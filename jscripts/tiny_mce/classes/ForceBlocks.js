@@ -55,7 +55,7 @@ tinymce.ForceBlocks = function(editor) {
 		// Wrap non block elements and text nodes
 		node = rootNode.firstChild;
 		while (node) {
-			if (node.nodeType === 3 || (node.nodeType == 1 && !blockElements[node.nodeName])) {
+			if (node.nodeType === 3 || (node.nodeType == 1 && !blockElements[node.nodeName] && !node.getAttribute('data-mce-type'))) {
 				// Remove empty text nodes
 				if (node.nodeType === 3 && node.nodeValue.length == 0) {
 					tempNode = node;
