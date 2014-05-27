@@ -140,7 +140,7 @@
 					'audio[A|src|autobuffer|autoplay|loop|controls][source]' +
 					'video[A|src|autobuffer|autoplay|loop|controls|width|height|poster][source]' +
 					'hr[A][]' +
-					'form[A|accept-charset|action|autocomplete|enctype|method|name|novalidate|target][C]' +
+					'form[A|accept-charset|action|autocomplete|enctype|method|name|novalidate|target|onsubmit][C]' +
 					'fieldset[A|disabled|form|name][C|legend]' +
 					'label[A|form|for][B]' +
 					'input[A|type|accept|alt|autocomplete|autofocus|checked|disabled|form|formaction|formenctype|formmethod|formnovalidate|formtarget|height|list|max|maxlength|min|' +
