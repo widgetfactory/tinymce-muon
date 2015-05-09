@@ -3,8 +3,8 @@
 <head>
 <title>Unit tests for noneditable</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-git.css" type="text/css" />
-<script src="http://code.jquery.com/qunit/qunit-git.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css" type="text/css" />
+<script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
 <script src="qunit/connector.js"></script>
 <script type="text/javascript" src="qunit/runner.js"></script>
 <script type="text/javascript" src="js/utils.js"></script>
@@ -18,6 +18,61 @@ module("Noneditable plugin", {
 	autostart: false
 });
 
+function normalizeRng2(rng) {
+	if (rng.startContainer.nodeType === 1 ) {
+		rng.setStart(rng.startContainer.childNodes[0], 0);
+	}
+	if (rng.endContainer.nodeType === 1) {
+		var nodes = rng.endContainer.childNodes;
+		rng.setEnd(nodes[nodes.length - 1], nodes.length - 1);
+	}
+
+	if (rng.startContainer.nodeType === 1 || rng.endContainer.nodeType === 1) {
+		normalizeRng2(rng);
+	}
+}
+
+function elIndex (node) {
+	var parent = node.parentNode;
+	var index = -1;
+	for (var i = 0; i < parent.childNodes.length; i++) {
+		if (parent.childNodes[i] === node) {
+			index = i;
+			break;
+		}
+	}
+	return index;
+}
+
+function fixOffsetUp (node, offset) {
+	var index, parent;
+	// if you are at the end of your node
+	if (offset === node.childNodes.length) {
+		if (node.parentNode !== null && node.parentNode.nodeName.toLowerCase() === 'p') {
+			parent = node.parentNode;
+			index = elIndex(node);
+			if (index > -1) {
+				return { node: parent, offset: index + 1 };
+			} 
+		}
+	} else if (offset === 0 && node.parentNode !== null && node.parentNode.nodeName.toLowerCase() === 'p') {
+		// or you are at the start of your node
+		parent = node.parentNode;
+		index = elIndex(node);
+		if (index > -1) {
+			return {node: parent, offset: index};
+		}
+		
+	}
+
+	return { node: node, offset: offset };
+}
+
+function triggerCaret () {
+	editor.dom.fire(editor.getBody(), 'mouseup');
+}
+
+
 test('expand to noneditable (start)', function() {
 	editor.setContent('<p><span class="mceNonEditable">no</span>yes</p>');
 
@@ -26,10 +81,13 @@ test('expand to noneditable (start)', function() {
 	rng.setEnd(editor.getBody().firstChild.lastChild, 1);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
-	rng = normalizeRng(editor.selection.getRng(true));
+	triggerCaret();
 
-	equal(rng.startContainer.nodeName, 'P');
+	rng = normalizeRng(editor.selection.getRng(true));
+	
+	normalizeRng2(rng);
+
+	equal(rng.startContainer.parentNode.nodeName, 'SPAN');
 	equal(rng.startOffset, 0);
 	equal(rng.endContainer.nodeName, '#text');
 	equal(rng.endOffset, 1);
@@ -43,30 +101,34 @@ test('expand to noneditable (end)', function() {
 	rng.setEnd(editor.getBody().firstChild.lastChild.firstChild, 1);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
+	triggerCaret();
 	rng = normalizeRng(editor.selection.getRng(true));
+	normalizeRng2(rng);
 
-	equal(rng.startContainer.nodeName, '#text');
+	equal(rng.endContainer.parentNode.nodeName, 'SPAN', 'The selection starts from the SPAN');
 	equal(rng.startOffset, 1);
-	equal(rng.endContainer.nodeName, 'P');
-	equal(rng.endOffset, 2);
+	equal(rng.endOffset, 0);
+	
+	
 });
 
 test('expand to noneditable (start/end)', function() {
-	editor.setContent('<p>yes<span class="mceNonEditable">noedit</span>yes</p>');
-
+	editor.setContent('<p>y1s<span class="mceNonEditable">noedit</span>y2s</p>');
 	rng = editor.dom.createRng();
 	rng.setStart(editor.dom.select('span')[0].firstChild, 1);
 	rng.setEnd(editor.dom.select('span')[0].firstChild, 2);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
+	triggerCaret();
 	rng = normalizeRng(editor.selection.getRng(true));
+
+	var end = fixOffsetUp(rng.endContainer, rng.endOffset);
 
 	equal(rng.startContainer.nodeName, 'P');
 	equal(rng.startOffset, 1);
-	equal(rng.endContainer.nodeName, 'P');
-	equal(rng.endOffset, 2);
+	equal(end.node.nodeName, 'P');
+
+	equal(end.offset, 2);
 });
 
 test('type after non editable', function() {
@@ -77,7 +139,7 @@ test('type after non editable', function() {
 	rng.setEnd(editor.dom.select('span')[0].firstChild, 2);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
+	triggerCaret();
 	type('X');
 	rng = normalizeRng(editor.selection.getRng(true));
 
@@ -97,7 +159,7 @@ test('type between non editable', function() {
 	rng.setEnd(editor.dom.select('span')[0].firstChild, 2);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
+	triggerCaret();
 	type('X');
 	rng = normalizeRng(editor.selection.getRng(true));
 
@@ -117,7 +179,7 @@ test('type after last non editable', function() {
 	rng.setEnd(editor.dom.select('span')[0].firstChild, 2);
 	editor.selection.setRng(rng);
 
-	editor.dom.fire(editor.getBody(), 'mouseup');
+	triggerCaret();
 	type('X');
 	rng = normalizeRng(editor.selection.getRng(true));
 
@@ -130,18 +192,23 @@ test('type after last non editable', function() {
 });
 
 test('escape noneditable inline element (left)', function() {
+	var startCnt;
 	editor.setContent('<p>no <span class="mceNonEditable">yes</span> no</p><p class="mceNonEditable">no</p>');
-	var container = editor.dom.select('p')[0];
 	rng = editor.dom.createRng();
 	rng.selectNode(editor.dom.select('span')[0]);
 	editor.selection.setRng(rng);
 
 	type({keyCode: 37});
+	// Remove carets
+	var caret = editor.dom.select('span#mce_noneditablecaret')[0];
+	if (caret) {
+		caret.parentNode.removeChild(caret);	
+	}
 	rng = normalizeRng(editor.selection.getRng(true));
+	startCnt = fixOffsetUp(rng.startContainer, rng.startOffset);
 
-	equal(rng.startContainer.nodeName, 'SPAN');
-	equal(rng.startContainer.parentNode.nodeName, 'P');
-	equal(editor.dom.nodeIndex(rng.startContainer), 1);
+	equal(startCnt.node.nodeName, 'P');
+	equal(startCnt.offset, 1);
 	equal(rng.collapsed, true);
 });
 
@@ -198,6 +265,53 @@ test('noneditable regexp', function() {
 
 	equal(editor.dom.select('span').length, 2);
 	equal(editor.getContent(), '<p>{test1}{test2}</p>');
+});
+
+test('A non editable text token is selected without including the parent node, pressing backspace should be deleted the whole block.', function() {
+	editor.setContent('<p class="mceNonEditable">Regards</p>');
+	rng = editor.dom.createRng();
+	rng.selectNode(editor.dom.select('p')[0]);
+	editor.selection.setRng(rng);
+	type({keyCode: 8});
+	equal(editor.getContent(), '');
+	// the editor content should still be the same as before.
+	
+});
+
+module("nondeletable not setted");
+test('noneditable_prevent_delete is not set. Token is used as a whole block char. ', function() {
+	var editorContent = '<p>E<span class="mceNonEditable">Z <a>X</a> W</span></p><h1><span class="mceNonEditable">G </span>A</h1>';
+	editor.setContent(editorContent);
+	rng = editor.dom.createRng();
+	rng.setStart(editor.dom.select('p')[0],2);
+	rng.setEnd(editor.dom.select('p')[0],2);
+	
+	editor.selection.setRng(rng);
+	triggerCaret();
+	type({keyCode: 8});
+	equal(editor.getContent(), "<p>E</p><h1><span class=\"mceNonEditable\">G </span>A</h1>");
+	
+});
+
+
+test('type after non editable and then pressing backspace should only remove last typed char.', function() {
+	editor.setContent('<p><span class="mceNonEditable">no</span></p>');
+
+	editor.selection.setCursorLocation(editor.dom.select('span')[0].firstChild, 2);
+	// Move this into a function to say 'trigger the generation of the container nicely'
+	triggerCaret();
+	
+	type('yes'); 
+
+	// Set the cursor position after the typed letters
+	editor.selection.setCursorLocation(editor.dom.select('span')[1].firstChild, 4);
+
+	// Delete the last letter only	
+	type({keyCode: 8});
+
+	equal(editor.getContent(), '<p><span class="mceNonEditable">no</span>ye</p>', 'Should have deleted only the last char "s"');
+	equal(editor.dom.select('#mce_noneditablecaret').length, 1, 'There should be only one noneditable caret in the editor');
+	equal(editor.dom.select('#mce_noneditablecaret')[0].innerHTML.match(/[\uFEFF]/).length, 1 , 'Caret container should contain non editable char.');
 });
 
 

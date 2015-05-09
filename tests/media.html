@@ -3,8 +3,8 @@
 <head>
 <title>Unit tests for Media Plugin</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-git.css" type="text/css" />
-<script src="http://code.jquery.com/qunit/qunit-git.js"></script>
+<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css" type="text/css" />
+<script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
 <script src="qunit/connector.js"></script>
 <script type="text/javascript" src="qunit/runner.js"></script>
 <script type="text/javascript" src="js/tiny_mce_loader.js"></script>
@@ -321,6 +321,13 @@ test("Internal dataToHtml", function() {
 
 		'<object width="320" height="240" classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=6,0,40,0"><param name="src" value="url" /><embed width="320" height="240" type="application/x-shockwave-flash" src="url" /></object>'
 	);
+});
+
+test("Non standard object kept", function() {
+	expect(1);
+
+	editor.setContent('<object id="myId" class="myClass"><param name="bgcolor" value="#FFFFFF" /> <param name="width" value="480" /> <param name="height" value="270" /> <param name="paramID" value="1234" /> <param name="key" value="abcd" /></object>');
+	equal(editor.getContent(), '<p><object id="myId" width="320" height="240" class="myClass"><param name="paramID" value="1234" /><param name="key" value="abcd" /></object></p>');
 });
 
 test("Flash retain attribs", function() {

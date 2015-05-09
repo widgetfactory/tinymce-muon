@@ -118,12 +118,15 @@ function fakeKeyEvent(e, na, o) {
 	e.dispatchEvent(ev);
 }
 
+
 function normalizeRng(rng) {
+
 	if (rng.startContainer.nodeType == 3) {
 		if (rng.startOffset == 0)
 			rng.setStartBefore(rng.startContainer);
-		else if (rng.startOffset >= rng.startContainer.nodeValue.length - 1)
+		else if (rng.startContainer.nodeValue && rng.startOffset >= rng.startContainer.nodeValue.length - 1){
 			rng.setStartAfter(rng.startContainer);
+		}
 	}
 
 	if (rng.endContainer.nodeType == 3) {
@@ -132,6 +135,7 @@ function normalizeRng(rng) {
 		else if (rng.endOffset >= rng.endContainer.nodeValue.length - 1)
 			rng.setEndAfter(rng.endContainer);
 	}
+
 
 	return rng;
 }
@@ -143,6 +147,12 @@ function type(chr) {
 	function fakeEvent(target, type, evt) {
 		editor.dom.fire(target, type, evt);
 	};
+
+	function selectLast(rng, node) {
+		rng.setStart(node, node.data.length - 1);
+		rng.setEnd(node, node.data.length);
+		editor.selection.setRng(rng);
+	}
 
 	// Numeric keyCode
 	if (typeof(chr) == "number") {
@@ -165,32 +175,33 @@ function type(chr) {
 
 	evt = evt || {keyCode: keyCode, charCode: charCode};
 
+	if (evt.keyCode && !keyCode) {
+		keyCode = evt.keyCode;
+	}
+
 	startElm = editor.selection.getStart();
 	fakeEvent(startElm, 'keydown', evt);
 	fakeEvent(startElm, 'keypress', evt);
-
-	if (!evt.isDefaultPrevented()) {
+	if (!evt.isDefaultPrevented() || tinymce.isIE) {
 		if (keyCode == 8) {
-			if (editor.getDoc().selection) {
+			if (editor.getDoc().selection && !editor.getDoc().selection.type==="None") {
 				var rng = editor.getDoc().selection.createRange();
 				rng.moveStart('character', -1);
 				rng.select();
 				rng.execCommand('Delete', false, null);
 			} else {
-				var rng = editor.selection.getRng();
-
+				var rng = editor.selection.getRng(true);
 				if (rng.startContainer.nodeType == 1 && rng.collapsed) {
 					var nodes = rng.startContainer.childNodes, lastNode = nodes[nodes.length - 1];
-
 					// If caret is at <p>abc|</p> and after the abc text node then move it to the end of the text node
 					// Expand the range to include the last char <p>ab[c]</p> since IE 11 doesn't delete otherwise
 					if (rng.startOffset >= nodes.length - 1 && lastNode && lastNode.nodeType == 3 && lastNode.data.length > 0) {
-						rng.setStart(lastNode, lastNode.data.length - 1);
-						rng.setEnd(lastNode, lastNode.data.length);
-						editor.selection.setRng(rng);
+						selectLast(rng, lastNode)
 					}
+				} else if (rng.startContainer.nodeType === 3 && rng.collapsed) {
+					var node = rng.startContainer;
+					selectLast(rng, node);
 				}
-
 				editor.getDoc().execCommand('Delete', false, null);
 			}
 		} else if (typeof(chr) == 'string') {
