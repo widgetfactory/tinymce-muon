@@ -113,6 +113,7 @@
 					'sup[A][B]' +
 					'i[A][B]' +
 					'b[A][B]' +
+					's[A][B]' +
 					'mark[A][B]' +
 					'progress[A|value|max][B]' +
 					'meter[A|value|min|max|low|high|optimum][B]' +
