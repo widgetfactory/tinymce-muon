@@ -272,6 +272,16 @@
 						dom.setStyle(elm, name, replaceVars(value, vars));
 					});
 
+					// Needed for the WebKit span spam bug
+					// TODO: Remove this once WebKit/Blink fixes this
+					if (fmt.styles) {
+						var styleVal = dom.getAttrib(elm, 'style');
+
+						if (styleVal) {
+							elm.setAttribute('data-mce-style', styleVal);
+						}
+					}
+
 					each(fmt.attributes, function(value, name) {
 						dom.setAttrib(elm, name, replaceVars(value, vars));
 					});
@@ -766,6 +776,11 @@
 					out = out[start ? 'firstChild' : 'lastChild'];
 				}
 
+				// Since dom.remove removes empty text nodes then we need to try to find a better node
+				if (out.nodeType == 3 && out.data.length === 0) {
+					out = start ? node.previousSibling || node.nextSibling : node.nextSibling || node.previousSibling;
+				}
+
 				dom.remove(node, true);
 
 				return out;
@@ -773,6 +788,7 @@
 
 			function removeRngStyle(rng) {
 				var startContainer, endContainer;
+				var commonAncestorContainer = rng.commonAncestorContainer;
 
 				rng = expandRng(rng, formatList, TRUE);
 
@@ -781,10 +797,25 @@
 					endContainer = getContainer(rng);
 
 					if (startContainer != endContainer) {
-						// WebKit will render the table incorrectly if we wrap a TD in a SPAN so lets see if the can use the first child instead
-						// This will happen if you tripple click a table cell and use remove formatting
-						if (/^(TR|TD)$/.test(startContainer.nodeName) && startContainer.firstChild) {
-							startContainer = (startContainer.nodeName == "TD" ? startContainer.firstChild : startContainer.firstChild.firstChild) || startContainer;
+						// WebKit will render the table incorrectly if we wrap a TH or TD in a SPAN
+						// so let's see if we can use the first child instead
+						// This will happen if you triple click a table cell and use remove formatting
+						
+						// Remove from JCE as causes issues with other browsers
+						
+						/*if (/^(TR|TH|TD)$/.test(startContainer.nodeName) && startContainer.firstChild) {
+							if (startContainer.nodeName == "TR") {
+								startContainer = startContainer.firstChild.firstChild || startContainer;
+							} else {
+								startContainer = startContainer.firstChild || startContainer;
+							}
+						}*/
+
+						// Try to adjust endContainer as well if cells on the same row were selected - bug #6410
+						if (commonAncestorContainer &&
+							/^T(HEAD|BODY|FOOT|R)$/.test(commonAncestorContainer.nodeName) &&
+							/^(TH|TD)$/.test(endContainer.nodeName) && endContainer.firstChild) {
+							endContainer = endContainer.firstChild || endContainer;
 						}
 
 						// Wrap start/end nodes in span element since these might be cloned/moved
@@ -803,9 +834,9 @@
 					}
 
 					// Update range positions since they might have changed after the split operations
-					rng.startContainer = startContainer.parentNode;
+					rng.startContainer = startContainer.parentNode ? startContainer.parentNode : startContainer;
 					rng.startOffset = nodeIndex(startContainer);
-					rng.endContainer = endContainer.parentNode;
+					rng.endContainer = endContainer.parentNode ? endContainer.parentNode : endContainer;
 					rng.endOffset = nodeIndex(endContainer) + 1;
 				}
 
@@ -907,7 +938,7 @@
 									return;
 								}
 
-								if ((!similar || format.exact) && !isEq(value, replaceVars(items[key], vars))) {
+								if ((!similar || format.exact) && !isEq(value, normalizeStyleValue(replaceVars(items[key], vars), key))) {
 									return;
 								}
 							}
@@ -933,8 +964,7 @@
 					// Name name, attributes, styles and classes
 					if (matchName(node, format) && matchItems(node, format, 'attributes') && matchItems(node, format, 'styles')) {
 						// Match classes
-						classes = format.classes;
-						if (classes) {
+						if ((classes = format.classes)) {
 							for (i = 0; i < classes.length; i++) {
 								if (!dom.hasClass(node, classes[i])) {
 									return;
@@ -961,9 +991,15 @@
 			var startNode;
 
 			function matchParents(node) {
+				var root = dom.getRoot();
+
+				if (node === root) {
+					return false;
+				}
+
 				// Find first node with similar format settings
 				node = dom.getParent(node, function(node) {
-					return !!matchNode(node, name, vars, true);
+					return node.parentNode === root || !!matchNode(node, name, vars, true);
 				});
 
 				// Do an exact check on the similar format element
@@ -1038,8 +1074,9 @@
 				for (x = formatList.length - 1; x >= 0; x--) {
 					selector = formatList[x].selector;
 
-					// Format is not selector based, then always return TRUE
-					if (!selector) {
+					// Format is not selector based then always return TRUE
+					// Is it has a defaultBlock then it's likely it can be applied for example align on a non block element line
+					if (!selector || formatList[x].defaultBlock) {
 						return TRUE;
 					}
 
@@ -1072,6 +1109,11 @@
 
 				ed.onNodeChange.addToTop(function(ed, cm, node) {
 					var parents = getParents(node), matchedFormats = {};
+					
+					// Ignore bogus nodes like the <a> tag created by moveStart()
+					parents = tinymce.grep(parents, function(node) {
+						return node.nodeType == 1 && !node.getAttribute('data-mce-bogus');
+					});
 
 					// Check for new formats
 					each(formatChangeData, function(callbacks, format) {
@@ -1159,7 +1201,7 @@
 
 			// Check for selector match
 			if (format.selector) {
-				return dom.is(node, format.selector);
+				return node.nodeType == 1 && dom.is(node, format.selector);
 			}
 		}
 
@@ -1191,19 +1233,34 @@
 		 * @return {String} Style item value.
 		 */
 		function getStyle(node, name) {
-			var styleVal = dom.getStyle(node, name);
-
+			return normalizeStyleValue(dom.getStyle(node, name), name);
+		}
+		/**
+		 * Normalize style value by name. This method modifies the style contents
+		 * to make it more easy to match. This will resolve a few browser issues.
+		 *
+		 * @private
+		 * @param {Node} node to get style from.
+		 * @param {String} name Style name to get.
+		 * @return {String} Style item value.
+		 */
+		function normalizeStyleValue(value, name) {
 			// Force the format to hex
 			if (name == 'color' || name == 'backgroundColor') {
-				styleVal = dom.toHex(styleVal);
+				value = dom.toHex(value);
 			}
 
 			// Opera will return bold as 700
-			if (name == 'fontWeight' && styleVal == 700) {
-				styleVal = 'bold';
+			if (name == 'fontWeight' && value == 700) {
+				value = 'bold';
 			}
 
-			return '' + styleVal;
+			// Normalize fontFamily so "'Font name', Font" becomes: "Font name,Font"
+			if (name == 'fontFamily') {
+				value = value.replace(/[\'\"]/g, '').replace(/,\s+/g, ',');
+			}
+
+			return '' + value;
 		}
 
 		/**
@@ -1276,7 +1333,8 @@
 					}
 				}
 
-				for (;;) {
+				/*eslint no-constant-condition:0 */
+				while (true) {
 					// Stop expanding on block elements
 					if (!format[0].block_expand && isBlock(parent)) {
 						return parent;
@@ -1442,16 +1500,19 @@
 			}
 
 			function findBlockEndPoint(container, sibling_name) {
-				var node;
+				var node, root = dom.getRoot();
 
 				// Expand to block of similar type
 				if (!format[0].wrapper) {
-					node = dom.getParent(container, format[0].block);
+					node = dom.getParent(container, format[0].block, root);
 				}
 
 				// Expand to first wrappable block element or any block element
 				if (!node) {
-					node = dom.getParent(container.nodeType == 3 ? container.parentNode : container, isTextBlock);
+					node = dom.getParent(container.nodeType == 3 ? container.parentNode : container, function(node) {
+						// Fixes #6183 where it would expand to editable parent element in inline mode
+						return node != root && isTextBlock(node);
+					});
 				}
 
 				// Exclude inner lists from wrapping
@@ -1595,6 +1656,10 @@
 			};
 		}
 
+		function isColorFormatAndAnchor(node, format) {
+			return format.links && node.tagName == 'A';
+		}
+
 		/**
 		 * Removes the specified format for the specified node. It will also remove the node if it doesn't have
 		 * any attributes if the format specifies it to do so.
@@ -1610,7 +1675,7 @@
 			var i, attrs, stylesModified;
 
 			// Check if node matches format
-			if (!matchName(node, format)) {
+			if (!matchName(node, format) && !isColorFormatAndAnchor(node, format)) {
 				return FALSE;
 			}
 
@@ -2068,7 +2133,16 @@
 						child = findFirstTextNode(node);
 
 						if (child.nodeValue.charAt(0) === INVISIBLE_CHAR) {
-							child = child.deleteData(0, 1);
+							child.deleteData(0, 1);
+
+							// Fix for bug #6976
+							if (rng.startContainer == child && rng.startOffset > 0) {
+								rng.setStart(child, rng.startOffset - 1);
+							}
+
+							if (rng.endContainer == child && rng.endOffset > 0) {
+								rng.setEnd(child, rng.endOffset - 1);
+							}
 						}
 
 						dom.remove(node, 1);
@@ -2274,7 +2348,9 @@
 				ed.onKeyDown.addToTop(function(ed, e) {
 					var keyCode = e.keyCode;
 
-					if (keyCode == 8 || keyCode == 37 || keyCode == 39) {
+					// Remove caret container on keydown and it's a backspace, enter or left/right arrow keys
+					// Backspace key needs to check if the range is collapsed due to bug #6780
+					if ((keyCode == 8 && selection.isCollapsed()) || keyCode == 37 || keyCode == 39) {
 						removeCaretContainer(getParentCaretContainer(selection.getStart()));
 					}
 
