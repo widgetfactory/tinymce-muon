@@ -867,6 +867,21 @@
 		 */
 		setRng : function(r, forward) {
 			var s, t = this;
+			
+			if (!r) {
+				return;
+			}
+
+			// Is IE specific range
+			if (r.select) {
+				try {
+					r.select();
+				} catch (ex) {
+					// Needed for some odd IE bug #1843306
+				}
+
+				return;
+			}
 
 			if (!t.tridentSel) {
 				s = t.getSel();
@@ -876,11 +891,10 @@
 
 					try {
 						s.removeAllRanges();
+						s.addRange(r);
 					} catch (ex) {
-						// IE9 might throw errors here don't know why
+						// IE might throw errors here if the editor is within a hidden container and selection is changed
 					}
-
-					s.addRange(r);
 
 					// Forward is set to false and we have an extend function
 					if (forward === false && s.extend) {
@@ -900,13 +914,6 @@
 					} catch (ex) {
 						//IE9 throws an error here if called before selection is placed in the editor
 					}
-				}
-
-				// Is IE specific range
-				try {
-					r.select();
-				} catch (ex) {
-					// Needed for some odd IE bug #1843306
 				}
 			}
 		},
