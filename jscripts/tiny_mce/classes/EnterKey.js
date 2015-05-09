@@ -47,6 +47,10 @@
 			function trimInlineElementsOnLeftSideOfBlock(block) {
 				var node = block, firstChilds = [], i;
 
+				if (!node) {
+					return;
+				}
+
 				// Find inner most first child ex: <p><i><b>*</b></i></p>
 				while (node = node.firstChild) {
 					if (dom.isBlock(node)) {
