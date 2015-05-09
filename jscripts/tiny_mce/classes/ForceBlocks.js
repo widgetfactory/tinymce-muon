@@ -32,6 +32,13 @@ tinymce.ForceBlocks = function(editor) {
 			startOffset = rng.startOffset;
 			endContainer = rng.endContainer;
 			endOffset = rng.endOffset;
+			
+			try {
+				restoreSelection = editor.getDoc().activeElement === rootNode;
+			} catch (ex) {
+				// IE throws unspecified error here sometimes
+			}
+			
 		} else {
 			// Force control range into text range
 			if (rng.item) {
@@ -40,7 +47,7 @@ tinymce.ForceBlocks = function(editor) {
 				rng.moveToElementText(node);
 			}
 
-			isInEditorDocument = rng.parentElement().ownerDocument === editor.getDoc();
+			restoreSelection = rng.parentElement().ownerDocument === editor.getDoc();
 			tmpRng = rng.duplicate();
 			tmpRng.collapse(true);
 			startOffset = tmpRng.move('character', offset) * -1;
@@ -79,32 +86,31 @@ tinymce.ForceBlocks = function(editor) {
 			}
 		}
 
-		if (wrapped) {
-			if (rng.setStart) {
-				rng.setStart(startContainer, startOffset);
-				rng.setEnd(endContainer, endOffset);
-				selection.setRng(rng);
-			} else {
-				// Only select if the previous selection was inside the document to prevent auto focus in quirks mode
-				if (isInEditorDocument) {
+		if (wrapped && restoreSelection) {
+				if (rng.setStart) {
+					rng.setStart(startContainer, startOffset);
+					rng.setEnd(endContainer, endOffset);
+					selection.setRng(rng);
+				} else {
+					// Only select if the previous selection was inside the document to prevent auto focus in quirks mode
 					try {
 						rng = editor.getDoc().body.createTextRange();
 						rng.moveToElementText(rootNode);
 						rng.collapse(true);
 						rng.moveStart('character', startOffset);
 
-						if (endOffset > 0)
+						if (endOffset > 0) {
 							rng.moveEnd('character', endOffset);
+						}
 
 						rng.select();
 					} catch (ex) {
 						// Ignore
 					}
 				}
-			}
 
-			editor.nodeChanged();
-		}
+				editor.nodeChanged();
+			}
 	};
 
 	// Force root blocks
