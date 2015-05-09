@@ -182,13 +182,15 @@
 					}
 
 					while (sibling) {
-						textNodeOffset += sibling.nodeValue.length;
+						if (sibling.nodeType == 3) {
+							textNodeOffset += sibling.nodeValue.length;
 
-						// We are at or passed the position we where looking for
-						if (textNodeOffset >= offset) {
-							container = sibling;
-							textNodeOffset -= offset;
-							break;
+							// We are at or passed the position we where looking for
+							if (textNodeOffset >= offset) {
+								container = sibling;
+								textNodeOffset -= offset;
+								break;
+							}
 						}
 
 						sibling = sibling.previousSibling;
@@ -249,7 +251,7 @@
 		};
 
 		this.getBookmark = function(type) {
-			var rng = selection.getRng(), start, end, bookmark = {};
+			var rng = selection.getRng(), bookmark = {};
 
 			function getIndexes(node) {
 				var parent, root, children, i, indexes = [];
@@ -273,7 +275,7 @@
 				}
 
 				return indexes;
-			};
+			}
 
 			function getBookmarkEndPoint(start) {
 				var position;
@@ -287,7 +289,7 @@
 						inside : position.inside
 					};
 				}
-			};
+			}
 
 			// Non ubstructive bookmark
 			if (type === 2) {
@@ -321,10 +323,10 @@
 				}
 
 				return node;
-			};
-			
+			}
+
 			function setBookmarkEndPoint(start) {
-				var endPoint = bookmark[start ? 'start' : 'end'], moveLeft, moveRng, undef;
+				var endPoint = bookmark[start ? 'start' : 'end'], moveLeft, moveRng, undef, offset;
 
 				if (endPoint) {
 					moveLeft = endPoint.position > 0;
@@ -344,7 +346,7 @@
 					if (start)
 						rng.collapse(true);
 				}
-			};
+			}
 
 			if (bookmark.start) {
 				if (bookmark.start.ctrl) {
@@ -397,7 +399,7 @@
 					} else if (container.canHaveHTML) {
 						// Empty node selection for example <div>|</div>
 						// Setting innerHTML with a span marker then remove that marker seems to keep empty block elements open
-						container.innerHTML = '<span>\uFEFF</span>';
+						container.innerHTML = '<span>&#xFEFF;</span>';
 						marker = container.firstChild;
 						tmpRng.moveToElementText(marker);
 						tmpRng.collapse(FALSE); // Collapse false works better than true for some odd reason
@@ -425,12 +427,12 @@
 						// Example this: <p></p><p>|</p> would become this: <p>|</p><p></p>
 						sibling = startContainer.previousSibling;
 						if (sibling && !sibling.hasChildNodes() && dom.isBlock(sibling)) {
-							sibling.innerHTML = '\uFEFF';
+							sibling.innerHTML = '&#xFEFF;';
 						} else {
 							sibling = null;
 						}
 
-						startContainer.innerHTML = '<span>\uFEFF</span><span>\uFEFF</span>';
+						startContainer.innerHTML = '<span>&#xFEFF;</span><span>&#xFEFF;</span>';
 						ieRng.moveToElementText(startContainer.lastChild);
 						ieRng.select();
 						dom.doc.selection.clear();
@@ -475,7 +477,7 @@
 
 		// Expose range method
 		this.getRangeAt = getRange;
-	};
+	}
 
 	// Expose the selection object
 	tinymce.dom.TridentSelection = Selection;
