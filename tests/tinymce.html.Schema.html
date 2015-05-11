@@ -160,13 +160,13 @@ test('getBlockElements', function() {
 
 	var schema = new tinymce.html.Schema();
 	deepEqual(schema.getBlockElements(), {
-		ASIDE: {}, HGROUP: {}, SECTION: {}, ARTICLE: {}, FOOTER: {}, HEADER: {}, SAMP: {},
+		ASIDE: {}, HGROUP: {}, SECTION: {}, ARTICLE: {}, FOOTER: {}, HEADER: {},
 		ISINDEX: {}, MENU: {}, NOSCRIPT: {}, FIELDSET: {}, DIR: {}, DD: {}, DT: {},
 		DL: {}, CENTER: {}, BLOCKQUOTE: {}, CAPTION: {}, UL: {}, OL: {}, LI: {},
 		TD: {}, TR: {}, TH: {}, TFOOT: {}, THEAD: {}, TBODY: {}, TABLE: {}, FORM: {},
 		PRE: {}, ADDRESS: {}, DIV: {}, P: {}, HR: {}, H6: {}, H5: {}, H4: {}, H3: {},
 		H2: {}, H1: {}, NAV: {}, FIGURE: {}, DATALIST: {}, OPTGROUP: {}, OPTION: {}, SELECT: {},
-		aside: {}, hgroup: {}, section: {}, article: {}, footer: {}, header: {}, samp: {},
+		aside: {}, hgroup: {}, section: {}, article: {}, footer: {}, header: {},
 		isindex: {}, menu: {}, noscript: {}, fieldset: {}, dir: {}, dd: {}, dt: {}, dl: {}, center: {},
 		blockquote: {}, caption: {}, ul: {}, ol: {}, li: {}, td: {}, tr: {}, th: {}, tfoot: {}, thead: {},
 		tbody: {}, table: {}, form: {}, pre: {}, address: {}, div: {}, p: {}, hr: {}, h6: {},
@@ -182,10 +182,10 @@ test('getShortEndedElements', function() {
 	deepEqual(schema.getShortEndedElements(), {
 		"EMBED": {}, "PARAM": {}, "META": {}, "LINK": {}, "ISINDEX": {},
 		"INPUT": {}, "IMG": {}, "HR": {}, "FRAME": {}, "COL": {}, "BR": {},
-		"BASEFONT": {}, "BASE": {}, "AREA": {}, "SOURCE" : {}, "WBR" : {}, 
+		"BASEFONT": {}, "BASE": {}, "AREA": {}, "SOURCE" : {}, "WBR" : {}, "TRACK" : {},
 		"embed": {}, "param": {}, "meta": {}, "link": {}, "isindex": {},
 		"input": {}, "img": {}, "hr": {}, "frame": {}, "col": {}, "br": {},
-		"basefont": {}, "base": {}, "area": {}, "source" : {}, "wbr" : {}
+		"basefont": {}, "base": {}, "area": {}, "source" : {}, "wbr" : {}, "track" : {}
 	});
 });
 
@@ -196,12 +196,12 @@ test('getNonEmptyElements', function() {
 	deepEqual(schema.getNonEmptyElements(), {
 		"EMBED": {}, "PARAM": {}, "META": {}, "LINK": {}, "ISINDEX": {},
 		"INPUT": {}, "IMG": {}, "HR": {}, "FRAME": {}, "COL": {}, "BR": {},
-		"BASEFONT": {}, "BASE": {}, "AREA": {}, "SCRIPT" : {}, "SOURCE" : {},
-		"TD": {}, "TH": {}, "IFRAME": {}, "VIDEO": {}, "AUDIO": {}, "OBJECT": {}, "WBR": {},
+		"BASEFONT": {}, "BASE": {}, "AREA": {}, "SOURCE" : {},
+		"TD": {}, "TH": {}, "IFRAME": {}, "VIDEO": {}, "AUDIO": {}, "OBJECT": {}, "WBR": {}, "TRACK" : {}, "SCRIPT" : {},
 		"embed": {}, "param": {}, "meta": {}, "link": {}, "isindex": {},
 		"input": {}, "img": {}, "hr": {}, "frame": {}, "col": {}, "br": {},
-		"basefont": {}, "base": {}, "area": {}, "script" : {}, "source" : {},
-		"td": {}, "th": {}, "iframe": {}, "video": {}, "audio": {}, "object": {}, "wbr" : {}
+		"basefont": {}, "base": {}, "area": {}, "source" : {},
+		"td": {}, "th": {}, "iframe": {}, "video": {}, "audio": {}, "object": {}, "wbr" : {}, "track" : {},  "script" : {}
 	});
 });
 
@@ -210,8 +210,10 @@ test('getWhiteSpaceElements', function() {
 
 	var schema = new tinymce.html.Schema();
 	deepEqual(schema.getWhiteSpaceElements(), {
-		"STYLE": {}, "SCRIPT": {}, "PRE": {}, "TEXTAREA": {}, "NOSCRIPT": {},
-		"style": {}, "script": {}, "pre": {}, "textarea": {}, "noscript": {}
+		"IFRAME": {}, "NOSCRIPT": {}, "OBJECT": {}, "PRE": {},
+		"SCRIPT": {}, "STYLE": {}, "TEXTAREA": {}, "VIDEO": {}, "AUDIO": {},
+		"iframe": {}, "noscript": {}, "object": {}, "pre": {},
+		"script": {}, "style": {}, "textarea": {}, "video": {}, "audio": {}
 	});
 });
 
