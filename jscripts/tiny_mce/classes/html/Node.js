@@ -23,22 +23,25 @@
 		var sibling, parent, startName = prev ? 'lastChild' : 'firstChild', siblingName = prev ? 'prev' : 'next';
 
 		// Walk into nodes if it has a start
-		if (node[startName])
+		if (node[startName]) {
 			return node[startName];
+		}
 
 		// Return the sibling if it has one
 		if (node !== root_node) {
 			sibling = node[siblingName];
 
-			if (sibling)
+			if (sibling) {
 				return sibling;
+			}
 
 			// Walk up the parents to look for siblings
 			for (parent = node.parent; parent && parent !== root_node; parent = parent.parent) {
 				sibling = parent[siblingName];
 
-				if (sibling)
+				if (sibling) {
 					return sibling;
+				}
 			}
 		}
 	};
@@ -86,8 +89,9 @@
 		replace : function(node) {
 			var self = this;
 
-			if (node.parent)
+			if (node.parent) {
 				node.remove();
+			}
 
 			self.insert(node, self);
 			self.remove();
@@ -112,13 +116,14 @@
 			var self = this, attrs, i, undef;
 
 			if (typeof name !== "string") {
-				for (i in name)
+				for (i in name) {
 					self.attr(i, name[i]);
+				}
 
 				return self;
 			}
 
-			if (attrs = self.attributes) {
+			if ((attrs = self.attributes)) {
 				if (value !== undef) {
 					// Remove attribute
 					if (value === null) {
@@ -147,8 +152,9 @@
 								break;
 							}
 						}
-					} else
+					} else {
 						attrs.push({name: name, value: value});
+					}
 
 					attrs.map[name] = value;
 
@@ -173,7 +179,7 @@
 			var self = this, clone = new Node(self.name, self.type), i, l, selfAttrs, selfAttr, cloneAttrs;
 
 			// Clone element attributes
-			if (selfAttrs = self.attributes) {
+			if ((selfAttrs = self.attributes)) {
 				cloneAttrs = [];
 				cloneAttrs.map = {};
 
@@ -224,7 +230,7 @@
 		unwrap : function() {
 			var self = this, node, next;
 
-			for (node = self.firstChild; node; ) {
+			for (node = self.firstChild; node;) {
 				next = node.next;
 				self.insert(node, self, true);
 				node = next;
@@ -249,8 +255,9 @@
 				if (parent.firstChild === self) {
 					parent.firstChild = next;
 
-					if (next)
+					if (next) {
 						next.prev = null;
+					}
 				} else {
 					prev.next = next;
 				}
@@ -258,8 +265,9 @@
 				if (parent.lastChild === self) {
 					parent.lastChild = prev;
 
-					if (prev)
+					if (prev) {
 						prev.next = null;
+					}
 				} else {
 					next.prev = prev;
 				}
@@ -283,16 +291,18 @@
 		append : function(node) {
 			var self = this, last;
 
-			if (node.parent)
+			if (node.parent) {
 				node.remove();
+			}
 
 			last = self.lastChild;
 			if (last) {
 				last.next = node;
 				node.prev = last;
 				self.lastChild = node;
-			} else
+			} else {
 				self.lastChild = self.firstChild = node;
+			}
 
 			node.parent = self;
 
@@ -314,25 +324,28 @@
 		insert : function(node, ref_node, before) {
 			var parent;
 
-			if (node.parent)
+			if (node.parent) {
 				node.remove();
+			}
 
 			parent = ref_node.parent || this;
 
 			if (before) {
-				if (ref_node === parent.firstChild)
+				if (ref_node === parent.firstChild) {
 					parent.firstChild = node;
-				else
+				} else {
 					ref_node.prev.next = node;
+				}
 
 				node.prev = ref_node.prev;
 				node.next = ref_node;
 				ref_node.prev = node;
 			} else {
-				if (ref_node === parent.lastChild)
+				if (ref_node === parent.lastChild) {
 					parent.lastChild = node;
-				else
+				} else {
 					ref_node.next.prev = node;
+				}
 
 				node.next = ref_node.next;
 				node.prev = ref_node;
@@ -355,8 +368,9 @@
 			var self = this, node, collection = [];
 
 			for (node = self.firstChild; node; node = walk(node, self)) {
-				if (node.name === name)
+				if (node.name === name) {
 					collection.push(node);
+				}
 			}
 
 			return collection;
@@ -376,8 +390,9 @@
 				nodes = [];
 
 				// Collect the children
-				for (node = self.firstChild; node; node = walk(node, self))
+				for (node = self.firstChild; node; node = walk(node, self)) {
 					nodes.push(node);
+				}
 
 				// Remove the children
 				i = nodes.length;
@@ -408,30 +423,35 @@
 				do {
 					if (node.type === 1) {
 						// Ignore bogus elements
-						if (node.attributes.map['data-mce-bogus'])
+						if (node.attributes.map['data-mce-bogus']) {
 							continue;
+						}
 
 						// Keep empty elements like <img />
-						if (elements[node.name])
+						if (elements[node.name]) {
 							return false;
+						}
 
 						// Keep elements with data attributes or name attribute like <a name="1"></a>
 						i = node.attributes.length;
 						while (i--) {
 							name = node.attributes[i].name;
-							if (name === "name" || name.indexOf('data-mce-') === 0)
+							if (name === "name" || name.indexOf('data-mce-bookmark') === 0) {
 								return false;
+							}
 						}
 					}
 
 					// Keep comments
-					if (node.type === 8)
+					if (node.type === 8) {
 						return false;
-					
+					}
+
 					// Keep non whitespace text nodes
-					if ((node.type === 3 && !whiteSpaceRegExp.test(node.value)))
+					if ((node.type === 3 && !whiteSpaceRegExp.test(node.value))) {
 						return false;
-				} while (node = walk(node, self));
+					}
+				} while ((node = walk(node, self)));
 			}
 
 			return true;
@@ -466,11 +486,12 @@
 
 			// Add attributes if needed
 			if (attrs) {
-				for (attrName in attrs)
+				for (attrName in attrs) {
 					node.attr(attrName, attrs[attrName]);
-			}
+				}
 
-			return node;
+				return node;
+			}
 		}
 	});
 
