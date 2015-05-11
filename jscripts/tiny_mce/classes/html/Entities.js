@@ -10,7 +10,7 @@
 
 (function(tinymce) {
 	var namedEntities, baseEntities, reverseEntities,
-		attrsCharsRegExp = /[&<>\"\u007E-\uD7FF\uE000-\uFFEF]|[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
+		attrsCharsRegExp = /[&<>\"\u0060\u007E-\uD7FF\uE000-\uFFEF]|[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
 		textCharsRegExp = /[<>&\u007E-\uD7FF\uE000-\uFFEF]|[\uD800-\uDBFF][\uDC00-\uDFFF]/g,
 		rawCharsRegExp = /[<>&\"\']/g,
 		entityRegExp = /&(#x|#)?([\w]+);/g,
@@ -24,11 +24,12 @@
 
 	// Raw entities
 	baseEntities = {
-		'\"' : '&quot;', // Needs to be escaped since the YUI compressor would otherwise break the code
-		"'" : '&#39;',
-		'<' : '&lt;',
-		'>' : '&gt;',
-		'&' : '&amp;'
+		'\"': '&quot;', // Needs to be escaped since the YUI compressor would otherwise break the code
+		"'": '&#39;',
+		'<': '&lt;',
+		'>': '&gt;',
+		'&': '&amp;',
+		'\u0060': '&#96;'
 	};
 
 	// Reverse lookup table for raw entities
@@ -48,7 +49,7 @@
 		elm.innerHTML = text;
 
 		return elm.textContent || elm.innerText || text;
-	};
+	}
 
 	// Build a two way lookup table for the entities
 	function buildEntitiesLookup(items, radix) {
@@ -72,7 +73,7 @@
 
 			return lookup;
 		}
-	};
+	}
 
 	// Unpack entities lookup where the numbers are in radix 32 to reduce the size
 	namedEntities = buildEntitiesLookup(
@@ -153,8 +154,9 @@
 		encodeNumeric : function(text, attr) {
 			return text.replace(attr ? attrsCharsRegExp : textCharsRegExp, function(chr) {
 				// Multi byte sequence convert it to a single entity
-				if (chr.length > 1)
+				if (chr.length > 1) {
 					return '&#' + (((chr.charCodeAt(0) - 0xD800) * 0x400) + (chr.charCodeAt(1) - 0xDC00) + 0x10000) + ';';
+				}
 
 				return baseEntities[chr] || '&#' + chr.charCodeAt(0) + ';';
 			});
@@ -195,31 +197,34 @@
 				return text.replace(attr ? attrsCharsRegExp : textCharsRegExp, function(chr) {
 					return baseEntities[chr] || entities[chr] || '&#' + chr.charCodeAt(0) + ';' || chr;
 				});
-			};
+			}
 
 			function encodeCustomNamed(text, attr) {
 				return Entities.encodeNamed(text, attr, entities);
-			};
+			}
 
 			// Replace + with , to be compatible with previous TinyMCE versions
 			name = tinymce.makeMap(name.replace(/\+/g, ','));
 
 			// Named and numeric encoder
-			if (name.named && name.numeric)
+			if (name.named && name.numeric) {
 				return encodeNamedAndNumeric;
+			}
 
 			// Named encoder
 			if (name.named) {
 				// Custom names
-				if (entities)
+				if (entities) {
 					return encodeCustomNamed;
+				}
 
 				return Entities.encodeNamed;
 			}
 
 			// Numeric
-			if (name.numeric)
+			if (name.numeric) {
 				return Entities.encodeNumeric;
+			}
 
 			// Raw encoder
 			return Entities.encodeRaw;
@@ -241,8 +246,9 @@
 						value -= 0x10000;
 
 						return String.fromCharCode(0xD800 + (value >> 10), 0xDC00 + (value & 0x3FF));
-					} else
+					} else {
 						return asciiMap[value] || String.fromCharCode(value);
+					}
 				}
 
 				return reverseEntities[all] || namedEntities[all] || nativeDecode(all);
