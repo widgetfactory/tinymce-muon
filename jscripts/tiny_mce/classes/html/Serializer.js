@@ -52,7 +52,7 @@
 
 			handlers = {
 				// #text
-				3: function(node, raw) {
+				3: function(node) {
 					writer.text(node.value, node.raw);
 				},
 
@@ -81,7 +81,7 @@
 					if ((node = node.firstChild)) {
 						do {
 							walk(node);
-						} while (node = node.next);
+						} while ((node = node.next));
 					}
 				}
 			};
@@ -131,20 +131,22 @@
 						if ((node = node.firstChild)) {
 							do {
 								walk(node);
-							} while (node = node.next);
+							} while ((node = node.next));
 						}
 
 						writer.end(name);
 					}
-				} else
+				} else {
 					handler(node);
+				}
 			}
 
 			// Serialize element and treat all non elements as fragments
-			if (node.type == 1 && !settings.inner)
+			if (node.type == 1 && !settings.inner) {
 				walk(node);
-			else
+			} else {
 				handlers[11](node);
+			}
 
 			return writer.getContent();
 		};
