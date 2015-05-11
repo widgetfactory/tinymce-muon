@@ -30,6 +30,8 @@
  */
 tinymce.html.Writer = function(settings) {
 	var html = [], indent, indentBefore, indentAfter, encode, htmlOutput;
+	
+	var makeMap = tinymce.makeMap, Entities = tinymce.html.Entities;
 
 	settings = settings || {};
 	indent = settings.indent;
