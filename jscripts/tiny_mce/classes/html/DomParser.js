@@ -9,7 +9,7 @@
  */
 
 (function(tinymce) {
-	var Node = tinymce.html.Node;
+	var Node = tinymce.html.Node, each = tinymce.each, explode = tinymce.explode, extend = tinymce.extend, makeMap = tinymce.makeMap;
 
 	/**
 	 * This class parses HTML code into a DOM like structure of nodes it will remove redundant whitespace and make
@@ -40,10 +40,10 @@
 		self.schema = schema = schema || new tinymce.html.Schema();
 
 		function fixInvalidChildren(nodes) {
-			var ni, node, parent, parents, newParent, currentNode, tempNode, childNode, i,
-				childClone, nonEmptyElements, nonSplitableElements, textBlockElements, sibling, nextNode;
+			var ni, node, parent, parents, newParent, currentNode, tempNode, childNode, i;
+			var nonEmptyElements, nonSplitableElements, textBlockElements, sibling, nextNode;
 
-			nonSplitableElements = tinymce.makeMap('tr,td,th,tbody,thead,tfoot,table');
+			nonSplitableElements = makeMap('tr,td,th,tbody,thead,tfoot,table');
 			nonEmptyElements = schema.getNonEmptyElements();
 			textBlockElements = schema.getTextBlockElements();
 
@@ -51,8 +51,9 @@
 				node = nodes[ni];
 
 				// Already removed or fixed
-				if (!node.parent || node.fixed)
+				if (!node.parent || node.fixed) {
 					continue;
+				}
 
 				// If the invalid element is a text block and the text block is within a parent LI element
 				// Then unwrap the first text block and convert other sibling text blocks to LI elements similar to Word/Open Office
@@ -78,8 +79,10 @@
 
 				// Get list of all parent nodes until we find a valid parent to stick the child into
 				parents = [node];
-				for (parent = node.parent; parent && !schema.isValidChild(parent.name, node.name) && !nonSplitableElements[parent.name]; parent = parent.parent)
+				for (parent = node.parent; parent && !schema.isValidChild(parent.name, node.name) &&
+					!nonSplitableElements[parent.name]; parent = parent.parent) {
 					parents.push(parent);
+				}
 
 				// Found a suitable parent
 				if (parent && parents.length > 1) {
@@ -94,10 +97,11 @@
 						if (schema.isValidChild(currentNode.name, parents[i].name)) {
 							tempNode = self.filterNode(parents[i].clone());
 							currentNode.append(tempNode);
-						} else
+						} else {
 							tempNode = currentNode;
+						}
 
-						for (childNode = parents[i].firstChild; childNode && childNode != parents[i + 1]; ) {
+						for (childNode = parents[i].firstChild; childNode && childNode != parents[i + 1];) {
 							nextNode = childNode.next;
 							tempNode.append(childNode);
 							childNode = nextNode;
@@ -142,18 +146,20 @@
 						node.wrap(self.filterNode(new Node('div', 1)));
 					} else {
 						// We failed wrapping it, then remove or unwrap it
-						if (node.name === 'style' || node.name === 'script')
+						if (node.name === 'style' || node.name === 'script') {
 							node.empty().remove();
-						else
+						} else {
 							node.unwrap();
+						}
 					}
 				}
 			}
-		};
+		}
 
 		/**
 		 * Runs the specified node though the element and attributes filters.
 		 *
+		 * @method filterNode
 		 * @param {tinymce.html.Node} Node the node to run filters on.
 		 * @return {tinymce.html.Node} The passed in node.
 		 */
@@ -164,10 +170,11 @@
 			if (name in nodeFilters) {
 				list = matchedNodes[name];
 
-				if (list)
+				if (list) {
 					list.push(node);
-				else
+				} else {
 					matchedNodes[name] = [node];
+				}
 			}
 
 			// Run attribute filters
@@ -178,10 +185,11 @@
 				if (name in node.attributes.map) {
 					list = matchedAttributes[name];
 
-					if (list)
+					if (list) {
 						list.push(node);
-					else
+					} else {
 						matchedAttributes[name] = [node];
+					}
 				}
 			}
 
@@ -203,11 +211,12 @@
 		 * @param {function} callback Callback function to execute once it has collected nodes.
 		 */
 		self.addNodeFilter = function(name, callback) {
-			tinymce.each(tinymce.explode(name), function(name) {
+			each(explode(name), function(name) {
 				var list = nodeFilters[name];
 
-				if (!list)
+				if (!list) {
 					nodeFilters[name] = list = [];
+				}
 
 				list.push(callback);
 			});
@@ -228,7 +237,7 @@
 		 * @param {function} callback Callback function to execute once it has collected nodes.
 		 */
 		self.addAttributeFilter = function(name, callback) {
-			tinymce.each(tinymce.explode(name), function(name) {
+			each(explode(name), function(name) {
 				var i;
 
 				for (i = 0; i < attributeFilters.length; i++) {
@@ -253,14 +262,15 @@
 		 * @return {tinymce.html.Node} Root node containing the tree.
 		 */
 		self.parse = function(html, args) {
-			var parser, rootNode, node, nodes, i, l, fi, fl, list, name, validate,
-				blockElements, startWhiteSpaceRegExp, invalidChildren = [], isInWhiteSpacePreservedElement,
-				endWhiteSpaceRegExp, allWhiteSpaceRegExp, isAllWhiteSpaceRegExp, whiteSpaceElements, children, nonEmptyElements, rootBlockName;
+			var parser, rootNode, node, nodes, i, l, fi, fl, list, name, validate;
+			var blockElements, startWhiteSpaceRegExp, invalidChildren = [], isInWhiteSpacePreservedElement;
+			var endWhiteSpaceRegExp, allWhiteSpaceRegExp, isAllWhiteSpaceRegExp, whiteSpaceElements;
+			var children, nonEmptyElements, rootBlockName;
 
 			args = args || {};
 			matchedNodes = {};
 			matchedAttributes = {};
-			blockElements = tinymce.extend(tinymce.makeMap('script,style,head,html,body,title,meta,param'), schema.getBlockElements());
+			blockElements = extend(makeMap('script,style,head,html,body,title,meta,param'), schema.getBlockElements());
 			nonEmptyElements = schema.getNonEmptyElements();
 			children = schema.children;
 			validate = settings.validate;
@@ -275,24 +285,51 @@
 			function addRootBlocks() {
 				var node = rootNode.firstChild, next, rootBlockNode;
 
+				// Removes whitespace at beginning and end of block so:
+				// <p> x </p> -> <p>x</p>
+				function trim(rootBlockNode) {
+					if (rootBlockNode) {
+						node = rootBlockNode.firstChild;
+						if (node && node.type == 3) {
+							node.value = node.value.replace(startWhiteSpaceRegExp, '');
+						}
+
+						node = rootBlockNode.lastChild;
+						if (node && node.type == 3) {
+							node.value = node.value.replace(endWhiteSpaceRegExp, '');
+						}
+					}
+				}
+
+				// Check if rootBlock is valid within rootNode for example if P is valid in H1 if H1 is the contentEditabe root
+				if (!schema.isValidChild(rootNode.name, rootBlockName.toLowerCase())) {
+					return;
+				}
+
 				while (node) {
 					next = node.next;
 
-					if (node.type == 3 || (node.type == 1 && node.name !== 'p' && !blockElements[node.name] && !node.attr('data-mce-type'))) {
+					if (node.type == 3 || (node.type == 1 && node.name !== 'p' &&
+						!blockElements[node.name] && !node.attr('data-mce-type'))) {
 						if (!rootBlockNode) {
 							// Create a new root block element
 							rootBlockNode = createNode(rootBlockName, 1);
+							rootBlockNode.attr(settings.forced_root_block_attrs);
 							rootNode.insert(rootBlockNode, node);
 							rootBlockNode.append(node);
-						} else
+						} else {
 							rootBlockNode.append(node);
+						}
 					} else {
+						trim(rootBlockNode);
 						rootBlockNode = null;
 					}
 
 					node = next;
-				};
-			};
+				}
+
+				trim(rootBlockNode);
+			}
 
 			function createNode(name, type) {
 				var node = new Node(name, type), list;
@@ -300,19 +337,20 @@
 				if (name in nodeFilters) {
 					list = matchedNodes[name];
 
-					if (list)
+					if (list) {
 						list.push(node);
-					else
+					} else {
 						matchedNodes[name] = [node];
+					}
 				}
 
 				return node;
-			};
+			}
 
 			function removeWhitespaceBefore(node) {
 				var textNode, textVal, sibling;
 
-				for (textNode = node.prev; textNode && textNode.type === 3; ) {
+				for (textNode = node.prev; textNode && textNode.type === 3;) {
 					textVal = textNode.value.replace(endWhiteSpaceRegExp, '');
 
 					if (textVal.length > 0) {
@@ -324,7 +362,7 @@
 						textNode = sibling;
 					}
 				}
-			};
+			}
 
 			function cloneAndExcludeBlocks(input) {
 				var name, output = {};
@@ -336,10 +374,12 @@
 				}
 
 				return output;
-			};
+			}
 
 			parser = new tinymce.html.SaxParser({
-				validate : validate,
+				validate: validate,
+				allow_script_urls: settings.allow_script_urls,
+				allow_conditional_comments: settings.allow_conditional_comments,
 
 				// Exclude P and LI from DOM parsing since it's treated better by the DOM parser
 				self_closing_elements: cloneAndExcludeBlocks(schema.getSelfClosingElements()),
@@ -355,8 +395,9 @@
 					if (!isInWhiteSpacePreservedElement) {
 						text = text.replace(allWhiteSpaceRegExp, ' ');
 
-						if (node.lastChild && blockElements[node.lastChild.name])
+						if (node.lastChild && blockElements[node.lastChild.name]) {
 							text = text.replace(startWhiteSpaceRegExp, '');
+						}
 					}
 
 					// Do we need to create the node
@@ -385,7 +426,7 @@
 				},
 
 				start: function(name, attrs, empty) {
-					var newNode, attrFiltersLen, elementRule, textNode, attrName, text, sibling, parent;
+					var newNode, attrFiltersLen, elementRule, attrName, parent;
 
 					elementRule = validate ? schema.getElementRule(name) : {};
 					if (elementRule) {
@@ -398,8 +439,9 @@
 						// Check if node is valid child of the parent node is the child is
 						// unknown we don't collect it since it's probably a custom element
 						parent = children[node.name];
-						if (parent && children[newNode.name] && !parent[newNode.name])
+						if (parent && children[newNode.name] && !parent[newNode.name]) {
 							invalidChildren.push(newNode);
+						}
 
 						attrFiltersLen = attributeFilters.length;
 						while (attrFiltersLen--) {
@@ -408,20 +450,23 @@
 							if (attrName in attrs.map) {
 								list = matchedAttributes[attrName];
 
-								if (list)
+								if (list) {
 									list.push(newNode);
-								else
+								} else {
 									matchedAttributes[attrName] = [newNode];
+								}
 							}
 						}
 
 						// Trim whitespace before block
-						if (blockElements[name])
+						if (blockElements[name]) {
 							removeWhitespaceBefore(newNode);
+						}
 
 						// Change current node if the element wasn't empty i.e not <br /> or <img />
-						if (!empty)
+						if (!empty) {
 							node = newNode;
+						}
 
 						// Check if we are inside a whitespace preserved element
 						if (!isInWhiteSpacePreservedElement && whiteSpaceElements[name]) {
@@ -451,20 +496,19 @@
 										textNode.remove();
 										textNode = sibling;
 
+										// Remove any pure whitespace siblings
+										while (textNode && textNode.type === 3) {
+											text = textNode.value;
+											sibling = textNode.next;
 
-                                        // Remove any pure whitespace siblings
-                                        while (textNode && textNode.type === 3) {
-                                            text = textNode.value;
-                                            sibling = textNode.next;
+											if (text.length === 0 || isAllWhiteSpaceRegExp.test(text)) {
+												textNode.remove();
+												textNode = sibling;
+											}
 
-                                            if (text.length === 0 || isAllWhiteSpaceRegExp.test(text)) {
-                                                textNode.remove();
-                                                textNode = sibling;
-                                            }
-
-                                            textNode = sibling;
-                                        }
-                                    }
+											textNode = sibling;
+										}
+									}
 								}
 
 								// Trim whitespace of the last node in a block
@@ -481,7 +525,6 @@
 										textNode.remove();
 										textNode = sibling;
 
-
 										// Remove any pure whitespace siblings
 										while (textNode && textNode.type === 3) {
 											text = textNode.value;
@@ -497,6 +540,18 @@
 									}
 								}
 							}
+
+							// Trim start white space
+							// Removed due to: #5424
+							/*textNode = node.prev;
+							if (textNode && textNode.type === 3) {
+								text = textNode.value.replace(startWhiteSpaceRegExp, '');
+
+								if (text.length > 0)
+									textNode.value = text;
+								else
+									textNode.remove();
+							}*/
 						}
 
 						// Check if we exited a whitespace preserved element
@@ -507,13 +562,12 @@
 						// Handle empty nodes
 						if (elementRule.removeEmpty || elementRule.paddEmpty) {
 							if (node.isEmpty(nonEmptyElements)) {
-								if (elementRule.paddEmpty)
+								if (elementRule.paddEmpty) {
 									node.empty().append(new Node('#text', '3')).value = '\u00a0';
-								else {
+								} else {
 									// Leave nodes that have a name like <a name="name">
 									if (!node.attributes.map.name && !node.attributes.map.id) {
 										tempNode = node.parent;
-
 
 										if (blockElements[node.name]) {
 											node.empty().remove();
@@ -539,15 +593,17 @@
 
 			// Fix invalid children or report invalid children in a contextual parsing
 			if (validate && invalidChildren.length) {
-				if (!args.context)
+				if (!args.context) {
 					fixInvalidChildren(invalidChildren);
-				else
+				} else {
 					args.invalid = true;
+				}
 			}
 
 			// Wrap nodes in the root into block elements if the root is body
-			if (rootBlockName && rootNode.name == 'body')
+			if (rootBlockName && (rootNode.name == 'body' || args.isRootContent)) {
 				addRootBlocks();
+			}
 
 			// Run filters only when the contents is valid
 			if (!args.invalid) {
@@ -559,12 +615,14 @@
 					// Remove already removed children
 					fi = nodes.length;
 					while (fi--) {
-						if (!nodes[fi].parent)
+						if (!nodes[fi].parent) {
 							nodes.splice(fi, 1);
+						}
 					}
 
-					for (i = 0, l = list.length; i < l; i++)
+					for (i = 0, l = list.length; i < l; i++) {
 						list[i](nodes, name, args);
+					}
 				}
 
 				// Run attribute filters
@@ -577,12 +635,14 @@
 						// Remove already removed children
 						fi = nodes.length;
 						while (fi--) {
-							if (!nodes[fi].parent)
+							if (!nodes[fi].parent) {
 								nodes.splice(fi, 1);
+							}
 						}
 
-						for (fi = 0, fl = list.callbacks.length; fi < fl; fi++)
+						for (fi = 0, fl = list.callbacks.length; fi < fl; fi++) {
 							list.callbacks[fi](nodes, list.name, args);
+						}
 					}
 				}
 			}
@@ -594,9 +654,10 @@
 		// make it possible to place the caret inside empty blocks. This logic tries to remove
 		// these elements and keep br elements that where intended to be there intact
 		if (settings.remove_trailing_brs) {
-			self.addNodeFilter('br', function(nodes, name) {
-				var i, l = nodes.length, node, blockElements = tinymce.extend({}, schema.getBlockElements()),
-					nonEmptyElements = schema.getNonEmptyElements(), parent, lastParent, prev, prevName;
+			self.addNodeFilter('br', function(nodes) {
+				var i, l = nodes.length, node, blockElements = extend({}, schema.getBlockElements());
+				var nonEmptyElements = schema.getNonEmptyElements(), parent, lastParent, prev, prevName;
+				var elementRule, textNode;
 
 				// Remove brs from body element as well
 				blockElements.body = 1;
@@ -616,8 +677,9 @@
 							// Ignore bookmarks
 							if (prevName !== "span" || prev.attr('data-mce-type') !== 'bookmark') {
 								// Found a non BR element
-								if (prevName !== "br")
+								if (prevName !== "br") {
 									break;
+								}
 
 								// Found another br it's a <br><br> structure then don't remove anything
 								if (prevName === 'br') {
@@ -638,17 +700,19 @@
 
 								// Remove or padd the element depending on schema rule
 								if (elementRule) {
-									if (elementRule.removeEmpty)
+									if (elementRule.removeEmpty) {
 										parent.remove();
-									else if (elementRule.paddEmpty)
-										parent.empty().append(new tinymce.html.Node('#text', 3)).value = '\u00a0';
+									} else if (elementRule.paddEmpty) {
+										parent.empty().append(new Node('#text', 3)).value = '\u00a0';
+									}
 								}
 							}
 						}
 					} else {
-						// Replaces BR elements inside inline elements like <p><b><i><br></i></b></p> so they become <p><b><i>&nbsp;</i></b></p>
+						// Replaces BR elements inside inline elements like <p><b><i><br></i></b></p>
+						// so they become <p><b><i>&nbsp;</i></b></p>
 						lastParent = node;
-						while (parent.firstChild === lastParent && parent.lastChild === lastParent) {
+						while (parent && parent.firstChild === lastParent && parent.lastChild === lastParent) {
 							lastParent = parent;
 
 							if (blockElements[parent.name]) {
@@ -659,7 +723,7 @@
 						}
 
 						if (lastParent === parent) {
-							textNode = new tinymce.html.Node('#text', 3);
+							textNode = new Node('#text', 3);
 							textNode.value = '\u00a0';
 							node.replace(textNode);
 						}
@@ -670,7 +734,7 @@
 
 		// Force anchor names closed, unless the setting "allow_html_in_named_anchor" is explicitly included.
 		if (!settings.allow_html_in_named_anchor) {
-			self.addAttributeFilter('id,name', function(nodes, name) {
+			self.addAttributeFilter('id,name', function(nodes) {
 				var i = nodes.length, sibling, prevSibling, parent, node;
 
 				while (i--) {
@@ -686,6 +750,48 @@
 							sibling = prevSibling;
 						} while (sibling);
 					}
+				}
+			});
+		}
+
+		if (settings.validate && schema.getValidClasses()) {
+			self.addAttributeFilter('class', function(nodes) {
+				var i = nodes.length, node, classList, ci, className, classValue;
+				var validClasses = schema.getValidClasses(), validClassesMap, valid;
+
+				while (i--) {
+					node = nodes[i];
+					classList = node.attr('class').split(' ');
+					classValue = '';
+
+					for (ci = 0; ci < classList.length; ci++) {
+						className = classList[ci];
+						valid = false;
+
+						validClassesMap = validClasses['*'];
+						if (validClassesMap && validClassesMap[className]) {
+							valid = true;
+						}
+
+						validClassesMap = validClasses[node.name];
+						if (!valid && validClassesMap && validClassesMap[className]) {
+							valid = true;
+						}
+
+						if (valid) {
+							if (classValue) {
+								classValue += ' ';
+							}
+
+							classValue += className;
+						}
+					}
+
+					if (!classValue.length) {
+						classValue = null;
+					}
+
+					node.attr('class', classValue);
 				}
 			});
 		}
