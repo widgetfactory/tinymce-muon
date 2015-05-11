@@ -14,16 +14,20 @@ tinymce.ForceBlocks = function(editor) {
 	function addRootBlocks() {
 		var node = selection.getStart(), rootNode = editor.getBody(), rng, startContainer, startOffset, endContainer, endOffset, rootBlockNode, tempNode, offset = -0xFFFFFF, wrapped, isInEditorDocument;
 
-		if (!node || node.nodeType !== 1 || !settings.forced_root_block)
-			return;
+		forcedRootBlock = settings.forced_root_block;
 
-		// Check if node is wrapped in block
-		while (node && node != rootNode) {
-			if (blockElements[node.nodeName])
+			if (!node || node.nodeType !== 1 || !forcedRootBlock) {
 				return;
+			}
 
-			node = node.parentNode;
-		}
+			// Check if node is wrapped in block
+			while (node && node != rootNode) {
+				if (blockElements[node.nodeName]) {
+					return;
+				}
+
+				node = node.parentNode;
+			}
 
 		// Get current selection
 		rng = selection.getRng();
@@ -72,7 +76,7 @@ tinymce.ForceBlocks = function(editor) {
 				}
 
 				if (!rootBlockNode) {
-					rootBlockNode = dom.create(settings.forced_root_block);
+					rootBlockNode = dom.create(settings.forced_root_block, editor.settings.forced_root_block_attrs);
 					node.parentNode.insertBefore(rootBlockNode, node);
 					wrapped = true;
 				}
