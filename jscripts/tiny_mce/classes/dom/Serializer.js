@@ -69,6 +69,17 @@
 		onPostProcess = new tinymce.util.Dispatcher(self);
 
 		htmlParser = new tinymce.html.DomParser(settings, schema);
+		
+		// Convert tabindex back to elements when serializing contents
+		htmlParser.addAttributeFilter('data-mce-tabindex', function(nodes, name) {
+			var i = nodes.length, node;
+
+			while (i--) {
+				node = nodes[i];
+				node.attr('tabindex', node.attributes.map['data-mce-tabindex']);
+				node.attr(name, null);
+			}
+		});
 
 		// Convert move data-mce-src, data-mce-href and data-mce-style into nodes or process them if needed
 		htmlParser.addAttributeFilter('src,href,style', function(nodes, name) {
@@ -86,10 +97,11 @@
 					// No internal attribute found then convert the value we have in the DOM
 					value = node.attributes.map[name];
 
-					if (name === "style")
+					if (name === "style") {
 						value = dom.serializeStyle(dom.parseStyle(value), node.name);
-					else if (urlConverter)
+					} else if (urlConverter) {
 						value = urlConverter.call(urlConverterScope, value, name, node.name);
+					}
 
 					node.attr(name, value.length > 0 ? value : null);
 				}
@@ -102,8 +114,12 @@
 
 			while (i--) {
 				node = nodes[i];
-				value = node.attr('class').replace(/(?:^|\s)mce(Item\w+|Selected)(?!\S)/g, '');
-				node.attr('class', value.length > 0 ? value : null);
+				value = node.attr('class');
+				
+				if (value) {
+					value = node.attr('class').replace(/(?:^|\s)mce(Item\w+|Selected)(?!\S)/g, '');
+					node.attr('class', value.length > 0 ? value : null);
+				}
 			}
 		});
 
@@ -114,17 +130,9 @@
 			while (i--) {
 				node = nodes[i];
 
-				if (node.attributes.map['data-mce-type'] === 'bookmark' && !args.cleanup)
+				if (node.attributes.map['data-mce-type'] === 'bookmark' && !args.cleanup) {
 					node.remove();
-			}
-		});
-
-		// Remove expando attributes
-		htmlParser.addAttributeFilter('data-mce-expando', function(nodes, name, args) {
-			var i = nodes.length;
-
-			while (i--) {
-				nodes[i].attr(name, null);
+				}
 			}
 		});
 
@@ -149,21 +157,27 @@
 						.replace(/^[\r\n]*|[\r\n]*$/g, '')
 						.replace(/^\s*((<!--)?(\s*\/\/)?\s*<!\[CDATA\[|(<!--\s*)?\/\*\s*<!\[CDATA\[\s*\*\/|(\/\/)?\s*<!--|\/\*\s*<!--\s*\*\/)\s*[\r\n]*/gi, '')
 						.replace(/\s*(\/\*\s*\]\]>\s*\*\/(-->)?|\s*\/\/\s*\]\]>(-->)?|\/\/\s*(-->)?|\]\]>|\/\*\s*-->\s*\*\/|\s*-->\s*)\s*$/g, '');
-			};
+			}
 
 			while (i--) {
 				node = nodes[i];
 				value = node.firstChild ? node.firstChild.value : '';
 
 				if (name === "script") {
-					// Remove mce- prefix from script elements
-					node.attr('type', (node.attr('type') || 'text/javascript').replace(/^mce\-/, ''));
+					// Remove mce- prefix from script elements and remove default type since the user specified
+					// a script element without type attribute
+					type = node.attr('type');
+					if (type) {
+						node.attr('type', type == 'mce-no/type' ? null : type.replace(/^mce\-/, ''));
+					}
 
-					if (value.length > 0)
+					if (value.length > 0) {
 						node.firstChild.value = '// <![CDATA[\n' + trim(value) + '\n// ]]>';
+					}
 				} else {
-					if (value.length > 0)
+					if (value.length > 0) {
 						node.firstChild.value = '<!--\n' + trim(value) + '\n-->';
+					}
 				}
 			}
 		});
@@ -193,11 +207,12 @@
 
 			while (i--) {
 				node = nodes[i];
-				if (node.type === 7)
+				if (node.type === 7) {
 					node.remove();
-				else if (node.type === 1) {
-					if (name === "input" && !("type" in node.attributes.map))
+				} else if (node.type === 1) {
+					if (name === "input" && !("type" in node.attributes.map)) {
 						node.attr('type', 'text');
+					}
 				}
 			}
 		});
@@ -221,13 +236,19 @@
 		}
 
 		// Remove internal data attributes
-		htmlParser.addAttributeFilter('data-mce-src,data-mce-href,data-mce-style', function(nodes, name) {
-			var i = nodes.length;
+		htmlParser.addAttributeFilter(
+			'data-mce-src,data-mce-href,data-mce-style,' +
+			'data-mce-selected,data-mce-expando,' +
+			'data-mce-type,data-mce-resize,data-mce-new',
 
-			while (i--) {
-				nodes[i].attr(name, null);
+			function(nodes, name) {
+				var i = nodes.length;
+
+				while (i--) {
+					nodes[i].attr(name, null);
+				}
 			}
-		});
+		);
 
 		// Return public methods
 		return {
@@ -309,8 +330,9 @@
 					content = node.innerHTML;
 					node = node.cloneNode(false);
 					dom.setHTML(node, content);
-				} else
+				} else {
 					node = node.cloneNode(true);
+				}
 
 				// Nodes needs to be attached to something in WebKit/Opera
 				// Older builds of Opera crashes if you attach the node to an document created dynamically
@@ -327,10 +349,11 @@
 					});
 
 					// Grab first child or body element for serialization
-					if (node.nodeName != 'BODY')
+					if (node.nodeName != 'BODY') {
 						node = doc.body.firstChild;
-					else
+					} else {
 						node = doc.body;
+					}
 
 					// set the new document in DOMUtils so createElement etc works
 					oldDoc = dom.doc;
@@ -339,6 +362,11 @@
 
 				args = args || {};
 				args.format = args.format || 'html';
+
+				// Don't wrap content if we want selected html
+				if (args.selection) {
+					args.forced_root_block = '';
+				}
 
 				// Pre process
 				if (!args.no_events) {
@@ -355,17 +383,20 @@
 				);
 
 				// Replace all BOM characters for now until we can find a better solution
-				if (!args.cleanup)
+				if (!args.cleanup) {
 					args.content = args.content.replace(/\uFEFF/g, '');
+				}
 
 				// Post process
-				if (!args.no_events)
+				if (!args.no_events) {
 					onPostProcess.dispatch(self, args);
+				}
 
 				// Restore the old document if it was changed
-				if (oldDoc)
+				if (oldDoc) {
 					dom.doc = oldDoc;
-
+				}
+				
 				args.node = null;
 
 				return args.content;
