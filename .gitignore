@@ -1,3 +1,4 @@
+.gitignore
 bin
 obj
 tmp
@@ -25,3 +26,7 @@ jscripts/tiny_mce/tiny_mce_prototype.js
 jscripts/tiny_mce/tiny_mce_prototype_src.js
 jscripts/tiny_mce/tiny_mce_src.js
 build-utils
+/nbproject/private/
+nbproject/project.xml
+
+nbproject/project.properties
