@@ -67,20 +67,32 @@
 
 		function defaultFormats() {
 			register({
-				alignleft : [
-					{selector : 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li', styles : {textAlign : 'left'}, defaultBlock: 'div'},
-					{selector : 'img,table', collapsed : false, styles : {'float' : 'left'}}
+				valigntop: [
+					{selector: 'td,th', styles: {'verticalAlign': 'top'}}
 				],
 
-				aligncenter : [
-					{selector : 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li', styles : {textAlign : 'center'}, defaultBlock: 'div'},
-					{selector : 'img', collapsed : false, styles : {display : 'block', marginLeft : 'auto', marginRight : 'auto'}},
-					{selector : 'table', collapsed : false, styles : {marginLeft : 'auto', marginRight : 'auto'}}
+				valignmiddle: [
+					{selector: 'td,th', styles: {'verticalAlign': 'middle'}}
 				],
 
-				alignright : [
-					{selector : 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li', styles : {textAlign : 'right'}, defaultBlock: 'div'},
-					{selector : 'img,table', collapsed : false, styles : {'float' : 'right'}}
+				valignbottom: [
+					{selector: 'td,th', styles: {'verticalAlign': 'bottom'}}
+				],
+
+				alignleft: [
+					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'left'}, defaultBlock: 'div'},
+					{selector: 'img,table', collapsed: false, styles: {'float': 'left'}}
+				],
+
+				aligncenter: [
+					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'center'}, defaultBlock: 'div'},
+					{selector: 'img', collapsed: false, styles: {display: 'block', marginLeft: 'auto', marginRight: 'auto'}},
+					{selector: 'table', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto'}}
+				],
+
+				alignright: [
+					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'right'}, defaultBlock: 'div'},
+					{selector: 'img,table', collapsed: false, styles: {'float': 'right'}}
 				],
 
 				alignfull : [
@@ -109,14 +121,15 @@
 					{inline : 'strike', remove : 'all'}
 				],
 
-				forecolor : {inline : 'span', styles : {color : '%value'}, wrap_links : false},
-				hilitecolor : {inline : 'span', styles : {backgroundColor : '%value'}, wrap_links : false},
-				fontname : {inline : 'span', styles : {fontFamily : '%value'}},
-				fontsize : {inline : 'span', styles : {fontSize : '%value'}},
-				fontsize_class : {inline : 'span', attributes : {'class' : '%value'}},
-				blockquote : {block : 'blockquote', wrapper : 1, remove : 'all'},
-				subscript : {inline : 'sub'},
-				superscript : {inline : 'sup'},
+				forecolor: {inline: 'span', styles: {color: '%value'}, links: true, remove_similar: true},
+				hilitecolor: {inline: 'span', styles: {backgroundColor: '%value'}, links: true, remove_similar: true},
+				fontname: {inline: 'span', styles: {fontFamily: '%value'}},
+				fontsize: {inline: 'span', styles: {fontSize: '%value'}},
+				fontsize_class: {inline: 'span', attributes: {'class': '%value'}},
+				blockquote: {block: 'blockquote', wrapper: 1, remove: 'all'},
+				subscript: {inline: 'sub'},
+				superscript: {inline: 'sup'},
+				code: {inline: 'code'},
 
 				link : {inline : 'a', selector : 'a', remove : 'all', split : true, deep : true,
 					onmatch : function() {
@@ -130,10 +143,17 @@
 					}
 				},
 
-				removeformat : [
-					{selector : 'b,strong,em,i,font,u,strike', remove : 'all', split : true, expand : false, block_expand : true, deep : true},
-					{selector : 'span', attributes : ['style', 'class'], remove : 'empty', split : true, expand : false, deep : true},
-					{selector : '*', attributes : ['style', 'class'], split : false, expand : false, deep : true}
+				removeformat: [
+					{
+						selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
+						remove: 'all',
+						split: true,
+						expand: false,
+						block_expand: true,
+						deep: true
+					},
+					{selector: 'span', attributes: ['style', 'class'], remove: 'empty', split: true, expand: false, deep: true},
+					{selector: '*', attributes: ['style', 'class'], split: false, expand: false, deep: true}
 				]
 			});
 
@@ -243,7 +263,7 @@
 				textDecoration = getTextDecoration(node.parentNode);
 				if (ed.dom.getStyle(node, 'color') && textDecoration) {
 					ed.dom.setStyle(node, 'text-decoration', textDecoration);
-				} else if (ed.dom.getStyle(node, 'textdecoration') === textDecoration) {
+				} else if (ed.dom.getStyle(node, 'text-decoration') === textDecoration) {
 					ed.dom.setStyle(node, 'text-decoration', null);
 				}
 			}
@@ -258,7 +278,7 @@
 		 * @param {Node} node Optional node to apply the format to defaults to current selection.
 		 */
 		function apply(name, vars, node) {
-			var formatList = get(name), format = formatList[0], bookmark, rng, isCollapsed = selection.isCollapsed();
+			var formatList = get(name), format = formatList[0], bookmark, rng, isCollapsed = !node && selection.isCollapsed();
 
 			function setElementFormat(elm, fmt) {
 				fmt = fmt || format;
@@ -403,7 +423,9 @@
 						}
 
 						// Can we rename the block
-						if (contentEditable && !hasContentEditableState && format.block && !format.wrapper && isTextBlock(nodeName)) {
+						// TODO: Break this if up, too complex
+						if (contentEditable && !hasContentEditableState && format.block &&
+							!format.wrapper && isTextBlock(nodeName) && isValidChild(parentName, wrapName)) {
 							node = dom.rename(node, wrapName);
 							setElementFormat(node);
 							newWrappers.push(node);
@@ -433,13 +455,14 @@
 							}
 						}
 
-						function isZWNBS(node) {
-							return node.nodeType === 3 && node.nodeValue.length === 1 && node.nodeValue.charCodeAt(0) === 65279;
-						}
-
 						// Is it valid to wrap this item
+						// TODO: Break this if up, too complex
 						if (contentEditable && !hasContentEditableState && isValidChild(wrapName, nodeName) && isValidChild(parentName, wrapName) &&
-								!(!node_specific && isZWNBS(node)) && !isCaretNode(node) && (!format.inline || !isBlock(node))) {
+								!(!node_specific && node.nodeType === 3 &&
+								node.nodeValue.length === 1 &&
+								node.nodeValue.charCodeAt(0) === 65279) &&
+								!isCaretNode(node) &&
+								(!format.inline || !isBlock(node))) {
 							// Start wrapping
 							if (!currentWrapElm) {
 								// Wrap the node
@@ -449,7 +472,6 @@
 							}
 
 							currentWrapElm.appendChild(node);
-
 						} else {
 							// Start a new wrapper for possible children
 							currentWrapElm = 0;
@@ -469,22 +491,14 @@
 					each(nodes, process);
 				});
 
-				// Wrap links inside as well, for example color inside a link when the wrapper is around the link
-				if (format.wrap_links === false) {
+				// Apply formats to links as well to get the color of the underline to change as well
+				if (format.links === true || format.wrap_links === false) {
 					each(newWrappers, function(node) {
 						function process(node) {
 							var i, currentWrapElm, children;
 
 							if (node.nodeName === 'A') {
-								currentWrapElm = dom.clone(wrapElm, FALSE);
-								newWrappers.push(currentWrapElm);
-
-								children = tinymce.grep(node.childNodes);
-								for (i = 0; i < children.length; i++) {
-									currentWrapElm.appendChild(children[i]);
-								}
-
-								node.appendChild(currentWrapElm);
+								setElementFormat(node, format);
 							}
 
 							each(tinymce.grep(node.childNodes), process);
@@ -522,7 +536,7 @@
 						});
 
 						// If child was found and of the same type as the current node
-						if (child && matchName(child, format)) {
+						if (child && !isBookmarkNode(child) && matchName(child, format)) {
 							clone = dom.clone(child, FALSE);
 							setElementFormat(clone);
 
@@ -553,20 +567,9 @@
 							// Merge all children of similar type will move styles from child to parent
 							// this: <span style="color:red"><b><span style="color:red; font-size:10px">text</span></b></span>
 							// will become: <span style="color:red"><b><span style="font-size:10px">text</span></b></span>
-							each(dom.select(format.inline, node), function(child) {
-								var parent;
-
-								// When wrap_links is set to false we don't want
-								// to remove the format on children within links
-								if (format.wrap_links === false) {
-									parent = child.parentNode;
-
-									do {
-										if (parent.nodeName === 'A') {
-											return;
-										}
-										parent = parent.parentNode;
-									} while (parent);
+							each(dom.select(format.inline, node), function(child) {								
+								if (isBookmarkNode(child)) {
+									return;
 								}
 
 								removeFormat(format, vars, child, format.exact ? child : null);
@@ -650,17 +653,12 @@
 		 * @param {Object} vars Optional list of variables to replace within format before removing it.
 		 * @param {Node/Range} node Optional node or DOM range to remove the format from defaults to current selection.
 		 */
-		function remove(name, vars, node) {
+		function remove(name, vars, node, similar) {
 			var formatList = get(name), format = formatList[0], bookmark, rng, contentEditable = true;
 
 			// Merges the styles for each node
 			function process(node) {
 				var children, i, l, lastContentEditable, hasContentEditableState;
-
-				// Skip on text nodes as they have neither format to remove nor children
-				if (node.nodeType === 3) {
-					return;
-				}
 
 				// Node has a contentEditable value
 				if (node.nodeType === 1 && getContentEditable(node)) {
@@ -705,7 +703,7 @@
 					// Find format root element
 					if (!formatRoot && parent.id != '_start' && parent.id != '_end') {
 						// Is the node matching the format we are looking for
-						format = matchNode(parent, name, vars);
+						format = matchNode(parent, name, vars, similar);
 						if (format && format.split !== false) {
 							formatRoot = parent;
 						}
@@ -715,12 +713,12 @@
 				return formatRoot;
 			}
 
-			function wrapAndSplit(format_root, container, target, split) {
+			function wrapAndSplit(formatRoot, container, target, split) {
 				var parent, clone, lastClone, firstClone, i, formatRootParent;
 
 				// Format root found then clone formats and split it
-				if (format_root) {
-					formatRootParent = format_root.parentNode;
+				if (formatRoot) {
+					formatRootParent = formatRoot.parentNode;
 
 					for (parent = container.parentNode; parent && parent != formatRootParent; parent = parent.parentNode) {
 						clone = dom.clone(parent, FALSE);
@@ -747,8 +745,8 @@
 					}
 
 					// Never split block elements if the format is mixed
-					if (split && (!format.mixed || !isBlock(format_root))) {
-						container = dom.split(format_root, container);
+					if (split && (!format.mixed || !isBlock(formatRoot))) {
+						container = dom.split(formatRoot, container);
 					}
 
 					// Wrap container in cloned formats
@@ -846,8 +844,16 @@
 						process(node);
 
 						// Remove parent span if it only contains text-decoration: underline, yet a parent node is also underlined.
-						if (node.nodeType === 1 && ed.dom.getStyle(node, 'text-decoration') === 'underline' && node.parentNode && getTextDecoration(node.parentNode) === 'underline') {
-							removeFormat({'deep': false, 'exact': true, 'inline': 'span', 'styles': {'textDecoration' : 'underline'}}, null, node);
+						if (node.nodeType === 1 && ed.dom.getStyle(node, 'text-decoration') === 'underline' &&
+							node.parentNode && getTextDecoration(node.parentNode) === 'underline') {
+							removeFormat({
+								'deep': false,
+								'exact': true,
+								'inline': 'span',
+								'styles': {
+									'textDecoration': 'underline'
+								}
+							}, null, node);
 						}
 					});
 				});
@@ -879,7 +885,7 @@
 
 				ed.nodeChanged();
 			} else {
-				performCaretAction('remove', name, vars);
+				performCaretAction('remove', name, vars, similar);
 			}
 		}
 
@@ -1683,7 +1689,7 @@
 			if (format.remove != 'all') {
 				// Remove styles
 				each(format.styles, function(value, name) {
-					value = replaceVars(value, vars);
+					value = normalizeStyleValue(replaceVars(value, vars), name);
 
 					// Indexed array
 					if (typeof(name) === 'number') {
@@ -1691,7 +1697,7 @@
 						compare_node = 0;
 					}
 
-					if (!compare_node || isEq(getStyle(compare_node, name), value)) {
+					if (format.remove_similar || (!compare_node || isEq(getStyle(compare_node, name), value))) {
 						dom.setStyle(node, name, '');
 					}
 
@@ -1823,6 +1829,7 @@
 								if (isValidChild(forcedRootBlock, node.nodeName.toLowerCase())) {
 									if (!rootBlockElm) {
 										rootBlockElm = wrap(node, forcedRootBlock);
+										dom.setAttribs(rootBlockElm, ed.settings.forced_root_block_attrs);
 									} else {
 										rootBlockElm.appendChild(node);
 									}
@@ -2050,7 +2057,7 @@
 			return container;
 		}
 
-		function performCaretAction(type, name, vars) {
+		function performCaretAction(type, name, vars, similar) {
 			var caretContainerId = '_mce_caret', debug = ed.settings.caret_debug;
 
 			// Creates a caret container bogus element
@@ -2115,7 +2122,7 @@
 					node = getParentCaretContainer(selection.getStart());
 
 					if (!node) {
-						while (node = dom.get(caretContainerId)) {
+						while ((node = dom.get(caretContainerId))) {
 							removeCaretContainer(node, false);
 						}
 					}
@@ -2204,12 +2211,7 @@
 						caretContainer = createCaretContainer(true);
 						textNode = caretContainer.firstChild;
 
-						if (rangeInBody(rng)) {
-							rng.insertNode(caretContainer);	
-						} else {
-							rng.startContainer.ownerDocument.body.appendChild(caretContainer);
-						}
-						
+						rng.insertNode(caretContainer);
 						offset = 1;
 
 						apply(name, vars, caretContainer);
@@ -2231,7 +2233,7 @@
 				node = container;
 
 				if (container.nodeType == 3) {
-					if (offset != container.nodeValue.length || container.nodeValue === INVISIBLE_CHAR) {
+					if (offset != container.nodeValue.length) {
 						hasContentAfter = true;
 					}
 
@@ -2239,7 +2241,7 @@
 				}
 
 				while (node) {
-					if (matchNode(node, name, vars)) {
+					if (matchNode(node, name, vars, similar)) {
 						formatNode = node;
 						break;
 					}
@@ -2402,7 +2404,7 @@
 					if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
 						// IE has a "neat" feature where it moves the start node into the closest element
 						// we can avoid this by inserting an element before it and then remove it after we set the selection
-						tmpNode = dom.create('a', null, INVISIBLE_CHAR);
+						tmpNode = dom.create('a', {'data-mce-bogus': 'all'}, INVISIBLE_CHAR);
 						node.parentNode.insertBefore(tmpNode, node);
 
 						// Set selection and remove tmpNode
