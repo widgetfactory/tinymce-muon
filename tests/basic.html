@@ -47,7 +47,7 @@ test('commands - xhtmlTextStyles', function() {
 	editor.setContent('test 123');
 	editor.execCommand('SelectAll');
 	editor.execCommand('FontName',false,'Arial');
-	equal(editor.getContent(), '<p><span style="font-family: ' + fontFace('Arial') + ';">test 123</span></p>');
+	equal(editor.getContent(), '<p><span style="font-family: ' + Utils.fontFace('Arial') + ';">test 123</span></p>');
 
 	editor.setContent('test 123');
 	editor.execCommand('SelectAll');
@@ -83,19 +83,19 @@ test('commands - xhtmlTextStyles', function() {
 	equal(editor.getContent(), '<p><span style="text-decoration: line-through;">test 123</span></p>');
 
 	editor.setContent('<p><font face="Arial">test 123</font></p>');
-	equal(editor.getContent(), '<p><span style="font-family: ' + fontFace('Arial') + ';">test 123</span></p>');
+	equal(editor.getContent(), '<p><span style="font-family: ' + Utils.fontFace('Arial') + ';">test 123</span></p>');
 
 	editor.setContent('<p><font size="7">test 123</font></p>');
 	equal(editor.getContent(), '<p><span style="font-size: 300%;">test 123</span></p>');
 
 	editor.setContent('<p><font face="Arial" size="7">test 123</font></p>');
-	equal(editor.getContent(), '<p><span style="font-size: 300%; font-family: ' + fontFace('Arial') + ';">test 123</span></p>');
+	equal(editor.getContent(), '<p><span style="font-size: 300%; font-family: ' + Utils.fontFace('Arial') + ';">test 123</span></p>');
 
 	editor.setContent('<font style="background-color: #ff0000" color="#ff0000">test</font><font face="Arial">test</font>');
-	equal(editor.getContent(), '<p><span style="color: #ff0000; background-color: #ff0000;">test</span><span style="font-family: ' + fontFace('Arial') + ';">test</span></p>');
+	equal(editor.getContent(), '<p><span style="color: #ff0000; background-color: #ff0000;">test</span><span style="font-family: ' + Utils.fontFace('Arial') + ';">test</span></p>');
 
 	editor.setContent('<p><font face="Arial" style="color: #ff0000">test 123</font></p>');
-	equal(editor.getContent(), '<p><span style="color: #ff0000; font-family: ' + fontFace('Arial') + ';">test 123</span></p>');
+	equal(editor.getContent(), '<p><span style="color: #ff0000; font-family: ' + Utils.fontFace('Arial') + ';">test 123</span></p>');
 });
 
 test('commands - alignInline', function() {
@@ -274,7 +274,7 @@ test('commands - link text inside text', function() {
 	expect(1);
 
 	editor.setContent('<p><a href="#"><em>abc</em></a></p>');
-	setSelection('em', 1, 'em', 2);
+	Utils.setSelection('em', 1, 'em', 2);
 
 	editor.execCommand('mceInsertLink', false, 'link');
 	equal(editor.getContent(), '<p><a href="link"><em>abc</em></a></p>');
@@ -322,7 +322,7 @@ test('commands - link text inside link', function() {
 	expect(1);
 
 	editor.setContent('<p><a href="#">test</a></p>');
-	setSelection('p', 0, 'p', 1);
+	Utils.setSelection('p', 0, 'p', 1);
 	editor.execCommand('SelectAll');
 
 	editor.execCommand('mceInsertLink', false, 'link');

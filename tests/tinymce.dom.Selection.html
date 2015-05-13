@@ -453,7 +453,7 @@ test('getBookmark/setBookmark (nonintrusive) - Get bookmark inside complex html'
 
 	editor.setContent('<p>abc</p>123<p>123</p><p>123<b>123</b><table><tr><td>abc</td></tr></table></p>');
 	editor.execCommand('SelectAll');
-	setSelection('td', 1, 'td', 2);
+	Utils.setSelection('td', 1, 'td', 2);
 	bookmark = editor.selection.getBookmark(2, true);
 	editor.getBody().innerHTML = editor.getBody().innerHTML;
 	editor.selection.moveToBookmark(bookmark);
@@ -662,7 +662,7 @@ if (!tinymce.isIE) {
 		var rng;
 
 		editor.getBody().innerHTML = '<p><b>a</b><i>b</i></p>';
-		setSelection('i', 0);
+		Utils.setSelection('i', 0);
 		editor.selection.normalize();
 
 		rng = editor.selection.getRng(true);
@@ -678,7 +678,7 @@ if (!tinymce.isIE) {
 		var rng;
 
 		editor.getBody().innerHTML = '<p><b>a</b><i>b</i></p>';
-		setSelection('b', 1, 'i', 1);
+		Utils.setSelection('b', 1, 'i', 1);
 		editor.selection.normalize();
 
 		rng = editor.selection.getRng(true);
@@ -694,7 +694,7 @@ if (!tinymce.isIE) {
 		var rng;
 
 		editor.getBody().innerHTML = '<p>a<br><b>b</b></p>';
-		setSelection('b', 0);
+		Utils.setSelection('b', 0);
 		editor.selection.normalize();
 
 		rng = editor.selection.getRng(true);
@@ -706,7 +706,7 @@ if (!tinymce.isIE) {
 		var rng;
 
 		editor.getBody().innerHTML = '<p>a<img><b>b</b></p>';
-		setSelection('b', 0);
+		Utils.setSelection('b', 0);
 		editor.selection.normalize();
 
 		rng = editor.selection.getRng(true);
@@ -718,7 +718,7 @@ if (!tinymce.isIE) {
 		var rng;
 
 		editor.getBody().innerHTML = '<p>a</p><p><b>b</b></p>';
-		setSelection('b', 0);
+		Utils.setSelection('b', 0);
 		editor.selection.normalize();
 
 		rng = editor.selection.getRng(true);
@@ -811,7 +811,7 @@ test('selectorChanged', function() {
 	});
 
 	editor.getBody().innerHTML = '<p><a href="#">text</a></p>';
-	setSelection('a', 0, 'a', 4);
+	Utils.setSelection('a', 0, 'a', 4);
 	editor.nodeChanged();
 
 	ok(newState);
@@ -820,7 +820,7 @@ test('selectorChanged', function() {
 	equal(newArgs.parents.length, 2);
 
 	editor.getBody().innerHTML = '<p>text</p>';
-	setSelection('p', 0, 'p', 4);
+	Utils.setSelection('p', 0, 'p', 4);
 	editor.nodeChanged();
 	equal(newArgs.selector, 'a[@href]');
 	equal(newArgs.node, editor.getBody().firstChild);

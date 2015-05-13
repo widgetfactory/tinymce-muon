@@ -18,9 +18,12 @@ module("tinymce.EditorCommands", {
 	autostart: false
 });
 
+setSelection = Utils.setSelection;
+normalizeRng = Utils.normalizeRng;
+
 function getContent() {
 	return editor.getContent({format:'raw'}).toLowerCase().replace(/[\r\n]+/g, '');
-};
+}
 
 test('mceInsertContent - p inside text of p', function() {
 	var rng;
@@ -265,10 +268,10 @@ test('mceInsertContent - mixed inline content inside td', function() {
 });
 
 test('mceInsertContent - invalid insertion with spans on page', function(){
-	var startingContent = '<p>123 testing <span>span later in document</span></p>',
+	var startingContent = '<p>123 testing <em>span later in document</em></p>',
 		insertedContent = '<ul><li>u</li><li>l</li></ul>';
 	editor.setContent(startingContent);
-	rng = editor.dom.createRng();
+	var rng = editor.dom.createRng();
 	rng.setStart(editor.dom.select('p')[0].firstChild, 0);
 	rng.setEnd(editor.dom.select('p')[0].firstChild, 0);
 	editor.selection.setRng(rng);
@@ -303,6 +306,23 @@ test('Justify - multiple block elements selected - queryCommandState', function(
 	setSelection('#a', 0, '#b', 3);
 	equal(editor.queryCommandState('JustifyLeft'), false);
 	ok(editor.queryCommandState('JustifyRight'));
+});
+
+test('InsertLineBreak', function() {
+	editor.setContent('<p>123</p>');
+	Utils.setSelection('p', 2);
+	editor.execCommand('InsertLineBreak');
+	equal(editor.getContent(), '<p>12<br />3</p>');
+
+	editor.setContent('<p>123</p>');
+	Utils.setSelection('p', 0);
+	editor.execCommand('InsertLineBreak');
+	equal(editor.getContent(), '<p><br />123</p>');
+
+	editor.setContent('<p>123</p>');
+	Utils.setSelection('p', 3);
+	editor.execCommand('InsertLineBreak');
+	equal(Utils.cleanHtml(editor.getBody().innerHTML), (tinymce.isIE && !tinymce.isIE11) ? '<p>123<br></p>': '<p>123<br><br></p>');
 });
 
 tinyMCE.init({

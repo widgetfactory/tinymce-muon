@@ -1,5 +1,7 @@
 (function() {
 	var DOM = new tinymce.dom.DOMUtils(document, {keep_values : true, schema : new tinymce.html.Schema()});
+	
+	var cleanHtml = Utils.cleanHtml;
 
 	test('parseStyle', 11, function() {
 		var dom;
@@ -575,7 +577,7 @@
 		parent = DOM.select('li:nth-child(1)', DOM.get('test'))[0];
 		point = DOM.select('ul li:nth-child(2)', DOM.get('test'))[0];
 		DOM.split(parent, point);
-		equal(cleanHtml(DOM.get('test').innerHTML), '<ul><li>first line<br><ul><li><span>second</span> <span>line</span></li></ul></li><li>third line<br></li></ul>');
+		equal(Utils.cleanHtml(DOM.get('test').innerHTML), '<ul><li>first line<br><ul><li><span>second</span> <span>line</span></li></ul></li><li>third line<br></li></ul>');
 
 		DOM.remove('test');
 	});

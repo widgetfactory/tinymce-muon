@@ -3,12 +3,12 @@
 <head>
 <title>Unit tests for noneditable</title>
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css" type="text/css" />
+<link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.14.0.css" Utils.type="text/css" />
 <script src="http://code.jquery.com/qunit/qunit-1.14.0.js"></script>
 <script src="qunit/connector.js"></script>
-<script type="text/javascript" src="qunit/runner.js"></script>
-<script type="text/javascript" src="js/utils.js"></script>
-<script type="text/javascript" src="js/tiny_mce_loader.js"></script>
+<script Utils.type="text/javascript" src="qunit/runner.js"></script>
+<script Utils.type="text/javascript" src="js/utils.js"></script>
+<script Utils.type="text/javascript" src="js/tiny_mce_loader.js"></script>
 <script>
 var editor, rng;
 
@@ -83,7 +83,7 @@ test('expand to noneditable (start)', function() {
 
 	triggerCaret();
 
-	rng = normalizeRng(editor.selection.getRng(true));
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 	
 	normalizeRng2(rng);
 
@@ -102,7 +102,7 @@ test('expand to noneditable (end)', function() {
 	editor.selection.setRng(rng);
 
 	triggerCaret();
-	rng = normalizeRng(editor.selection.getRng(true));
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 	normalizeRng2(rng);
 
 	equal(rng.endContainer.parentNode.nodeName, 'SPAN', 'The selection starts from the SPAN');
@@ -120,7 +120,7 @@ test('expand to noneditable (start/end)', function() {
 	editor.selection.setRng(rng);
 
 	triggerCaret();
-	rng = normalizeRng(editor.selection.getRng(true));
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	var end = fixOffsetUp(rng.endContainer, rng.endOffset);
 
@@ -131,7 +131,7 @@ test('expand to noneditable (start/end)', function() {
 	equal(end.offset, 2);
 });
 
-test('type after non editable', function() {
+test('Utils.type after non editable', function() {
 	editor.setContent('<p><span class="mceNonEditable">no</span>yes</p>');
 
 	rng = editor.dom.createRng();
@@ -140,8 +140,8 @@ test('type after non editable', function() {
 	editor.selection.setRng(rng);
 
 	triggerCaret();
-	type('X');
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type('X');
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.getAttribute('data-mce-bogus'), 'true');
 	equal(rng.startContainer.nodeName, 'SPAN');
@@ -151,7 +151,7 @@ test('type after non editable', function() {
 	equal(editor.getContent(), '<p><span class="mceNonEditable">no</span>Xyes</p>');
 });
 
-test('type between non editable', function() {
+test('Utils.type between non editable', function() {
 	editor.setContent('<p><span class="mceNonEditable">no</span><span class="mceNonEditable">no</span></p>');
 
 	rng = editor.dom.createRng();
@@ -160,8 +160,8 @@ test('type between non editable', function() {
 	editor.selection.setRng(rng);
 
 	triggerCaret();
-	type('X');
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type('X');
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.getAttribute('data-mce-bogus'), 'true');
 	equal(rng.startContainer.nodeName, 'SPAN');
@@ -171,7 +171,7 @@ test('type between non editable', function() {
 	equal(editor.getContent(), '<p><span class="mceNonEditable">no</span>X<span class="mceNonEditable">no</span></p>');
 });
 
-test('type after last non editable', function() {
+test('Utils.type after last non editable', function() {
 	editor.setContent('<p><span class="mceNonEditable">no</span></p>');
 
 	rng = editor.dom.createRng();
@@ -180,8 +180,8 @@ test('type after last non editable', function() {
 	editor.selection.setRng(rng);
 
 	triggerCaret();
-	type('X');
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type('X');
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.getAttribute('data-mce-bogus'), 'true');
 	equal(rng.startContainer.nodeName, 'SPAN');
@@ -198,13 +198,13 @@ test('escape noneditable inline element (left)', function() {
 	rng.selectNode(editor.dom.select('span')[0]);
 	editor.selection.setRng(rng);
 
-	type({keyCode: 37});
+	Utils.type({keyCode: 37});
 	// Remove carets
 	var caret = editor.dom.select('span#mce_noneditablecaret')[0];
 	if (caret) {
 		caret.parentNode.removeChild(caret);	
 	}
-	rng = normalizeRng(editor.selection.getRng(true));
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 	startCnt = fixOffsetUp(rng.startContainer, rng.startOffset);
 
 	equal(startCnt.node.nodeName, 'P');
@@ -219,8 +219,8 @@ test('escape noneditable inline element (right)', function() {
 	rng.selectNode(editor.dom.select('span')[0]);
 	editor.selection.setRng(rng);
 
-	type({keyCode: 39});
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type({keyCode: 39});
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.nodeName, 'SPAN');
 	equal(rng.startContainer.parentNode.nodeName, 'P');
@@ -234,8 +234,8 @@ test('escape noneditable block element (left)', function(){
 	rng.selectNode(editor.dom.select('p')[1]);
 	editor.selection.setRng(rng);
 
-	type({keyCode: 37});
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type({keyCode: 37});
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.nodeName, "P");
 	equal(editor.dom.nodeIndex(rng.startContainer), 0);
@@ -250,8 +250,8 @@ test('escape noneditable block element (right)', function(){
 	rng.selectNode(editor.dom.select('p')[1]);
 	editor.selection.setRng(rng);
 
-	type({keyCode: 39});
-	rng = normalizeRng(editor.selection.getRng(true));
+	Utils.type({keyCode: 39});
+	rng = Utils.normalizeRng(editor.selection.getRng(true));
 
 	equal(rng.startContainer.nodeName, "P");
 	equal(editor.dom.nodeIndex(rng.startContainer), 2);
@@ -272,7 +272,7 @@ test('A non editable text token is selected without including the parent node, p
 	rng = editor.dom.createRng();
 	rng.selectNode(editor.dom.select('p')[0]);
 	editor.selection.setRng(rng);
-	type({keyCode: 8});
+	Utils.type({keyCode: 8});
 	equal(editor.getContent(), '');
 	// the editor content should still be the same as before.
 	
@@ -288,26 +288,26 @@ test('noneditable_prevent_delete is not set. Token is used as a whole block char
 	
 	editor.selection.setRng(rng);
 	triggerCaret();
-	type({keyCode: 8});
+	Utils.type({keyCode: 8});
 	equal(editor.getContent(), "<p>E</p><h1><span class=\"mceNonEditable\">G </span>A</h1>");
 	
 });
 
 
-test('type after non editable and then pressing backspace should only remove last typed char.', function() {
+test('Utils.type after non editable and then pressing backspace should only remove last typed char.', function() {
 	editor.setContent('<p><span class="mceNonEditable">no</span></p>');
 
 	editor.selection.setCursorLocation(editor.dom.select('span')[0].firstChild, 2);
 	// Move this into a function to say 'trigger the generation of the container nicely'
 	triggerCaret();
 	
-	type('yes'); 
+	Utils.type('yes'); 
 
 	// Set the cursor position after the typed letters
 	editor.selection.setCursorLocation(editor.dom.select('span')[1].firstChild, 4);
 
 	// Delete the last letter only	
-	type({keyCode: 8});
+	Utils.type({keyCode: 8});
 
 	equal(editor.getContent(), '<p><span class="mceNonEditable">no</span>ye</p>', 'Should have deleted only the last char "s"');
 	equal(editor.dom.select('#mce_noneditablecaret').length, 1, 'There should be only one noneditable caret in the editor');
@@ -323,7 +323,7 @@ tinyMCE.init({
 	apply_source_formatting : false,
 	theme_advanced_styles : 'test1=test1;test2=test2',
 	noneditable_regexp : [/\{[^\}]+\}/g],
-	valid_elements : '@[contenteditable|id|class|style|title|dir<ltr?rtl|lang|xml::lang|onclick|ondblclick|onmousedown|onmouseup|onmouseover|onmousemove|onmouseout|onkeypress|onkeydown|onkeyup],a[rel|rev|charset|hreflang|tabindex|accesskey|type|name|href|target|title|class|onfocus|onblur],strong,b,em,i,strike,u,#p,-ol[type|compact],-ul[type|compact],-li,br,img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],-sub,-sup,-blockquote[cite],-table[border|cellspacing|cellpadding|width|frame|rules|height|align|summary|bgcolor|background|bordercolor],-tr[rowspan|width|height|align|valign|bgcolor|background|bordercolor],tbody,thead,tfoot,#td[colspan|rowspan|width|height|align|valign|bgcolor|background|bordercolor|scope],#th[colspan|rowspan|width|height|align|valign|scope],caption,-div,-span,-code,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr[size|noshade],-font[face|size|color],dd,dl,dt,cite,abbr,acronym,del[datetime|cite],ins[datetime|cite],object[classid|width|height|codebase|*],param[name|value],embed[type|width|height|src|*],script[src|type],map[name],area[shape|coords|href|alt|target],bdo,button,col[align|char|charoff|span|valign|width],colgroup[align|char|charoff|span|valign|width],dfn,fieldset,form[action|accept|accept-charset|enctype|method],input[accept|alt|checked|disabled|maxlength|name|readonly|size|src|type|value|tabindex|accesskey],kbd,label[for],legend,noscript,optgroup[label|disabled],option[disabled|label|selected|value],q[cite],samp,select[disabled|multiple|name|size],small,textarea[cols|rows|disabled|name|readonly],tt,var,big',
+	valid_elements : '@[contenteditable|id|class|style|title|dir<ltr?rtl|lang|xml::lang|onclick|ondblclick|onmousedown|onmouseup|onmouseover|onmousemove|onmouseout|onkeypress|onkeydown|onkeyup],a[rel|rev|charset|hreflang|tabindex|accesskey|Utils.type|name|href|target|title|class|onfocus|onblur],strong,b,em,i,strike,u,#p,-ol[Utils.type|compact],-ul[Utils.type|compact],-li,br,img[longdesc|usemap|src|border|alt=|title|hspace|vspace|width|height|align],-sub,-sup,-blockquote[cite],-table[border|cellspacing|cellpadding|width|frame|rules|height|align|summary|bgcolor|background|bordercolor],-tr[rowspan|width|height|align|valign|bgcolor|background|bordercolor],tbody,thead,tfoot,#td[colspan|rowspan|width|height|align|valign|bgcolor|background|bordercolor|scope],#th[colspan|rowspan|width|height|align|valign|scope],caption,-div,-span,-code,-pre,address,-h1,-h2,-h3,-h4,-h5,-h6,hr[size|noshade],-font[face|size|color],dd,dl,dt,cite,abbr,acronym,del[datetime|cite],ins[datetime|cite],object[classid|width|height|codebase|*],param[name|value],embed[Utils.type|width|height|src|*],script[src|Utils.type],map[name],area[shape|coords|href|alt|target],bdo,button,col[align|char|charoff|span|valign|width],colgroup[align|char|charoff|span|valign|width],dfn,fieldset,form[action|accept|accept-charset|enctype|method],input[accept|alt|checked|disabled|maxlength|name|readonly|size|src|Utils.type|value|tabindex|accesskey],kbd,label[for],legend,noscript,optgroup[label|disabled],option[disabled|label|selected|value],q[cite],samp,select[disabled|multiple|name|size],small,textarea[cols|rows|disabled|name|readonly],tt,var,big',
 	plugins: 'noneditable',
 	forced_root_block : '',
 	convert_fonts_to_spans : false,
