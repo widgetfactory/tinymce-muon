@@ -1646,31 +1646,29 @@
 					content = '<br data-mce-bogus="1">';
 				}
 
-				body.innerHTML = content;
-				self.selection.select(body, true);
-				self.selection.collapse(true);
-				return;
-			}
-
-			// Parse and serialize the html
-			if (args.format !== 'raw') {
-				content = new tinymce.html.Serializer({}, self.schema).serialize(
-					self.parser.parse(content)
-				);
-			}
-
-			// Set the new cleaned contents to the editor
-			args.content = tinymce.trim(content);
-			self.dom.setHTML(body, args.content);
-
-			// Do post processing
-			if (!args.no_events) {
+				self.dom.setHTML(body, content);
 				self.onSetContent.dispatch(self, args);
-			}
+			} else {
+				// Parse and serialize the html
+				if (args.format !== 'raw') {
+					content = new tinymce.html.Serializer({}, self.schema).serialize(
+						self.parser.parse(content)
+					);
+				}
 
-			// Don't normalize selection if the focused element isn't the body in content editable mode since it will steal focus otherwise
-			if (!self.settings.content_editable || document.activeElement === self.getBody()) {
-				self.selection.normalize();
+				// Set the new cleaned contents to the editor
+				args.content = tinymce.trim(content);
+				self.dom.setHTML(body, args.content);
+
+				// Do post processing
+				if (!args.no_events) {
+					self.onSetContent.dispatch(self, args);
+				}
+
+				// Don't normalize selection if the focused element isn't the body in content editable mode since it will steal focus otherwise
+				/*if (!self.settings.content_editable || document.activeElement === self.getBody()) {
+					self.selection.normalize();
+				}*/
 			}
 
 			return args.content;
@@ -1849,9 +1847,10 @@
 			var self = this, settings = self.settings;
 
 			// Use callback instead
-			if (settings.urlconverter_callback)
+			if (settings.urlconverter_callback) {
 				return self.execCallback('urlconverter_callback', url, elm, true, name);
-
+			}
+			
 			// Don't convert link href since thats the CSS files that gets loaded into the editor also skip local file URLs
 			if (!settings.convert_urls || (elm && elm.nodeName == 'LINK') || url.indexOf('file:') === 0) {
 				return url;
