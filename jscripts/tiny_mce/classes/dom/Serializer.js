@@ -25,7 +25,7 @@
 	 * @param {tinymce.html.Schema} schema Optional schema reference.
 	 */
 	tinymce.dom.Serializer = function(settings, dom, schema) {
-		var onPreProcess, onPostProcess, isIE = tinymce.isIE, each = tinymce.each, htmlParser;
+		var self = this, onPreProcess, onPostProcess, isIE = tinymce.isIE, each = tinymce.each, htmlParser;
 
 		// Support the old apply_source_formatting option
 		if (!settings.apply_source_formatting)
