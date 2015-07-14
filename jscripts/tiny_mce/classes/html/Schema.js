@@ -121,7 +121,7 @@
 
         // Phrasing content elements from the HTML5 spec (inline)
         phrasingContent = split(
-                "abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
+                "a abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
                 "label map noscript object q s samp script select small span strong sub sup " +
                 "textarea u var #text #comment"
                 );
@@ -130,7 +130,7 @@
         if (type != "html4") {
             globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
                     "hidden spellcheck translate"));
-            blockContent.push.apply(blockContent, split("a article aside details dialog figure header footer hgroup section nav"));
+            blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
             phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output progress time wbr " +
                     "video ruby bdi keygen"));
         }
@@ -156,10 +156,6 @@
                 add(name, "", flowContent);
             });
         }
-        
-        if (type == "html4") {
-        	phrasingContent.push.apply(phrasingContent, split("a"));
-        }
 
         // Flow content elements from the HTML5 spec (block+inline)
         flowContent = flowContent || [].concat(blockContent, phrasingContent);
@@ -184,7 +180,7 @@
         add("ul", "", "li");
         add("li", "value", flowContent);
         add("dl", "", "dt dd");
-        add("a", "href target rel media hreflang type", type == "html4" ? phrasingContent : flowContent);
+        add("a", "href target rel media hreflang type", phrasingContent);
         add("q", "cite", phrasingContent);
         add("ins del", "cite datetime", flowContent);
         add("img", "src sizes srcset alt usemap ismap width height");
@@ -410,7 +406,7 @@
         nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script', shortEndedElementsMap);
         moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
         textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
-                'blockquote center dir fieldset header footer article section hgroup aside nav figure a');
+                'blockquote center dir fieldset header footer article section hgroup aside nav figure');
         blockElementsMap = createLookupTable('block_elements', 'hr table tbody thead tfoot ' +
                 'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
                 'datalist select optgroup', textBlockElementsMap);
@@ -718,7 +714,7 @@
             });
 
             // Padd these by default
-            each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption a'), function (name) {
+            each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
                 elements[name].paddEmpty = true;
             });
 
