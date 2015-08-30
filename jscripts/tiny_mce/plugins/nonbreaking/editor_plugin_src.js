@@ -34,6 +34,8 @@
 					}
 				});
 			}
+
+			ed.addShortcut('ctrl+shift+space', 'nonbreaking.nonbreaking_desc', 'mceNonBreaking');
 		},
 
 		getInfo : function() {
