@@ -301,11 +301,35 @@ tinymce.util.Quirks = function(editor) {
 			// WebKit can't even do simple things like selecting an image
 			// Needs tobe the setBaseAndExtend or it will fail to select floated images
 			if (/^(IMG|HR)$/.test(e.nodeName)) {
-				selection.getSel().setBaseAndExtent(e, 0, e, 1);
+				if (tinymce.isWebKit) {
+					selection.getSel().setBaseAndExtent(e, 0, e, 1);
+				} else {
+					selection.select(e);
+				}
+			}
+
+			if (tinymce.isIE12 && e.nodeName == "TABLE") {
+				selection.select(e);
 			}
 
 			if (e.nodeName == 'A' && dom.hasClass(e, 'mceItemAnchor')) {
 				selection.select(e);
+			}
+
+			editor.nodeChanged();
+		});
+
+		dom.bind(editor.getBody(), 'mscontrolselect', function(e) {
+			if (/^(TABLE|IMG|HR)$/.test(e.target.nodeName)) {
+				e.preventDefault();
+
+				// This moves the selection from being a control selection to a text like selection like in WebKit #6753
+				// TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
+				if (e.target.tagName == 'IMG') {
+					window.setTimeout(function() {
+						selection.select(e.target);
+					}, 0);
+				}
 			}
 
 			editor.nodeChanged();
@@ -733,6 +757,27 @@ tinymce.util.Quirks = function(editor) {
 			editor.contentStyles.push(emptyBlocksCSS + '{padding-right: 1px !important}');
 		}
 	};
+	
+	/**
+	 * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
+     * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
+     * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
+     * but not as the lastChild of the body. However is we add a BR element to the body then remove it
+	 * it doesn't seem to add these BR elements makes sence right?!
+	 *
+	 * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
+	 */
+	function doubleTrailingBrElements() {
+		function fn() {
+			var br = editor.dom.create('br');
+			editor.getBody().appendChild(br);
+			br.parentNode.removeChild(br);
+		}
+			
+		editor.onFocus.add(fn);
+		editor.onBlur.add(fn);
+		editor.onBeforeGetContent.add(fn);
+	}
 
 	/**
 	 * Fakes image/table resizing on WebKit/Opera.
@@ -1052,6 +1097,17 @@ tinymce.util.Quirks = function(editor) {
 						selection.fakeRng.setEndAfter(e.target);
 					}
 				}, 0);
+
+                e.preventDefault();
+                // This moves the selection from being a control selection to a text like selection like in WebKit #6753
+                // TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
+                if (e.target.tagName == 'IMG') {
+                    window.setTimeout(function() {
+                        editor.selection.select(e.target);
+                    }, 0);
+                }
+
+
 			}, false);
 
 			editor.getDoc().addEventListener('selectionchange', function(e) {
@@ -1098,8 +1154,15 @@ tinymce.util.Quirks = function(editor) {
 	// IE 11+
 	if (tinymce.isIE11) {
 		bodyHeight();
-		fixControlSelection();
+		doubleTrailingBrElements();
+        fixControlSelection();
 	}
+
+    // IE 12 / Edge
+    if (tinymce.isIE12) {
+        selectControlElements();
+        fakeImageResize();
+    }
 
 	// Gecko
 	if (tinymce.isGecko && !tinymce.isIE11) {
