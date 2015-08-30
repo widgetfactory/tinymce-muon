@@ -167,6 +167,13 @@
 			 * @final
 			 */
 			t.isIOS5 = t.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1]>=534;
+			
+			// Handle IE 12 sniffing
+			t.isIE12 = (ua.indexOf('Edge/') != -1 && !t.isIE && !t.isIE11) ? 12 : false;
+			
+			if (t.isIE12) {
+				t.isWebKit = false;
+			}
 
 			// TinyMCE .NET webcontrol might be setting the values for TinyMCE
 			if (win.tinyMCEPreInit) {
