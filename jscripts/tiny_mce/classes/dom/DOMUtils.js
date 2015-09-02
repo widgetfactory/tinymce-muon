@@ -121,7 +121,7 @@
 		fixDoc: function(doc) {
 			var settings = this.settings, name;
 
-			if (isIE && !tinymce.isIE11 && settings.schema) {
+			if (isIE && !tinymce.isIE11 && !tinymce.isIE12 && settings.schema) {
 				// Add missing HTML 4/5 elements to IE
 				('abbr article aside audio canvas ' +
 				'details figcaption figure footer ' +
@@ -581,7 +581,7 @@
 				switch (na) {
 					case 'opacity':
 						// IE specific opacity
-						if (isIE && ! tinymce.isIE11) {
+						if (isIE && ! tinymce.isIE11 && ! tinymce.isIE12) {
 							s.filter = v === '' ? '' : "alpha(opacity=" + (v * 100) + ")";
 
 							if (!n.currentStyle || !n.currentStyle.hasLayout)
@@ -593,7 +593,7 @@
 						break;
 
 					case 'float':
-						(isIE && ! tinymce.isIE11) ? s.styleFloat = v : s.cssFloat = v;
+						(isIE && ! tinymce.isIE11 && ! tinymce.isIE12) ? s.styleFloat = v : s.cssFloat = v;
 						break;
 					
 					default:
