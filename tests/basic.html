@@ -124,17 +124,17 @@ test('commands - alignInline', function() {
 	editor.setContent('<img src="../media/logo.jpg" />');
 	editor.selection.select(editor.dom.select('img')[0]);
 	editor.execCommand('JustifyLeft');
-	equal(editor.getContent(), '<p><img style="float: left;" src="../media/logo.jpg" alt="" /></p>');
+	equal(editor.getContent(), '<p><img src="../media/logo.jpg" alt="" style="float: left;" /></p>');
 
 	editor.setContent('<img src="../media/logo.jpg" />');
 	editor.selection.select(editor.dom.select('img')[0]);
 	editor.execCommand('JustifyCenter');
-	equal(editor.getContent(), '<p><img style="margin-right: auto; margin-left: auto; display: block;" src="../media/logo.jpg" alt="" /></p>');
+	equal(editor.getContent(), '<p><img src="../media/logo.jpg" alt="" style="margin-right: auto; margin-left: auto; display: block;" /></p>');
 
 	editor.setContent('<img src="../media/logo.jpg" />');
 	editor.selection.select(editor.dom.select('img')[0]);
 	editor.execCommand('JustifyRight');
-	equal(editor.getContent(), '<p><img style="float: right;" src="../media/logo.jpg" alt="" /></p>');
+	equal(editor.getContent(), '<p><img src="../media/logo.jpg" alt="" style="float: right;" /></p>');
 });
 
 test('commands - blockquote', function() {
@@ -231,7 +231,7 @@ test('commands - link encoded and with class', function() {
 	editor.setContent('<p>test 123</p>');
 	editor.execCommand('SelectAll');
 	editor.execCommand('mceInsertLink', false, {href : '"&<>', 'class' : 'test'});
-	equal(editor.getContent(), '<p><a class="test" href="&quot;&amp;&lt;&gt;">test 123</a></p>');
+	equal(editor.getContent(), '<p><a href="&quot;&amp;&lt;&gt;" class="test">test 123</a></p>');
 });
 
 test('commands - link with space', function() {
@@ -249,7 +249,7 @@ test('commands - link floated img', function() {
 	editor.setContent('<p><img style="float: right;" src="about:blank" /></p>');
 	editor.execCommand('SelectAll');
 	editor.execCommand('mceInsertLink', false, 'link');
-	equal(editor.getContent(), '<p><a href="link"><img style="float: right;" src="about:blank" alt="" /></a></p>');
+	equal(editor.getContent(), '<p><a href="link"><img src="about:blank" alt="" style="float: right;" /></a></p>');
 });
 
 test('commands - link adjacent text', function() {

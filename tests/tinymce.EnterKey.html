@@ -451,13 +451,13 @@ test('Shift+Enter in the middle of B with a BR after it', function() {
 	editor.getBody().innerHTML = '<p><b>abcd</b><br></p>';
 	Utils.setSelection('b', 2);
 	pressEnter({shiftKey: true});
-	equal(editor.getContent(), '<p><b>ab<br />cd</b></p>');
+	equal(editor.getContent(), '<p><strong>ab<br />cd</strong></p>');
 });
 test('Shift+Enter at the end of B with a BR after it', function() {
 	editor.getBody().innerHTML = '<p><b>abcd</b><br></p>';
 	Utils.setSelection('b', 4);
 	pressEnter({shiftKey: true});
-	equal(editor.getContent(), '<p><b>abcd<br /></b></p>');
+	equal(editor.getContent(), '<p><strong>abcd<br /></strong></p>');
 });
 test('Enter in beginning of PRE', function() {
 	editor.getBody().innerHTML = '<pre>abc</pre>';
