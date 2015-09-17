@@ -146,7 +146,8 @@
 			function createNewBlock(name) {
 				var node = container, block, clonedNode, caretNode;
 
-				block = name || parentBlockName == "TABLE" ? dom.create(name || newBlockName) : parentBlock.cloneNode(false);
+                block = dom.create(name || newBlockName || parentBlock.nodeName);
+				//block = name || parentBlockName == "TABLE" ? dom.create(name || newBlockName) : parentBlock.cloneNode(false);
 				caretNode = block;
 
 				// Clone any parent styles
