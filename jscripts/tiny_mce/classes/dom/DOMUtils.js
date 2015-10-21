@@ -512,6 +512,30 @@
 		},
 
 		/**
+		 * Creates a document fragment out of the specified HTML string.
+		 *
+		 * @method createFragment
+		 * @param {String} html Html string to create fragment from.
+		 * @return {DocumentFragment} Document fragment node.
+		 */
+		createFragment: function(html) {
+			var frag, node, doc = this.doc, container;
+
+			container = doc.createElement("div");
+			frag = doc.createDocumentFragment();
+
+			if (html) {
+				container.innerHTML = html;
+			}
+
+			while ((node = container.firstChild)) {
+				frag.appendChild(node);
+			}
+
+			return frag;
+		},
+
+		/**
 		 * Removes/deletes the specified element(s) from the DOM.
 		 *
 		 * @method remove
@@ -543,6 +567,27 @@
 				}
 
 				return parent.removeChild(node);
+			});
+		},
+
+		/**
+		 * Empties all elements in set.
+		 *
+		 * @method empty
+		 * @return {tinymce.dom.DomQuery} Current set with the empty nodes.
+		 */
+		empty: function(node) {
+			return this.run(node, function(node) {
+				var n, i = node.length;
+
+				while (i--) {
+					n = node[i];
+					while (n.firstChild) {
+						n.removeChild(n.firstChild);
+					}
+				}
+
+				return true;
 			});
 		},
 
