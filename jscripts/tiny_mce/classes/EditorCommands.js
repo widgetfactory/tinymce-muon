@@ -197,7 +197,7 @@
 			},
 
 			// Override list commands to fix WebKit bug
-			'InsertUnorderedList,InsertOrderedList' : function(command) {
+			'InsertUnorderedList,InsertOrderedList': function(command) {
 				var listElm, listParent;
 
 				execNativeCommand(command);
@@ -545,7 +545,7 @@
 				editor.setContent(value);
 			},
 
-			'Indent,Outdent' : function(command) {
+			'Indent,Outdent': function(command) {
 				var intentValue, indentUnit, value;
 
 				// Setup indent level
@@ -775,7 +775,7 @@
 		// Add queryCommandState overrides
 		addCommands({
 			// Override justify commands
-			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull' : function(command) {
+			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function(command) {
 				var name = 'align' + command.substring(7);
 				var nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
 				var matches = tinymce.map(nodes, function(node) {
@@ -784,15 +784,15 @@
 				return tinymce.inArray(matches, TRUE) !== -1;
 			},
 
-			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript' : function(command) {
+			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript': function(command) {
 				return isFormatMatch(command);
 			},
 
-			mceBlockQuote : function() {
+			mceBlockQuote: function() {
 				return isFormatMatch('blockquote');
 			},
 
-			Outdent : function() {
+			Outdent: function() {
 				var node;
 
 				if (settings.inline_styles) {
@@ -805,14 +805,21 @@
 					}
 				}
 
-				return queryCommandState('InsertUnorderedList') || queryCommandState('InsertOrderedList') || (!settings.inline_styles && !!dom.getParent(selection.getNode(), 'BLOCKQUOTE'));
+				return (
+					queryCommandState('InsertUnorderedList') ||
+					queryCommandState('InsertOrderedList') ||
+					(!settings.inline_styles && !!dom.getParent(selection.getNode(), 'BLOCKQUOTE'))
+				);
 			},
 
-			'InsertUnorderedList,InsertOrderedList' : function(command) {
-				var list = dom.getParent(selection.getNode(), 'ul,ol');
-				return list && 
-				     (command === 'insertunorderedlist' && list.tagName === 'UL'
-				   || command === 'insertorderedlist' && list.tagName === 'OL');
+			'InsertUnorderedList,InsertOrderedList': function(command) {
+				var list = dom.getParent(selection.getNode(), 'ul,ol,dl');
+
+				return list &&
+					(
+						command === 'insertunorderedlist' && list.tagName === 'UL' ||
+						command === 'insertorderedlist' && list.tagName === 'OL'
+					);
 			}
 		}, 'state');
 
