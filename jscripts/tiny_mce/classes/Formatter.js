@@ -158,7 +158,7 @@
 			});
 
 			// Register default block formats
-			each('p h1 h2 h3 h4 h5 h6 div address pre div code dt dd samp'.split(/\s/), function(name) {
+			each('p h1 h2 h3 h4 h5 h6 div address pre div code samp dt dd dl'.split(/\s/), function(name) {
 				register(name, {block : name, remove : 'all'});
 			});
 
@@ -1523,7 +1523,7 @@
 
 				// Exclude inner lists from wrapping
 				if (node && format[0].wrapper) {
-					node = getParents(node, 'ul,ol').reverse()[0] || node;
+					node = getParents(node, 'ul,ol,dl').reverse()[0] || node;
 				}
 
 				// Didn't find a block element look for first/last wrappable element
