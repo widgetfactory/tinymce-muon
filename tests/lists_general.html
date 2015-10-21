@@ -422,11 +422,11 @@ test('Apply UL list to multiple formatted lines separated by BR', function() {
 	);
 
 	equal(editor.selection.getStart().nodeName, 'STRONG');
-	equal(editor.selection.getEnd().nodeName, tinymce.isIE8 ? 'LI' : 'EM'); // Old IE will return the end LI not a big deal
+	equal(editor.selection.getEnd().nodeName, tinymce.isIE && tinymce.isIE8 ? 'LI' : 'EM'); // Old IE will return the end LI not a big deal
 });
 
 // Ignore on IE 7, 8 this is a known bug not worth fixing
-if (!tinymce.isIE) {
+if (!tinymce.isIE || (tinymce.isIE && !tinymce.isIE8)) {
 	test('Apply UL list to br line and text block line', function() {
 		editor.settings.forced_root_block = false;
 
@@ -867,7 +867,7 @@ test('Remove indented list with multiple items', function() {
 			'<li>a</li>' +
 		'</ul>' +
 		'<p>b</p>' +
-	 	'<p>c</p>' +
+		'<p>c</p>' +
 		'<ul>' +
 			'<li>d</li>' +
 		'</ul>'
@@ -877,7 +877,7 @@ test('Remove indented list with multiple items', function() {
 });
 
 // Ignore on IE 7, 8 this is a known bug not worth fixing
-if (!tinymce.isIE) {
+if (!tinymce.isIE || (tinymce.isIE && !tinymce.isIE8)) {
 	test('Remove empty UL between two textblocks in BR mode', function() {
 		editor.settings.forced_root_block = false;
 
@@ -1714,6 +1714,29 @@ test('Backspace at beginning of LI with BR padded empty LI above in UL', functio
 	equal(editor.selection.getNode().innerHTML, 'b');
 });
 
+test('Backspace at empty LI (IE)', function() {
+	editor.getBody().innerHTML = (
+		'<ul>' +
+			'<li>a</li>' +
+			'<li></li>' +
+			'<li>b</li>' +
+		'</ul>'
+	);
+
+	editor.focus();
+	Utils.setSelection('li:nth-child(2)', 0);
+	editor.plugins.lists.backspaceDelete();
+
+	equal(editor.getContent(),
+		'<ul>' +
+			'<li>a</li>' +
+			'<li>b</li>' +
+		'</ul>'
+	);
+
+	equal(editor.selection.getNode().innerHTML, 'a');
+});
+
 test('Backspace at beginning of LI with empty LI with STRING and BR above in UL', function() {
 	editor.getBody().innerHTML = (
 		'<ul>' +
@@ -2047,8 +2070,9 @@ test('Outdent single DD in DL', function() {
 	equal(editor.selection.getNode().nodeName, 'DT');
 });
 
+	
 
-	tinyMCE.init({
+	tinyMCE.init({		
 		mode : "exact",
 		elements : "elm1",
 		theme : "advanced",
@@ -2058,6 +2082,12 @@ test('Outdent single DD in DL', function() {
 		plugins : 'lists',
 		add_unload_trigger : false,
 		apply_source_formatting : 0,
+		schema: 'html5',
+		entities: 'raw',
+		valid_elements: 'li,ol,ul,dl,dt,dd,em,strong,span,#p,div,br',
+		valid_styles: {
+			'*': 'color,font-size,font-family,background-color,font-weight,font-style,text-decoration,float,margin,margin-top,margin-right,margin-bottom,margin-left,display,position,top,left'
+		},
 		init_instance_callback : function(ed) {
 			editor = ed;
 
