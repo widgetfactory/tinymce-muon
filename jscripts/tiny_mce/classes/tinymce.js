@@ -124,6 +124,15 @@
 			t.isIE9 = t.isIE && /MSIE [9]/.test(ua);
 
 			/**
+			 * Constant that is true if the browser is IE 10.
+			 *
+			 * @property isIE9
+			 * @type Boolean
+			 * @final
+			 */
+			t.isIE10 = t.isIE && /MSIE [10]/.test(ua);
+
+			/**
 			 * Constant that is true if the browser is Gecko.
 			 *
 			 * @property isGecko
