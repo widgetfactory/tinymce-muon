@@ -22,7 +22,7 @@
 			START_CONTAINER = 'startContainer',
 			END_CONTAINER = 'endContainer',
 			END_OFFSET = 'endOffset',
-			extend = Tools.extend,
+			extend = tinymce.extend,
 			nodeIndex = dom.nodeIndex;
 
 		function createDocumentFragment() {
