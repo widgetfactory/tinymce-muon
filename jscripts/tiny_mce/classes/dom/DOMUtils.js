@@ -646,8 +646,9 @@
 				}
 
 				// Force update of the style data
-				if (t.settings.update_styles)
-					t.setAttrib(e, 'data-mce-style');
+				if (t.settings.update_styles) {
+					t.setAttrib(e, 'data-mce-style', e.style.cssText);
+				}
 			});
 		},
 
@@ -718,11 +719,6 @@
 			each(o, function(v, n) {
 				t.setStyle(e, n, v);
 			});
-
-			// Update style info
-			s.update_styles = ol;
-			if (s.update_styles)
-				t.setAttrib(e, s.cssText);
 		},
 
 		/**
