@@ -140,7 +140,7 @@ tinymce.util.Quirks = function(editor) {
 
 		editor.addCommand('Delete', function() {removeMergedFormatSpans();});
 	};
-	
+
 	/**
 	 * Makes sure that the editor body becomes empty when backspace or delete is pressed in empty editors.
 	 *
@@ -1053,11 +1053,12 @@ tinymce.util.Quirks = function(editor) {
 					}
 				}, 0);
 
-                e.preventDefault();
-                // This moves the selection from being a control selection to a text like selection like in WebKit #6753
+          //e.preventDefault();
+        	// This moves the selection from being a control selection to a text like selection like in WebKit #6753
                 // TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
                 if (e.target.tagName == 'IMG') {
-                    window.setTimeout(function() {
+										e.preventDefault();
+										window.setTimeout(function() {
                         editor.selection.select(e.target);
                     }, 0);
                 }
@@ -1145,7 +1146,7 @@ tinymce.util.Quirks = function(editor) {
 	if (tinymce.isIE11) {
 		bodyHeight();
 		//doubleTrailingBrElements();
-        fixControlSelection();
+    fixControlSelection();
 		//fakeImageResize();
 	}
 
