@@ -56,6 +56,14 @@
 
 			return !!ed.schema.getTextBlockElements()[name.toLowerCase()];
 		}
+		
+		function isTableCell(node) {
+			return /^(TH|TD)$/.test(node.nodeName);
+		}
+
+		function isInlineBlock(node) {
+			return node && /^(IMG)$/.test(node.nodeName);
+		}
 
 		function getParents(node, selector) {
 			return dom.getParents(node, selector, dom.getRoot());
@@ -244,6 +252,34 @@
 					formats[name] = format;
 				}
 			}
+		}
+		
+		/**
+		 * Unregister a specific format by name.
+		 *
+		 * @method unregister
+		 * @param {String} name Name of the format for example "bold".
+		 */
+		function unregister(name) {
+			if (name && formats[name]) {
+				delete formats[name];
+			}
+
+			return formats;
+		}
+		
+		function matchesUnInheritedFormatSelector(node, name) {
+			var formatList = get(name);
+
+			if (formatList) {
+				for (var i = 0; i < formatList.length; i++) {
+					if (formatList[i].inherit === false && dom.is(node, formatList[i].selector)) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 
 		var getTextDecoration = function(node) {
@@ -445,6 +481,7 @@
 								if (dom.is(node, format.selector) && !isCaretNode(node)) {
 									setElementFormat(node, format);
 									found = true;
+									return false;
 								}
 							});
 
@@ -816,6 +853,14 @@
 							endContainer = endContainer.firstChild || endContainer;
 						}
 
+						if (dom.isChildOf(startContainer, endContainer) && !isBlock(endContainer) &&
+							!isTableCell(startContainer) && !isTableCell(endContainer)) {
+							startContainer = wrap(startContainer, 'span', {id: '_start', 'data-mce-type': 'bookmark'});
+							splitToFormatRoot(startContainer);
+							startContainer = unwrap(TRUE);
+							return;
+						}
+
 						// Wrap start/end nodes in span element since these might be cloned/moved
 						startContainer = wrap(startContainer, 'span', {id : '_start', 'data-mce-type' : 'bookmark'});
 						endContainer = wrap(endContainer, 'span', {id : '_end', 'data-mce-type' : 'bookmark'});
@@ -1005,6 +1050,10 @@
 
 				// Find first node with similar format settings
 				node = dom.getParent(node, function(node) {
+					if (matchesUnInheritedFormatSelector(node, name)) {
+						return true;
+					}
+
 					return node.parentNode === root || !!matchNode(node, name, vars, true);
 				});
 
@@ -1135,6 +1184,10 @@
 								}
 
 								matchedFormats[format] = callbacks;
+								return false;
+							}
+
+							if (matchesUnInheritedFormatSelector(node, format)) {
 								return false;
 							}
 						});
@@ -2380,6 +2433,12 @@
 			var container = rng.startContainer,
 					offset = rng.startOffset, isAtEndOfText,
 					walker, node, nodes, tmpNode;
+
+			if (rng.startContainer == rng.endContainer) {
+				if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
+					return;
+				}
+			}
 
 			// Convert text node into index if possible
 			if (container.nodeType == 3 && offset >= container.nodeValue.length) {
