@@ -8,57 +8,99 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-tinymce.dom.TreeWalker = function(start_node, root_node) {
-	var node = start_node;
+tinymce.dom.TreeWalker = function(startNode, rootNode) {
+	var node = startNode;
 
-	function findSibling(node, start_name, sibling_name, shallow) {
-		var sibling, parent;
+	function findSibling(node, startName, siblingName, shallow) {
+			var sibling, parent;
 
-		if (node) {
-			// Walk into nodes if it has a start
-			if (!shallow && node[start_name])
-				return node[start_name];
+			if (node) {
+				// Walk into nodes if it has a start
+				if (!shallow && node[startName]) {
+					return node[startName];
+				}
 
-			// Return the sibling if it has one
-			if (node != root_node) {
-				sibling = node[sibling_name];
-				if (sibling)
-					return sibling;
-
-				// Walk up the parents to look for siblings
-				for (parent = node.parentNode; parent && parent != root_node; parent = parent.parentNode) {
-					sibling = parent[sibling_name];
-					if (sibling)
+				// Return the sibling if it has one
+				if (node != rootNode) {
+					sibling = node[siblingName];
+					if (sibling) {
 						return sibling;
+					}
+
+					// Walk up the parents to look for siblings
+					for (parent = node.parentNode; parent && parent != rootNode; parent = parent.parentNode) {
+						sibling = parent[siblingName];
+						if (sibling) {
+							return sibling;
+						}
+					}
 				}
 			}
 		}
-	};
 
-	/**
-	 * Returns the current node.
-	 *
-	 * @return {Node} Current node where the walker is.
-	 */
-	this.current = function() {
-		return node;
-	};
+		function findPreviousNode(node, startName, siblingName, shallow) {
+			var sibling, parent, child;
 
-	/**
-	 * Walks to the next node in tree.
-	 *
-	 * @return {Node} Current node where the walker is after moving to the next node.
-	 */
-	this.next = function(shallow) {
-		return (node = findSibling(node, 'firstChild', 'nextSibling', shallow));
-	};
+			if (node) {
+				sibling = node[siblingName];
+				if (rootNode && sibling === rootNode) {
+					return;
+				}
 
-	/**
-	 * Walks to the previous node in tree.
-	 *
-	 * @return {Node} Current node where the walker is after moving to the previous node.
-	 */
-	this.prev = function(shallow) {
-		return (node = findSibling(node, 'lastChild', 'previousSibling', shallow));
-	};
+				if (sibling) {
+					if (!shallow) {
+						// Walk up the parents to look for siblings
+						for (child = sibling[startName]; child; child = child[startName]) {
+							if (!child[startName]) {
+								return child;
+							}
+						}
+					}
+
+					return sibling;
+				}
+
+				parent = node.parentNode;
+				if (parent && parent !== rootNode) {
+					return parent;
+				}
+			}
+		}
+
+		/**
+		 * Returns the current node.
+		 *
+		 * @method current
+		 * @return {Node} Current node where the walker is.
+		 */
+		this.current = function() {
+			return node;
+		};
+
+		/**
+		 * Walks to the next node in tree.
+		 *
+		 * @method next
+		 * @return {Node} Current node where the walker is after moving to the next node.
+		 */
+		this.next = function(shallow) {
+			node = findSibling(node, 'firstChild', 'nextSibling', shallow);
+			return node;
+		};
+
+		/**
+		 * Walks to the previous node in tree.
+		 *
+		 * @method prev
+		 * @return {Node} Current node where the walker is after moving to the previous node.
+		 */
+		this.prev = function(shallow) {
+			node = findSibling(node, 'lastChild', 'previousSibling', shallow);
+			return node;
+		};
+
+		this.prev2 = function(shallow) {
+			node = findPreviousNode(node, 'lastChild', 'previousSibling', shallow);
+			return node;
+		};
 };
