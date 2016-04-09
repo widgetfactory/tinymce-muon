@@ -56,7 +56,7 @@
 
 			return !!ed.schema.getTextBlockElements()[name.toLowerCase()];
 		}
-		
+
 		function isTableCell(node) {
 			return /^(TH|TD)$/.test(node.nodeName);
 		}
@@ -253,7 +253,7 @@
 				}
 			}
 		}
-		
+
 		/**
 		 * Unregister a specific format by name.
 		 *
@@ -267,7 +267,7 @@
 
 			return formats;
 		}
-		
+
 		function matchesUnInheritedFormatSelector(node, name) {
 			var formatList = get(name);
 
@@ -351,10 +351,15 @@
 					});
 				}
 			}
+			// This converts: <p>[a</p><p>]b</p> -> <p>[a]</p><p>b</p>
 			function adjustSelectionToVisibleSelection() {
 				function findSelectionEnd(start, end) {
 					var walker = new TreeWalker(end);
-					for (node = walker.current(); node; node = walker.prev()) {
+					for (node = walker.prev2(); node; node = walker.prev2()) {
+						if (node.nodeType == 3 && node.data.length > 0) {
+							return node;
+						}
+
 						if (node.childNodes.length > 1 || node == start || node.tagName == 'BR') {
 							return node;
 						}
@@ -369,7 +374,7 @@
 
 				if (start != end && rng.endOffset === 0) {
 					var newEnd = findSelectionEnd(start, end);
-					var endOffset = newEnd.nodeType == 3 ? newEnd.length : newEnd.childNodes.length;
+					var endOffset = newEnd.nodeType == 3 ? newEnd.data.length : newEnd.childNodes.length;
 
 					rng.setEnd(newEnd, endOffset);
 				}
@@ -512,7 +517,7 @@
 						} else {
 							// Start a new wrapper for possible children
 							currentWrapElm = 0;
-							
+
 							each(tinymce.grep(node.childNodes), process);
 
 							if (hasContentEditableState) {
@@ -546,7 +551,7 @@
 				}
 
 				// Cleanup
-				
+
 				each(newWrappers, function(node) {
 					var childCount;
 
@@ -604,7 +609,7 @@
 							// Merge all children of similar type will move styles from child to parent
 							// this: <span style="color:red"><b><span style="color:red; font-size:10px">text</span></b></span>
 							// will become: <span style="color:red"><b><span style="font-size:10px">text</span></b></span>
-							each(dom.select(format.inline, node), function(child) {								
+							each(dom.select(format.inline, node), function(child) {
 								if (isBookmarkNode(child)) {
 									return;
 								}
@@ -718,7 +723,7 @@
 
 				// Process the children
 				if (format.deep) {
-					if (children.length) {					
+					if (children.length) {
 						for (i = 0, l = children.length; i < l; i++) {
 							process(children[i]);
 						}
@@ -835,9 +840,9 @@
 						// WebKit will render the table incorrectly if we wrap a TH or TD in a SPAN
 						// so let's see if we can use the first child instead
 						// This will happen if you triple click a table cell and use remove formatting
-						
+
 						// Remove from JCE as causes issues with other browsers
-						
+
 						/*if (/^(TR|TH|TD)$/.test(startContainer.nodeName) && startContainer.firstChild) {
 							if (startContainer.nodeName == "TR") {
 								startContainer = startContainer.firstChild.firstChild || startContainer;
@@ -1164,7 +1169,7 @@
 
 				ed.onNodeChange.addToTop(function(ed, cm, node) {
 					var parents = getParents(node), matchedFormats = {};
-					
+
 					// Ignore bogus nodes like the <a> tag created by moveStart()
 					parents = tinymce.grep(parents, function(node) {
 						return node.nodeType == 1 && !node.getAttribute('data-mce-bogus');
@@ -1439,7 +1444,7 @@
 				startContainer = startContainer.childNodes[startOffset > lastIdx ? lastIdx : startOffset];
 
 				if (startContainer && startContainer.nodeType == 3) {
-					startOffset = 0; 
+					startOffset = 0;
 				}
 			}
 
@@ -2140,7 +2145,7 @@
 
 				return true;
 			}
-			
+
 			// Returns any parent caret container element
 			function getParentCaretContainer(node) {
 				while (node) {
@@ -2355,7 +2360,7 @@
 					// Move selection to text node
 					selection.setCursorLocation(node, 1);
 
-					// If the formatNode is empty, we can remove it safely. 
+					// If the formatNode is empty, we can remove it safely.
 					if (dom.isEmpty(formatNode)) {
 						dom.remove(formatNode);
 					}
