@@ -1962,6 +1962,18 @@
 			// Check for real content editable
 			return node.contentEditable !== "inherit" ? node.contentEditable : null;
 		},
+		
+		isChildOf: function(node, parent) {
+			while (node) {
+				if (parent === node) {
+					return true;
+				}
+
+				node = node.parentNode;
+			}
+
+			return false;
+		},
 
 		// #ifdef debug
 
