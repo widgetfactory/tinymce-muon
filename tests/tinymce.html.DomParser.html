@@ -15,30 +15,32 @@ module("tinymce.html.DomParser");
 QUnit.config.reorder = false;
 
 var schema = new tinymce.html.Schema({valid_elements: '*[class|title]'});
-var serializer = new tinymce.html.Serializer({}, schema);
-var parser, root;
+	var serializer = new tinymce.html.Serializer({}, schema);
+	var parser, root;
 
-function countNodes(node, counter) {
-	var sibling;
+	function countNodes(node, counter) {
+		var sibling;
 
-	if (!counter)
-		counter = {};
+		if (!counter) {
+			counter = {};
+		}
 
-	if (node.name in counter) {
-		counter[node.name]++;
-	} else
-		counter[node.name] = 1;
+		if (node.name in counter) {
+			counter[node.name]++;
+		} else {
+			counter[node.name] = 1;
+		}
 
-	for (sibling = node.firstChild; sibling; sibling = sibling.next) {
-		countNodes(sibling, counter);
+		for (sibling = node.firstChild; sibling; sibling = sibling.next) {
+			countNodes(sibling, counter);
+		}
+
+		return counter;
 	}
 
-	return counter;
-}
+	schema.addValidChildren('+body[style]');
 
-schema.addValidChildren('+body[style]');
-
-test('Parse element', function() {
+	test('Parse element', function() {
 		var parser, root;
 
 		expect(7);
@@ -87,7 +89,7 @@ test('Parse element', function() {
 
 		parser = new tinymce.html.DomParser({}, new tinymce.html.Schema({invalid_elements : 'hr,br'}));
 		root = parser.parse('\n<hr />\n<br />\n<div>\n<hr />\n<br />\n<img src="file.gif" data-mce-src="file.gif" />\n<hr />\n<br />\n</div>\n<hr />\n<br />\n');
-		equal(serializer.serialize(root), '<div><img src="file.gif" data-mce-src="file.gif" alt="" /></div>', 'Whitespace where SaxParser will produce multiple whitespace nodes');
+		equal(serializer.serialize(root), '<div><img src="file.gif" data-mce-src="file.gif" /></div>', 'Whitespace where SaxParser will produce multiple whitespace nodes');
 		deepEqual(countNodes(root), {body:1, div:1, img:1}, 'Whitespace where SaxParser will produce multiple whitespace nodes (count)');
 	});
 
@@ -527,6 +529,28 @@ test('Parse element', function() {
 		parser = new tinymce.html.DomParser({}, schema);
 		root = parser.parse('a<span> </span>b');
 		equal(serializer.serialize(root), 'a b');
+	});
+
+	test('Bug #7543 removes whitespace between bogus elements before a block', function() {
+		var serializer = new tinymce.html.Serializer();
+
+		equal(
+			serializer.serialize(new tinymce.html.DomParser().parse(
+				'<div><b data-mce-bogus="1">a</b> <b data-mce-bogus="1">b</b><p>c</p></div>')
+			),
+			'<div>a b<p>c</p></div>'
+		);
+	});
+
+	test('Bug #7582 removes whitespace between bogus elements before a block', function() {
+		var serializer = new tinymce.html.Serializer();
+
+		equal(
+			serializer.serialize(new tinymce.html.DomParser().parse(
+				'<div>1 <span data-mce-bogus="1">2</span><div>3</div></div>')
+			),
+			'<div>1 2<div>3</div></div>'
+		);
 	});
 </script>
 </head>
