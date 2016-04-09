@@ -14,80 +14,88 @@ module("tinymce.html.SaxParser");
 
 QUnit.config.reorder = false;
 
-var writer = new tinymce.html.Writer(), schema = new tinymce.html.Schema();
 
-function createCounter(writer) {
-	var counts = {};
+	var writer = new tinymce.html.Writer(), schema = new tinymce.html.Schema();
 
-	return {
-		counts : counts,
+	function createCounter(writer) {
+		var counts = {};
 
-		comment: function(text) {
-			if ("comment" in counts)
-				counts.comment++;
-			else
-				counts.comment = 1;
+		return {
+			counts : counts,
 
-			writer.comment(text);
-		},
+			comment: function(text) {
+				if ("comment" in counts) {
+					counts.comment++;
+				} else {
+					counts.comment = 1;
+				}
 
-		cdata: function(text) {
-			if ("cdata" in counts)
-				counts.cdata++;
-			else
-				counts.cdata = 1;
+				writer.comment(text);
+			},
 
-			writer.cdata(text);
-		},
+			cdata: function(text) {
+				if ("cdata" in counts) {
+					counts.cdata++;
+				} else {
+					counts.cdata = 1;
+				}
 
-		text: function(text, raw) {
-			if ("text" in counts)
-				counts.text++;
-			else
-				counts.text = 1;
+				writer.cdata(text);
+			},
 
-			writer.text(text, raw);
-		},
+			text: function(text, raw) {
+				if ("text" in counts) {
+					counts.text++;
+				} else {
+					counts.text = 1;
+				}
 
-		start: function(name, attrs, empty) {
-			if ("start" in counts)
-				counts.start++;
-			else
-				counts.start = 1;
+				writer.text(text, raw);
+			},
 
-			writer.start(name, attrs, empty);
-		},
+			start: function(name, attrs, empty) {
+				if ("start" in counts) {
+					counts.start++;
+				} else {
+					counts.start = 1;
+				}
 
-		end: function(name) {
-			if ("end" in counts)
-				counts.end++;
-			else
-				counts.end = 1;
+				writer.start(name, attrs, empty);
+			},
 
-			writer.end(name);
-		},
+			end: function(name) {
+				if ("end" in counts) {
+					counts.end++;
+				} else {
+					counts.end = 1;
+				}
 
-		pi: function(name, text) {
-			if ("pi" in counts)
-				counts.pi++;
-			else
-				counts.pi = 1;
+				writer.end(name);
+			},
 
-			writer.pi(name, text);
-		},
+			pi: function(name, text) {
+				if ("pi" in counts) {
+					counts.pi++;
+				} else {
+					counts.pi = 1;
+				}
 
-		doctype: function(text) {
-			if ("doctype:" in counts)
-				counts.doctype++;
-			else
-				counts.doctype = 1;
+				writer.pi(name, text);
+			},
 
-			writer.doctype(text);
-		}
-	};
-}
+			doctype: function(text) {
+				if ("doctype:" in counts) {
+					counts.doctype++;
+				} else {
+					counts.doctype = 1;
+				}
 
-test('Parse elements', function() {
+				writer.doctype(text);
+			}
+		};
+	}
+
+	test('Parse elements', function() {
 		var counter, parser;
 
 		expect(48);
@@ -712,7 +720,7 @@ test('Parse elements', function() {
 		testBogusSaxParse('a<b data-mce-bogus="all"></b><b>c</b>', 'a<b>c</b>', {start: 1, end: 1, text:2});
 	});
 
-	/*test('findEndTag', function() {		
+	test('findEndTag', function() {
 		function testFindEndTag(html, startIndex, expectedIndex) {
 			equal(tinymce.html.SaxParser.findEndTag(schema, html, startIndex), expectedIndex);
 		}
@@ -723,7 +731,24 @@ test('Parse elements', function() {
 		testFindEndTag('<b><img></b>', 3, 12);
 		testFindEndTag('<b><!-- </b> --></b>', 3, 20);
 		testFindEndTag('<span><b><i>a<img>b</i><b>c</b></b></span>', 9, 35);
-	});*/
+	});
+
+	test('parse XSS PI', function() {
+		var counter, parser;
+
+		counter = createCounter(writer);
+		counter.validate = false;
+		parser = new tinymce.html.SaxParser(counter, schema);
+
+		writer.reset();
+		parser.parse('<?xml><iframe SRC=&#106&#97&#118&#97&#115&#99&#114&#105&#112&#116&#58&#97&#108&#101&#114&#116&#40&#39&#88&#83&#83&#39&#41>?>');
+
+		equal(
+			writer.getContent(),
+			'<?xml &gt;&lt;iframe SRC=&amp;#106&amp;#97&amp;#118&amp;#97&amp;#115&amp;#99&amp;#114&amp;#105&amp;#112&amp;' +
+			'#116&amp;#58&amp;#97&amp;#108&amp;#101&amp;#114&amp;#116&amp;#40&amp;#39&amp;#88&amp;#83&amp;#83&amp;#39&amp;#41&gt;?>'
+		);
+	});
 </script>
 </head>
 <body>
