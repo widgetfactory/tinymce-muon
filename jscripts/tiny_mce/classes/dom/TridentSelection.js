@@ -10,7 +10,7 @@
 
 (function() {
 	function Selection(selection) {
-		var self = this, dom = selection.dom, TRUE = true, FALSE = false;
+		var self = this, dom = selection.dom, FALSE = false;
 
 		function getPosition(rng, start) {
 			var checkRng, startIndex = 0, endIndex, inside,
@@ -22,8 +22,9 @@
 			parent = checkRng.parentElement();
 
 			// Check if the selection is within the right document
-			if (parent.ownerDocument !== selection.dom.doc)
+			if (parent.ownerDocument !== selection.dom.doc) {
 				return;
+			}
 
 			// IE will report non editable elements as it's parent so look for an editable one
 			while (parent.contentEditable === "false") {
@@ -66,8 +67,9 @@
 					checkRng.collapse(true);
 					child = parent;
 					inside = true;
-				} else
+				} else {
 					checkRng.collapse(false);
+				}
 
 				// Walk character by character in text node until we hit the selected range endpoint, hit the end of document or parent isn't the right one
 				// We need to walk char by char since rng.text or rng.htmlText will trim line endings
@@ -83,7 +85,8 @@
 				// Child position is after the selection endpoint
 				checkRng.collapse(true);
 
-				// Walk character by character in text node until we hit the selected range endpoint, hit the end of document or parent isn't the right one
+				// Walk character by character in text node until we hit the selected range endpoint, hit
+				// the end of document or parent isn't the right one
 				offset = 0;
 				while (checkRng.compareEndPoints(start ? 'StartToStart' : 'StartToEnd', rng) !== 0) {
 					if (checkRng.move('character', -1) === 0 || parent != checkRng.parentElement()) {
@@ -94,17 +97,18 @@
 				}
 			}
 
-			return {node : child, position : position, offset : offset, inside : inside};
-		};
+			return {node: child, position: position, offset: offset, inside: inside};
+		}
 
 		// Returns a W3C DOM compatible range object by using the IE Range API
 		function getRange() {
-			var ieRange = selection.getRng(), domRange = dom.createRng(), element, collapsed, tmpRange, element2, bookmark, fail;
+			var ieRange = selection.getRng(), domRange = dom.createRng(), element, collapsed, tmpRange, element2, bookmark;
 
 			// If selection is outside the current document just return an empty range
 			element = ieRange.item ? ieRange.item(0) : ieRange.parentElement();
-			if (element.ownerDocument != dom.doc)
+			if (element.ownerDocument != dom.doc) {
 				return domRange;
+			}
 
 			collapsed = selection.isCollapsed();
 
@@ -141,25 +145,28 @@
 					}
 
 					if (!offset) {
-						if (sibling.nodeType == 3)
+						if (sibling.nodeType == 3) {
 							domRange[start ? 'setStart' : 'setEnd'](sibling, 0);
-						else
+						} else {
 							domRange[start ? 'setStartBefore' : 'setEndBefore'](sibling);
+						}
 
 						return;
 					}
 
 					// Find the text node and offset
 					while (sibling) {
-						nodeValue = sibling.nodeValue;
-						textNodeOffset += nodeValue.length;
+						if (sibling.nodeType == 3) {
+							nodeValue = sibling.nodeValue;
+							textNodeOffset += nodeValue.length;
 
-						// We are at or passed the position we where looking for
-						if (textNodeOffset >= offset) {
-							container = sibling;
-							textNodeOffset -= offset;
-							textNodeOffset = nodeValue.length - textNodeOffset;
-							break;
+							// We are at or passed the position we where looking for
+							if (textNodeOffset >= offset) {
+								container = sibling;
+								textNodeOffset -= offset;
+								textNodeOffset = nodeValue.length - textNodeOffset;
+								break;
+							}
 						}
 
 						sibling = sibling.nextSibling;
@@ -168,15 +175,17 @@
 					// Find the text node and offset
 					sibling = container.previousSibling;
 
-					if (!sibling)
+					if (!sibling) {
 						return domRange[start ? 'setStartBefore' : 'setEndBefore'](container);
+					}
 
 					// If there isn't any text to loop then use the first position
 					if (!offset) {
-						if (container.nodeType == 3)
+						if (container.nodeType == 3) {
 							domRange[start ? 'setStart' : 'setEnd'](sibling, container.nodeValue.length);
-						else
+						} else {
 							domRange[start ? 'setStartAfter' : 'setEndAfter'](sibling);
+						}
 
 						return;
 					}
@@ -198,19 +207,21 @@
 				}
 
 				domRange[start ? 'setStart' : 'setEnd'](container, textNodeOffset);
-			};
+			}
 
 			try {
 				// Find start point
 				findEndPoint(true);
 
 				// Find end point if needed
-				if (!collapsed)
+				if (!collapsed) {
 					findEndPoint();
+				}
 			} catch (ex) {
 				// IE has a nasty bug where text nodes might throw "invalid argument" when you
-				// access the nodeValue or other properties of text nodes. This seems to happend when
-				// text nodes are split into two nodes by a delete/backspace call. So lets detect it and try to fix it.
+				// access the nodeValue or other properties of text nodes. This seems to happen when
+				// text nodes are split into two nodes by a delete/backspace call.
+				// So let us detect and try to fix it.
 				if (ex.number == -2147024809) {
 					// Get the current selection
 					bookmark = self.getBookmark(2);
@@ -241,14 +252,16 @@
 					findEndPoint(true);
 
 					// Find end point if needed
-					if (!collapsed)
+					if (!collapsed) {
 						findEndPoint();
-				} else
+					}
+				} else {
 					throw ex; // Throw other errors
+				}
 			}
 
 			return domRange;
-		};
+		}
 
 		this.getBookmark = function(type) {
 			var rng = selection.getRng(), bookmark = {};
@@ -283,10 +296,10 @@
 				position = getPosition(rng, start);
 				if (position) {
 					return {
-						position : position.position,
-						offset : position.offset,
-						indexes : getIndexes(position.node),
-						inside : position.inside
+						position: position.position,
+						offset: position.offset,
+						indexes: getIndexes(position.node),
+						inside: position.inside
 					};
 				}
 			}
@@ -297,10 +310,12 @@
 				if (!rng.item) {
 					bookmark.start = getBookmarkEndPoint(true);
 
-					if (!selection.isCollapsed())
+					if (!selection.isCollapsed()) {
 						bookmark.end = getBookmarkEndPoint();
-				} else
-					bookmark.start = {ctrl : true, indexes : getIndexes(rng.item(0))};
+					}
+				} else {
+					bookmark.start = {ctrl: true, indexes: getIndexes(rng.item(0))};
+				}
 			}
 
 			return bookmark;
@@ -338,13 +353,15 @@
 					if (offset !== undef) {
 						moveRng.collapse(endPoint.inside || moveLeft);
 						moveRng.moveStart('character', moveLeft ? -offset : offset);
-					} else
+					} else {
 						moveRng.collapse(start);
+					}
 
 					rng.setEndPoint(start ? 'StartToStart' : 'EndToStart', moveRng);
 
-					if (start)
+					if (start) {
 						rng.collapse(true);
+					}
 				}
 			}
 
@@ -442,10 +459,10 @@
 							sibling.innerHTML = '';
 						}
 						return;
-					} else {
-						startOffset = dom.nodeIndex(startContainer);
-						startContainer = startContainer.parentNode;
 					}
+
+					startOffset = dom.nodeIndex(startContainer);
+					startContainer = startContainer.parentNode;
 				}
 
 				if (startOffset == endOffset - 1) {
