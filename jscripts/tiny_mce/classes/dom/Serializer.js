@@ -10,7 +10,7 @@
 
 (function(tinymce) {
 	/**
-	 * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class. 
+	 * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
 	 *
 	 * @class tinymce.dom.Serializer
 	 */
@@ -38,6 +38,33 @@
 		settings.remove_trailing_brs = "remove_trailing_brs" in settings ? settings.remove_trailing_brs : true;
 
 		/**
+		 * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
+		 * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
+		 * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
+		 * but not as the lastChild of the body. So this fix simply removes the last two
+		 * BR elements at the end of the document.
+		 *
+		 * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
+		 */
+		function trimTrailingBr(rootNode) {
+			var brNode1, brNode2;
+
+			function isBr(node) {
+				return node && node.name === 'br';
+			}
+
+			brNode1 = rootNode.lastChild;
+			if (isBr(brNode1)) {
+				brNode2 = brNode1.prev;
+
+				if (isBr(brNode2)) {
+					brNode1.remove();
+					brNode2.remove();
+				}
+			}
+		}
+
+		/**
 		 * This event gets executed before a HTML fragment gets serialized into a HTML string. This event enables you to do modifications to the DOM before the serialization occurs. It's important to know that the element that is getting serialized is cloned so it's not inside a document.
 		 *
 		 * @event onPreProcess
@@ -53,11 +80,11 @@
 		onPreProcess = new tinymce.util.Dispatcher(self);
 
 		/**
-		 * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc. 
+		 * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc.
 		 *
 		 * @event onPreProcess
 		 * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
-		 * @param {Object} args Object containing things like the current contents. 
+		 * @param {Object} args Object containing things like the current contents.
 		 * @example
 		 * // Adds an observer to the onPostProcess event
 		 * serializer.onPostProcess.add(function(se, o) {
@@ -69,7 +96,7 @@
 		onPostProcess = new tinymce.util.Dispatcher(self);
 
 		htmlParser = new tinymce.html.DomParser(settings, schema);
-		
+
 		// Convert tabindex back to elements when serializing contents
 		htmlParser.addAttributeFilter('data-mce-tabindex', function(nodes, name) {
 			var i = nodes.length, node;
@@ -115,7 +142,7 @@
 			while (i--) {
 				node = nodes[i];
 				value = node.attr('class');
-				
+
 				if (value) {
 					value = node.attr('class').replace(/(?:^|\s)mce(Item\w+|Selected)(?!\S)/g, '');
 					node.attr('class', value.length > 0 ? value : null);
@@ -373,14 +400,14 @@
 					args.node = node;
 					onPreProcess.dispatch(self, args);
 				}
+				
+				// Parse HTML
+				rootNode = htmlParser.parse(trim(args.getInner ? node.innerHTML : dom.getOuterHTML(node)), args);
+				trimTrailingBr(rootNode);
 
-				// Setup serializer
+				// Serialize HTML
 				htmlSerializer = new tinymce.html.Serializer(settings, schema);
-
-				// Parse and serialize HTML
-				args.content = htmlSerializer.serialize(
-					htmlParser.parse(tinymce.trim(args.getInner ? node.innerHTML : dom.getOuterHTML(node)), args)
-				);
+				args.content = htmlSerializer.serialize(rootNode);
 
 				// Replace all BOM characters for now until we can find a better solution
 				if (!args.cleanup) {
@@ -396,7 +423,7 @@
 				if (oldDoc) {
 					dom.doc = oldDoc;
 				}
-				
+
 				args.node = null;
 
 				return args.content;
