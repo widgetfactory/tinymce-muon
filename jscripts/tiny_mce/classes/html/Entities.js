@@ -15,11 +15,11 @@
 		rawCharsRegExp = /[<>&\"\']/g,
 		entityRegExp = /&#([a-z0-9]+);?|&([a-z0-9]+);/gi,
 		asciiMap = {
-				128 : "\u20AC", 130 : "\u201A", 131 : "\u0192", 132 : "\u201E", 133 : "\u2026", 134 : "\u2020",
-				135 : "\u2021", 136 : "\u02C6", 137 : "\u2030", 138 : "\u0160", 139 : "\u2039", 140 : "\u0152",
-				142 : "\u017D", 145 : "\u2018", 146 : "\u2019", 147 : "\u201C", 148 : "\u201D", 149 : "\u2022",
-				150 : "\u2013", 151 : "\u2014", 152 : "\u02DC", 153 : "\u2122", 154 : "\u0161", 155 : "\u203A",
-				156 : "\u0153", 158 : "\u017E", 159 : "\u0178"
+			128: "\u20AC", 130: "\u201A", 131: "\u0192", 132: "\u201E", 133: "\u2026", 134: "\u2020",
+			135: "\u2021", 136: "\u02C6", 137: "\u2030", 138: "\u0160", 139: "\u2039", 140: "\u0152",
+			142: "\u017D", 145: "\u2018", 146: "\u2019", 147: "\u201C", 148: "\u201D", 149: "\u2022",
+			150: "\u2013", 151: "\u2014", 152: "\u02DC", 153: "\u2122", 154: "\u0161", 155: "\u203A",
+			156: "\u0153", 158: "\u017E", 159: "\u0178"
 		};
 
 	// Raw entities
@@ -34,11 +34,11 @@
 
 	// Reverse lookup table for raw entities
 	reverseEntities = {
-		'&lt;' : '<',
-		'&gt;' : '>',
-		'&amp;' : '&',
-		'&quot;' : '"',
-		'&apos;' : "'"
+		'&lt;': '<',
+		'&gt;': '>',
+		'&amp;': '&',
+		'&quot;': '"',
+		'&apos;': "'"
 	};
 
 	// Decodes text by using the browser
@@ -114,14 +114,14 @@
 	 */
 	tinymce.html.Entities = {
 		/**
-		 * Encodes the specified string using raw entities. This means only the required XML base entities will be endoded.
+		 * Encodes the specified string using raw entities. This means only the required XML base entities will be encoded.
 		 *
 		 * @method encodeRaw
 		 * @param {String} text Text to encode.
 		 * @param {Boolean} attr Optional flag to specify if the text is attribute contents.
 		 * @return {String} Entity encoded text.
 		 */
-		encodeRaw : function(text, attr) {
+		encodeRaw: function(text, attr) {
 			return text.replace(attr ? attrsCharsRegExp : textCharsRegExp, function(chr) {
 				return baseEntities[chr] || chr;
 			});
@@ -136,22 +136,22 @@
 		 * @param {String} text Text to encode.
 		 * @return {String} Entity encoded text.
 		 */
-		encodeAllRaw : function(text) {
+		encodeAllRaw: function(text) {
 			return ('' + text).replace(rawCharsRegExp, function(chr) {
 				return baseEntities[chr] || chr;
 			});
 		},
 
 		/**
-		 * Encodes the specified string using numeric entities. The core entities will be encoded as named ones but all non lower ascii characters
-		 * will be encoded into numeric entities.
+		 * Encodes the specified string using numeric entities. The core entities will be
+		 * encoded as named ones but all non lower ascii characters will be encoded into numeric entities.
 		 *
 		 * @method encodeNumeric
 		 * @param {String} text Text to encode.
 		 * @param {Boolean} attr Optional flag to specify if the text is attribute contents.
 		 * @return {String} Entity encoded text.
 		 */
-		encodeNumeric : function(text, attr) {
+		encodeNumeric: function(text, attr) {
 			return text.replace(attr ? attrsCharsRegExp : textCharsRegExp, function(chr) {
 				// Multi byte sequence convert it to a single entity
 				if (chr.length > 1) {
@@ -163,8 +163,8 @@
 		},
 
 		/**
-		 * Encodes the specified string using named entities. The core entities will be encoded as named ones but all non lower ascii characters
-		 * will be encoded into named entities.
+		 * Encodes the specified string using named entities. The core entities will be encoded
+		 * as named ones but all non lower ascii characters will be encoded into named entities.
 		 *
 		 * @method encodeNamed
 		 * @param {String} text Text to encode.
@@ -172,7 +172,7 @@
 		 * @param {Object} entities Optional parameter with entities to use.
 		 * @return {String} Entity encoded text.
 		 */
-		encodeNamed : function(text, attr, entities) {
+		encodeNamed: function(text, attr, entities) {
 			entities = entities || namedEntities;
 
 			return text.replace(attr ? attrsCharsRegExp : textCharsRegExp, function(chr) {
@@ -188,7 +188,7 @@
 		 * @param {String} entities Optional parameter with entities to use instead of the built in set.
 		 * @return {function} Encode function to be used.
 		 */
-		getEncodeFunc : function(name, entities) {
+		getEncodeFunc: function(name, entities) {
 			var Entities = tinymce.html.Entities;
 
 			entities = buildEntitiesLookup(entities) || namedEntities;
@@ -233,22 +233,27 @@
 		/**
 		 * Decodes the specified string, this will replace entities with raw UTF characters.
 		 *
+		 * @method decode
 		 * @param {String} text Text to entity decode.
 		 * @return {String} Entity decoded string.
 		 */
-		decode : function(text) {
-			return text.replace(entityRegExp, function(all, numeric, value) {
+		decode: function(text) {
+			return text.replace(entityRegExp, function(all, numeric) {
 				if (numeric) {
-					value = parseInt(value, numeric.length === 2 ? 16 : 10);
+					if (numeric.charAt(0).toLowerCase() === 'x') {
+						numeric = parseInt(numeric.substr(1), 16);
+					} else {
+						numeric = parseInt(numeric, 10);
+					}
 
 					// Support upper UTF
-					if (value > 0xFFFF) {
-						value -= 0x10000;
+					if (numeric > 0xFFFF) {
+						numeric -= 0x10000;
 
-						return String.fromCharCode(0xD800 + (value >> 10), 0xDC00 + (value & 0x3FF));
-					} else {
-						return asciiMap[value] || String.fromCharCode(value);
+						return String.fromCharCode(0xD800 + (numeric >> 10), 0xDC00 + (numeric & 0x3FF));
 					}
+
+					return asciiMap[numeric] || String.fromCharCode(numeric);
 				}
 
 				return reverseEntities[all] || namedEntities[all] || nativeDecode(all);
