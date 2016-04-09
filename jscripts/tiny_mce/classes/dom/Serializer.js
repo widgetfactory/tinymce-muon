@@ -400,9 +400,9 @@
 					args.node = node;
 					onPreProcess.dispatch(self, args);
 				}
-				
+
 				// Parse HTML
-				rootNode = htmlParser.parse(trim(args.getInner ? node.innerHTML : dom.getOuterHTML(node)), args);
+				rootNode = htmlParser.parse(tinymce.trim(args.getInner ? node.innerHTML : dom.getOuterHTML(node)), args);
 				trimTrailingBr(rootNode);
 
 				// Serialize HTML
