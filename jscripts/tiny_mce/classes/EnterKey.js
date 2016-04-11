@@ -56,7 +56,7 @@
 				}
 
 				// Find inner most first child ex: <p><i><b>*</b></i></p>
-				while ((node = node.firstChild)) {
+				while (node = node.firstChild) {
 					if (dom.isBlock(node)) {
 						return;
 					}
@@ -127,7 +127,7 @@
 				if (root.hasChildNodes()) {
 					walker = new TreeWalker(root, root);
 
-					while ((node = walker.current())) {
+					while (node = walker.current()) {
 						if (node.nodeType == 3) {
 							rng.setStart(node, 0);
 							rng.setEnd(node, 0);
@@ -227,9 +227,7 @@
 				}
 
 				// BR is needed in empty blocks on non IE browsers
-				if (!tinymce.isIE && !tinymce.isIE12) {
-					caretNode.innerHTML = '<br data-mce-bogus="1">';
-				}
+				emptyBlock(caretNode);
 
 				return block;
 			}
@@ -474,7 +472,7 @@
 				var lastChild;
 
 				// IE will render the blocks correctly other browsers needs a BR
-				if (!tinymce.isIE) {
+				if (!tinymce.isIE && !tinymce.isIE12) {
 					block.normalize(); // Remove empty text nodes that got left behind by the extract
 
 					// Check if the block is empty or contains a floated last child
@@ -587,6 +585,11 @@
 
 				// Handle enter inside an empty list item
 				if (dom.isEmpty(parentBlock)) {
+					// Let the list plugin or browser handle nested lists for now
+					if (/^(UL|OL|LI)$/.test(containerBlock.parentNode.nodeName)) {
+						return false;
+					}
+					
 					handleEmptyListItem();
 					return;
 				}
