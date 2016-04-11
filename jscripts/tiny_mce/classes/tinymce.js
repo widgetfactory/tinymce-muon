@@ -34,7 +34,7 @@
 		 * @property majorVersion
 		 * @type String
 		 */
-		majorVersion : '@@tinymce_major_version@@',
+		majorVersion: '@@tinymce_major_version@@',
 
 		/**
 		 * Major version of TinyMCE build.
@@ -42,7 +42,7 @@
 		 * @property minorVersion
 		 * @type String
 		 */
-		minorVersion : '@@tinymce_minor_version@@',
+		minorVersion: '@@tinymce_minor_version@@',
 
 		/**
 		 * Release date of TinyMCE build.
@@ -50,13 +50,17 @@
 		 * @property releaseDate
 		 * @type String
 		 */
-		releaseDate : '@@tinymce_release_date@@',
+		releaseDate: '@@tinymce_release_date@@',
 
 		/**
 		 * Initializes the TinyMCE global namespace this will setup browser detection and figure out where TinyMCE is running from.
 		 */
-		_init : function() {
-			var t = this, d = document, na = navigator, ua = na.userAgent, i, nl, n, base, p, v;
+		_init: function() {
+			var t = this,
+				d = document,
+				na = navigator,
+				ua = na.userAgent,
+				i, nl, n, base, p, v;
 
 			t.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1);
 
@@ -85,7 +89,20 @@
 			 * @type Boolean
 			 * @final
 			 */
-			t.isIE = !t.isWebKit && !t.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName) || t.isIE11;
+
+			var isIE = !t.isWebKit && !t.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName);
+
+			isIE = isIE && /MSIE (\w+)\./.exec(us)[1];
+
+			t.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1) ? 11 : false;
+
+			t.isIE = isIE || t.isIE11;
+
+			t.isIE12 = (ua.indexOf('Edge/') != -1 && !t.isIE) ? 12 : false;
+
+			if (t.isIE12) {
+				t.isWebKit = false;
+			}
 
 			/**
 			 * Constant that is true if the browser is IE 6 or older.
@@ -167,7 +184,7 @@
 			 * @final
 			 */
 			t.isIDevice = /(iPad|iPhone)/.test(ua);
-			
+
 			/**
 			 * Constant that is true if the current browser is running on iOS 5 or greater.
 			 *
@@ -175,14 +192,7 @@
 			 * @type Boolean
 			 * @final
 			 */
-			t.isIOS5 = t.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1]>=534;
-			
-			// Handle IE 12 sniffing
-			t.isIE12 = (ua.indexOf('Edge/') != -1 && !t.isIE && !t.isIE11) ? 12 : false;
-			
-			if (t.isIE12) {
-				t.isWebKit = false;
-			}
+			t.isIOS5 = t.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1] >= 534;
 
 			// TinyMCE .NET webcontrol might be setting the values for TinyMCE
 			if (win.tinyMCEPreInit) {
@@ -197,7 +207,7 @@
 
 			// If base element found, add that infront of baseURL
 			nl = d.getElementsByTagName('base');
-			for (i=0; i<nl.length; i++) {
+			for (i = 0; i < nl.length; i++) {
 				v = nl[i].href;
 				if (v) {
 					// Host only value like http://site.com or http://site.com:8008
@@ -232,7 +242,7 @@
 
 			// Check document
 			nl = d.getElementsByTagName('script');
-			for (i=0; i<nl.length; i++) {
+			for (i = 0; i < nl.length; i++) {
 				if (getBase(nl[i]))
 					return;
 			}
@@ -241,7 +251,7 @@
 			n = d.getElementsByTagName('head')[0];
 			if (n) {
 				nl = n.getElementsByTagName('script');
-				for (i=0; i<nl.length; i++) {
+				for (i = 0; i < nl.length; i++) {
 					if (getBase(nl[i]))
 						return;
 				}
@@ -258,7 +268,7 @@
 		 * @param {string} t Optional type to check for.
 		 * @return {Boolean} true/false if the object is of the specified type.
 		 */
-		is : function(o, t) {
+		is: function(o, t) {
 			if (!t)
 				return o !== undef;
 
@@ -288,7 +298,7 @@
 		 * @param {Object} map Optional map to add items to.
 		 * @return {Object} Name/value map of items.
 		 */
-		makeMap : function(items, delim, map) {
+		makeMap: function(items, delim, map) {
 			var i;
 
 			items = items || [];
@@ -320,13 +330,13 @@
 		 * tinymce.each([1,2,3], function(v, i) {
 		 *     console.debug("Value: " + v + ", Index: " + i);
 		 * });
-		 * 
+		 *
 		 * // Iterate an object
 		 * tinymce.each({a : 1, b : 2, c: 3], function(v, k) {
 		 *     console.debug("Value: " + v + ", Key: " + k);
 		 * });
 		 */
-		each : function(o, cb, s) {
+		each: function(o, cb, s) {
 			var n, l;
 
 			if (!o)
@@ -336,7 +346,7 @@
 
 			if (o.length !== undef) {
 				// Indexed arrays, needed for Safari
-				for (n=0, l = o.length; n < l; n++) {
+				for (n = 0, l = o.length; n < l; n++) {
 					if (cb.call(s, o[n], n, o) === false)
 						return 0;
 				}
@@ -364,7 +374,7 @@
 		 * @param {function} f Function to call for each item. It's return value will be the new value.
 		 * @return {Array} Array with new values based on function return values.
 		 */
-		map : function(a, f) {
+		map: function(a, f) {
 			var o = [];
 
 			tinymce.each(a, function(v) {
@@ -386,7 +396,7 @@
 		 * // Filter out some items, this will return an array with 4 and 5
 		 * var items = tinymce.grep([1,2,3,4,5], function(v) {return v > 3;});
 		 */
-		grep : function(a, f) {
+		grep: function(a, f) {
 			var o = [];
 
 			tinymce.each(a, function(v) {
@@ -408,7 +418,7 @@
 		 * // Get index of value in array this will alert 1 since 2 is at that index
 		 * alert(tinymce.inArray([1,2,3], 2));
 		 */
-		inArray : function(a, v) {
+		inArray: function(a, v) {
 			var i, l;
 
 			if (a) {
@@ -434,12 +444,13 @@
 		 *     somefield1 : 'a',
 		 *     somefield2 : 'a'
 		 * });
-		 * 
+		 *
 		 * // Extends obj with obj2 and obj3
 		 * tinymce.extend(obj, obj2, obj3);
 		 */
-		extend : function(obj, ext) {
-			var i, l, name, args = arguments, value;
+		extend: function(obj, ext) {
+			var i, l, name, args = arguments,
+				value;
 
 			for (i = 1, l = args.length; i < l; i++) {
 				ext = args[i];
@@ -466,7 +477,7 @@
 		 * @param {String} s String to remove whitespace from.
 		 * @return {String} New string with removed whitespace.
 		 */
-		trim : function(s) {
+		trim: function(s) {
 			return (s ? '' + s : '').replace(whiteSpaceRe, '');
 		},
 
@@ -484,7 +495,7 @@
 		 *     SomeClass : function() {
 		 *         // Class constructor
 		 *     },
-		 * 
+		 *
 		 *     method : function() {
 		 *         // Some method
 		 *     }
@@ -496,12 +507,12 @@
 		 *         // Class constructor
 		 *         this.parent(); // Call parent constructor
 		 *     },
-		 * 
+		 *
 		 *     method : function() {
 		 *         // Some method
 		 *         this.parent(); // Call parent method
 		 *     },
-		 * 
+		 *
 		 *     'static' : {
 		 *         staticMethod : function() {
 		 *             // Static method
@@ -516,8 +527,9 @@
 		 *     }
 		 * });
 		 */
-		create : function(s, p, root) {
-			var t = this, sp, ns, cn, scn, c, de = 0;
+		create: function(s, p, root) {
+			var t = this,
+				sp, ns, cn, scn, c, de = 0;
 
 			// Parse : <prefix> <class>:<super class>
 			s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
@@ -609,7 +621,7 @@
 		 * @param {String} n Optional name of collection inside the objects to walk for example childNodes.
 		 * @param {String} s Optional scope to execute the function in.
 		 */
-		walk : function(o, f, n, s) {
+		walk: function(o, f, n, s) {
 			s = s || this;
 
 			if (o) {
@@ -643,13 +655,13 @@
 		 *     }
 		 * };
 		 */
-		createNS : function(n, o) {
+		createNS: function(n, o) {
 			var i, v;
 
 			o = o || win;
 
 			n = n.split('.');
-			for (i=0; i<n.length; i++) {
+			for (i = 0; i < n.length; i++) {
 				v = n[i];
 
 				if (!o[v])
@@ -672,7 +684,7 @@
 		 * // Resolve a path into an object reference
 		 * var obj = tinymce.resolve('a.b.c.d');
 		 */
-		resolve : function(n, o) {
+		resolve: function(n, o) {
 			var i, l;
 
 			o = o || win;
@@ -703,11 +715,13 @@
 		 *     someObject.someElement = null;
 		 * });
 		 */
-		addUnload : function(f, s) {
-			var t = this, unload;
+		addUnload: function(f, s) {
+			var t = this,
+				unload;
 
 			unload = function() {
-				var li = t.unloads, o, n;
+				var li = t.unloads,
+					o, n;
 
 				if (li) {
 					// Call unload handlers
@@ -764,7 +778,10 @@
 				}
 			};
 
-			f = {func : f, scope : s || this};
+			f = {
+				func: f,
+				scope: s || this
+			};
 
 			if (!t.unloads) {
 				// Attach unload handler
@@ -789,8 +806,9 @@
 		 * @param {function} f Function to remove from unload handler list.
 		 * @return {function} Removed function name or null if it wasn't found.
 		 */
-		removeUnload : function(f) {
-			var u = this.unloads, r = null;
+		removeUnload: function(f) {
+			var u = this.unloads,
+				r = null;
 
 			tinymce.each(u, function(o, i) {
 				if (o && o.func == f) {
@@ -813,7 +831,7 @@
 		 * // Split a string into an array with a,b,c
 		 * var arr = tinymce.explode('a, b,   c');
 		 */
-		explode : function(s, d) {
+		explode: function(s, d) {
 			if (!s || tinymce.is(s, 'array')) {
 				return s;
 			}
@@ -821,7 +839,7 @@
 			return tinymce.map(s.split(d || ','), tinymce.trim);
 		},
 
-		_addVer : function(u) {
+		_addVer: function(u) {
 			var v;
 
 			if (!this.query)
@@ -837,11 +855,13 @@
 
 		// Fix function for IE 9 where regexps isn't working correctly
 		// Todo: remove me once MS fixes the bug
-		_replace : function(find, replace, str) {
+		_replace: function(find, replace, str) {
 			// On IE9 we have to fake $x replacement
 			if (isRegExpBroken) {
 				return str.replace(find, function() {
-					var val = replace, args = arguments, i;
+					var val = replace,
+						args = arguments,
+						i;
 
 					for (i = 0; i < args.length - 2; i++) {
 						if (args[i] === undef) {
