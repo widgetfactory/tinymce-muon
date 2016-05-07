@@ -208,7 +208,7 @@
 
 				e = e.target;
 
-				if (e && (e = DOM.getParent(e, 'tr')) && !DOM.hasClass(e, cp + 'ItemSub')) {
+				if (e && (e = DOM.getParent(e, 'div')) && !DOM.hasClass(e, cp + 'ItemSub')) {					
 					m = t.items[e.id];
 
 					if (m.isDisabled())
@@ -235,7 +235,7 @@
 					var m, r, mi;
 
 					e = e.target;
-					if (e && (e = DOM.getParent(e, 'tr'))) {
+					if (e && (e = DOM.getParent(e, 'div'))) {
 						m = t.items[e.id];
 
 						if (t.lastMenu)
@@ -307,7 +307,7 @@
 			o = t.parent(o);
 
 			if (t.isRendered && (co = DOM.get('menu_' + t.id)))
-				t._add(DOM.select('tbody', co)[0], o);
+				t._add(co, o);
 
 			return o;
 		},
@@ -374,14 +374,14 @@
 			t.element = new Element('menu_' + t.id, {blocker : 1, container : s.container});
 
 			if (s.menu_line)
-				DOM.add(co, 'span', {'class' : t.classPrefix + 'Line'});
+				DOM.add(co, 'div', {'class' : t.classPrefix + 'Line'});
 
 //			n = DOM.add(co, 'div', {id : 'menu_' + t.id + '_co', 'class' : 'mceMenuContainer'});
-			n = DOM.add(co, 'table', {role: 'presentation', id : 'menu_' + t.id + '_tbl', border : 0, cellPadding : 0, cellSpacing : 0});
-			tb = DOM.add(n, 'tbody');
+			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl', border : 0, cellPadding : 0, cellSpacing : 0});
+			//tb = DOM.add(n, 'tbody');
 
 			each(t.items, function(o) {
-				t._add(tb, o);
+				t._add(n, o);
 			});
 
 			t.rendered = true;
@@ -427,8 +427,8 @@
 			var n, s = o.settings, a, ro, it, cp = this.classPrefix, ic;
 
 			if (s.separator) {
-				ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'ItemSeparator'});
-				DOM.add(ro, 'td', {'class' : cp + 'ItemSeparator'});
+				//ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'ItemSeparator'});
+				ro = DOM.add(tb, 'div', {'class' : cp + 'ItemSeparator'});
 
 				if (n = ro.previousSibling)
 					DOM.addClass(n, 'mceLast');
@@ -436,8 +436,9 @@
 				return;
 			}
 
-			n = ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'Item ' + cp + 'ItemEnabled'});
-			n = it = DOM.add(n, s.titleItem ? 'th' : 'td');
+			//n = ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'Item ' + cp + 'ItemEnabled'});
+			//n = it = DOM.add(n, s.titleItem ? 'th' : 'td');
+			n = it = DOM.add(tb, 'div', {id : o.id, 'class' : cp + 'Item ' + cp + 'ItemEnabled'});
 			n = a = DOM.add(n, 'a', {id: o.id + '_aria',  role: s.titleItem ? 'presentation' : 'option', href : 'javascript:;', onclick : "return false;", onmousedown : 'return false;'});
 
 			if (s.parent) {
@@ -463,18 +464,18 @@
 			}
 
 			if (tb.childNodes.length == 1)
-				DOM.addClass(ro, 'mceFirst');
+				DOM.addClass(it, 'mceFirst');
 
-			if ((n = ro.previousSibling) && DOM.hasClass(n, cp + 'ItemSeparator'))
+			if ((n = it.previousSibling) && DOM.hasClass(n, cp + 'ItemSeparator'))
 				DOM.addClass(ro, 'mceFirst');
 
 			if (o.collapse)
-				DOM.addClass(ro, cp + 'ItemSub');
+				DOM.addClass(it, cp + 'ItemSub');
 
-			if (n = ro.previousSibling)
+			if (n = it.previousSibling)
 				DOM.removeClass(n, 'mceLast');
 
-			DOM.addClass(ro, 'mceLast');
+			DOM.addClass(it, 'mceLast');
 		}
 	});
 })(tinymce);

@@ -73,9 +73,9 @@
 		 * @return {String} HTML for the split button control element.
 		 */
 		renderHTML : function() {
-			var h, t = this, s = t.settings, h1;
+			var h = '', t = this, s = t.settings, h1;
 
-			h = '<tbody><tr>';
+			//h = '<tbody><tr>';
 
 			if (s.image)
 				h1 = DOM.createHTML('img ', {src : s.image, role: 'presentation', 'class' : 'mceAction ' + s['class']});
@@ -83,13 +83,13 @@
 				h1 = DOM.createHTML('span', {'class' : 'mceAction ' + s['class']}, '');
 
 			h1 += DOM.createHTML('span', {'class': 'mceVoiceLabel mceIconOnly', id: t.id + '_voice', style: 'display:none;'}, s.title);
-			h += '<td >' + DOM.createHTML('a', {role: 'button', id : t.id + '_action', tabindex: '-1', href : 'javascript:;', 'class' : 'mceAction ' + s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</td>';
+			h += '<div class="mceText">' + DOM.createHTML('a', {role: 'button', id : t.id + '_action', tabindex: '-1', href : 'javascript:;', 'class' : s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</div>';
 	
 			h1 = DOM.createHTML('span', {'class' : 'mceOpen ' + s['class']}, '<span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span>');
-			h += '<td >' + DOM.createHTML('a', {role: 'button', id : t.id + '_open', tabindex: '-1', href : 'javascript:;', 'class' : 'mceOpen ' + s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</td>';
+			h += '<div class="mceOpen">' + DOM.createHTML('a', {role: 'button', id : t.id + '_open', tabindex: '-1', href : 'javascript:;', 'class' : s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</div>';
 
-			h += '</tr></tbody>';
-			h = DOM.createHTML('table', { role: 'presentation',   'class' : 'mceSplitButton mceSplitButtonEnabled ' + s['class'], cellpadding : '0', cellspacing : '0', title : s.title}, h);
+			//h += '</tr></tbody>';
+			h = DOM.createHTML('div', { role: 'presentation',   'class' : 'mceSplitButton mceSplitButtonEnabled ' + s['class'], title : s.title}, h);
 			return DOM.createHTML('div', {id : t.id, role: 'button', tabindex: '0', 'aria-labelledby': t.id + '_voice', 'aria-haspopup': 'true'}, h);
 		},
 
