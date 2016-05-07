@@ -26,7 +26,7 @@
 				return node &&
 					dom.isBlock(node) &&
 					!/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
-					!/^(fixed|absolute)/i.test(node.style.position) && 
+					!/^(fixed|absolute)/i.test(node.style.position) &&
 					dom.getContentEditable(node) !== "true";
 			};
 
@@ -75,7 +75,7 @@
 					}
 				}
 			};
-			
+
 			// Moves the caret to a suitable position within the root for example in the first non pure whitespace text node or before an image
 			function moveToCaretPosition(root) {
 				var walker, node, rng, y, viewPort, lastNode = root, tempElm;
@@ -178,13 +178,9 @@
 				}
 
 				// BR is needed in empty blocks on non IE browsers
-<<<<<<< HEAD
-				emptyBlock(caretNode);
-=======
 				if (!tinymce.isIE || tinymce.isIE11) {
 					caretNode.innerHTML = '<br data-mce-bogus="1">';
 				}
->>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 
 				return block;
 			};
@@ -215,7 +211,7 @@
 
 				// Walk the DOM and look for text nodes or non empty elements
 				walker = new TreeWalker(container, parentBlock);
-	
+
 				// If caret is in beginning or end of a text block then jump to the next/previous node
 				if (container.nodeType == 3) {
 					if (start && offset == 0) {
@@ -419,7 +415,7 @@
 
 					parent = parent.parentNode;
 				}
-				
+
 				return parent !== root ? editableRoot : root;
 			};
 
@@ -428,11 +424,7 @@
 				var lastChild;
 
 				// IE will render the blocks correctly other browsers needs a BR
-<<<<<<< HEAD
-				if (!tinymce.isIE && !tinymce.isIE12) {
-=======
 				if (!tinymce.isIE || tinymce.isIE11) {
->>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 					block.normalize(); // Remove empty text nodes that got left behind by the extract
 
 					// Check if the block is empty or contains a floated last child
@@ -526,11 +518,7 @@
 					if (/^(UL|OL|LI)$/.test(containerBlock.parentNode.nodeName)) {
 						return false;
 					}
-<<<<<<< HEAD
-					
-=======
 
->>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 					handleEmptyListItem();
 					return;
 				}
