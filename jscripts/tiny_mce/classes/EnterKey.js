@@ -9,13 +9,13 @@
  */
 
 (function(tinymce) {
-	var TreeWalker = tinymce.dom.TreeWalker, RangeUtils = tinymce.dom.RangeUtils;
+	var TreeWalker = tinymce.dom.TreeWalker;
 
 	/**
 	 * Contains logic for handling the enter key to split/generate block elements.
 	 */
 	tinymce.EnterKey = function(editor) {
-		var dom = editor.dom, selection = editor.selection, settings = editor.settings, undoManager = editor.undoManager, schema = editor.schema, nonEmptyElementsMap = schema.getNonEmptyElements(), moveCaretBeforeOnEnterElementsMap = schema.getMoveCaretBeforeOnEnterElements();
+		var dom = editor.dom, selection = editor.selection, settings = editor.settings, undoManager = editor.undoManager, nonEmptyElementsMap = editor.schema.getNonEmptyElements();
 
 		function handleEnterKey(evt) {
 			var rng = selection.getRng(true), tmpRng, editableRoot, container, offset, parentBlock, documentMode, shiftKey,
@@ -26,26 +26,22 @@
 				return node &&
 					dom.isBlock(node) &&
 					!/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
-					!/^(fixed|absolute)/i.test(node.style.position) &&
+					!/^(fixed|absolute)/i.test(node.style.position) && 
 					dom.getContentEditable(node) !== "true";
-			}
-
-			function isTableCell(node) {
-				return node && /^(TD|TH|CAPTION)$/.test(node.nodeName);
-			}
+			};
 
 			// Renders empty block on IE
 			function renderBlockOnIE(block) {
 				var oldRng;
 
-				if (tinymce.isIE < 11 && dom.isBlock(block)) {
+				if (tinymce.isIE && !tinymce.isIE11 && dom.isBlock(block)) {
 					oldRng = selection.getRng();
 					block.appendChild(dom.create('span', null, '\u00a0'));
 					selection.select(block);
 					block.lastChild.outerHTML = '';
 					selection.setRng(oldRng);
 				}
-			}
+			};
 
 			// Remove the first empty inline element of the block so this: <p><b><em></em></b>x</p> becomes this: <p>x</p>
 			function trimInlineElementsOnLeftSideOfBlock(block) {
@@ -78,51 +74,13 @@
 						}
 					}
 				}
-			}
-
-			// Moves the caret to a suitable position within the root for example in the first non
-			// pure whitespace text node or before an image
+			};
+			
+			// Moves the caret to a suitable position within the root for example in the first non pure whitespace text node or before an image
 			function moveToCaretPosition(root) {
-				var walker, node, rng, lastNode = root, tempElm;
-				function firstNonWhiteSpaceNodeSibling(node) {
-					while (node) {
-						if (node.nodeType == 1 || (node.nodeType == 3 && node.data && /[\r\n\s]/.test(node.data))) {
-							return node;
-						}
-
-						node = node.nextSibling;
-					}
-				}
-
-				if (!root) {
-					return;
-				}
-
-				// Old IE versions doesn't properly render blocks with br elements in them
-				// For example <p><br></p> wont be rendered correctly in a contentEditable area
-				// until you remove the br producing <p></p>
-				if (tinymce.isIE < 9 && parentBlock && parentBlock.firstChild) {
-					if (parentBlock.firstChild == parentBlock.lastChild && parentBlock.firstChild.tagName == 'BR') {
-						dom.remove(parentBlock.firstChild);
-					}
-				}
-
-				if (/^(LI|DT|DD)$/.test(root.nodeName)) {
-					var firstChild = firstNonWhiteSpaceNodeSibling(root.firstChild);
-
-					if (firstChild && /^(UL|OL|DL)$/.test(firstChild.nodeName)) {
-						root.insertBefore(dom.doc.createTextNode('\u00a0'), root.firstChild);
-					}
-				}
+				var walker, node, rng, y, viewPort, lastNode = root, tempElm;
 
 				rng = dom.createRng();
-
-				// Normalize whitespace to remove empty text nodes. Fix for: #6904
-				// Gecko will be able to place the caret in empty text nodes but it won't render propery
-				// Older IE versions will sometimes crash so for now ignore all IE versions
-				if (!tinymce.isIE && !tinymce.isIE12) {
-					root.normalize();
-				}
 
 				if (root.hasChildNodes()) {
 					walker = new TreeWalker(root, root);
@@ -134,7 +92,7 @@
 							break;
 						}
 
-						if (moveCaretBeforeOnEnterElementsMap[node.nodeName.toLowerCase()]) {
+						if (nonEmptyElementsMap[node.nodeName.toLowerCase()]) {
 							rng.setStartBefore(node);
 							rng.setEndBefore(node);
 							break;
@@ -173,30 +131,23 @@
 
 				// Remove tempElm created for old IE:s
 				dom.remove(tempElm);
-				selection.scrollIntoView(root);
-			}
 
-			function setForcedBlockAttrs(node) {
-				var forcedRootBlockName = settings.forced_root_block;
+				viewPort = dom.getViewPort(editor.getWin());
 
-				if (forcedRootBlockName && forcedRootBlockName.toLowerCase() === node.tagName.toLowerCase()) {
-					dom.setAttribs(node, settings.forced_root_block_attrs);
+				// scrollIntoView seems to scroll the parent window in most browsers now including FF 3.0b4 so it's time to stop using it and do it our selfs
+				y = dom.getPos(root).y;
+				if (y < viewPort.y || y + 25 > viewPort.y + viewPort.h) {
+					editor.getWin().scrollTo(0, y < viewPort.y ? y : y - viewPort.h + 25); // Needs to be hardcoded to roughly one line of text if a huge text block is broken into two blocks
 				}
-			}
-
-			function emptyBlock(elm) {
-				// BR is needed in empty blocks on non IE browsers
-				elm.innerHTML = (!tinymce.isIE && !tinymce.isIE12) ? '<br data-mce-bogus="1">' : '';
-			}
+			};
 
 			// Creates a new block element by cloning the current one or creating a new one if the name is specified
 			// This function will also copy any text formatting from the parent block and add it to the new one
 			function createNewBlock(name) {
-				var node = container, block, clonedNode, caretNode, textInlineElements = schema.getTextInlineElements();
+				var node = container, block, clonedNode, caretNode;
 
 				if (name || parentBlockName == "TABLE") {
 					block = dom.create(name || newBlockName);
-					setForcedBlockAttrs(block);
 				} else {
 					block = settings.keep_attributes ? parentBlock.cloneNode(false) : dom.create(parentBlock.nodeName);
 				}
@@ -206,7 +157,7 @@
 				// Clone any parent styles
 				if (settings.keep_styles !== false) {
 					do {
-						if (textInlineElements[node.nodeName]) {
+						if (/^(SPAN|STRONG|B|EM|I|FONT|STRIKE|U)$/.test(node.nodeName)) {
 							// Never clone a caret containers
 							if (node.id == '_mce_caret') {
 								continue;
@@ -223,14 +174,20 @@
 								block.appendChild(clonedNode);
 							}
 						}
-					} while ((node = node.parentNode) && node != editableRoot);
+					} while (node = node.parentNode);
 				}
 
 				// BR is needed in empty blocks on non IE browsers
+<<<<<<< HEAD
 				emptyBlock(caretNode);
+=======
+				if (!tinymce.isIE || tinymce.isIE11) {
+					caretNode.innerHTML = '<br data-mce-bogus="1">';
+				}
+>>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 
 				return block;
-			}
+			};
 
 			// Returns true/false if the caret is at the start/end of the parent block element
 			function isCaretAtStartOrEndOfBlock(start) {
@@ -258,17 +215,17 @@
 
 				// Walk the DOM and look for text nodes or non empty elements
 				walker = new TreeWalker(container, parentBlock);
-
+	
 				// If caret is in beginning or end of a text block then jump to the next/previous node
 				if (container.nodeType == 3) {
-					if (start && offset === 0) {
+					if (start && offset == 0) {
 						walker.prev();
 					} else if (!start && offset == container.nodeValue.length) {
 						walker.next();
 					}
 				}
 
-				while ((node = walker.current())) {
+				while (node = walker.current()) {
 					if (node.nodeType === 1) {
 						// Ignore bogus elements
 						if (!node.getAttribute('data-mce-bogus')) {
@@ -290,26 +247,19 @@
 				}
 
 				return true;
-			}
+			};
 
 			// Wraps any text nodes or inline elements in the specified forced root block name
 			function wrapSelfAndSiblingsInDefaultBlock(container, offset) {
-				var newBlock, parentBlock, startNode, node, next, rootBlockName, blockName = newBlockName || 'P';
+				var newBlock, parentBlock, startNode, node, next, blockName = newBlockName || 'P';
 
 				// Not in a block element or in a table cell or caption
 				parentBlock = dom.getParent(container, dom.isBlock);
 				if (!parentBlock || !canSplitBlock(parentBlock)) {
 					parentBlock = parentBlock || editableRoot;
 
-					if (parentBlock == editor.getBody() || isTableCell(parentBlock)) {
-						rootBlockName = parentBlock.nodeName.toLowerCase();
-					} else {
-						rootBlockName = parentBlock.parentNode.nodeName.toLowerCase();
-					}
-
 					if (!parentBlock.hasChildNodes()) {
 						newBlock = dom.create(blockName);
-						setForcedBlockAttrs(newBlock);
 						parentBlock.appendChild(newBlock);
 						rng.setStart(newBlock, 0);
 						rng.setEnd(newBlock, 0);
@@ -328,9 +278,8 @@
 						node = node.previousSibling;
 					}
 
-					if (startNode && schema.isValidChild(rootBlockName, blockName.toLowerCase())) {
+					if (startNode) {
 						newBlock = dom.create(blockName);
-						setForcedBlockAttrs(newBlock);
 						startNode.parentNode.insertBefore(newBlock, startNode);
 
 						// Start wrapping until we hit a block
@@ -348,7 +297,7 @@
 				}
 
 				return container;
-			}
+			};
 
 			// Inserts a block or br before/after or in the middle of a split list of the LI is empty
 			function handleEmptyListItem() {
@@ -365,79 +314,87 @@
 					}
 
 					return node === parentBlock;
-				}
-
-				function getContainerBlock() {
-					var containerBlockParent = containerBlock.parentNode;
-
-					if (/^(LI|DT|DD)$/.test(containerBlockParent.nodeName)) {
-						return containerBlockParent;
-					}
-
-					return containerBlock;
-				}
-
-				if (containerBlock == editor.getBody()) {
-					return;
-				}
-
-				// Check if we are in an nested list
-				var containerBlockParentName = containerBlock.parentNode.nodeName;
-				if (/^(OL|UL|LI)$/.test(containerBlockParentName)) {
-					newBlockName = 'LI';
-				}
+				};
 
 				newBlock = newBlockName ? createNewBlock(newBlockName) : dom.create('BR');
 
 				if (isFirstOrLastLi(true) && isFirstOrLastLi()) {
-					if (containerBlockParentName == 'LI') {
-						// Nested list is inside a LI
-						dom.insertAfter(newBlock, getContainerBlock());
-					} else {
-						// Is first and last list item then replace the OL/UL with a text block
-						dom.replace(newBlock, containerBlock);
-					}
+					// Is first and last list item then replace the OL/UL with a text block
+					dom.replace(newBlock, containerBlock);
 				} else if (isFirstOrLastLi(true)) {
-					if (containerBlockParentName == 'LI') {
-						// List nested in an LI then move the list to a new sibling LI
-						dom.insertAfter(newBlock, getContainerBlock());
-						newBlock.appendChild(dom.doc.createTextNode(' ')); // Needed for IE so the caret can be placed
-						newBlock.appendChild(containerBlock);
-					} else {
-						// First LI in list then remove LI and add text block before list
-						containerBlock.parentNode.insertBefore(newBlock, containerBlock);
-					}
+					// First LI in list then remove LI and add text block before list
+					containerBlock.parentNode.insertBefore(newBlock, containerBlock);
 				} else if (isFirstOrLastLi()) {
-					// Last LI in list then remove LI and add text block after list
-					dom.insertAfter(newBlock, getContainerBlock());
+					// Last LI in list then temove LI and add text block after list
+					dom.insertAfter(newBlock, containerBlock);
 					renderBlockOnIE(newBlock);
 				} else {
 					// Middle LI in list the split the list and insert a text block in the middle
 					// Extract after fragment and insert it after the current block
-					containerBlock = getContainerBlock();
 					tmpRng = rng.cloneRange();
 					tmpRng.setStartAfter(parentBlock);
 					tmpRng.setEndAfter(containerBlock);
 					fragment = tmpRng.extractContents();
-
-					if (newBlockName == 'LI' && fragment.firstChild.nodeName == 'LI') {
-						newBlock = fragment.firstChild;
-						dom.insertAfter(fragment, containerBlock);
-					} else {
-						dom.insertAfter(fragment, containerBlock);
-						dom.insertAfter(newBlock, containerBlock);
-					}
+					dom.insertAfter(fragment, containerBlock);
+					dom.insertAfter(newBlock, containerBlock);
 				}
 
 				dom.remove(parentBlock);
 				moveToCaretPosition(newBlock);
 				undoManager.add();
+			};
+
+			// Walks the parent block to the right and look for any contents
+			function hasRightSideContent() {
+				var walker = new TreeWalker(container, parentBlock), node;
+
+				while (node = walker.next()) {
+					if (nonEmptyElementsMap[node.nodeName.toLowerCase()] || node.length > 0) {
+						return true;
+					}
+				}
 			}
 
 			// Inserts a BR element if the forced_root_block option is set to false or empty string
 			function insertBr() {
-				editor.execCommand("InsertLineBreak", false, evt);
-			}
+				var brElm, extraBr, marker;
+
+				if (container && container.nodeType == 3 && offset >= container.nodeValue.length) {
+					// Insert extra BR element at the end block elements
+					if ((!tinymce.isIE || tinymce.isIE11) && !hasRightSideContent()) {
+						brElm = dom.create('br');
+						rng.insertNode(brElm);
+						rng.setStartAfter(brElm);
+						rng.setEndAfter(brElm);
+						extraBr = true;
+					}
+				}
+
+				brElm = dom.create('br');
+				rng.insertNode(brElm);
+
+				// Rendering modes below IE8 doesn't display BR elements in PRE unless we have a \n before it
+				if ((tinymce.isIE && !tinymce.isIE11) && parentBlockName == 'PRE' && (!documentMode || documentMode < 8)) {
+					brElm.parentNode.insertBefore(dom.doc.createTextNode('\r'), brElm);
+				}
+
+				// Insert temp marker and scroll to that
+				marker = dom.create('span', {}, '&nbsp;');
+				brElm.parentNode.insertBefore(marker, brElm);
+				selection.scrollIntoView(marker);
+				dom.remove(marker);
+
+				if (!extraBr) {
+					rng.setStartAfter(brElm);
+					rng.setEndAfter(brElm);
+				} else {
+					rng.setStartBefore(brElm);
+					rng.setEndBefore(brElm);
+				}
+
+				selection.setRng(rng);
+				undoManager.add();
+			};
 
 			// Trims any linebreaks at the beginning of node user for example when pressing enter in a PRE element
 			function trimLeadingLineBreaks(node) {
@@ -448,7 +405,7 @@
 
 					node = node.firstChild;
 				} while (node);
-			}
+			};
 
 			function getEditableRoot(node) {
 				var root = dom.getRoot(), parent, editableRoot;
@@ -462,17 +419,20 @@
 
 					parent = parent.parentNode;
 				}
-
+				
 				return parent !== root ? editableRoot : root;
-			}
+			};
 
-			// Adds a BR at the end of blocks that only contains an IMG or INPUT since
-			// these might be floated and then they won't expand the block
+			// Adds a BR at the end of blocks that only contains an IMG or INPUT since these might be floated and then they won't expand the block
 			function addBrToBlockIfNeeded(block) {
 				var lastChild;
 
 				// IE will render the blocks correctly other browsers needs a BR
+<<<<<<< HEAD
 				if (!tinymce.isIE && !tinymce.isIE12) {
+=======
+				if (!tinymce.isIE || tinymce.isIE11) {
+>>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 					block.normalize(); // Remove empty text nodes that got left behind by the extract
 
 					// Check if the block is empty or contains a floated last child
@@ -481,33 +441,7 @@
 						dom.add(block, 'br');
 					}
 				}
-			}
-
-			function insertNewBlockAfter() {
-				// If the caret is at the end of a header we produce a P tag after it similar to Word unless we are in a hgroup
-				if (/^(H[1-6]|PRE|FIGURE)$/.test(parentBlockName) && containerBlockName != 'HGROUP') {
-					newBlock = createNewBlock(newBlockName);
-				} else {
-					newBlock = createNewBlock();
-				}
-
-				// Split the current container block element if enter is pressed inside an empty inner block element
-				if (settings.end_container_on_empty_block && canSplitBlock(containerBlock) && dom.isEmpty(parentBlock)) {
-					// Split container block for example a BLOCKQUOTE at the current blockParent location for example a P
-					newBlock = dom.split(containerBlock, parentBlock);
-				} else {
-					dom.insertAfter(newBlock, parentBlock);
-				}
-
-				moveToCaretPosition(newBlock);
-			}
-
-			rng = selection.getRng(true);
-
-			// Event is blocked by some other handler for example the lists plugin
-			if (evt.isDefaultPrevented()) {
-				return;
-			}
+			};
 
 			// Delete any selected contents
 			if (!rng.collapsed) {
@@ -515,8 +449,12 @@
 				return;
 			}
 
+			// Event is blocked by some other handler for example the lists plugin
+			if (evt.isDefaultPrevented()) {
+				return;
+			}
+
 			// Setup range items and newBlockName
-			new RangeUtils(dom).normalize(rng);
 			container = rng.startContainer;
 			offset = rng.startOffset;
 			newBlockName = (settings.force_p_newlines ? 'p' : '') || settings.forced_root_block;
@@ -527,7 +465,6 @@
 			// Resolve node index
 			if (container.nodeType == 1 && container.hasChildNodes()) {
 				isAfterLastNodeInContainer = offset > container.childNodes.length - 1;
-
 				container = container.childNodes[Math.min(offset, container.childNodes.length - 1)] || container;
 				if (isAfterLastNodeInContainer && container.nodeType == 3) {
 					offset = container.nodeValue.length;
@@ -536,7 +473,7 @@
 				}
 			}
 
-			// Get editable root node, normally the body element but sometimes a div or span
+			// Get editable root node normaly the body element but sometimes a div or span
 			editableRoot = getEditableRoot(container);
 
 			// If there is no editable root then enter is done inside a contentEditable false element
@@ -576,8 +513,8 @@
 				parentBlockName = containerBlockName;
 			}
 
-			// Handle enter in list item
-			if (/^(LI|DT|DD)$/.test(parentBlockName)) {
+			// Handle enter in LI
+			if (parentBlockName == 'LI') {
 				if (!newBlockName && shiftKey) {
 					insertBr();
 					return;
@@ -589,7 +526,11 @@
 					if (/^(UL|OL|LI)$/.test(containerBlock.parentNode.nodeName)) {
 						return false;
 					}
+<<<<<<< HEAD
 					
+=======
+
+>>>>>>> parent of 15ad642... Update EnterKey to tinymce 4.3.8
 					handleEmptyListItem();
 					return;
 				}
@@ -609,22 +550,31 @@
 				}
 			}
 
-			// If parent block is root then never insert new blocks
-			if (newBlockName && parentBlock === editor.getBody()) {
-				return;
-			}
-
 			// Default block name if it's not configured
 			newBlockName = newBlockName || 'P';
 
 			// Insert new block before/after the parent block depending on caret location
 			if (isCaretAtStartOrEndOfBlock()) {
-				insertNewBlockAfter();
+				// If the caret is at the end of a header we produce a P tag after it similar to Word unless we are in a hgroup
+				if (/^(H[1-6]|PRE)$/.test(parentBlockName) && containerBlockName != 'HGROUP') {
+					newBlock = createNewBlock(newBlockName);
+				} else {
+					newBlock = createNewBlock();
+				}
+
+				// Split the current container block element if enter is pressed inside an empty inner block element
+				if (settings.end_container_on_empty_block && canSplitBlock(containerBlock) && dom.isEmpty(parentBlock)) {
+					// Split container block for example a BLOCKQUOTE at the current blockParent location for example a P
+					newBlock = dom.split(containerBlock, parentBlock);
+				} else {
+					dom.insertAfter(newBlock, parentBlock);
+				}
+
+				moveToCaretPosition(newBlock);
 			} else if (isCaretAtStartOrEndOfBlock(true)) {
 				// Insert new block before
 				newBlock = parentBlock.parentNode.insertBefore(createNewBlock(), parentBlock);
 				renderBlockOnIE(newBlock);
-				moveToCaretPosition(parentBlock);
 			} else {
 				// Extract after fragment and insert it after the current block
 				tmpRng = rng.cloneRange();
@@ -635,20 +585,7 @@
 				dom.insertAfter(fragment, parentBlock);
 				trimInlineElementsOnLeftSideOfBlock(newBlock);
 				addBrToBlockIfNeeded(parentBlock);
-
-				if (dom.isEmpty(parentBlock)) {
-					emptyBlock(parentBlock);
-				}
-
-				newBlock.normalize();
-
-				// New block might become empty if it's <p><b>a |</b></p>
-				if (dom.isEmpty(newBlock)) {
-					dom.remove(newBlock);
-					insertNewBlockAfter();
-				} else {
-					moveToCaretPosition(newBlock);
-				}
+				moveToCaretPosition(newBlock);
 			}
 
 			dom.setAttrib(newBlock, 'id', ''); // Remove ID since it needs to be document unique
