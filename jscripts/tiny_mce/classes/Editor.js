@@ -448,8 +448,9 @@
 				t.orgDisplay = e.style.display;
 
 				if (typeof s.theme != "function") {
-					w = s.width || e.style.width || e.offsetWidth;
+					w = s.width;// || e.style.width || e.offsetWidth;
 					h = s.height || e.style.height || e.offsetHeight;
+
 					mh = s.min_height || 100;
 					re = /^[0-9\.]+(|px)$/i;
 
@@ -470,13 +471,15 @@
 						deltaHeight : s.delta_height
 					});
 
-					// Resize editor
-					DOM.setStyles(o.sizeContainer || o.editorContainer, {
-						width : w,
-						height : h
-					});
+					if (w) {
+						// Resize editor
+						DOM.setStyles(o.sizeContainer || o.editorContainer, {
+							width : w
+						});
+					}
 
 					h = (o.iframeHeight || h) + (typeof(h) == 'number' ? (o.deltaHeight || 0) : '');
+
 					if (h < mh) {
 						h = mh;
 					}
@@ -593,9 +596,7 @@
 				allowTransparency : "true",
 				title : s.aria_label,
 				style : {
-					width : '100%',
-					height : h,
-					display : 'block' // Important for Gecko to render the iframe correctly
+					height : h
 				}
 			});
 
