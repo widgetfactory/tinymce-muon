@@ -159,6 +159,10 @@
 		 */
 		renderMenu : function() {
 			var t = this, m, i = 0, s = t.settings, n, tb, tr, w, context;
+			
+			if (s.menu_class.indexOf('defaultSkin') === -1) {
+				s.menu_class = 'defaultSkin ' + s.menu_class;
+			}
 
 			w = DOM.add(s.menu_container, 'div', {role: 'listbox', id : t.id + '_menu', 'class' : s.menu_class + ' ' + s['class'], style : 'position:absolute;left:0;top:-1000px;'});
 			m = DOM.add(w, 'div', {'class' : s['class'] + ' mceSplitButtonMenu'});

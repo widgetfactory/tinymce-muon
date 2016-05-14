@@ -365,6 +365,10 @@
 		 */
 		renderNode : function() {
 			var t = this, s = t.settings, n, tb, co, w;
+			
+			if (s['class'].indexOf('defaultSkin') === -1) {
+				s['class'] = 'defaultSkin ' + s['class'];
+			}
 
 			w = DOM.create('div', {role: 'listbox', id : 'menu_' + t.id, 'class' : s['class'], 'style' : 'position:absolute;left:0;top:0;z-index:200000;outline:0'});
 			if (t.settings.parent) {
@@ -377,7 +381,7 @@
 				DOM.add(co, 'div', {'class' : t.classPrefix + 'Line'});
 
 //			n = DOM.add(co, 'div', {id : 'menu_' + t.id + '_co', 'class' : 'mceMenuContainer'});
-			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl', border : 0, cellPadding : 0, cellSpacing : 0});
+			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl'});
 			//tb = DOM.add(n, 'tbody');
 
 			each(t.items, function(o) {

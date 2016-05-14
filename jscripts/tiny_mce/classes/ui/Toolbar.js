@@ -34,57 +34,35 @@ tinymce.create('tinymce.ui.Toolbar:tinymce.ui.Container', {
 			co = cl[i];
 			pr = cl[i - 1];
 			nx = cl[i + 1];
+			
+			c = ' mceToolBarItem';
+			
+			if (co.Button) {
+				c += 'Button';
+			} else if (co.SplitButton) {
+				c += 'SplitButton';
+			} else if (co.ListBox) {
+				c += 'ListBox';
+			}
 
-			// Add toolbar start
-			if (i === 0) {
-				c = ' mceToolbarStart';
-
-				if (co.Button) {
-					c += ' mceToolbarStartButton';
-				} else if (co.SplitButton) {
-					c += ' mceToolbarStartSplitButton';
-				} else if (co.ListBox) {
-					c += ' mceToolbarStartListBox';
-				}
-
-				//h += dom.createHTML('div', {'class' : c}, '');
+			
+			// Add toolbar start after list box and before the next button
+			// This is to fix the o2k7 editor skins
+			if (nx && nx.ListBox && (co.Button || co.SplitButton)) {
+				c += ' mceToolBarItemEnd';
 			}
 			
-			if (i === cl.length - 1) {
-				c = ' mceToolbarEnd';
-
-				if (co.Button) {
-					c += ' mceToolbarEndButton';
-				} else if (co.SplitButton) {
-					c += ' mceToolbarEndSplitButton';
-				} else if (co.ListBox) {
-					c += ' mceToolbarEndListBox';
-				}
-			}
-
 			// Add toolbar end before list box and after the previous button
 			// This is to fix the o2k7 editor skins
-			if (pr && co.ListBox) {
-				if (pr.Button || pr.SplitButton) {
-					h += dom.createHTML('div', {'class': 'mceToolbarEnd'}, '');
-				}
+			if (pr && pr.ListBox && (co.Button || co.SplitButton)) {
+				c += ' mceToolBarItemStart';
 			}
 
 			// Render control HTML
 			h += '<div class="mceToolBarItem' + c + '">' + co.renderHTML() + '</div>';
 			
 			c = '';
-
-			// Add toolbar start after list box and before the next button
-			// This is to fix the o2k7 editor skins
-			if (nx && co.ListBox) {
-				if (nx.Button || nx.SplitButton) {
-					h += dom.createHTML('div', {'class': 'mceToolbarStart'}, '');
-				}
-			}
 		}
-
-		//h += dom.createHTML('div', {'class' : c}, '');
 
 		return dom.createHTML('div', {id : t.id, 'class' : 'mceToolbarRow' + (s['class'] ? ' ' + s['class'] : ''), role: 'toolbar', tabindex: '-1'}, h);
 	}
