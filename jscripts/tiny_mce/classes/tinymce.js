@@ -92,7 +92,7 @@
 
 			var isIE = !t.isWebKit && !t.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName);
 
-			isIE = isIE && /MSIE (\w+)\./.exec(us)[1];
+			isIE = isIE && /MSIE (\w+)\./.exec(ua)[1];
 
 			t.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1) ? 11 : false;
 
