@@ -57,7 +57,7 @@ tinyMCEPopup = {
 		 * tinyMCEPopup.onInit.add(function(ed) {
 		 *     alert(ed.selection.getContent());
 		 * });
-		 * 
+		 *
 		 * // Executes the init method on page load in some object using the SomeObject scope
 		 * tinyMCEPopup.onInit.add(SomeObject.init, SomeObject);
 		 */
@@ -248,9 +248,9 @@ tinyMCEPopup = {
 	 * @param {string} type Type of browser to open image/file/flash.
 	 * @param {string} option Option name to get the file_broswer_callback function name from.
 	 */
-	openBrowser : function(element_id, type, option) {
+	openBrowser : function(args) {
 		tinyMCEPopup.restoreSelection();
-		this.editor.execCallback('file_browser_callback', element_id, document.getElementById(element_id).value, type, window);
+		this.editor.execCallback('file_browser_callback', args, window);
 	},
 
 	/**
@@ -299,7 +299,7 @@ tinyMCEPopup = {
 			close();
 	},
 
-	// Internal functions	
+	// Internal functions
 
 	_restoreSelection : function(e) {
 		var e = (e && e.target) || window.event.srcElement;
