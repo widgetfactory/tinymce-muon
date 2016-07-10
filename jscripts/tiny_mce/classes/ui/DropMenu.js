@@ -204,12 +204,12 @@
 
 			t.isMenuVisible = 1;
 			t.mouseClickFunc = Event.add(co, 'click', function(e) {
-				var m;
+				var m, n;
 
-				e = e.target;
+				n = e.target;
 
-				if (e && (e = DOM.getParent(e, 'div')) && !DOM.hasClass(e, cp + 'ItemSub')) {					
-					m = t.items[e.id];
+				if (n && (n = DOM.getParent(n, 'div.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {					
+					m = t.items[n.id];
 
 					if (m.isDisabled())
 						return;
@@ -230,31 +230,34 @@
 				}
 			});
 
-			if (t.hasMenus()) {
-				t.mouseOverFunc = Event.add(co, 'mouseover', function(e) {
-					var m, r, mi;
+			t.mouseOverFunc = Event.add(co, 'mouseover', function(e) {
+				var m, r, mi, n;
 
-					e = e.target;
-					if (e && (e = DOM.getParent(e, 'div'))) {
-						m = t.items[e.id];
-
+				n = e.target;
+					
+				if (n && (n = DOM.getParent(n, 'div.mceMenuItem'))) {
+					m = t.items[n.id];
+						
+					if (t.hasMenus()) {
 						if (t.lastMenu)
 							t.lastMenu.collapse(1);
 
 						if (m.isDisabled())
 							return;
 
-						if (e && DOM.hasClass(e, cp + 'ItemSub')) {
-							//p = DOM.getPos(s.container);
-							r = DOM.getRect(e);
+						if (n && DOM.hasClass(n, cp + 'ItemSub')) {
+							r = DOM.getRect(n);
 							m.showMenu((r.x + r.w - ot), r.y - ot, r.x);
 							t.lastMenu = m;
 							DOM.addClass(DOM.get(m.id).firstChild, cp + 'ItemActive');
 						}
 					}
-				});
-			}
-			
+
+					if (m.settings.onmouseover)
+						m.settings.onmouseover(e);
+				}
+			});
+
 			Event.add(co, 'keydown', t._keyHandler, t);
 
 			t.onShowMenu.dispatch(t);
@@ -371,18 +374,19 @@
 			}
 
 			w = DOM.create('div', {role: 'listbox', id : 'menu_' + t.id, 'class' : s['class'], 'style' : 'position:absolute;left:0;top:0;z-index:200000;outline:0'});
+			
 			if (t.settings.parent) {
 				DOM.setAttrib(w, 'aria-parent', 'menu_' + t.settings.parent.id);
 			}
+			
 			co = DOM.add(w, 'div', {role: 'presentation', id : 'menu_' + t.id + '_co', 'class' : t.classPrefix + (s['class'] ? ' ' + s['class'] : '')});
 			t.element = new Element('menu_' + t.id, {blocker : 1, container : s.container});
 
-			if (s.menu_line)
+			if (s.menu_line) {
 				DOM.add(co, 'div', {'class' : t.classPrefix + 'Line'});
+			}
 
-//			n = DOM.add(co, 'div', {id : 'menu_' + t.id + '_co', 'class' : 'mceMenuContainer'});
 			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl'});
-			//tb = DOM.add(n, 'tbody');
 
 			each(t.items, function(o) {
 				t._add(n, o);
@@ -431,7 +435,6 @@
 			var n, s = o.settings, a, ro, it, cp = this.classPrefix, ic;
 
 			if (s.separator) {
-				//ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'ItemSeparator'});
 				ro = DOM.add(tb, 'div', {'class' : cp + 'ItemSeparator'});
 
 				if (n = ro.previousSibling)
@@ -440,31 +443,38 @@
 				return;
 			}
 
-			//n = ro = DOM.add(tb, 'tr', {id : o.id, 'class' : cp + 'Item ' + cp + 'ItemEnabled'});
-			//n = it = DOM.add(n, s.titleItem ? 'th' : 'td');
 			n = it = DOM.add(tb, 'div', {id : o.id, 'class' : cp + 'Item ' + cp + 'ItemEnabled'});
-			n = a = DOM.add(n, 'a', {id: o.id + '_aria',  role: s.titleItem ? 'presentation' : 'option', href : 'javascript:;', onclick : "return false;", onmousedown : 'return false;'});
+			
+			if (s.html) {
+				n = DOM.add(n, 'div', {'class' : 'mceMenuHtml'}, s.html);
+			} else {
+				n = a = DOM.add(n, 'a', {id: o.id + '_aria',  role: s.titleItem ? 'presentation' : 'option', href : 'javascript:;', onclick : "return false;", onmousedown : 'return false;'});
+				
+				ic = DOM.add(n, 'span', {'class' : 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')});
 
-			if (s.parent) {
-				DOM.setAttrib(a, 'aria-haspopup', 'true');
-				DOM.setAttrib(a, 'aria-owns', 'menu_' + o.id);
+				if (s.icon_src) {
+					DOM.add(ic, 'img', {src : s.icon_src});
+				}
+
+				n = DOM.add(n, s.element || 'span', {'class' : 'mceText', title : o.settings.title}, o.settings.title);
+				
+				if (s.parent) {
+					DOM.setAttrib(a, 'aria-haspopup', 'true');
+					DOM.setAttrib(a, 'aria-owns', 'menu_' + o.id);
+				}
 			}
 
 			DOM.addClass(it, s['class']);
-//			n = DOM.add(n, 'span', {'class' : 'item'});
-
-			ic = DOM.add(n, 'span', {'class' : 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')});
-
-			if (s.icon_src)
-				DOM.add(ic, 'img', {src : s.icon_src});
-
-			n = DOM.add(n, s.element || 'span', {'class' : 'mceText', title : o.settings.title}, o.settings.title);
 
 			if (o.settings.style) {
 				if (typeof o.settings.style == "function")
 					o.settings.style = o.settings.style();
 
 				DOM.setAttrib(n, 'style', o.settings.style);
+			}
+			
+			if (o.onmouseover) {
+				Event.add(n, 'mouseover', o.onmouseover);
 			}
 
 			if (tb.childNodes.length == 1)
