@@ -339,13 +339,14 @@
 								PluginManager.load(dep.resource, dep);
 							});
 						} else {
-							// Skip safari plugin, since it is removed as of 3.3b1
-							if (p == 'safari') {
-								return;
-							}
 							PluginManager.load(p, {prefix:'plugins/', resource: p, suffix:'/editor_plugin' + tinymce.suffix + '.js'});
 						}
 					}
+				});
+				
+				each(s.external_plugins, function(url, name) {
+					PluginManager.load(name, url);
+					s.plugins += ',' + name;
 				});
 
 				// Init when que is loaded
@@ -398,6 +399,7 @@
 
 			function initPlugin(p) {
 				var c = PluginManager.get(p), u = PluginManager.urls[p] || tinymce.documentBaseURL.replace(/\/$/, ''), po;
+
 				if (c && tinymce.inArray(initializedPlugins,p) === -1) {
 					each(PluginManager.dependencies(p), function(dep){
 						initPlugin(dep);
