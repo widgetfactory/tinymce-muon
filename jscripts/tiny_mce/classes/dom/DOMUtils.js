@@ -647,7 +647,8 @@
 
 				// Force update of the style data
 				if (t.settings.update_styles) {
-					t.setAttrib(e, 'data-mce-style', e.style.cssText);
+					v = t.serializeStyle(t.parseStyle(e.style.cssText), e.nodeName);
+					t.setAttrib(e, 'data-mce-style', v);
 				}
 			});
 		},
