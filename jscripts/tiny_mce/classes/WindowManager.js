@@ -144,8 +144,10 @@
 		 * @param {Window} w Native window object to close.
 		 */
 		close : function(w) {
-			w.close();
-			this.onClose.dispatch(this);
+			if (w) {
+				w.close();
+				this.onClose.dispatch(this);
+			}
 		},
 
 		/**
