@@ -116,21 +116,22 @@
 				node = nodes[i];
 
 				value = node.attributes.map[internalName];
-				
 				if (value !== undef) {
+					// Set external name to internal value and remove internal
+					node.attr(name, value.length > 0 ? value : null);
 					node.attr(internalName, null);
 				} else {
 					// No internal attribute found then convert the value we have in the DOM
 					value = node.attributes.map[name];
-				}
-				
-				if (name === "style") {
-					value = dom.serializeStyle(dom.parseStyle(value), node.name);
-				} else if (urlConverter) {
-					value = urlConverter.call(urlConverterScope, value, name, node.name);
-				}
 
-				node.attr(name, value.length > 0 ? value : null);
+					if (name === "style") {
+						value = dom.serializeStyle(dom.parseStyle(value), node.name);
+					} else if (urlConverter) {
+						value = urlConverter.call(urlConverterScope, value, name, node.name);
+					}
+
+					node.attr(name, value.length > 0 ? value : null);
+				}
 			}
 		});
 
