@@ -131,8 +131,8 @@
             globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
                     "hidden spellcheck translate"));
             blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
-            phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output progress time wbr " +
-                    "video ruby bdi keygen"));
+            phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
+				"progress time wbr video ruby bdi keygen"));
         }
 
         // Add HTML4 elements unless it's html5-strict
