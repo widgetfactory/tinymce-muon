@@ -330,8 +330,8 @@
 
 					// Needed for the WebKit span spam bug
 					// TODO: Remove this once WebKit/Blink fixes this
-					if (fmt.styles) {
-						var styleVal = dom.getAttrib(elm, 'style');
+					if (fmt.styles) {						
+						var styleVal = dom.serializeStyle(dom.parseStyle(elm.style.cssText), elm.nodeName);			
 
 						if (styleVal) {
 							elm.setAttribute('data-mce-style', styleVal);
@@ -351,6 +351,31 @@
 					});
 				}
 			}
+
+			function applyNodeStyle(formatList, node) {
+				var found = false;
+
+				if (!format.selector) {
+					return false;
+				}
+
+				// Look for matching formats
+				each(formatList, function(format) {
+					// Check collapsed state if it exists
+					if ('collapsed' in format && format.collapsed !== isCollapsed) {
+						return;
+					}
+
+					if (dom.is(node, format.selector) && !isCaretNode(node)) {
+						setElementFormat(node, format);
+						found = true;
+						return false;
+					}
+				});
+
+				return found;
+			}
+
 			// This converts: <p>[a</p><p>]b</p> -> <p>[a]</p><p>b</p>
 			function adjustSelectionToVisibleSelection() {
 				function findSelectionEnd(start, end) {
@@ -477,18 +502,7 @@
 						// Handle selector patterns
 						if (format.selector) {
 							// Look for matching formats
-							each(formatList, function(format) {
-								// Check collapsed state if it exists
-								if ('collapsed' in format && format.collapsed !== isCollapsed) {
-									return;
-								}
-
-								if (dom.is(node, format.selector) && !isCaretNode(node)) {
-									setElementFormat(node, format);
-									found = true;
-									return false;
-								}
-							});
+							var found = applyNodeStyle(formatList, node);
 
 							// Continue processing if a selector match wasn't found and a inline element is defined
 							if (!format.inline || found) {
@@ -648,10 +662,12 @@
 			if (format) {
 				if (node) {
 					if (node.nodeType) {
-						rng = dom.createRng();
-						rng.setStartBefore(node);
-						rng.setEndAfter(node);
-						applyRngStyle(expandRng(rng, formatList), null, true);
+						if (!applyNodeStyle(formatList, node)) {
+							rng = dom.createRng();
+							rng.setStartBefore(node);
+							rng.setEndAfter(node);
+							applyRngStyle(expandRng(rng, formatList), null, true);
+						}
 					} else {
 						applyRngStyle(node, null, true);
 					}
