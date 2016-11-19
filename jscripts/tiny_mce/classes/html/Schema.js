@@ -696,7 +696,7 @@
             });
 
             // Switch these on HTML4
-            if (settings.schema != "html5-strict") {
+            if (settings.schema === "html4") {
                 each(split('strong/b em/i'), function (item) {
                     item = split(item, '/');
                     elements[item[1]].outputName = item[0];
