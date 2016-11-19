@@ -23,6 +23,8 @@
 			t.update_rate = ed.getParam('wordcount_update_rate', 2000);
 			t.update_on_delete = ed.getParam('wordcount_update_on_delete', false);
 			t.id = ed.id + '-word-count';
+			
+			t.onWordCount = new tinymce.util.Dispatcher(t);
 
 			ed.onPostRender.add(function(ed, cm) {
 				var row, id;
@@ -102,6 +104,9 @@
 				if (!ed.destroyed) {
 					var tc = t._getCount(ed);
 					tinymce.DOM.setHTML(t.id, tc.toString());
+					
+					t.onWordCount.dispatch(t, tc);	
+					
 					setTimeout(function() {t.block = 0;}, t.update_rate);
 				}
 			}, 1);
