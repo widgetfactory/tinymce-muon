@@ -305,8 +305,9 @@
 				DOM.removeClass(t.id, t.classPrefix + 'Selected');
 
 				// Prevent double toogles by canceling the mouse click event to the button
-				if (e && e.type == "mousedown" && (e.target.id == t.id + '_text' || e.target.id == t.id + '_open'))
+				if (e && e.type == "mousedown" && (e.target.id == t.id + '_text' || e.target.id == t.id + '_open')) {
 					return;
+				}
 
 				if (!e || !DOM.getParent(e.target, '.mceMenu')) {
 					DOM.removeClass(t.id, t.classPrefix + 'Selected');
@@ -322,20 +323,26 @@
 		 * @method renderMenu
 		 */
 		renderMenu : function() {
-			var t = this, m;
+			var t = this, m, count = 0;
 
 			m = t.settings.control_manager.createDropMenu(t.id + '_menu', {
 				menu_line : 1,
 				'class' : t.classPrefix + 'Menu mceNoIcons',
 				max_width : 250,
-				max_height : 150
-			});
+				max_height : t.settings.max_height || 150,
+				filter: !!t.settings.filter,
+				onselect: function(value) {					
+					if (t.settings.onselect(value) !== false) {
+						t.select(value);
+					}
+				}
+ 			});
 
 			m.onHideMenu.add(function() {
 				t.hideMenu();
 				t.focus();
 			});
-
+			
 			m.add({
 				title : t.settings.title,
 				'class' : 'mceMenuItemTitle',
@@ -351,7 +358,7 @@
 					m.add({
 						title : o.title,
 						role : "option",
-						'class' : 'mceMenuItemTitle',
+						//'class' : 'mceMenuItemTitle',
 						onclick : function() {
 							if (t.settings.onselect('') !== false)
 								t.select(''); // Must be runned after
@@ -383,12 +390,14 @@
 			var t = this, cp = t.classPrefix;
 
 			Event.add(t.id, 'click', t.showMenu, t);
-			Event.add(t.id, 'keydown', function(evt) {
+			
+			Event.add(t.id, 'keydown', function(evt) {				
 				if (evt.keyCode == 32) { // Space
 					t.showMenu(evt);
 					Event.cancel(evt);
 				}
 			});
+			
 			Event.add(t.id, 'focus', function() {
 				if (!t._focused) {
 					t.keyDownHandler = Event.add(t.id, 'keydown', function(e) {
@@ -411,24 +420,12 @@
 
 				t._focused = 1;
 			});
+			
 			Event.add(t.id, 'blur', function() {
 				Event.remove(t.id, 'keydown', t.keyDownHandler);
 				Event.remove(t.id, 'keypress', t.keyPressHandler);
 				t._focused = 0;
 			});
-
-			// Old IE doesn't have hover on all elements
-			if (tinymce.isIE6 || !DOM.boxModel) {
-				Event.add(t.id, 'mouseover', function() {
-					if (!DOM.hasClass(t.id, cp + 'Disabled'))
-						DOM.addClass(t.id, cp + 'Hover');
-				});
-
-				Event.add(t.id, 'mouseout', function() {
-					if (!DOM.hasClass(t.id, cp + 'Disabled'))
-						DOM.removeClass(t.id, cp + 'Hover');
-				});
-			}
 
 			t.onPostRender.dispatch(t, DOM.get(t.id));
 		},

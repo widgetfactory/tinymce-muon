@@ -9,7 +9,12 @@
  */
 
 (function(tinymce) {
-	var is = tinymce.is, DOM = tinymce.DOM, each = tinymce.each, Event = tinymce.dom.Event, Element = tinymce.dom.Element;
+	var is = tinymce.is, DOM = tinymce.DOM, each = tinymce.each, Event = tinymce.dom.Event, Element = tinymce.dom.Element, undef;
+	
+	// http://stackoverflow.com/a/6969486
+    function escapeRegExChars(str) {
+        return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
+    }
 
 	/**
 	 * This class is used to create drop menus, a drop menu can be a
@@ -127,8 +132,8 @@
 		update : function() {
 			var t = this, s = t.settings, tb = DOM.get('menu_' + t.id + '_tbl'), co = DOM.get('menu_' + t.id + '_co'), tw, th;
 
-			tw = s.max_width ? Math.min(tb.offsetWidth, s.max_width) : tb.offsetWidth;
-			th = s.max_height ? Math.min(tb.offsetHeight, s.max_height) : tb.offsetHeight;
+			tw = s.max_width ? Math.min(co.offsetWidth, s.max_width) : co.offsetWidth;
+			th = s.max_height ? Math.min(co.offsetHeight, s.max_height) : co.offsetHeight;
 
 			if (!DOM.boxModel)
 				t.element.setStyles({width : tw + 2, height : th + 2});
@@ -138,7 +143,7 @@
 			if (s.max_width)
 				DOM.setStyle(co, 'width', tw);
 
-			if (s.max_height) {
+			if (s.max_height) {				
 				DOM.setStyle(co, 'height', th);
 
 				if (tb.clientHeight < s.max_height)
@@ -207,6 +212,11 @@
 				var m, n;
 
 				n = e.target;
+				
+				// cancel on input click
+				if (n.nodeName === "INPUT") {
+					return;
+				}
 
 				if (n && (n = DOM.getParent(n, 'div.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {					
 					m = t.items[n.id];
@@ -385,8 +395,20 @@
 			if (s.menu_line) {
 				DOM.add(co, 'div', {'class' : t.classPrefix + 'Line'});
 			}
+			
+			if (s.filter) {
+				var filter = DOM.add(co, 'div', {'class' : t.classPrefix + 'Filter'}, '<input type="text" />');
+				
+				t.onHideMenu.add(function() {
+					filter.firstChild.value = "";
+					
+					each(t.items, function(o, id) {
+						DOM.removeClass(id, 'mceMenuItemHidden');
+					});
+				});
+			}
 
-			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl'});
+			n = DOM.add(co, 'div', {role: 'presentation', id : 'menu_' + t.id + '_tbl', 'class' : t.classPrefix + 'Items'});
 
 			each(t.items, function(o) {
 				t._add(n, o);
@@ -413,9 +435,58 @@
 			});
 			contextMenu.focus();
 		},
+		
+		_filter : function(evt) {
+			var t = this, n = evt.target;
+
+            var matcher = new RegExp('^' + escapeRegExChars(n.value), "i");
+            
+            each(t.items, function(o, id) {				
+				var s = o.settings, state;
+				
+				if (!n.value || s.value === undef) {
+					state = true;
+				} else {
+					state = matcher.test(s.title);
+				}
+
+                if (state) {
+            		DOM.removeClass(id, 'mceMenuItemHidden');
+                } else {
+            		DOM.addClass(id, 'mceMenuItemHidden');
+                }
+			});
+		},
 
 		_keyHandler : function(evt) {
-			var t = this, e;
+			var t = this;
+			
+			var specialKeyCodeMap = {
+        		9: 'tab',
+        		17: 'ctrl',
+        		18: 'alt',
+        		27: 'esc',
+       		 	32: 'space',
+       		 	37: 'left',
+       		 	39: 'right',
+        		13: 'enter',
+        		91: 'cmd'
+    		};
+    		
+    		if (evt.target && evt.target.nodeName === "INPUT") {
+				setTimeout(function() {
+					if (!specialKeyCodeMap[evt.keyCode]) {
+						t._filter(evt);
+					}
+				
+					if (evt.keyCode === 13 && evt.target.value) {
+						if (t.settings.onselect) {
+							t.settings.onselect(evt.target.value);
+						}
+					}		
+				}, 0);
+			}
+
 			switch (evt.keyCode) {
 				case 37: // Left
 					if (t.settings.parent) {
