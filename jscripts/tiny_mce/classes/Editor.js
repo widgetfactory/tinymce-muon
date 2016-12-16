@@ -80,7 +80,7 @@
 				table_inline_editing : false,
 				object_resizing : TRUE,
 				accessibility_focus : TRUE,
-				doctype : tinymce.isIE6 ? '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">' : '<!DOCTYPE>', // Use old doctype on IE 6 to avoid horizontal scroll
+				doctype : '<!DOCTYPE html>',
 				visual : TRUE,
 				font_size_style_values : 'xx-small,x-small,small,medium,large,x-large,xx-large',
 				font_size_legacy_values : 'xx-small,small,medium,large,x-large,xx-large,300%', // See: http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size
