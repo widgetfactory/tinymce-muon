@@ -88,23 +88,100 @@
 				],
 
 				alignleft: [
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'left'}, defaultBlock: 'div'},
-					{selector: 'img,table', collapsed: false, styles: {'float': 'left'}}
+					{
+						selector: 'figure.image',
+						collapsed: false,
+						classes: 'align-left',
+						ceFalseOverride: true,
+						preview: 'font-family font-size'
+					},
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'left'
+						},
+						inherit: false,
+						preview: false,
+						defaultBlock: 'div'
+					},
+					{selector: 'img,table', collapsed: false, styles: {'float': 'left'}, preview: 'font-family font-size'}
 				],
 
 				aligncenter: [
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'center'}, defaultBlock: 'div'},
-					{selector: 'img', collapsed: false, styles: {display: 'block', marginLeft: 'auto', marginRight: 'auto'}},
-					{selector: 'table', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto'}}
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'center'
+						},
+						inherit: false,
+						preview: false,
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'figure.image',
+						collapsed: false,
+						classes: 'align-center',
+						ceFalseOverride: true,
+						preview: 'font-family font-size'
+					},
+					{
+						selector: 'img',
+						collapsed: false,
+						styles: {
+							display: 'block',
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						},
+						preview: false
+					},
+					{
+						selector: 'table',
+						collapsed: false,
+						styles: {
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						},
+						preview: 'font-family font-size'
+					}
 				],
 
 				alignright: [
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'right'}, defaultBlock: 'div'},
-					{selector: 'img,table', collapsed: false, styles: {'float': 'right'}}
+					{
+						selector: 'figure.image',
+						collapsed: false,
+						classes: 'align-right',
+						ceFalseOverride: true,
+						preview: 'font-family font-size'
+					},
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'right'
+						},
+						inherit: false,
+						preview: 'font-family font-size',
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'img,table',
+						collapsed: false,
+						styles: {
+							'float': 'right'
+						},
+						preview: 'font-family font-size'
+					}
 				],
 
-				alignfull : [
-					{selector : 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li', styles : {textAlign : 'justify'}, defaultBlock: 'div'}
+				alignjustify: [
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'justify'
+						},
+						inherit: false,
+						defaultBlock: 'div',
+						preview: 'font-family font-size'
+					}
 				],
 
 				bold : [
@@ -282,7 +359,7 @@
 			return false;
 		}
 
-		var getTextDecoration = function(node) {
+		function getTextDecoration(node) {
 			var decoration;
 
 			ed.dom.getParent(node, function(n) {
@@ -291,9 +368,9 @@
 			});
 
 			return decoration;
-		};
+		}
 
-		var processUnderlineAndColor = function(node) {
+		function processUnderlineAndColor(node) {
 			var textDecoration;
 			if (node.nodeType === 1 && node.parentNode && node.parentNode.nodeType === 1) {
 				textDecoration = getTextDecoration(node.parentNode);
@@ -303,7 +380,7 @@
 					ed.dom.setStyle(node, 'text-decoration', null);
 				}
 			}
-		};
+		}
 
 		/**
 		 * Applies the specified format to the current selection or specified node.
@@ -318,7 +395,7 @@
 
 			function setElementFormat(elm, fmt) {
 				fmt = fmt || format;
-
+				
 				if (elm) {
 					if (fmt.onformat) {
 						fmt.onformat(elm, fmt, vars, node);
@@ -580,16 +657,37 @@
 
 						return count;
 					}
+					
+					function getChildElementNode(root) {
+						var child = false;
+						each(root.childNodes, function(node) {
+							if (isElementNode(node)) {
+								child = node;
+								return false; // break loop
+							}
+						});
+						return child;
+					}
+
+					function matchNestedWrapper(node, filter) {
+						do {
+							if (getChildCount(node) !== 1) {
+								return false;
+							}
+
+							node = getChildElementNode(node);
+							if (!node) {
+								return false;
+							} else if (filter(node)) {
+								return node;
+							}
+						} while (node);
+					}
 
 					function mergeStyles(node) {
 						var child, clone;
 
-						each(node.childNodes, function(node) {
-							if (node.nodeType == 1 && !isBookmarkNode(node) && !isCaretNode(node)) {
-								child = node;
-								return FALSE; // break loop
-							}
-						});
+						child = getChildElementNode(node);
 
 						// If child was found and of the same type as the current node
 						if (child && !isBookmarkNode(child) && matchName(child, format)) {
@@ -610,6 +708,15 @@
 					if ((newWrappers.length > 1 || !isBlock(node)) && childCount === 0) {
 						dom.remove(node, 1);
 						return;
+					}
+
+					// fontSize defines the line height for the whole branch of nested style wrappers,
+					// therefore it should be set on the outermost wrapper
+					if (!isBlock(node) && !getStyle(node, 'fontSize')) {
+						var styleNode = matchNestedWrapper(node, hasStyle('fontSize'));
+						if (styleNode) {
+							apply('fontsize', {value: getStyle(styleNode, 'fontSize')}, node);
+						}
 					}
 
 					if (format.inline || format.wrapper) {
@@ -659,6 +766,18 @@
 				});
 			}
 
+			if (getContentEditable(selection.getNode()) === "false") {
+				node = selection.getNode();
+				for (var i = 0, l = formatList.length; i < l; i++) {
+					if (formatList[i].ceFalseOverride && dom.is(node, formatList[i].selector)) {
+						setElementFormat(node, formatList[i]);
+						return;
+					}
+				}
+
+				return;
+			}
+
 			if (format) {
 				if (node) {
 					if (node.nodeType) {
@@ -675,7 +794,7 @@
 					if (!isCollapsed || !format.inline || dom.select('td.mceSelected,th.mceSelected').length) {
 						// Obtain selection node before selection is unselected by applyRngStyle()
 						var curSelNode = ed.selection.getNode();
-
+						
 						// If the formats have a default block and we can't find a parent block then start wrapping it with a DIV this is for forced_root_blocks: false
 						// It's kind of a hack but people should be using the default block type P since all desktop editors work that way
 						if (!forcedRootBlock && formatList[0].defaultBlock && !dom.getParent(curSelNode, dom.isBlock)) {
@@ -934,6 +1053,19 @@
 					removeRngStyle(rng);
 				} else {
 					removeRngStyle(node);
+				}
+
+				return;
+			}
+			
+			if (getContentEditable(selection.getNode()) === "false") {
+				node = selection.getNode();
+				for (var i = 0, l = formatList.length; i < l; i++) {
+					if (formatList[i].ceFalseOverride) {
+						if (removeFormat(formatList[i], vars, node, node)) {
+							break;
+						}
+					}
 				}
 
 				return;
@@ -1240,6 +1372,20 @@
 			return this;
 		}
 
+		/**
+		 * Returns a preview css text for the specified format.
+		 *
+		 * @method getCssText
+		 * @param {String/Object} format Format to generate preview css text for.
+		 * @return {String} Css text for the specified format.
+		 * @example
+		 * var cssText1 = editor.formatter.getCssText('bold');
+		 * var cssText2 = editor.formatter.getCssText({inline: 'b'});
+		 */
+		function getCssText(format) {
+			return Preview.getCssText(ed, format);
+		}
+
 		// Expose to public
 		tinymce.extend(this, {
 			get : get,
@@ -1301,6 +1447,16 @@
 			str2 = '' + (str2.nodeName || str2);
 
 			return str1.toLowerCase() == str2.toLowerCase();
+		}
+
+		function isElementNode(node) {
+			return node.nodeType == 1 && !isBookmarkNode(node) && !isWhiteSpaceNode(node) && !isCaretNode(node);
+		}
+
+		function hasStyle(name) {
+			return tinymce.curry(function(name, node) {
+				return !!(node && getStyle(node, name));
+			}, name);
 		}
 
 		/**
@@ -1428,7 +1584,7 @@
 					}
 
 					// Check if we can move up are we at root level or body level
-					if (parent.parentNode == root) {
+					if (parent == root || parent.parentNode == root) {
 						container = parent;
 						break;
 					}
@@ -1843,7 +1999,8 @@
 				// Check for non internal attributes
 				attrs = dom.getAttribs(node);
 				for (i = 0; i < attrs.length; i++) {
-					if (attrs[i].nodeName.indexOf('_') !== 0) {
+					var attrName = attrs[i].nodeName;
+					if (attrName.indexOf('_') !== 0 && attrName.indexOf('data-') !== 0) {
 						return FALSE;
 					}
 				}

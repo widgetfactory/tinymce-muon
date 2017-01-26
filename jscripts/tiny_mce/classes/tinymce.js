@@ -11,6 +11,8 @@
 (function(win) {
 	var whiteSpaceRe = /^\s*|\s*$/g,
 		undef, isRegExpBroken = 'B'.replace(/A(.)|B/, '$1') === '$1';
+		
+		var slice = [].slice;
 
 	/**
 	 * Core namespace with core functionality for the TinyMCE API all sub classes will be added to this namespace/object.
@@ -837,6 +839,19 @@
 			}
 
 			return tinymce.map(s.split(d || ','), tinymce.trim);
+		},
+		
+		curry: function(fn) {
+			var args = slice.call(arguments);
+
+			if (args.length - 1 >= fn.length) {
+				return fn.apply(this, args.slice(1));
+			}
+
+			return function() {
+				var tempArgs = args.concat([].slice.call(arguments));
+				return tinymce.curry.apply(this, tempArgs);
+			};
 		},
 
 		_addVer: function(u) {
