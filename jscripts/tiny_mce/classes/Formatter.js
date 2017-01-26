@@ -2,6 +2,7 @@
  * Formatter.js
  *
  * Copyright, Moxiecode Systems AB
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  * Released under LGPL License.
  *
  * License: http://www.tinymce.com/license
