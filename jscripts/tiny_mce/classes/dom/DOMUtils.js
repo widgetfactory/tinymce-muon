@@ -33,7 +33,7 @@
 		doc : null,
 		root : null,
 		files : null,
-		pixelStyles : /^(top|left|bottom|right|width|height|borderWidth)$/,
+		pixelStyles : /^(top|left|bottom|right|width|height|maxWidth|maxHeight|minWidth|minHeight|borderWidth)$/,
 		props : {
 			"for" : "htmlFor",
 			"class" : "className",
