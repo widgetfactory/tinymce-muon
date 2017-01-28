@@ -167,16 +167,16 @@
 					stack.length = pos;
 				}
 			}
+			
+			function isDataAttribute(name) {
+				return name.indexOf('data-') === 0 || name.indexOf('uk-') === 0 || name.indexOf('ng-') === 0 || name.indexOf('v-') === 0;
+			}
 
 			function parseAttribute(match, name, value, val2, val3) {
 				var attrRule, i, trimRegExp = /[\s\u0000-\u001F]+/g;
 
 				name = name.toLowerCase();
 				value = name in fillAttrsMap ? name : decode(value || val2 || val3 || ''); // Handle boolean attribute than value attribute
-				
-				function isDataAttribute(name) {
-					return name.indexOf('data-') === 0 || name.indexOf('uk-') === 0 || name.indexOf('ng-') === 0 || name.indexOf('v-') === 0;
-				}
 
 				// Validate name and value pass through all data- attributes
 				if (validate && !isInternalElement && !isDataAttribute(name)) {
