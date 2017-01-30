@@ -40,7 +40,7 @@
 			 * @type Object
 			 */
 			t.settings = s = tinymce.extend({
-				colors : '000000,993300,333300,003300,003366,000080,333399,333333,800000,FF6600,808000,008000,008080,0000FF,666699,808080,FF0000,FF9900,99CC00,339966,33CCCC,3366FF,800080,999999,FF00FF,FFCC00,FFFF00,00FF00,00FFFF,00CCFF,993366,C0C0C0,FF99CC,FFCC99,FFFF99,CCFFCC,CCFFFF,99CCFF,CC99FF,FFFFFF',
+				colors : '000000,993300,333300,003300,003366,000080,333399,333333,800000,FF6600,808000,008000,008080,0000FF,666699,808080,FF0000,FF9900,99CC00,339966,33CCCC,3366FF,800080,999999,FF00FF,FFCC00,FFFF00,00FF00,00FFFF,00CCFF,993366,FFFFFF,FF99CC,FFCC99,FFFF99,CCFFCC,CCFFFF,99CCFF,CC99FF',
 				grid_width : 8,
 				default_color : '#888888'
 			}, t.settings);
@@ -209,6 +209,14 @@
 					}
 				}
 			});
+			
+			n = DOM.add(tr, 'td', {'class' : 'mceRemoveColor'});
+			n = DOM.add(n, 'a', {
+				href : 'javascript:;',
+				'title': t.editor.getLang('colors.transparent', 'No Colour'),
+				'data-mce-color' : '',
+				role: 'option'
+			});
 
 			if (s.more_colors_func) {
 				n = DOM.add(tb, 'tr');
@@ -227,12 +235,13 @@
 			Event.add(t.id + '_menu', 'mousedown', function(e) {return Event.cancel(e);});
 
 			Event.add(t.id + '_menu', 'click', function(e) {
-				var c;
-
 				e = DOM.getParent(e.target, 'a', tb);
+				
+				var c = e.getAttribute('data-mce-color');
 
-				if (e && e.nodeName.toLowerCase() == 'a' && (c = e.getAttribute('data-mce-color')))
+				if (e && e.nodeName.toLowerCase() == 'a' && typeof c !== "undefined") {
 					t.setColor(c);
+				}
 
 				return false; // Prevent IE auto save warning
 			});
