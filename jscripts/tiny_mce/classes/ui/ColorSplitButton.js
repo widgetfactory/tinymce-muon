@@ -187,7 +187,7 @@
 					style : {
 						backgroundColor : '#' + c
 					},
-					'title': t.editor.getLang('colors.' + c, c),
+					'title': t.editor.getLang('colors.' + c, '#' + c),
 					'data-mce-color' : '#' + c
 				};
 
@@ -213,7 +213,7 @@
 			n = DOM.add(tr, 'td', {'class' : 'mceRemoveColor'});
 			n = DOM.add(n, 'a', {
 				href : 'javascript:;',
-				'title': t.editor.getLang('colors.transparent', 'No Colour'),
+				'title': t.editor.getLang('advanced.no_color', 'No Colour'),
 				'data-mce-color' : '',
 				role: 'option'
 			});
