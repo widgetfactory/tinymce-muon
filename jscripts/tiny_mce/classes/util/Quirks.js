@@ -660,8 +660,8 @@ tinymce.util.Quirks = function(editor) {
 			});
 		};
 
-		editor.onExecCommand.add(function(editor, cmd) {
-			if (cmd === 'CreateLink') {
+		editor.onExecCommand.add(function(editor, cmd) {			
+			if (cmd === 'mceInsertLink') {
 				fixLinks(editor);
 			}
 		});
@@ -1108,6 +1108,36 @@ tinymce.util.Quirks = function(editor) {
 
 		editor.onBeforeGetContent.add(fn);
 	}
+	
+	function imageFloatLinkBug() {
+        editor.onBeforeExecCommand.add(function(ed, cmd, ui, v, o) {
+            // remove img styles
+            if (cmd == 'mceInsertLink') {
+                var se = ed.selection,
+                n = se.getNode();
+                        
+                // store class and style
+                if (n && n.nodeName == 'IMG') {
+                    ed.dom.setAttrib(n, 'data-mce-style', n.style.cssText);
+                     n.style.cssText = null;
+                }
+            }
+        });
+
+        editor.onExecCommand.add(function(ed, cmd, ui, v, o) {
+       		// restore img styles
+        	if (cmd == 'mceInsertLink') {
+        		var se = ed.selection,
+            	n = se.getNode();
+                        
+            	tinymce.each(ed.dom.select('img[data-mce-style]', n), function(el) {
+                	if (el.parentNode.nodeName == 'A' && !el.style.cssText) {
+                    	el.style.cssText = ed.dom.getAttrib(el, 'data-mce-style');
+                	}
+            	});
+        	}
+        });
+	}
 
 	// All browsers
 	disableBackspaceIntoATable();
@@ -1121,6 +1151,7 @@ tinymce.util.Quirks = function(editor) {
 		inputMethodFocus();
 		selectControlElements();
 		setDefaultBlockType();
+		imageFloatLinkBug();
 
 		// iOS
 		if (tinymce.isIDevice) {
