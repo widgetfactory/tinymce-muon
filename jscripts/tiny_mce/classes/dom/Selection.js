@@ -1286,6 +1286,10 @@
 			}
 		},
 
+		placeCaretAt: function(clientX, clientY) {
+			this.setRng(tinymce.dom.RangeUtils.getCaretRangeFromPoint(clientX, clientY, this.editor.getDoc()));
+		},
+
 		destroy : function(manual) {
 			var self = this;
 
