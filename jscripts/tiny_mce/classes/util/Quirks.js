@@ -1177,8 +1177,8 @@ tinymce.util.Quirks = function(editor) {
 	if (tinymce.isIE11) {
 		bodyHeight();
 		//doubleTrailingBrElements();
-    fixControlSelection();
-		//fakeImageResize();
+    	fixControlSelection();
+		fakeImageResize();
 	}
 
     // IE 12 / Edge
