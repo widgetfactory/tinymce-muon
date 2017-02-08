@@ -432,6 +432,19 @@
 
 			return -1;
 		},
+		
+		toArray: function(obj) {
+			var array = obj, i, l;
+
+			if (!tinymce.isArray(obj)) {
+				array = [];
+				for (i = 0, l = obj.length; i < l; i++) {
+					array[i] = obj[i];
+				}
+			}
+
+			return array;
+		},
 
 		/**
 		 * Extends an object with the specified other object(s).
