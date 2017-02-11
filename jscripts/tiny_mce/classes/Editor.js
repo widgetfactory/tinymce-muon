@@ -1103,9 +1103,15 @@
 				// Get start node
 				node = selection.getStart() || self.getBody();
 				node = isIE && node.ownerDocument != self.getDoc() ? self.getBody() : node; // Fix for IE initial state
+				
+				// Edge case for <p>|<img></p>
+				if (node.nodeName == 'IMG' && selection.isCollapsed()) {
+					node = node.parentNode;
+				}
 
 				// Get parents and add them to object
 				o.parents = [];
+				
 				self.dom.getParent(node, function(node) {
 					if (node.nodeName == 'BODY') {
 						return true;
