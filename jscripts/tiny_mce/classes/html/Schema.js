@@ -265,7 +265,7 @@
             addAttrs("pre", "width xml:space");
             addAttrs("hr", "align noshade size width");
             addAttrs("isindex", "prompt");
-            addAttrs("table", "summary width height frame rules cellspacing cellpadding align bgcolor");
+            addAttrs("table", "summary width frame rules cellspacing cellpadding align bgcolor");
             addAttrs("col", "width align char charoff valign");
             addAttrs("colgroup", "width align char charoff valign");
             addAttrs("thead", "align char charoff valign");
