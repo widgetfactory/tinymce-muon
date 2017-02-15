@@ -104,6 +104,8 @@
 
 			if (t.isIE12) {
 				t.isWebKit = false;
+				
+				t.isIE = 12;
 			}
 
 			/**
