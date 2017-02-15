@@ -150,6 +150,11 @@
 					DOM.setStyle(co, 'overflow', 'hidden');
 			}
 		},
+		
+		scrollTo: function(el) {
+			var p = el.parentNode;
+			p.scrollTop = el.offsetTop;
+		},
 
 		/**
 		 * Displays the menu at the specified cordinate.
@@ -271,6 +276,18 @@
 			Event.add(co, 'keydown', t._keyHandler, t);
 
 			t.onShowMenu.dispatch(t);
+			
+			each(t.items, function(o) {
+				if (o.selected) {
+					var el = DOM.get(o.id);
+			
+					if (el) {
+						t.scrollTo(el);
+					}
+					
+					return false;
+				}
+			});
 
 			if (s.keyboard_focus) { 
 				t._setupKeyboardNav(); 
