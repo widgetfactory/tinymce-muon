@@ -37,8 +37,8 @@ tinymce.dom.TreeWalker = function(startNode, rootNode) {
 				}
 			}
 		}
-
-		function findPreviousNode(node, startName, siblingName, shallow) {
+	
+	function findPreviousNode(node, startName, siblingName, shallow) {
 			var sibling, parent, child;
 
 			if (node) {
@@ -67,40 +67,30 @@ tinymce.dom.TreeWalker = function(startNode, rootNode) {
 			}
 		}
 
-		/**
-		 * Returns the current node.
-		 *
-		 * @method current
-		 * @return {Node} Current node where the walker is.
-		 */
-		this.current = function() {
-			return node;
-		};
+	/**
+	 * Returns the current node.
+	 *
+	 * @return {Node} Current node where the walker is.
+	 */
+	this.current = function() {
+		return node;
+	};
 
-		/**
-		 * Walks to the next node in tree.
-		 *
-		 * @method next
-		 * @return {Node} Current node where the walker is after moving to the next node.
-		 */
-		this.next = function(shallow) {
-			node = findSibling(node, 'firstChild', 'nextSibling', shallow);
-			return node;
-		};
+	/**
+	 * Walks to the next node in tree.
+	 *
+	 * @return {Node} Current node where the walker is after moving to the next node.
+	 */
+	this.next = function(shallow) {
+		return (node = findSibling(node, 'firstChild', 'nextSibling', shallow));
+	};
 
-		/**
-		 * Walks to the previous node in tree.
-		 *
-		 * @method prev
-		 * @return {Node} Current node where the walker is after moving to the previous node.
-		 */
-		this.prev = function(shallow) {
-			node = findSibling(node, 'lastChild', 'previousSibling', shallow);
-			return node;
-		};
-
-		this.prev2 = function(shallow) {
-			node = findPreviousNode(node, 'lastChild', 'previousSibling', shallow);
-			return node;
-		};
+	/**
+	 * Walks to the previous node in tree.
+	 *
+	 * @return {Node} Current node where the walker is after moving to the previous node.
+	 */
+	this.prev = function(shallow) {
+		return (node = findSibling(node, 'lastChild', 'previousSibling', shallow));
+	};
 };
