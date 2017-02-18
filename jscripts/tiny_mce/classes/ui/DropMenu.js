@@ -277,7 +277,11 @@
 
 			t.onShowMenu.dispatch(t);
 			
-			each(t.items, function(o) {
+			// reset scroll position
+			DOM.get('menu_' + t.id + '_tbl').scrollTop = 0;
+
+			// scroll to selected item
+			each(t.items, function(o) {				
 				if (o.selected) {
 					var el = DOM.get(o.id);
 			
