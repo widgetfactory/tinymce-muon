@@ -735,6 +735,22 @@
 				}
 			});
 		},
+		
+		removeAttrib: function(e, n) {
+			var t = this;
+			
+			// Whats the point
+			if (!e || !n)
+				return;
+				
+			// Strict XML mode
+			if (t.settings.strict)
+				n = n.toLowerCase();
+
+			return this.run(e, function(e) {
+				e.removeAttribute(n, 2);
+			});	
+		},
 
 		/**
 		 * Sets the specified attributes value of a element or elements.
