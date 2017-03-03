@@ -64,8 +64,6 @@
 				ua = na.userAgent,
 				i, nl, n, base, p, v;
 
-			t.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1);
-
 			/**
 			 * Constant that is true if the browser is Opera.
 			 *
@@ -73,7 +71,7 @@
 			 * @type Boolean
 			 * @final
 			 */
-			t.isOpera = win.opera && opera.buildNumber;
+			t.isOpera = (win.opera && win.opera.buildNumber) || false;
 
 			/**
 			 * Constant that is true if the browser is WebKit (Safari/Chrome).
@@ -91,21 +89,25 @@
 			 * @type Boolean
 			 * @final
 			 */
-
+			 
+			// IE
 			var isIE = !t.isWebKit && !t.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName);
-
+			
+			// IE version number
 			isIE = isIE && /MSIE (\w+)\./.exec(ua)[1];
-
+			
+			// IE 11
 			t.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1) ? 11 : false;
-
+			
+			// IE
 			t.isIE = isIE || t.isIE11;
-
+			
+			// IE 12 / Edge
 			t.isIE12 = (ua.indexOf('Edge/') != -1 && !t.isIE) ? 12 : false;
-
+			
+			// Remove webkit flag
 			if (t.isIE12) {
 				t.isWebKit = false;
-				
-				//t.isIE = 12;
 			}
 
 			/**
