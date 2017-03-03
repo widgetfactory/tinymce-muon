@@ -293,10 +293,11 @@ tinyMCEPopup = {
 			tinymce = tinyMCE = t.editor = t.params = t.dom = t.dom.doc = null; // Cleanup
 		};
 
-		if (tinymce.isOpera)
+		if (tinymce.isOpera) {
 			t.getWin().setTimeout(close, 0);
-		else
+		} else {
 			close();
+		}
 	},
 
 	// Internal functions
