@@ -1178,7 +1178,7 @@ tinymce.util.Quirks = function(editor) {
 		bodyHeight();
 		//doubleTrailingBrElements();
     	fixControlSelection();
-		fakeImageResize();
+    	fakeImageResize();
 	}
 
     // IE 12 / Edge
