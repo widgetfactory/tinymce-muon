@@ -93,4 +93,9 @@ tinymce.dom.TreeWalker = function(startNode, rootNode) {
 	this.prev = function(shallow) {
 		return (node = findSibling(node, 'lastChild', 'previousSibling', shallow));
 	};
+	
+	this.prev2 = function(shallow) {
+		node = findPreviousNode(node, 'lastChild', 'previousSibling', shallow);
+		return node;
+	};
 };
