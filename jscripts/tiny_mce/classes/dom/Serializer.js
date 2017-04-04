@@ -144,7 +144,7 @@
 				value = node.attr('class');
 
 				if (value) {
-					value = node.attr('class').replace(/(?:^|\s)mce(Item\w+|Selected)(?!\S)/g, '');
+					value = node.attr('class').replace(/(?:^|\s)mce(-?)(Item[\w-]+|Selected)(?!\S)/gi, '');
 					node.attr('class', value.length > 0 ? value : null);
 				}
 			}
