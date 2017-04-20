@@ -240,6 +240,9 @@
             add("meter", "value min max low high optimum", phrasingContent);
             add("details", "open", flowContent, "summary");
             add("keygen", "autofocus challenge disabled form keytype name");
+            
+            // update with flowContent
+            add("a", "href target rel media hreflang type", flowContent);
         }
 
         // form events
