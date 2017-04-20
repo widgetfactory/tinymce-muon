@@ -225,6 +225,8 @@
 
 				if (n && (n = DOM.getParent(n, 'div.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {					
 					m = t.items[n.id];
+					
+					t.selected = n;
 
 					if (m.isDisabled())
 						return;
@@ -276,9 +278,6 @@
 			Event.add(co, 'keydown', t._keyHandler, t);
 
 			t.onShowMenu.dispatch(t);
-			
-			// reset scroll position
-			DOM.get('menu_' + t.id + '_tbl').scrollTop = 0;
 
 			// scroll to selected item
 			each(t.items, function(o) {				
@@ -286,13 +285,20 @@
 					var el = DOM.get(o.id);
 			
 					if (el) {
-						t.scrollTo(el);
+						t.selected = el;
 					}
 					
 					return false;
 				}
 			});
 
+			if (t.selected) {
+				t.scrollTo(t.selected);
+			} else {
+				// reset scroll position
+				DOM.get('menu_' + t.id + '_tbl').scrollTop = 0;
+			}
+			
 			if (s.keyboard_focus) { 
 				t._setupKeyboardNav(); 
 			}
