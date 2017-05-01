@@ -102,7 +102,7 @@
         }
 
         // Event attributes can be opt-in/opt-out
-        eventAttributes = split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclick onclose oncontextmenu oncuechange " +
+        eventAttributes = split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
          "ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
          "onerror onfocus oninput oninvalid onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart " +
          "onmousedown onmousemove onmouseout onmouseover onmouseup onmousewheel onpause onplay onplaying onprogress onratechange " +
