@@ -710,6 +710,12 @@
 						}
 
 						if (node) {
+						
+							// skip breaks with style
+							if (node.attr('style')) {
+								break;
+							}
+							
 							node.remove();
 
 							// Is the parent to be considered empty after we removed the BR
