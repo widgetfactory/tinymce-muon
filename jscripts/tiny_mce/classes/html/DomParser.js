@@ -713,7 +713,7 @@
 						
 							// skip breaks with style
 							if (node.attr('style')) {
-								break;
+								continue;
 							}
 							
 							node.remove();
