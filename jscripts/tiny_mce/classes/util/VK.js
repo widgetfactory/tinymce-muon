@@ -13,6 +13,7 @@
  */
 
 (function(tinymce){
+	
 	tinymce.VK = {
 		BACKSPACE: 8,
 		DELETE: 46,
@@ -30,7 +31,11 @@
 
 		metaKeyPressed: function(e) {
 			// Check if ctrl or meta key is pressed also check if alt is false for Polish users
-			return tinymce.isMac ? e.metaKey : e.ctrlKey && !e.altKey;
+			if (tinymce.isMac) {
+				return e.metaKey;
+			}
+			
+			return 	e.ctrlKey && !e.altKey
 		}
 	};
 })(tinymce);
