@@ -561,6 +561,13 @@
 			}
 
 			t.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
+			
+			// prevent caching....
+			if (s.no_cache_headers) {
+				t.iframeHTML += '<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />';
+				t.iframeHTML += '<meta http-equiv="Pragma" content="no-cache" />';
+				t.iframeHTML += '<meta http-equiv="Expires" content="0" />';	
+			}	
 
 			// Load the CSS by injecting them into the HTML this will reduce "flicker"
 			for (i = 0; i < t.contentCSS.length; i++) {
