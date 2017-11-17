@@ -1895,7 +1895,7 @@
 
 				switch (elm.nodeName) {
 					case 'TABLE':
-						cls = settings.visual_table_class || 'mceItemTable';
+						cls = settings.visual_table_class || 'mce-item-table';
 						value = dom.getAttrib(elm, 'border');
 
 						if (!value || value == '0') {
@@ -1911,7 +1911,7 @@
 					case 'A':
 						if (!dom.getAttrib(elm, 'href', false)) {
 							value = dom.getAttrib(elm, 'name') || elm.id;
-							cls = 'mceItemAnchor';
+							cls = 'mce-item-anchor';
 
 							if (value) {
 								if (self.hasVisual) {

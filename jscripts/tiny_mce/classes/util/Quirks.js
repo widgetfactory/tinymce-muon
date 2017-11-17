@@ -306,7 +306,7 @@ tinymce.util.Quirks = function(editor) {
             	editor.selection.select(target);
 			}
 
-			if (e.nodeName == 'A' && dom.hasClass(e, 'mceItemAnchor')) {
+			if (e.nodeName == 'A' && dom.hasClass(e, 'mce-item-anchor')) {
 				selection.select(target);
 			}
 
@@ -1083,7 +1083,7 @@ tinymce.util.Quirks = function(editor) {
 					selection.select(e);
 				}
 
-				if (e.nodeName == 'A' && dom.hasClass(e, 'mceItemAnchor')) {
+				if (e.nodeName == 'A' && dom.hasClass(e, 'mce-item-anchor')) {
 					selection.select(e);
 				}
 
