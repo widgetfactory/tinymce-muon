@@ -105,9 +105,9 @@
         eventAttributes = split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
          "ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
          "onerror onfocus oninput oninvalid onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart " +
-         "onmousedown onmousemove onmouseout onmouseover onmouseup onmousewheel onpause onplay onplaying onprogress onratechange " +
+         "onmousedown onmousemove onmouseout onmouseover onmouseup onmousewheel onmouseenter onmouseleave onpause onplay onplaying onprogress onratechange " +
          "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
-         "onwaiting" 
+         "onwaiting onwheel" 
          );
          
          if (type != "html4") {
