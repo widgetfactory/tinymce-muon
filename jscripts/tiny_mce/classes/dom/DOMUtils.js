@@ -712,7 +712,7 @@
 		 * tinyMCE.DOM.setStyles('mydiv', {'background-color' : 'red', 'color' : 'green'});
 		 */
 		setStyles : function(e, o) {
-			var t = this, s = t.settings, ol;
+			var t = this, s = t.settings, ol, v;
 
 			ol = s.update_styles;
 			s.update_styles = 0;
@@ -720,6 +720,14 @@
 			each(o, function(v, n) {
 				t.setStyle(e, n, v);
 			});
+
+			s.update_styles = ol;
+			
+			if (ol) {
+				// Force update of the style data
+				v = t.serializeStyle(t.parseStyle(e.style.cssText), e.nodeName);
+				t.setAttrib(e, 'data-mce-style', v);
+			}
 		},
 
 		/**
