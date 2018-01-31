@@ -167,9 +167,9 @@
 					stack.length = pos;
 				}
 			}
-			
+			// a data attribute is any attribute with a hyphen, eg: data- or ng- or v-
 			function isDataAttribute(name) {
-				return name.indexOf('data-') === 0 || name.indexOf('uk-') === 0 || name.indexOf('ng-') === 0 || name.indexOf('v-') === 0;
+				return name.indexOf('-') > 0;
 			}
 
 			function parseAttribute(match, name, value, val2, val3) {
@@ -259,7 +259,7 @@
 			fixSelfClosing = settings.fix_self_closing;
 			specialElements = schema.getSpecialElements();
 
-			while ((matches = tokenRegExp.exec(html))) {
+			while ((matches = tokenRegExp.exec(html))) {				
 				// Text
 				if (index < matches.index) {
 					self.text(decode(html.substr(index, matches.index - index)));
