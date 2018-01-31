@@ -190,6 +190,15 @@
 			 * @final
 			 */
 			t.isIDevice = /(iPad|iPhone)/.test(ua);
+			
+			/**
+       		 * Constant that is true if the os is iOS.
+       		 *
+       	     * @property iOS
+       		 * @type Boolean
+       		 * @final
+       		 */
+			t.isIOS = t.isIDevice;
 
 			/**
 			 * Constant that is true if the current browser is running on iOS 5 or greater.
