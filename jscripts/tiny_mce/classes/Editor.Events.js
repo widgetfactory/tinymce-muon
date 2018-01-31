@@ -393,6 +393,44 @@
 			 * });
 			 */
 			'onPaste',
+			
+			/**
+			 * Fires when a cut event is intercepted inside the editor.
+			 *
+			 * @event onCut
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @param {Event} evt W3C DOM Event instance.
+			 * @example
+			 * // Adds an observer to the onCut event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onCut.add(function(ed, e) {
+			 *            console.debug('Cut plain text');
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onCut',
+			
+			/**
+			 * Fires when a copy event is intercepted inside the editor.
+			 *
+			 * @event onCopy
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @param {Event} evt W3C DOM Event instance.
+			 * @example
+			 * // Adds an observer to the onCopy event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onCopy.add(function(ed, e) {
+			 *            console.debug('copy plain text');
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onCopy',
 
 			/**
 			 * Fires when the Serializer does a preProcess on the contents.
@@ -810,7 +848,9 @@
 			reset : 'onReset',
 			contextmenu : 'onContextMenu',
 			dblclick : 'onDblClick',
-			paste : 'onPaste' // Doesn't work in all browsers yet
+			paste : 'onPaste', // Doesn't work in all browsers yet,
+			cut: 'onCut',
+			copy: 'onCopy'
 		};
 
 		// Handler that takes a native event and sends it out to a dispatcher like onKeyDown
@@ -851,6 +891,8 @@
 					break;
 
 				case 'paste':
+				case 'cut':
+				case 'copy':
 					dom.bind(self.getBody(), nativeName, eventHandler);
 					break;
 
