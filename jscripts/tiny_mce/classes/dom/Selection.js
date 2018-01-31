@@ -107,6 +107,76 @@
 			t.setRng(r);
 			t.collapse(false);
 		},
+		
+		getContextualFragment: function(rng, frag) {
+			var t = this, ed = t.editor, dom = t.dom;
+			
+			function isBlock(elm) {
+				return dom.isBlock(elm) && !/H[1-6]/.test(elm.nodeName);
+			}
+			
+			function isAllTextSelected(rng) {
+				var node = rng.commonAncestorContainer;
+				return rng.endOffset - rng.startOffset === node.nodeValue.length;
+			}
+
+			var node = rng.commonAncestorContainer;
+			
+			// skip if the node is the editor body
+			if (node === ed.getBody()) {
+				return frag;
+			}
+			
+			var tableCells = dom.select('td.mceSelected, th.mceSelected', node);
+			
+			if (tableCells.length) {
+				var table = dom.getParent(node, 'table');
+
+				if (table) {
+					var parent = dom.clone(table), row = dom.create('tr');
+					
+					each(tableCells, function(cell) {
+						row.appendChild(dom.clone(cell, true));
+					});
+					
+					parent.appendChild(row);
+					
+					return parent;
+				}
+			}
+			
+			if (rng.collapsed) {
+				return frag;
+			}
+			
+			// get all parents of the ancestor node, excluding the body
+			var parents = dom.getParents(node, null, ed.getBody());
+			
+			// filter to get inline and heading elements
+			var elms = tinymce.grep(parents, function(elm) {
+				return elm.nodeType === 1 && !isBlock(elm);
+			});
+			
+			// no elements selected, return range contents
+			if (!elms.length) {				
+				return frag;
+			}
+			
+			// create fragment to return
+			var nodes = document.createDocumentFragment();
+			
+			// clone each parent node, adding fragment
+			each(elms, function(elm) {
+				var n = dom.clone(elm);
+
+				n.appendChild(frag);
+
+				nodes.appendChild(n);
+			});
+			
+			return nodes;
+		},
+		
 		/**
 		 * Returns the selected contents using the DOM serializer passed in to this class.
 		 *
@@ -121,7 +191,7 @@
 		 * alert(tinyMCE.activeEditor.selection.getContent({format : 'text'}));
 		 */
 		getContent : function(s) {
-			var t = this, r = t.getRng(), e = t.dom.create("body"), se = t.getSel(), wb, wa, n;
+			var t = this, r = t.getRng(), e = t.dom.create("body"), se = t.getSel(), wb, wa, frag;
 
 			s = s || {};
 			wb = wa = '';
@@ -130,33 +200,45 @@
 			s.forced_root_block = '';
 			t.onBeforeGetContent.dispatch(t, s);
 
-			if (s.format == 'text')
+			if (s.format == 'text') {
 				return t.isCollapsed() ? '' : (r.text || (se.toString ? se.toString() : ''));
+			}
 
 			if (r.cloneContents) {
-				n = r.cloneContents();
+				frag = r.cloneContents();
 
-				if (n)
-					e.appendChild(n);
+				if (frag) {
+									
+					// internal content selection for cut/copy
+					if (s.contextual) {
+						frag = t.getContextualFragment(r, frag);
+					}
+					
+					e.appendChild(frag);
+				}	
 			} else if (is(r.item) || is(r.htmlText)) {
 				// IE will produce invalid markup if elements are present that
 				// it doesn't understand like custom elements or HTML5 elements.
 				// Adding a BR in front of the contents and then remoiving it seems to fix it though.
 				e.innerHTML = '<br>' + (r.item ? r.item(0).outerHTML : r.htmlText);
 				e.removeChild(e.firstChild);
-			} else
+			} else {
 				e.innerHTML = r.toString();
+			}
 
 			// Keep whitespace before and after
-			if (/^\s/.test(e.innerHTML))
+			if (/^\s/.test(e.innerHTML)) {
 				wb = ' ';
+			}
 
-			if (/\s+$/.test(e.innerHTML))
+			if (/\s+$/.test(e.innerHTML)) {
 				wa = ' ';
+			}
 
 			s.getInner = true;
 
 			s.content = t.isCollapsed() ? '' : wb + t.serializer.serialize(e, s) + wa;
+			
 			t.onGetContent.dispatch(t, s);
 
 			return s.content;
