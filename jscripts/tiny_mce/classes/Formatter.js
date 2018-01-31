@@ -382,7 +382,7 @@
 				function findSelectionEnd(start, end) {
 					var walker = new TreeWalker(end);
 					for (node = walker.prev2(); node; node = walker.prev2()) {
-						if (node.nodeType == 3 && node.data.length > 0) {
+						if (node.nodeType == 3 && node.data.length > 0) {						
 							return node;
 						}
 
@@ -704,7 +704,7 @@
 
 			if (format) {
 				if (node) {
-					if (node.nodeType) {
+					if (node.nodeType) {						
 						if (!applyNodeStyle(formatList, node)) {
 							rng = dom.createRng();
 							rng.setStartBefore(node);
@@ -1760,13 +1760,17 @@
 			// Example * becomes !: !<p><b><i>*text</i><i>text*</i></b></p>!
 			// This will reduce the number of wrapper elements that needs to be created
 			// Move start point up the tree
-			if (format[0].inline || format[0].block_expand) {
+			if (format[0].inline || format[0].block_expand) {				
 				if (!format[0].inline || (startContainer.nodeType != 3 || startOffset === 0)) {
-					startContainer = findParentContainer(true);
+					if (!isBlock(startContainer)) {
+						startContainer = findParentContainer(true);
+					}
 				}
 
 				if (!format[0].inline || (endContainer.nodeType != 3 || endOffset === endContainer.nodeValue.length)) {
-					endContainer = findParentContainer();
+					if (!isBlock(endContainer)) {
+						endContainer = findParentContainer();
+					}
 				}
 			}
 
