@@ -857,6 +857,7 @@ tinymce.util.Quirks = function(editor) {
 					handleElm = dom.add(editableDoc.documentElement, 'div', {
 						id: 'mceResizeHandle' + name,
 						'class': 'mceResizeHandle',
+						'data-mce-bogus': 1,
 						style: 'cursor:' + name + '-resize; margin:0; padding:0'
 					});
 
