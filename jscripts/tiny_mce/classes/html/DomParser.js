@@ -120,6 +120,7 @@
 
 					// Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
 					parent = parents[0];
+					
 					if (parent.isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
 						parent.empty().remove();
 					}
@@ -497,6 +498,7 @@
 					var textNode, elementRule, text, sibling, tempNode;
 
 					elementRule = validate ? schema.getElementRule(name) : {};
+					
 					if (elementRule) {
 						if (blockElements[name]) {
 							if (!isInWhiteSpacePreservedElement) {
@@ -671,7 +673,7 @@
 		// Remove <br> at end of block elements Gecko and WebKit injects BR elements to
 		// make it possible to place the caret inside empty blocks. This logic tries to remove
 		// these elements and keep br elements that where intended to be there intact
-		if (settings.remove_trailing_brs) {
+		if (settings.remove_trailing_brs) {			
 			self.addNodeFilter('br', function(nodes) {
 				var i, l = nodes.length, node, blockElements = extend({}, schema.getBlockElements());
 				var nonEmptyElements = schema.getNonEmptyElements(), parent, lastParent, prev, prevName;
@@ -720,7 +722,7 @@
 
 							// Is the parent to be considered empty after we removed the BR
 							if (parent.isEmpty(nonEmptyElements)) {
-								elementRule = schema.getElementRule(parent.name);
+								/*elementRule = schema.getElementRule(parent.name);
 
 								// Remove or padd the element depending on schema rule
 								if (elementRule) {
@@ -729,7 +731,7 @@
 									} else if (elementRule.paddEmpty) {
 										parent.empty().append(new Node('#text', 3)).value = '\u00a0';
 									}
-								}
+								}*/
 							}
 						}
 					} else {
