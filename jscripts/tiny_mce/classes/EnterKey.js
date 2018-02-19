@@ -570,7 +570,13 @@
 				fragment = tmpRng.extractContents();
 				trimLeadingLineBreaks(fragment);
 				newBlock = fragment.firstChild;
-				dom.insertAfter(fragment, parentBlock);
+
+				if (editor.schema.isValidChild(parentBlock.nodeName.toLowerCase(), newBlockName.toLowerCase())) {
+					parentBlock.appendChild(fragment);
+				} else {
+					dom.insertAfter(fragment, parentBlock);
+				}
+
 				trimInlineElementsOnLeftSideOfBlock(newBlock);
 				addBrToBlockIfNeeded(parentBlock);
 				moveToCaretPosition(newBlock);
