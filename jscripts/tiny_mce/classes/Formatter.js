@@ -717,7 +717,7 @@
 				} else {
 					if (!isCollapsed || !format.inline || dom.select('td.mceSelected,th.mceSelected').length) {
 						// Obtain selection node before selection is unselected by applyRngStyle()
-						var curSelNode = ed.selection.getNode();
+						var curSelNode = selection.getNode();
 						
 						// If the formats have a default block and we can't find a parent block then start wrapping it with a DIV this is for forced_root_blocks: false
 						// It's kind of a hack but people should be using the default block type P since all desktop editors work that way
@@ -726,7 +726,7 @@
 						}
 
 						// Apply formatting to selection
-						ed.selection.setRng(adjustSelectionToVisibleSelection());
+						selection.setRng(adjustSelectionToVisibleSelection());
 						bookmark = selection.getBookmark();
 						applyRngStyle(expandRng(selection.getRng(TRUE), formatList), bookmark);
 
