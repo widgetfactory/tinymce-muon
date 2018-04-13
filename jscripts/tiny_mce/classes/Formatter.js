@@ -394,7 +394,7 @@
 
 				// Adjust selection so that a end container with a end offset of zero is not included in the selection
 				// as this isn't visible to the user.
-				var rng = ed.selection.getRng();
+				var rng = selection.getRng();
 				var start = rng.startContainer;
 				var end = rng.endContainer;
 
