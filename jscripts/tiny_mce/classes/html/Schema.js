@@ -116,11 +116,14 @@
         
         // schema.org attributes
         globalAttributes.push.apply(globalAttributes, split("itemscope itemtype itemid itemprop itemref"));
+        
+        // aria attributes
+        globalAttributes.push.apply(globalAttributes, split("role"));
 
         // Block content elements
         blockContent = split(
-                "address blockquote div dl fieldset form h1 h2 h3 h4 h5 h6 hr menu ol p pre table ul"
-                );
+            "address blockquote div dl fieldset form h1 h2 h3 h4 h5 h6 hr menu ol p pre table ul"
+        );
 
         // Phrasing content elements from the HTML5 spec (inline)
         phrasingContent = split(
@@ -223,7 +226,7 @@
             add("mark rt rp summary bdi", "", phrasingContent);
             add("canvas", "width height", flowContent);
             add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-                    "muted controls width height buffered controlslist", flowContent, "track source");
+                    "muted controls width height buffered controlslist playsinline", flowContent, "track source");
             add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
             add("picture", "", "img source");
             add("source", "src srcset type media sizes");
@@ -408,7 +411,7 @@
         shortEndedElementsMap = createLookupTable('short_ended_elements', 'area base basefont br col frame hr img input isindex link ' +
                 'meta param embed source wbr track');
         boolAttrMap = createLookupTable('boolean_attributes', 'checked compact declare defer disabled ismap multiple nohref noresize ' +
-                'noshade nowrap readonly selected autoplay loop controls itemscope');
+                'noshade nowrap readonly selected autoplay loop controls itemscope playsinline');
         nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script', shortEndedElementsMap);
         moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
         textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
