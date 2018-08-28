@@ -200,7 +200,15 @@
 								return;
 
 							if (!s.editor_selector || hasClass(elm, s.editor_selector)) {
-								ed = new tinymce.Editor(createId(elm), s);
+								
+								var id = createId(elm);
+								
+								// don't create an editor that is already created
+								if (t.get(id)) {
+									return;
+								}
+								
+								ed = new tinymce.Editor(id, s);
 								el.push(ed);
 								ed.render(1);
 							}
