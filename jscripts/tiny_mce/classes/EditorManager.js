@@ -339,10 +339,16 @@
 		 */
 		remove : function(editor) {
 			var t = this, i, editors = t.editors;
+			
+			// no value given
+			if (!editor) {
+				return null;
+			}
 
 			// Not in the collection
-			if (!editors[editor.id])
+			if (!editors[editor.id]) {
 				return null;
+			}
 
 			delete editors[editor.id];
 
