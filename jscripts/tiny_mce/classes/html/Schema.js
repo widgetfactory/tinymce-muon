@@ -77,6 +77,12 @@
             while (ni--) {
                 schemaItem = schema[name[ni]];
                 for (i = 0, l = attributes.length; i < l; i++) {
+                
+                	// avoid duplicates
+                	if (schemaItem.attributes[attributes[i]]) {
+                		continue;
+                	}
+
                     schemaItem.attributes[attributes[i]] = {};
                     schemaItem.attributesOrder.push(attributes[i]);
                 }
