@@ -133,10 +133,10 @@
 
         // Phrasing content elements from the HTML5 spec (inline)
         phrasingContent = split(
-                "a abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
-                "label map noscript object q s samp script select small span strong sub sup " +
-                "textarea u var #text #comment"
-                );
+            "a abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
+            "label map noscript object q s samp script select small span strong sub sup " +
+            "textarea u var link style #text #comment"
+        );
 
         // Add HTML5 items to globalAttributes, blockContent, phrasingContent
         if (type != "html4") {
