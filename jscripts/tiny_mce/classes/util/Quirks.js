@@ -11,7 +11,7 @@
 /**
  * This file includes fixes for various browser quirks it's made to make it easy to add/remove browser specific fixes.
  */
-tinymce.util.Quirks = function(editor) {
+tinymce.util.Quirks = function (editor) {
 	var VK = tinymce.VK, BACKSPACE = VK.BACKSPACE, DELETE = VK.DELETE, dom = editor.dom, selection = editor.selection,
 		settings = editor.settings, parser = editor.parser, serializer = editor.serializer, each = tinymce.each;
 
@@ -99,9 +99,9 @@ tinymce.util.Quirks = function(editor) {
 				if (blockElm && (isAtStartOrEndOfElm() || !rng.collapsed)) {
 					// Wrap children of block in a EM and let WebKit stick is
 					// runtime styles junk into that EM
-					wrapperElm = dom.create('em', {'id': '__mceDel'});
+					wrapperElm = dom.create('em', { 'id': '__mceDel' });
 
-					each(tinymce.grep(blockElm.childNodes), function(node) {
+					each(tinymce.grep(blockElm.childNodes), function (node) {
 						wrapperElm.appendChild(node);
 					});
 
@@ -128,7 +128,7 @@ tinymce.util.Quirks = function(editor) {
 			}
 		}
 
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			var isDelete;
 
 			isDelete = e.keyCode == DELETE;
@@ -138,7 +138,7 @@ tinymce.util.Quirks = function(editor) {
 			}
 		});
 
-		editor.addCommand('Delete', function() {removeMergedFormatSpans();});
+		editor.addCommand('Delete', function () { removeMergedFormatSpans(); });
 	};
 
 	/**
@@ -158,7 +158,7 @@ tinymce.util.Quirks = function(editor) {
 			var body = dom.create("body");
 			var contents = rng.cloneContents();
 			body.appendChild(contents);
-			return selection.serializer.serialize(body, {format: 'html'});
+			return selection.serializer.serialize(body, { format: 'html' });
 		}
 
 		function allContentsSelected(rng) {
@@ -171,7 +171,7 @@ tinymce.util.Quirks = function(editor) {
 			return selection === allSelection;
 		}
 
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			var keyCode = e.keyCode, isCollapsed;
 
 			// Empty the editor if it's needed for example backspace at <p><b>|</b></p>
@@ -206,7 +206,7 @@ tinymce.util.Quirks = function(editor) {
 	 * This selects the whole body so that backspace/delete logic will delete everything
 	 */
 	function selectAll() {
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && e.keyCode == 65 && VK.metaKeyPressed(e)) {
 				e.preventDefault();
 				editor.execCommand('SelectAll');
@@ -228,12 +228,12 @@ tinymce.util.Quirks = function(editor) {
 	function inputMethodFocus() {
 		if (!editor.settings.content_editable) {
 			// Case 1 IME doesn't initialize if you focus the document
-			dom.bind(editor.getDoc(), 'focusin', function(e) {
+			dom.bind(editor.getDoc(), 'focusin', function (e) {
 				selection.setRng(selection.getRng());
 			});
 
 			// Case 2 IME doesn't initialize if you click the documentElement it also doesn't properly fire the focusin event
-			dom.bind(editor.getDoc(), 'mousedown', function(e) {
+			dom.bind(editor.getDoc(), 'mousedown', function (e) {
 				if (e.target == editor.getDoc().documentElement) {
 					editor.getWin().focus();
 					selection.setRng(selection.getRng());
@@ -250,7 +250,7 @@ tinymce.util.Quirks = function(editor) {
 	 * browsers
 	 */
 	function removeHrOnBackspace() {
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
 				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
 					var node = selection.getNode();
@@ -273,7 +273,7 @@ tinymce.util.Quirks = function(editor) {
 		// Fix for a focus bug in FF 3.x where the body element
 		// wouldn't get proper focus if the user clicked on the HTML element
 		if (!Range.prototype.getClientRects) { // Detect getClientRects got introduced in FF 4
-			editor.onMouseDown.add(function(editor, e) {
+			editor.onMouseDown.add(function (editor, e) {
 				if (!isDefaultPrevented(e) && e.target.nodeName === "HTML") {
 					var body = editor.getBody();
 
@@ -281,7 +281,7 @@ tinymce.util.Quirks = function(editor) {
 					body.blur();
 
 					// Refocus the body after a little while
-					setTimeout(function() {
+					setTimeout(function () {
 						body.focus();
 					}, 0);
 				}
@@ -294,7 +294,7 @@ tinymce.util.Quirks = function(editor) {
 	 * by clicking on them so we need to fake that.
 	 */
 	function selectControlElements() {
-		editor.onClick.add(function(editor, e) {
+		editor.onClick.add(function (editor, e) {
 			var target = e.target;
 
 			// Workaround for bug, http://bugs.webkit.org/show_bug.cgi?id=12250
@@ -303,7 +303,7 @@ tinymce.util.Quirks = function(editor) {
 			if (/^(IMG|HR)$/.test(target.nodeName)) {
 				//selection.getSel().setBaseAndExtent(e, 0, e, 1);
 				e.preventDefault();
-            	editor.selection.select(target);
+				editor.selection.select(target);
 			}
 
 			if (e.nodeName == 'A' && dom.hasClass(e, 'mce-item-anchor')) {
@@ -330,13 +330,13 @@ tinymce.util.Quirks = function(editor) {
 		function getAttributeApplyFunction() {
 			var template = dom.getAttribs(selection.getStart().cloneNode(false));
 
-			return function() {
+			return function () {
 				var target = selection.getStart();
 
 				if (target !== editor.getBody()) {
 					dom.setAttrib(target, "style", null);
 
-					each(template, function(attr) {
+					each(template, function (attr) {
 						target.setAttributeNode(attr.cloneNode(true));
 					});
 				}
@@ -352,7 +352,7 @@ tinymce.util.Quirks = function(editor) {
 			return false;
 		}
 
-		editor.onKeyPress.add(function(editor, e) {
+		editor.onKeyPress.add(function (editor, e) {
 			var applyAttributes;
 
 			if (!isDefaultPrevented(e) && (e.keyCode == 8 || e.keyCode == 46) && isSelectionAcrossElements()) {
@@ -364,14 +364,14 @@ tinymce.util.Quirks = function(editor) {
 			}
 		});
 
-		dom.bind(editor.getDoc(), 'cut', function(e) {
+		dom.bind(editor.getDoc(), 'cut', function (e) {
 			var applyAttributes;
 
 			if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
 				applyAttributes = getAttributeApplyFunction();
 				editor.onKeyUp.addToTop(blockEvent);
 
-				setTimeout(function() {
+				setTimeout(function () {
 					applyAttributes();
 					editor.onKeyUp.remove(blockEvent);
 				}, 0);
@@ -386,13 +386,13 @@ tinymce.util.Quirks = function(editor) {
 	function selectionChangeNodeChanged() {
 		var lastRng, selectionTimer;
 
-		dom.bind(editor.getDoc(), 'selectionchange', function() {
+		dom.bind(editor.getDoc(), 'selectionchange', function () {
 			if (selectionTimer) {
 				clearTimeout(selectionTimer);
 				selectionTimer = 0;
 			}
 
-			selectionTimer = window.setTimeout(function() {
+			selectionTimer = window.setTimeout(function () {
 				var rng = selection.getRng();
 
 				// Compare the ranges to see if it was a real change or not
@@ -416,7 +416,7 @@ tinymce.util.Quirks = function(editor) {
 	 * Therefore, disable Backspace when cursor immediately follows a table.
 	 */
 	function disableBackspaceIntoATable() {
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
 				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
 					var previousSibling = selection.getNode().previousSibling;
@@ -437,14 +437,14 @@ tinymce.util.Quirks = function(editor) {
 			return;
 		}
 
-		 // Enable display: none in area and add a specific class that hides all BR elements in PRE to
-		 // avoid the caret from getting stuck at the BR elements while pressing the right arrow key
+		// Enable display: none in area and add a specific class that hides all BR elements in PRE to
+		// avoid the caret from getting stuck at the BR elements while pressing the right arrow key
 		setEditorCommandState('RespectVisibilityInDesign', true);
 		editor.contentStyles.push('.mceHideBrInPre pre br {display: none}');
 		dom.addClass(editor.getBody(), 'mceHideBrInPre');
 
 		// Adds a \n before all BR elements in PRE to get them visual
-		parser.addNodeFilter('pre', function(nodes, name) {
+		parser.addNodeFilter('pre', function (nodes, name) {
 			var i = nodes.length, brNodes, j, brElm, sibling;
 
 			while (i--) {
@@ -465,7 +465,7 @@ tinymce.util.Quirks = function(editor) {
 		});
 
 		// Removes any \n before BR elements in PRE since other browsers and in contentEditable=false mode they will be visible
-		serializer.addNodeFilter('pre', function(nodes, name) {
+		serializer.addNodeFilter('pre', function (nodes, name) {
 			var i = nodes.length, brNodes, j, brElm, sibling;
 
 			while (i--) {
@@ -486,7 +486,7 @@ tinymce.util.Quirks = function(editor) {
 	 * Moves style width/height to attribute width/height when the user resizes an image on IE.
 	 */
 	function removePreSerializedStylesWhenSelectingControls() {
-		dom.bind(editor.getBody(), 'mouseup', function(e) {
+		dom.bind(editor.getBody(), 'mouseup', function (e) {
 			var value, node = selection.getNode();
 
 			// Moved styles to attributes on IMG eements
@@ -521,7 +521,7 @@ tinymce.util.Quirks = function(editor) {
 	 * See: https://bugs.webkit.org/show_bug.cgi?id=81656
 	 */
 	function keepInlineElementOnDeleteBackspace() {
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			var isDelete, rng, container, offset, brElm, sibling, collapsed;
 
 			isDelete = e.keyCode == DELETE;
@@ -546,7 +546,7 @@ tinymce.util.Quirks = function(editor) {
 					e.preventDefault();
 
 					// Insert a BR before the text node this will prevent the containing element from being deleted/converted
-					brElm = dom.create('br', {id: '__tmp'});
+					brElm = dom.create('br', { id: '__tmp' });
 					container.parentNode.insertBefore(brElm, container);
 
 					// Do the browser delete
@@ -577,7 +577,7 @@ tinymce.util.Quirks = function(editor) {
 	 */
 	function removeBlockQuoteOnBackSpace() {
 		// Add block quote deletion handler
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			var rng, container, offset, root, parent;
 
 			if (isDefaultPrevented(e) || e.keyCode != VK.BACKSPACE) {
@@ -645,7 +645,7 @@ tinymce.util.Quirks = function(editor) {
 	 */
 	function addBrAfterLastLinks() {
 		function fixLinks(editor, o) {
-			each(dom.select('a'), function(node) {
+			each(dom.select('a'), function (node) {
 				var parentNode = node.parentNode, root = dom.getRoot();
 
 				if (parentNode.lastChild === node) {
@@ -657,12 +657,12 @@ tinymce.util.Quirks = function(editor) {
 						parentNode = parentNode.parentNode;
 					}
 
-					dom.add(parentNode, 'br', {'data-mce-bogus' : 1});
+					dom.add(parentNode, 'br', { 'data-mce-bogus': 1 });
 				}
 			});
 		};
 
-		editor.onExecCommand.add(function(editor, cmd) {			
+		editor.onExecCommand.add(function (editor, cmd) {
 			if (cmd === 'mceInsertLink') {
 				fixLinks(editor);
 			}
@@ -677,7 +677,7 @@ tinymce.util.Quirks = function(editor) {
 	 */
 	function setDefaultBlockType() {
 		if (settings.forced_root_block) {
-			editor.onInit.add(function() {
+			editor.onInit.add(function () {
 				setEditorCommandState('DefaultParagraphSeparator', settings.forced_root_block);
 			});
 		}
@@ -702,7 +702,7 @@ tinymce.util.Quirks = function(editor) {
 	 * Deletes the selected image on IE instead of navigating to previous page.
 	 */
 	function deleteControlItemOnBackSpace() {
-		editor.onKeyDown.add(function(editor, e) {
+		editor.onKeyDown.add(function (editor, e) {
 			var rng;
 
 			if (!isDefaultPrevented(e) && e.keyCode == BACKSPACE) {
@@ -728,7 +728,7 @@ tinymce.util.Quirks = function(editor) {
 		// IE10+
 		if (getDocumentMode() >= 10) {
 			emptyBlocksCSS = '';
-			each('p div h1 h2 h3 h4 h5 h6'.split(' '), function(name, i) {
+			each('p div h1 h2 h3 h4 h5 h6'.split(' '), function (name, i) {
 				emptyBlocksCSS += (i > 0 ? ',' : '') + name + ':empty';
 			});
 
@@ -740,222 +740,369 @@ tinymce.util.Quirks = function(editor) {
 	 * Fakes image/table resizing on WebKit/Opera.
 	 */
 	function fakeImageResize() {
-		var selectedElmX, selectedElmY, selectedElm, selectedElmGhost, selectedHandle, startX, startY, startW, startH, ratio,
-			resizeHandles, width, height, rootDocument = document, editableDoc = editor.getDoc();
+		var dom = editor.dom, each = tinymce.each;
+		var selectedElm, selectedElmGhost, resizeHelper, resizeHandles, selectedHandle;
+		var startX, startY, selectedElmX, selectedElmY, startW, startH, ratio, resizeStarted;
+		var width, height;
+		var editableDoc = editor.getDoc(), rootDocument = document;
+		var abs = Math.abs, round = Math.round, rootElement = editor.getBody();
+		var startScrollWidth, startScrollHeight;
+
+		editor.onObjectResized = new tinymce.util.Dispatcher();
+		editor.onObjectResizeStart = new tinymce.util.Dispatcher();
 
 		if (!settings.object_resizing || settings.webkit_fake_resize === false) {
 			return;
 		}
 
-		// Try disabling object resizing if WebKit implements resizing in the future
-		setEditorCommandState("enableObjectResizing", false);
-
 		// Details about each resize handle how to scale etc
 		resizeHandles = {
 			// Name: x multiplier, y multiplier, delta size x, delta size y
-			n: [.5, 0, 0, -1],
-			e: [1, .5, 1, 0],
-			s: [.5, 1, 0, 1],
-			w: [0, .5, -1, 0],
+			/*n: [0.5, 0, 0, -1],
+			e: [1, 0.5, 1, 0],
+			s: [0.5, 1, 0, 1],
+			w: [0, 0.5, -1, 0],*/
 			nw: [0, 0, -1, -1],
 			ne: [1, 0, 1, -1],
 			se: [1, 1, 1, 1],
-			sw : [0, 1, -1, 1]
+			sw: [0, 1, -1, 1]
 		};
 
-		function resizeElement(e) {
-			var deltaX, deltaY;
+		// Add CSS for resize handles, cloned element and selected
+		var rootClass = '.mceContentBody';
+		editor.contentStyles.push(rootClass + ' div.mce-resizehandle {' +
+			'position: absolute;' +
+			'border: 1px solid black;' +
+			'box-sizing: content-box;' +
+			'background: #FFF;' +
+			'width: 7px;' +
+			'height: 7px;' +
+			'z-index: 10000' +
+			'}' +
+			rootClass + ' .mce-resizehandle:hover {' +
+			'background: #000' +
+			'}' +
+			rootClass + ' img[data-mce-selected],' + rootClass + ' hr[data-mce-selected] {' +
+			'outline: 1px solid black;' +
+			'resize: none' + // Have been talks about implementing this in browsers
+			'}' +
+			rootClass + ' .mce-clonedresizable {' +
+			'position: absolute;' +
+			(tinymce.isGecko ? '' : 'outline: 1px dashed black;') + // Gecko produces trails while resizing
+			'opacity: .5;' +
+			'filter: alpha(opacity=50);' +
+			'z-index: 10000' +
+			'}' +
+			rootClass + ' .mce-resize-helper {' +
+			'background: #555;' +
+			'background: rgba(0,0,0,0.75);' +
+			'border-radius: 3px;' +
+			'border: 1px;' +
+			'color: white;' +
+			'display: none;' +
+			'font-family: sans-serif;' +
+			'font-size: 12px;' +
+			'white-space: nowrap;' +
+			'line-height: 14px;' +
+			'margin: 5px 10px;' +
+			'padding: 5px;' +
+			'position: absolute;' +
+			'z-index: 10001' +
+			'}');
 
+		var isImage = function (elm) {
+			return elm && (elm.nodeName === 'IMG' || editor.dom.is(elm, 'figure.image'));
+		};
+
+		var getResizeTarget = function (elm) {
+			return editor.dom.is(elm, 'figure.image') ? elm.querySelector('img') : elm;
+		};
+
+		var isResizable = function (elm) {
+			var selector = editor.settings.object_resizing;
+
+			if (selector === false || tinymce.isIOS) {
+				return false;
+			}
+			if (typeof selector !== 'string') {
+				selector = 'table,img,figure.image,div';
+			}
+
+			if (elm.getAttribute('data-mce-resize') === 'false') {
+				return false;
+			}
+
+			if (elm === editor.getBody()) {
+				return false;
+			}
+
+			return editor.dom.is(elm, selector);
+		};
+
+		var resizeGhostElement = function (e) {
+			var deltaX, deltaY, proportional;
+			var resizeHelperX, resizeHelperY;
 			// Calc new width/height
 			deltaX = e.screenX - startX;
 			deltaY = e.screenY - startY;
-
 			// Calc new size
 			width = deltaX * selectedHandle[2] + startW;
 			height = deltaY * selectedHandle[3] + startH;
-
 			// Never scale down lower than 5 pixels
 			width = width < 5 ? 5 : width;
 			height = height < 5 ? 5 : height;
 
-			// Constrain proportions when modifier key is pressed or if the nw, ne, sw, se corners are moved on an image
-			if (VK.modifierPressed(e) || (selectedElm.nodeName == "IMG" && selectedHandle[2] * selectedHandle[3] !== 0)) {
-				width = Math.round(height / ratio);
-				height = Math.round(width * ratio);
+			if (isImage(selectedElm) && editor.settings.resize_img_proportional !== false) {
+				proportional = !VK.modifierPressed(e);
 			}
-
+			else {
+				proportional = VK.modifierPressed(e) || (isImage(selectedElm) && selectedHandle[2] * selectedHandle[3] !== 0);
+			}
+			// Constrain proportions
+			if (proportional) {
+				if (abs(deltaX) > abs(deltaY)) {
+					height = round(width * ratio);
+					width = round(height / ratio);
+				}
+				else {
+					width = round(height / ratio);
+					height = round(width * ratio);
+				}
+			}
 			// Update ghost size
-			dom.setStyles(selectedElmGhost, {
+			dom.setStyles(getResizeTarget(selectedElmGhost), {
 				width: width,
 				height: height
 			});
-
+			// Update resize helper position
+			resizeHelperX = selectedHandle.startPos.x + deltaX;
+			resizeHelperY = selectedHandle.startPos.y + deltaY;
+			resizeHelperX = resizeHelperX > 0 ? resizeHelperX : 0;
+			resizeHelperY = resizeHelperY > 0 ? resizeHelperY : 0;
+			dom.setStyles(resizeHelper, {
+				left: resizeHelperX,
+				top: resizeHelperY,
+				display: 'block'
+			});
+			resizeHelper.innerHTML = width + ' &times; ' + height;
 			// Update ghost X position if needed
 			if (selectedHandle[2] < 0 && selectedElmGhost.clientWidth <= width) {
 				dom.setStyle(selectedElmGhost, 'left', selectedElmX + (startW - width));
 			}
-
 			// Update ghost Y position if needed
 			if (selectedHandle[3] < 0 && selectedElmGhost.clientHeight <= height) {
 				dom.setStyle(selectedElmGhost, 'top', selectedElmY + (startH - height));
 			}
-		}
+			// Calculate how must overflow we got
+			deltaX = rootElement.scrollWidth - startScrollWidth;
+			deltaY = rootElement.scrollHeight - startScrollHeight;
+			// Re-position the resize helper based on the overflow
+			if (deltaX + deltaY !== 0) {
+				dom.setStyles(resizeHelper, {
+					left: resizeHelperX - deltaX,
+					top: resizeHelperY - deltaY
+				});
+			}
+			if (!resizeStarted) {
+				editor.onObjectResizeStart.dispatch(editor, selectedElm, startW, startH);
+				resizeStarted = true;
+			}
+		};
 
-		function endResize() {
-			function setSizeProp(name, value) {
+		var endGhostResize = function () {
+			resizeStarted = false;
+			var setSizeProp = function (name, value) {
 				if (value) {
 					// Resize by using style or attribute
 					if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
-						dom.setStyle(selectedElm, name, value);
-					} else {
-						dom.setAttrib(selectedElm, name, value);
+						dom.setStyle(getResizeTarget(selectedElm), name, value);
+					}
+					else {
+						dom.setAttrib(getResizeTarget(selectedElm), name, value);
 					}
 				}
-			}
-
+			};
 			// Set width/height properties
 			setSizeProp('width', width);
 			setSizeProp('height', height);
-
-			dom.unbind(editableDoc, 'mousemove', resizeElement);
-			dom.unbind(editableDoc, 'mouseup', endResize);
-
-			if (rootDocument != editableDoc) {
-				dom.unbind(rootDocument, 'mousemove', resizeElement);
-				dom.unbind(rootDocument, 'mouseup', endResize);
+			dom.unbind(editableDoc, 'mousemove', resizeGhostElement);
+			dom.unbind(editableDoc, 'mouseup', endGhostResize);
+			if (rootDocument !== editableDoc) {
+				dom.unbind(rootDocument, 'mousemove', resizeGhostElement);
+				dom.unbind(rootDocument, 'mouseup', endGhostResize);
 			}
-
-			// Remove ghost and update resize handle positions
+			// Remove ghost/helper and update resize handle positions
 			dom.remove(selectedElmGhost);
+			dom.remove(resizeHelper);
 			showResizeRect(selectedElm);
-		}
+			// dispatch event
+			editor.onObjectResized.dispatch(editor, selectedElm, width, height);
 
-		function showResizeRect(targetElm) {
-			var position, targetWidth, targetHeight;
+			dom.setAttrib(selectedElm, 'style', dom.getAttrib(selectedElm, 'style'));
+			editor.nodeChanged();
+		};
 
+		var showResizeRect = function (targetElm) {
+			var position, targetWidth, targetHeight, rect;
 			hideResizeRect();
+			unbindResizeHandleEvents();
 
 			// Get position and size of target
-			position = dom.getPos(targetElm);
+			position = dom.getPos(targetElm, rootElement);
 			selectedElmX = position.x;
 			selectedElmY = position.y;
-			targetWidth = targetElm.offsetWidth;
-			targetHeight = targetElm.offsetHeight;
+			rect = targetElm.getBoundingClientRect(); // Fix for Gecko offsetHeight for table with caption
+			targetWidth = rect.width || (rect.right - rect.left);
+			targetHeight = rect.height || (rect.bottom - rect.top);
 
 			// Reset width/height if user selects a new image/table
-			if (selectedElm != targetElm) {
+			if (selectedElm !== targetElm) {
 				selectedElm = targetElm;
 				width = height = 0;
 			}
 
-			each(resizeHandles, function(handle, name) {
-				var handleElm;
-
-				// Get existing or render resize handle
-				handleElm = dom.get('mceResizeHandle' + name);
-				if (!handleElm) {
-					handleElm = dom.add(editableDoc.documentElement, 'div', {
-						id: 'mceResizeHandle' + name,
-						'class': 'mceResizeHandle',
-						'data-mce-bogus': 1,
-						style: 'cursor:' + name + '-resize; margin:0; padding:0'
-					});
-
-					dom.bind(handleElm, 'mousedown', function(e) {
-						e.preventDefault();
-
-						endResize();
-
+			if (isResizable(targetElm)) {
+				each(resizeHandles, function (handle, name) {
+					var handleElm;
+					var startDrag = function (e) {
 						startX = e.screenX;
 						startY = e.screenY;
-						startW = selectedElm.clientWidth;
-						startH = selectedElm.clientHeight;
+						startW = getResizeTarget(selectedElm).clientWidth;
+						startH = getResizeTarget(selectedElm).clientHeight;
 						ratio = startH / startW;
 						selectedHandle = handle;
-
+						handle.startPos = {
+							x: targetWidth * handle[0] + selectedElmX,
+							y: targetHeight * handle[1] + selectedElmY
+						};
+						startScrollWidth = rootElement.scrollWidth;
+						startScrollHeight = rootElement.scrollHeight;
 						selectedElmGhost = selectedElm.cloneNode(true);
-						dom.addClass(selectedElmGhost, 'mceClonedResizable');
+						dom.addClass(selectedElmGhost, 'mce-clonedresizable');
+						dom.setAttrib(selectedElmGhost, 'data-mce-bogus', 'all');
+						selectedElmGhost.contentEditable = false; // Hides IE move layer cursor
+						selectedElmGhost.unSelectabe = true;
 						dom.setStyles(selectedElmGhost, {
 							left: selectedElmX,
 							top: selectedElmY,
 							margin: 0
 						});
-
-						editableDoc.documentElement.appendChild(selectedElmGhost);
-
-						dom.bind(editableDoc, 'mousemove', resizeElement);
-						dom.bind(editableDoc, 'mouseup', endResize);
-
-						if (rootDocument != editableDoc) {
-							dom.bind(rootDocument, 'mousemove', resizeElement);
-							dom.bind(rootDocument, 'mouseup', endResize);
+						selectedElmGhost.removeAttribute('data-mce-selected');
+						rootElement.appendChild(selectedElmGhost);
+						dom.bind(editableDoc, 'mousemove', resizeGhostElement);
+						dom.bind(editableDoc, 'mouseup', endGhostResize);
+						if (rootDocument !== editableDoc) {
+							dom.bind(rootDocument, 'mousemove', resizeGhostElement);
+							dom.bind(rootDocument, 'mouseup', endGhostResize);
 						}
+						resizeHelper = dom.add(rootElement, 'div', {
+							'class': 'mce-resize-helper',
+							'data-mce-bogus': 'all'
+						}, startW + ' &times; ' + startH);
+					};
+					// Get existing or render resize handle
+					handleElm = dom.get('mceResizeHandle' + name);
+					if (handleElm) {
+						dom.remove(handleElm);
+					}
+					handleElm = dom.add(rootElement, 'div', {
+						'id': 'mceResizeHandle' + name,
+						'data-mce-bogus': 'all',
+						'class': 'mce-resizehandle mce-resizehandle-' + name,
+						'unselectable': true,
+						'style': 'cursor:' + name + '-resize; margin:0; padding:0; user-select: none; -ms-user-select: none;'
 					});
-				} else {
-					dom.show(handleElm);
-				}
-
-				// Position element
-				dom.setStyles(handleElm, {
-					left: (targetWidth * handle[0] + selectedElmX) - (handleElm.offsetWidth / 2),
-					top: (targetHeight * handle[1] + selectedElmY) - (handleElm.offsetHeight / 2)
+					// Hides IE move layer cursor
+					// If we set it on Chrome we get this wounderful bug: #6725
+					// Edge doesn't have this issue however setting contenteditable will move the selection to that element on Edge 17 see #TINY-1679
+					if (tinymce.isIE11) {
+						handleElm.contentEditable = false;
+					}
+					dom.bind(handleElm, 'mousedown', function (e) {
+						e.stopImmediatePropagation();
+						e.preventDefault();
+						startDrag(e);
+					});
+					handle.elm = handleElm;
+					// Position element
+					dom.setStyles(handleElm, {
+						left: (targetWidth * handle[0] + selectedElmX) - (handleElm.offsetWidth / 2),
+						top: (targetHeight * handle[1] + selectedElmY) - (handleElm.offsetHeight / 2)
+					});
 				});
-			});
-
-			// Only add resize rectangle on WebKit and only on images
-			if (!tinymce.isOpera && selectedElm.nodeName == "IMG") {
-				selectedElm.setAttribute('data-mce-selected', '1');
 			}
-		}
-
-		function hideResizeRect() {
+			else {
+				hideResizeRect();
+			}
+			selectedElm.setAttribute('data-mce-selected', '1');
+		};
+		var hideResizeRect = function () {
+			var name, handleElm;
+			unbindResizeHandleEvents();
 			if (selectedElm) {
 				selectedElm.removeAttribute('data-mce-selected');
 			}
-
-			for (var name in resizeHandles) {
-				dom.hide('mceResizeHandle' + name);
+			for (name in resizeHandles) {
+				handleElm = dom.get('mceResizeHandle' + name);
+				if (handleElm) {
+					dom.unbind(handleElm);
+					dom.remove(handleElm);
+				}
 			}
-		}
-
-		// Add CSS for resize handles, cloned element and selected
-		editor.contentStyles.push(
-			'.mceResizeHandle {' +
-				'position: absolute;' +
-				'border: 1px solid black;' +
-				'background: #FFF;' +
-				'width: 5px;' +
-				'height: 5px;' +
-				'z-index: 10000' +
-			'}' +
-			'.mceResizeHandle:hover {' +
-				'background: #000' +
-			'}' +
-			'img[data-mce-selected] {' +
-				'outline: 1px solid black' +
-			'}' +
-			'img.mceClonedResizable, table.mceClonedResizable {' +
-				'position: absolute;' +
-				'outline: 1px dashed black;' +
-				'opacity: .5;' +
-				'z-index: 10000' +
-			'}'
-		);
-
-		function updateResizeRect() {
-			var controlElm = dom.getParent(selection.getNode(), 'table,img');
-
+		};
+		var updateResizeRect = function (e) {
+			var startElm, controlElm;
+			var isChildOrEqual = function (node, parent) {
+				if (node) {
+					do {
+						if (node === parent) {
+							return true;
+						}
+					} while ((node = node.parentNode));
+				}
+			};
+			// Ignore all events while resizing or if the editor instance was removed
+			if (resizeStarted || editor.removed) {
+				return;
+			}
 			// Remove data-mce-selected from all elements since they might have been copied using Ctrl+c/v
-			each(dom.select('img[data-mce-selected]'), function(img) {
+			each(dom.select('img[data-mce-selected],hr[data-mce-selected]'), function (img) {
 				img.removeAttribute('data-mce-selected');
 			});
+			controlElm = e.type === 'mousedown' ? e.target : selection.getNode();
+			controlElm = dom.closest(controlElm, 'table,img,figure.image,hr')[0];
 
-			if (controlElm) {
-				showResizeRect(controlElm);
-			} else {
-				hideResizeRect();
+			if (isChildOrEqual(controlElm, rootElement)) {
+				disableGeckoResize();
+				startElm = selection.getStart(true);
+				if (isChildOrEqual(startElm, controlElm) && isChildOrEqual(selection.getEnd(true), controlElm)) {
+					showResizeRect(controlElm);
+					return;
+				}
 			}
-		}
+
+			hideResizeRect();
+		};
+
+		var unbindResizeHandleEvents = function () {
+			for (var name in resizeHandles) {
+				var handle = resizeHandles[name];
+				if (handle.elm) {
+					dom.unbind(handle.elm);
+					delete handle.elm;
+				}
+			}
+		};
+
+		var disableGeckoResize = function () {
+			try {
+				// Disable object resizing on Gecko
+				editor.getDoc().execCommand('enableObjectResizing', false, false);
+			}
+			catch (ex) {
+				// Ignore
+			}
+		};
 
 		// Show/hide resize rect when image is selected
 		editor.onNodeChange.add(updateResizeRect);
@@ -964,13 +1111,15 @@ tinymce.util.Quirks = function(editor) {
 		dom.bind(editableDoc, 'selectionchange', updateResizeRect);
 
 		// Remove the internal attribute when serializing the DOM
-		editor.serializer.addAttributeFilter('data-mce-selected', function(nodes, name) {
+		editor.serializer.addAttributeFilter('data-mce-selected', function (nodes, name) {
 			var i = nodes.length;
 
 			while (i--) {
 				nodes[i].attr(name, null);
 			}
 		});
+
+		disableGeckoResize();
 	}
 
 	/**
@@ -979,7 +1128,7 @@ tinymce.util.Quirks = function(editor) {
 	 */
 	function keepNoScriptContents() {
 		if (getDocumentMode() < 9) {
-			parser.addNodeFilter('noscript', function(nodes) {
+			parser.addNodeFilter('noscript', function (nodes) {
 				var i = nodes.length, node, textNode;
 
 				while (i--) {
@@ -992,7 +1141,7 @@ tinymce.util.Quirks = function(editor) {
 				}
 			});
 
-			serializer.addNodeFilter('noscript', function(nodes) {
+			serializer.addNodeFilter('noscript', function (nodes) {
 				var i = nodes.length, node, textNode, value;
 
 				while (i--) {
@@ -1028,7 +1177,7 @@ tinymce.util.Quirks = function(editor) {
 	 */
 	function bodyHeight() {
 		editor.contentStyles.push('body {min-height: 100px}');
-		editor.onClick.add(function(ed, e) {
+		editor.onClick.add(function (ed, e) {
 			if (e.target.nodeName == 'HTML') {
 				editor.execCommand('SelectAll');
 				editor.selection.collapse(true);
@@ -1043,11 +1192,11 @@ tinymce.util.Quirks = function(editor) {
 	 * example this HTML: <p>a<img src="b"></p>
 	 */
 	function fixControlSelection() {
-		editor.onInit.add(function() {
+		editor.onInit.add(function () {
 			var selectedRng;
 
-			editor.getBody().addEventListener('mscontrolselect', function(e) {
-				setTimeout(function() {
+			editor.getBody().addEventListener('mscontrolselect', function (e) {
+				setTimeout(function () {
 					if (editor.selection.getNode() != e.target) {
 						selectedRng = editor.selection.getRng();
 						selection.fakeRng = editor.dom.createRng();
@@ -1056,20 +1205,20 @@ tinymce.util.Quirks = function(editor) {
 					}
 				}, 0);
 
-          //e.preventDefault();
-        	// This moves the selection from being a control selection to a text like selection like in WebKit #6753
-                // TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
-                if (e.target.tagName == 'IMG') {
-										e.preventDefault();
-										window.setTimeout(function() {
-                        editor.selection.select(e.target);
-                    }, 0);
-                }
+				//e.preventDefault();
+				// This moves the selection from being a control selection to a text like selection like in WebKit #6753
+				// TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
+				if (e.target.tagName == 'IMG') {
+					e.preventDefault();
+					window.setTimeout(function () {
+						editor.selection.select(e.target);
+					}, 0);
+				}
 
 
 			}, false);
 
-			editor.getDoc().addEventListener('selectionchange', function(e) {
+			editor.getDoc().addEventListener('selectionchange', function (e) {
 				if (selectedRng && !tinymce.dom.RangeUtils.compareRanges(editor.selection.getRng(), selectedRng)) {
 					selection.fakeRng = selectedRng = null;
 				}
@@ -1077,7 +1226,7 @@ tinymce.util.Quirks = function(editor) {
 		});
 
 		if (tinymce.isIE12) {
-			editor.onClick.add(function(editor, e) {
+			editor.onClick.add(function (editor, e) {
 				e = e.target;
 
 				if (/^(IMG|HR|TABLE)$/.test(e.nodeName)) {
@@ -1111,35 +1260,35 @@ tinymce.util.Quirks = function(editor) {
 
 		editor.onBeforeGetContent.add(fn);
 	}
-	
-	function imageFloatLinkBug() {
-        editor.onBeforeExecCommand.add(function(ed, cmd, ui, v, o) {
-            // remove img styles
-            if (cmd == 'mceInsertLink') {
-                var se = ed.selection,
-                n = se.getNode();
-                        
-                // store class and style
-                if (n && n.nodeName == 'IMG') {
-                    ed.dom.setAttrib(n, 'data-mce-style', n.style.cssText);
-                     n.style.cssText = null;
-                }
-            }
-        });
 
-        editor.onExecCommand.add(function(ed, cmd, ui, v, o) {
-       		// restore img styles
-        	if (cmd == 'mceInsertLink') {
-        		var se = ed.selection,
-            	n = se.getNode();
-                        
-            	tinymce.each(ed.dom.select('img[data-mce-style]', n), function(el) {
-                	if (el.parentNode.nodeName == 'A' && !el.style.cssText) {
-                    	el.style.cssText = ed.dom.getAttrib(el, 'data-mce-style');
-                	}
-            	});
-        	}
-        });
+	function imageFloatLinkBug() {
+		editor.onBeforeExecCommand.add(function (ed, cmd, ui, v, o) {
+			// remove img styles
+			if (cmd == 'mceInsertLink') {
+				var se = ed.selection,
+					n = se.getNode();
+
+				// store class and style
+				if (n && n.nodeName == 'IMG') {
+					ed.dom.setAttrib(n, 'data-mce-style', n.style.cssText);
+					n.style.cssText = null;
+				}
+			}
+		});
+
+		editor.onExecCommand.add(function (ed, cmd, ui, v, o) {
+			// restore img styles
+			if (cmd == 'mceInsertLink') {
+				var se = ed.selection,
+					n = se.getNode();
+
+				tinymce.each(ed.dom.select('img[data-mce-style]', n), function (el) {
+					if (el.parentNode.nodeName == 'A' && !el.style.cssText) {
+						el.style.cssText = ed.dom.getAttrib(el, 'data-mce-style');
+					}
+				});
+			}
+		});
 	}
 
 	// All browsers
@@ -1160,7 +1309,6 @@ tinymce.util.Quirks = function(editor) {
 		if (tinymce.isIDevice) {
 			selectionChangeNodeChanged();
 		} else {
-			fakeImageResize();
 			selectAll();
 		}
 	}
@@ -1180,15 +1328,13 @@ tinymce.util.Quirks = function(editor) {
 	if (tinymce.isIE11) {
 		bodyHeight();
 		//doubleTrailingBrElements();
-    	fixControlSelection();
-    	fakeImageResize();
+		fixControlSelection();
 	}
 
-    // IE 12 / Edge
-    if (tinymce.isIE12) {
+	// IE 12 / Edge
+	if (tinymce.isIE12) {
 		fixControlSelection();
-        fakeImageResize();
-    }
+	}
 
 	// Gecko
 	if (tinymce.isGecko && !tinymce.isIE11) {
@@ -1200,8 +1346,5 @@ tinymce.util.Quirks = function(editor) {
 		removeGhostSelection();
 	}
 
-	// Opera
-	if (tinymce.isOpera) {
-		fakeImageResize();
-	}
+	fakeImageResize();
 };

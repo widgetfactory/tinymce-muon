@@ -428,6 +428,24 @@
 
 			return tinymce.dom.Sizzle.matches(selector, n.nodeType ? [n] : n).length > 0;
 		},
+		
+		closest: function(n, selector) {
+			var t = this, result = [];
+			
+			while (n) {
+        		if (typeof selector === 'string' && t.is(n, selector)) {
+          			result.push(n);
+          			break;
+        		} else if (n === selector) {
+          			result.push(n);
+          			break;
+        		}
+
+        		n = n.parentNode;
+      		}	
+      		
+      		return result;
+		},
 
 		// #endif
 
