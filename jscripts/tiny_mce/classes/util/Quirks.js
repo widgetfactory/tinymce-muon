@@ -914,12 +914,13 @@ tinymce.util.Quirks = function (editor) {
 			var setSizeProp = function (name, value) {
 				if (value) {
 					// Resize by using style or attribute
-					if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
+					/*if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
 						dom.setStyle(getResizeTarget(selectedElm), name, value);
 					}
 					else {
 						dom.setAttrib(getResizeTarget(selectedElm), name, value);
-					}
+					}*/
+					dom.setAttrib(getResizeTarget(selectedElm), name, value);
 				}
 			};
 			// Set width/height properties
