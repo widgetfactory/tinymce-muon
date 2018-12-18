@@ -303,7 +303,7 @@
             addAttrs("input textarea", "placeholder");
             addAttrs("a", "download");
             addAttrs("link script img", "crossorigin");
-            addAttrs("iframe", "sandbox seamless allowfullscreen"); // Excluded: srcdoc
+            addAttrs("iframe", "sandbox seamless allowfullscreen allow referrerpolicy"); // Excluded: srcdoc
 
             // form events
             addAttrs("form", "oncontextmenu onformchange onforminput oninput oninvalid");
