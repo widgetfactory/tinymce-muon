@@ -162,6 +162,19 @@
 				}
 			}
 		});
+		
+		// Remove bogus elements
+		/*htmlParser.addAttributeFilter('data-mce-bogus', function(nodes, name, args) {
+			var i = nodes.length, node;
+
+			while (i--) {
+				node = nodes[i];
+
+				if (node.attributes.map['data-mce-bogus'] === 'all' && !args.cleanup) {
+					node.remove();
+				}
+			}
+		});*/
 
 		htmlParser.addNodeFilter('noscript', function(nodes) {
 			var i = nodes.length, node;

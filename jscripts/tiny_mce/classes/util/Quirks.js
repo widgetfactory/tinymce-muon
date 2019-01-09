@@ -1107,6 +1107,9 @@ tinymce.util.Quirks = function (editor) {
 
 		// Show/hide resize rect when image is selected
 		editor.onNodeChange.add(updateResizeRect);
+		
+		// Remove resize rect when getting content from the editor
+		editor.onBeforeGetContent.add(hideResizeRect);
 
 		// Fixes WebKit quirk where it returns IMG on getNode if caret is after last image in container
 		dom.bind(editableDoc, 'selectionchange', updateResizeRect);
