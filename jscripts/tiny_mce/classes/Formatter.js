@@ -183,7 +183,7 @@
 
 			// BlockFormat shortcuts keys
 			for (var i = 1; i <= 6; i++) {
-				ed.addShortcut('alt+shift+' + i, '', ['FormatBlock', false, 'h' + i]);
+				//ed.addShortcut('alt+shift+' + i, '', ['FormatBlock', false, 'h' + i]);
 				// keep legacy shortcuts
 				ed.addShortcut('ctrl+' + i, '', ['FormatBlock', false, 'h' + i]);
 				
@@ -192,7 +192,7 @@
 			each(['p', 'div', 'address'], function(name, i) {
 				var n = 7 + i;
 			
-				ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
+				//ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
 				ed.addShortcut('ctrl+' + n, '', ['FormatBlock', false, name]);
 			});
 		}
