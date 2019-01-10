@@ -1023,14 +1023,15 @@
 		 * @return {object} Absolute position of the specified element object with x, y fields.
 		 */
 		getPos : function(n, ro) {
-			var t = this, x = 0, y = 0, e, d = t.doc, r;
+			var t = this, x = 0, y = 0, e, d = t.doc, r, body = d.body;
 
 			n = t.get(n);
-			ro = ro || d.body;
+			ro = ro || body;
 
 			if (n) {
+			
 				// Use getBoundingClientRect if it exists since it's faster than looping offset nodes
-				if (n.getBoundingClientRect) {
+				if (ro === body && n.getBoundingClientRect && t.getStyle(body, 'position') === 'static') {
 					n = n.getBoundingClientRect();
 					e = t.boxModel ? d.documentElement : d.body;
 
