@@ -89,17 +89,20 @@
 				],
 
 				alignleft: [
+					{selector: 'figure[data-mce-image]', collapsed: false, styles: {'float': 'left'}},
 					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'left'}, defaultBlock: 'div'},
 					{selector: 'img,table', collapsed: false, styles: {'float': 'left'}}
 				],
 
 				aligncenter: [
+					{selector: 'figure[data-mce-image]', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto', display: 'table'}},
 					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'center'}, defaultBlock: 'div'},
 					{selector: 'img', collapsed: false, styles: {display: 'block', marginLeft: 'auto', marginRight: 'auto'}},
 					{selector: 'table', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto'}}
 				],
 
 				alignright: [
+					{selector: 'figure[data-mce-image]', collapsed: false, styles: {'float': 'right'}},
 					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'right'}, defaultBlock: 'div'},
 					{selector: 'img,table', collapsed: false, styles: {'float': 'right'}}
 				],
@@ -455,6 +458,7 @@
 				// Setup wrapper element
 				wrapName = format.inline || format.block;
 				wrapElm = dom.create(wrapName);
+				
 				setElementFormat(wrapElm);
 
 				rangeUtils.walk(rng, function(nodes) {
