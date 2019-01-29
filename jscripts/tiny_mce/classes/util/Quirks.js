@@ -811,11 +811,11 @@ tinymce.util.Quirks = function (editor) {
 			'}');
 
 		var isImage = function (elm) {
-			return elm && (elm.nodeName === 'IMG' || editor.dom.is(elm, 'figure.image'));
+			return elm && (elm.nodeName === 'IMG' || editor.dom.is(elm, 'figure[data-mce-image]'));
 		};
 
 		var getResizeTarget = function (elm) {
-			return editor.dom.is(elm, 'figure.image') ? elm.querySelector('img') : elm;
+			return editor.dom.is(elm, 'figure[data-mce-image]') ? elm.querySelector('img') : elm;
 		};
 
 		var isResizable = function (elm) {
@@ -825,7 +825,7 @@ tinymce.util.Quirks = function (editor) {
 				return false;
 			}
 			if (typeof selector !== 'string') {
-				selector = 'table,img,figure.image,div';
+				selector = 'table,img,figure[data-mce-image],div';
 			}
 
 			if (elm.getAttribute('data-mce-resize') === 'false') {
@@ -1070,8 +1070,8 @@ tinymce.util.Quirks = function (editor) {
 			each(dom.select('img[data-mce-selected],hr[data-mce-selected]'), function (img) {
 				img.removeAttribute('data-mce-selected');
 			});
-			controlElm = e.type === 'mousedown' ? e.target : selection.getNode();
-			controlElm = dom.closest(controlElm, 'table,img,figure.image,hr')[0];
+			controlElm = e.type === 'mousedown' ? e.target : selection.getNode();			
+			controlElm = dom.closest(controlElm, 'table,img,figure[data-mce-image],hr')[0];
 
 			if (isChildOrEqual(controlElm, rootElement)) {
 				disableGeckoResize();
