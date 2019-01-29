@@ -591,8 +591,9 @@
 		/**
 		 * Empties all elements in set.
 		 *
+		 * @param {String/Element/Array} n HTML element/Element ID or Array of elements/ids to empty.
 		 * @method empty
-		 * @return {tinymce.dom.DomQuery} Current set with the empty nodes.
+		 * @return {Boolean}
 		 */
 		empty: function(node) {
 			return this.run(node, function(node) {
