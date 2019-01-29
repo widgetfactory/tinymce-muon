@@ -1682,6 +1682,10 @@
 
 			return args.content;
 		},
+		
+		getSelection: function() {
+			return this.selection.getContent();
+		},
 
 		/**
 		 * Gets the content from the editor instance, this will cleanup the content before it gets returned using
