@@ -986,7 +986,9 @@ tinymce.util.Quirks = function (editor) {
 						dom.setStyles(selectedElmGhost, {
 							left: selectedElmX,
 							top: selectedElmY,
-							margin: 0
+							margin: 0,
+							width: targetWidth,
+							height: targetHeight
 						});
 						selectedElmGhost.removeAttribute('data-mce-selected');
 						rootElement.appendChild(selectedElmGhost);
