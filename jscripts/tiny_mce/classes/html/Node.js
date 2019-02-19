@@ -144,6 +144,9 @@
 
 					// Set attribute
 					if (name in attrs.map) {
+						// stringify value
+						value = '' + value;
+						
 						// Set attribute
 						i = attrs.length;
 						while (i--) {

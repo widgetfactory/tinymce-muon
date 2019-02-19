@@ -65,7 +65,7 @@ tinymce.html.Writer = function(settings) {
 				if (attrs) {
 					for (i = 0, l = attrs.length; i < l; i++) {
 						attr = attrs[i];
-						html.push(' ', attr.name, '="', encode(attr.value, true), '"');
+						html.push(' ', attr.name, '="', encode('' + attr.value, true), '"');
 					}
 				}
 
