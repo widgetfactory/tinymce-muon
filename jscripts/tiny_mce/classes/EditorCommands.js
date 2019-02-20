@@ -10,7 +10,7 @@
 
 (function(tinymce) {
 	// Added for compression purposes
-	var each = tinymce.each, undef, TRUE = true, FALSE = false, isOldIE = tinymce.isIE && !tinymce.isIE11
+	var each = tinymce.each, undef, TRUE = true, FALSE = false, isOldIE = tinymce.isIE && !tinymce.isIE11;
 	var TreeWalker = tinymce.dom.TreeWalker;
 
 	/**
