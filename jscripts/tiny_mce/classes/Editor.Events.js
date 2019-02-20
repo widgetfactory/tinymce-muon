@@ -759,7 +759,46 @@
 			 *    }
 			 * });
 			 */
-			'onSetAttrib'
+			'onSetAttrib',
+			
+			/**
+			 * Fires when a dragstart event is intercepted inside the editor.
+			 *
+			 * @event onDragStart
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @param {Event} evt W3C DOM Event instance.
+			 * @example
+			 * // Adds an observer to the onDragStart event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onDragStart.add(function(ed, e) {
+			 *           console.debug('Mouse up event: ' + e.target.nodeName);
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onDragStart',
+			
+			/**
+			 * Fires when a drop event is intercepted inside the editor.
+			 *
+			 * @event onDrop
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @param {Event} evt W3C DOM Event instance.
+			 * @example
+			 * // Adds an observer to the onDrop event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onDrop.add(function(ed, e) {
+			 *           console.debug('Mouse up event: ' + e.target.nodeName);
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onDrop'
+			
 		], function(name) {
 			self[name] = new tinymce.util.Dispatcher(self);
 		});
@@ -850,7 +889,9 @@
 			dblclick : 'onDblClick',
 			paste : 'onPaste', // Doesn't work in all browsers yet,
 			cut: 'onCut',
-			copy: 'onCopy'
+			copy: 'onCopy',
+			drop: 'onDrop',
+			dragstart: 'onDragStart'
 		};
 
 		// Handler that takes a native event and sends it out to a dispatcher like onKeyDown
