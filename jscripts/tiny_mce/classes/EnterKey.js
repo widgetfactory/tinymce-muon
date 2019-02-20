@@ -24,6 +24,8 @@
 		var nonEmptyElementsMap = schema.getNonEmptyElements(),
 			moveCaretBeforeOnEnterElementsMap = schema.getMoveCaretBeforeOnEnterElements();
 
+		var isIE = tinymce.isIE && tinymce.isIE < 11;
+
 		function handleEnterKey(evt) {
 			var rng = selection.getRng(true),
 				tmpRng, editableRoot, container, offset, parentBlock, documentMode, shiftKey,
@@ -146,7 +148,7 @@
 				// Old IE versions doesn't properly render blocks with br elements in them
 				// For example <p><br></p> wont be rendered correctly in a contentEditable area
 				// until you remove the br producing <p></p>
-				if (tinymce.isIE && tinymce.isIE < 9 && parentBlock && parentBlock.firstChild) {
+				if (isIE && tinymce.isIE < 9 && parentBlock && parentBlock.firstChild) {
 					if (parentBlock.firstChild == parentBlock.lastChild && parentBlock.firstChild.tagName == 'BR') {
 						dom.remove(parentBlock.firstChild);
 					}
@@ -165,7 +167,7 @@
 				// Normalize whitespace to remove empty text nodes. Fix for: #6904
 				// Gecko will be able to place the caret in empty text nodes but it won't render propery
 				// Older IE versions will sometimes crash so for now ignore all IE versions
-				if (!tinymce.isIE) {
+				if (!isIE) {
 					root.normalize();
 				}
 
@@ -231,7 +233,7 @@
 
 			function emptyBlock(elm) {
 				// BR is needed in empty blocks on non IE browsers
-				elm.innerHTML = !tinymce.isIE ? '<br data-mce-bogus="1">' : '';
+				elm.innerHTML = !isIE ? '<br data-mce-bogus="1">' : '';
 			}
 
 			// Creates a new block element by cloning the current one or creating a new one if the name is specified
@@ -273,7 +275,7 @@
 				}
 
 				// BR is needed in empty blocks on non IE browsers
-				if (!tinymce.isIE || tinymce.isIE11) {
+				if (!isIE) {
 					caretNode.innerHTML = '<br data-mce-bogus="1">';
 				}
 
@@ -521,7 +523,7 @@
 				var lastChild;
 
 				// IE will render the blocks correctly other browsers needs a BR
-				if (!tinymce.isIE || tinymce.isIE11) {
+				if (!isIE) {
 					block.normalize(); // Remove empty text nodes that got left behind by the extract
 
 					// Check if the block is empty or contains a floated last child
