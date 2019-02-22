@@ -174,13 +174,12 @@ tinymce.util.Quirks = function (editor) {
 			caretNodeBefore = findCaretNode(startBlock, false);
 			caretNodeAfter = findCaretNode(endBlock, true);
 
-			if (dom.isEmpty(startBlock)) {
-				dom.remove(startBlock);
-			}
-
-			if (dom.isEmpty(endBlock)) {
-				dom.remove(endBlock);
-			}
+			// remove block elment only if it is empty
+			each([startBlock, endBlock], function(node) {
+				if (dom.isEmpty(node)) {
+					dom.remove(node);
+				}
+			});
 
 			// backspace from the beginning of one block element into the previous block element...
 			if (caretNodeBefore && caretNodeAfter) {
