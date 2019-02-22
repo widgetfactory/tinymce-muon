@@ -720,7 +720,7 @@ QUnit.config.reorder = false;
 		testBogusSaxParse('a<b data-mce-bogus="all"></b><b>c</b>', 'a<b>c</b>', {start: 1, end: 1, text:2});
 	});
 
-	test('findEndTag', function() {
+	/*test('findEndTag', function() {
 		function testFindEndTag(html, startIndex, expectedIndex) {
 			equal(tinymce.html.SaxParser.findEndTag(schema, html, startIndex), expectedIndex);
 		}
@@ -731,7 +731,7 @@ QUnit.config.reorder = false;
 		testFindEndTag('<b><img></b>', 3, 12);
 		testFindEndTag('<b><!-- </b> --></b>', 3, 20);
 		testFindEndTag('<span><b><i>a<img>b</i><b>c</b></b></span>', 9, 35);
-	});
+	});*/
 
 	test('parse XSS PI', function() {
 		var counter, parser;
