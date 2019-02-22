@@ -84,54 +84,7 @@ tinymce.util.Quirks = function (editor) {
 		var doc = editor.getDoc(),
 			dom = editor.dom,
 			selection = editor.selection;
-		var MutationObserver = window.MutationObserver,
-			olderWebKit, dragStartRng;
-
-		// Add mini polyfill for older WebKits
-		// TODO: Remove this when old Safari versions gets updated
-		if (!MutationObserver) {
-			olderWebKit = true;
-
-			MutationObserver = function () {
-				var records = [],
-					target;
-
-				function nodeInsert(e) {
-					var target = e.relatedNode || e.target;
-					records.push({
-						target: target,
-						addedNodes: [target]
-					});
-				}
-
-				function attrModified(e) {
-					var target = e.relatedNode || e.target;
-					records.push({
-						target: target,
-						attributeName: e.attrName
-					});
-				}
-
-				this.observe = function (node) {
-					target = node;
-					target.addEventListener('DOMSubtreeModified', nodeInsert, false);
-					target.addEventListener('DOMNodeInsertedIntoDocument', nodeInsert, false);
-					target.addEventListener('DOMNodeInserted', nodeInsert, false);
-					target.addEventListener('DOMAttrModified', attrModified, false);
-				};
-
-				this.disconnect = function () {
-					target.removeEventListener('DOMSubtreeModified', nodeInsert, false);
-					target.removeEventListener('DOMNodeInsertedIntoDocument', nodeInsert, false);
-					target.removeEventListener('DOMNodeInserted', nodeInsert, false);
-					target.removeEventListener('DOMAttrModified', attrModified, false);
-				};
-
-				this.takeRecords = function () {
-					return records;
-				};
-			};
-		}
+		var MutationObserver = window.MutationObserver, dragStartRng;
 
 		function isTrailingBr(node) {
 			var blockElements = dom.schema.getBlockElements(),
@@ -221,15 +174,26 @@ tinymce.util.Quirks = function (editor) {
 			caretNodeBefore = findCaretNode(startBlock, false);
 			caretNodeAfter = findCaretNode(endBlock, true);
 
-			if (!dom.isEmpty(endBlock)) {
-				tinymce.each(endBlock.childNodes, function (node) {
-					if (node) {
-						startBlock.appendChild(node);
-					}
-				});
+			if (dom.isEmpty(startBlock)) {
+				dom.remove(startBlock);
 			}
 
-			dom.remove(endBlock);
+			if (dom.isEmpty(endBlock)) {
+				dom.remove(endBlock);
+			}
+
+			// backspace from the beginning of one block element into the previous block element...
+			if (caretNodeBefore && caretNodeAfter) {
+				if (!dom.isEmpty(endBlock)) {
+					tinymce.each(endBlock.childNodes, function (node) {
+						if (node) {
+							startBlock.appendChild(node);
+						}
+					});
+				}
+	
+				dom.remove(endBlock);
+			}
 
 			if (caretNodeBefore) {
 				if (caretNodeBefore.nodeType == 1) {
@@ -621,7 +585,7 @@ tinymce.util.Quirks = function (editor) {
 				e.preventDefault();
 
 				// Keep track of current format nodes
-				currentFormatNodes = $(rng.startContainer).parents().filter(function (idx, node) {
+				currentFormatNodes = dom.getParents(rng.startContainer, function(node) {
 					return !!editor.schema.getTextInlineElements()[node.nodeName];
 				});
 
@@ -629,7 +593,7 @@ tinymce.util.Quirks = function (editor) {
 
 				// Check if the browser removed them
 				currentFormatNodes = currentFormatNodes.filter(function (idx, node) {
-					return !$.contains(editor.getBody(), node);
+					return !editor.getBody().contains(node);
 				});
 
 				// Then re-add them
@@ -677,11 +641,6 @@ tinymce.util.Quirks = function (editor) {
 		editor.addCommand('ForwardDelete', function () {
 			customDelete(true);
 		});
-
-		// Older WebKits doesn't properly handle the clipboard so we can't add the rest
-		if (olderWebKit) {
-			return;
-		}
 
 		editor.onDragStart.add(function (editor, e) {
 			dragStartRng = selection.getRng();
