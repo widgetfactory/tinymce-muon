@@ -128,19 +128,6 @@
 			});
 			Event.add([t.id, t.id + '_open'], 'focus', function() {t._focused = 1;});
 			Event.add([t.id, t.id + '_open'], 'blur', function() {t._focused = 0;});
-
-			// Old IE doesn't have hover on all elements
-			if (tinymce.isIE6 || !DOM.boxModel) {
-				Event.add(t.id, 'mouseover', function() {
-					if (!DOM.hasClass(t.id, 'mceSplitButtonDisabled'))
-						DOM.addClass(t.id, 'mceSplitButtonHover');
-				});
-
-				Event.add(t.id, 'mouseout', function() {
-					if (!DOM.hasClass(t.id, 'mceSplitButtonDisabled'))
-						DOM.removeClass(t.id, 'mceSplitButtonHover');
-				});
-			}
 		},
 
 		destroy : function() {

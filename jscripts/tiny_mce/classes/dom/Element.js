@@ -158,37 +158,6 @@
 			 * @param {String} k Optional function key. Used internally.
 			 */
 			update : function(k) {
-				var b;
-
-				if (tinymce.isIE6 && settings.blocker) {
-					k = k || '';
-
-					// Ignore getters
-					if (k.indexOf('get') === 0 || k.indexOf('has') === 0 || k.indexOf('is') === 0)
-						return;
-
-					// Remove blocker on remove
-					if (k == 'remove') {
-						dom.remove(t.blocker);
-						return;
-					}
-
-					if (!t.blocker) {
-						t.blocker = dom.uniqueId();
-						b = dom.add(settings.container || dom.getRoot(), 'iframe', {id : t.blocker, style : 'position:absolute;', frameBorder : 0, src : 'javascript:""'});
-						dom.setStyle(b, 'opacity', 0);
-					} else
-						b = dom.get(t.blocker);
-
-					dom.setStyles(b, {
-						left : t.getStyle('left', 1),
-						top : t.getStyle('top', 1),
-						width : t.getStyle('width', 1),
-						height : t.getStyle('height', 1),
-						display : t.getStyle('display', 1),
-						zIndex : parseInt(t.getStyle('zIndex', 1) || 0) - 1
-					});
-				}
 			}
 		});
 	};
