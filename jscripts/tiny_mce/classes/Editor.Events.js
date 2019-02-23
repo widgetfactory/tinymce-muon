@@ -167,6 +167,42 @@
 			'onDeactivate',
 
 			/**
+			 * Fires when the editor is shown.
+			 *
+			 * @event onShow
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @example
+			 * // Adds an observer to the onShow event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onShow.add(function(ed) {
+			 *           console.debug('Editor was shown: ' + ed.id);
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onShow',
+
+			/**
+			 * Fires when the editor is hidden.
+			 *
+			 * @event onHide
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @example
+			 * // Adds an observer to the onHide event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onHide.add(function(ed) {
+			 *           console.debug('Editor was hidden: ' + ed.id);
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onHide',
+
+			/**
 			 * Fires when something in the body of the editor is clicked.
 			 *
 			 * @event onClick
