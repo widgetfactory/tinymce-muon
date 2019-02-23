@@ -2,6 +2,7 @@
  * Quirks.js
  *
  * Copyright, Moxiecode Systems AB
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  * Released under LGPL License.
  *
  * License: http://www.tinymce.com/license
@@ -19,7 +20,6 @@ tinymce.util.Quirks = function (editor) {
 		selection = editor.selection,
 		settings = editor.settings,
 		parser = editor.parser,
-		serializer = editor.serializer,
 		each = tinymce.each,
 		RangeUtils = tinymce.dom.RangeUtils,
 		TreeWalker = tinymce.dom.TreeWalker;
@@ -35,15 +35,6 @@ tinymce.util.Quirks = function (editor) {
 	}
 
 	/**
-	 * Returns current IE document mode.
-	 */
-	function getDocumentMode() {
-		var documentMode = editor.getDoc().documentMode;
-
-		return documentMode ? documentMode : 6;
-	};
-
-	/**
 	 * Returns true/false if the event is prevented or not.
 	 *
 	 * @param {Event} e Event object.
@@ -51,7 +42,78 @@ tinymce.util.Quirks = function (editor) {
 	 */
 	function isDefaultPrevented(e) {
 		return e.isDefaultPrevented();
-	};
+	}
+
+	/**
+	 * Sets Text/URL data on the event's dataTransfer object to a special data:text/mce-internal url.
+	 * This is to workaround the inability to set custom contentType on IE and Safari.
+	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
+	 *
+	 * @private
+	 * @param {DragEvent} e Event object
+	 */
+	function setMceInternalContent(e) {
+		var selectionHtml, internalContent;
+
+		if (e.dataTransfer) {
+			if (editor.selection.isCollapsed() && e.target.tagName == 'IMG') {
+				selection.select(e.target);
+			}
+
+			selectionHtml = editor.selection.getContent();
+
+			// Safari/IE doesn't support custom dataTransfer items so we can only use URL and Text
+			if (selectionHtml.length > 0) {
+				internalContent = mceInternalUrlPrefix + escape(editor.id) + ',' + escape(selectionHtml);
+				e.dataTransfer.setData(mceInternalDataType, internalContent);
+			}
+		}
+	}
+
+	/**
+	 * Gets content of special data:text/mce-internal url on the event's dataTransfer object.
+	 * This is to workaround the inability to set custom contentType on IE and Safari.
+	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
+	 *
+	 * @private
+	 * @param {DragEvent} e Event object
+	 * @returns {String} mce-internal content
+	 */
+	function getMceInternalContent(e) {
+		var internalContent;
+
+		if (e.dataTransfer) {
+			internalContent = e.dataTransfer.getData(mceInternalDataType);
+
+			if (internalContent && internalContent.indexOf(mceInternalUrlPrefix) >= 0) {
+				internalContent = internalContent.substr(mceInternalUrlPrefix.length).split(',');
+
+				return {
+					id: unescape(internalContent[0]),
+					html: unescape(internalContent[1])
+				};
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Inserts contents using the paste clipboard command if it's available if it isn't it will fallback
+	 * to the core command.
+	 *
+	 * @private
+	 * @param {String} content Content to insert at selection.
+	 */
+	function insertClipboardContents(content) {
+		if (editor.queryCommandSupported('mceInsertClipboardContent')) {
+			editor.execCommand('mceInsertClipboardContent', false, {
+				content: content
+			});
+		} else {
+			editor.execCommand('mceInsertContent', false, content);
+		}
+	}
 
 	/**
 	 * Fixes a WebKit bug when deleting contents using backspace or delete key.
@@ -84,7 +146,8 @@ tinymce.util.Quirks = function (editor) {
 		var doc = editor.getDoc(),
 			dom = editor.dom,
 			selection = editor.selection;
-		var MutationObserver = window.MutationObserver, dragStartRng;
+		var MutationObserver = window.MutationObserver,
+			dragStartRng;
 
 		function isTrailingBr(node) {
 			var blockElements = dom.schema.getBlockElements(),
@@ -175,7 +238,7 @@ tinymce.util.Quirks = function (editor) {
 			caretNodeAfter = findCaretNode(endBlock, true);
 
 			// remove block elment only if it is empty
-			each([startBlock, endBlock], function(node) {
+			each([startBlock, endBlock], function (node) {
 				if (dom.isEmpty(node)) {
 					dom.remove(node);
 				}
@@ -190,7 +253,7 @@ tinymce.util.Quirks = function (editor) {
 						}
 					});
 				}
-	
+
 				dom.remove(endBlock);
 			}
 
@@ -326,7 +389,7 @@ tinymce.util.Quirks = function (editor) {
 				container, offset, br, currentFormatNodes;
 
 			function cloneTextBlockWithFormats(blockElm, node) {
-				currentFormatNodes = dom.getParents(node, function(n) {
+				currentFormatNodes = dom.getParents(node, function (n) {
 					return !!editor.schema.getTextInlineElements()[n.nodeName];
 				});
 
@@ -368,27 +431,27 @@ tinymce.util.Quirks = function (editor) {
 
 			function NodePathCreate(rootNode, targetNode, normalized) {
 				var path = [];
-		
+
 				for (; targetNode && targetNode != rootNode; targetNode = targetNode.parentNode) {
 					path.push(tinymce.DOM.nodeIndex(targetNode, normalized));
 				}
-		
+
 				return path;
 			}
-		
+
 			function NodePathResolve(rootNode, path) {
 				var i, node, children;
-		
+
 				for (node = rootNode, i = path.length - 1; i >= 0; i--) {
 					children = node.childNodes;
-		
+
 					if (path[i] > children.length - 1) {
 						return null;
 					}
-		
+
 					node = children[path[i]];
 				}
-		
+
 				return node;
 			}
 
@@ -584,7 +647,7 @@ tinymce.util.Quirks = function (editor) {
 				e.preventDefault();
 
 				// Keep track of current format nodes
-				currentFormatNodes = dom.getParents(rng.startContainer, function(node) {
+				currentFormatNodes = dom.getParents(rng.startContainer, function (node) {
 					return !!editor.schema.getTextInlineElements()[node.nodeName];
 				});
 
@@ -697,6 +760,16 @@ tinymce.util.Quirks = function (editor) {
 		}
 
 		function allContentsSelected(rng) {
+			if (!rng.setStart) {
+				if (rng.item) {
+					return false;
+				}
+
+				var bodyRng = rng.duplicate();
+				bodyRng.moveToElementText(editor.getBody());
+				return RangeUtils.compareRanges(rng, bodyRng);
+			}
+
 			var selection = serializeRng(rng);
 
 			var allRng = dom.createRng();
@@ -708,19 +781,15 @@ tinymce.util.Quirks = function (editor) {
 
 		editor.onKeyDown.add(function (editor, e) {
 			var keyCode = e.keyCode,
-				isCollapsed;
+				isCollapsed, body;
 
 			// Empty the editor if it's needed for example backspace at <p><b>|</b></p>
 			if (!isDefaultPrevented(e) && (keyCode == DELETE || keyCode == BACKSPACE)) {
 				isCollapsed = editor.selection.isCollapsed();
+				body = editor.getBody();
 
 				// Selection is collapsed but the editor isn't empty
-				if (isCollapsed && !dom.isEmpty(editor.getBody())) {
-					return;
-				}
-
-				// IE deletes all contents correctly when everything is selected
-				if (tinymce.isIE && !isCollapsed) {
+				if (isCollapsed && !dom.isEmpty(body)) {
 					return;
 				}
 
@@ -730,12 +799,19 @@ tinymce.util.Quirks = function (editor) {
 				}
 
 				// Manually empty the editor
+				e.preventDefault();
 				editor.setContent('');
-				editor.selection.setCursorLocation(editor.getBody(), 0);
+
+				if (body.firstChild && dom.isBlock(body.firstChild)) {
+					editor.selection.setCursorLocation(body.firstChild, 0);
+				} else {
+					editor.selection.setCursorLocation(body, 0);
+				}
+
 				editor.nodeChanged();
 			}
 		});
-	};
+	}
 
 	/**
 	 * WebKit doesn't select all the nodes in the body when you press Ctrl+A.
@@ -748,11 +824,11 @@ tinymce.util.Quirks = function (editor) {
 				editor.execCommand('SelectAll');
 			}
 		});
-	};
+	}
 
 	/**
-	 * WebKit has a weird issue where it some times fails to properly convert keypresses to input method keystrokes. The IME on Mac doesn't
-	 * initialize when it doesn't fire a proper focus event.
+	 * WebKit has a weird issue where it some times fails to properly convert keypresses to input method keystrokes.
+	 * The IME on Mac doesn't initialize when it doesn't fire a proper focus event.
 	 *
 	 * This seems to happen when the user manages to click the documentElement element then the window doesn't get proper focus until
 	 * you enter a character into the editor.
@@ -764,91 +840,60 @@ tinymce.util.Quirks = function (editor) {
 	function inputMethodFocus() {
 		if (!editor.settings.content_editable) {
 			// Case 1 IME doesn't initialize if you focus the document
-			dom.bind(editor.getDoc(), 'focusin', function (e) {
+			// Disabled since it was interferring with the cE=false logic
+			// Also coultn't reproduce the issue on Safari 9
+			/*dom.bind(editor.getDoc(), 'focusin', function() {
 				selection.setRng(selection.getRng());
-			});
+			});*/
 
 			// Case 2 IME doesn't initialize if you click the documentElement it also doesn't properly fire the focusin event
-			dom.bind(editor.getDoc(), 'mousedown', function (e) {
+			// Needs to be both down/up due to weird rendering bug on Chrome Windows
+			dom.bind(editor.getDoc(), 'mousedown mouseup', function (e) {
+				var rng;
+
 				if (e.target == editor.getDoc().documentElement) {
-					editor.getWin().focus();
-					selection.setRng(selection.getRng());
+					rng = selection.getRng();
+					editor.getBody().focus();
 				}
 			});
 		}
-	};
+	}
 
 	/**
 	 * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
 	 * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
 	 * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
 	 * addRootBlocks), meaning the action does nothing. With this code, FireFox/IE matche the behaviour of other
-	 * browsers
+	 * browsers.
+	 *
+	 * It also fixes a bug on Firefox where it's impossible to delete HR elements.
 	 */
 	function removeHrOnBackspace() {
 		editor.onKeyDown.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
+				// Check if there is any HR elements this is faster since getRng on IE 7 & 8 is slow
+				if (!editor.getBody().getElementsByTagName('hr').length) {
+					return;
+				}
+
 				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
 					var node = selection.getNode();
 					var previousSibling = node.previousSibling;
 
+					if (node.nodeName == 'HR') {
+						dom.remove(node);
+						e.preventDefault();
+						return;
+					}
+
 					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "hr") {
 						dom.remove(previousSibling);
-						tinymce.dom.Event.cancel(e);
+						e.preventDefault();
 					}
 				}
 			}
-		})
-	}
-
-	/**
-	 * Firefox 3.x has an issue where the body element won't get proper focus if you click out
-	 * side it's rectangle.
-	 */
-	function focusBody() {
-		// Fix for a focus bug in FF 3.x where the body element
-		// wouldn't get proper focus if the user clicked on the HTML element
-		if (!Range.prototype.getClientRects) { // Detect getClientRects got introduced in FF 4
-			editor.onMouseDown.add(function (editor, e) {
-				if (!isDefaultPrevented(e) && e.target.nodeName === "HTML") {
-					var body = editor.getBody();
-
-					// Blur the body it's focused but not correctly focused
-					body.blur();
-
-					// Refocus the body after a little while
-					setTimeout(function () {
-						body.focus();
-					}, 0);
-				}
-			});
-		}
-	};
-
-	/**
-	 * WebKit has a bug where it isn't possible to select image, hr or anchor elements
-	 * by clicking on them so we need to fake that.
-	 */
-	function selectControlElements() {
-		editor.onClick.add(function (editor, e) {
-			var target = e.target;
-
-			// Workaround for bug, http://bugs.webkit.org/show_bug.cgi?id=12250
-			// WebKit can't even do simple things like selecting an image
-			// Needs tobe the setBaseAndExtend or it will fail to select floated images
-			if (/^(IMG|HR)$/.test(target.nodeName)) {
-				//selection.getSel().setBaseAndExtent(e, 0, e, 1);
-				e.preventDefault();
-				editor.selection.select(target);
-			}
-
-			if (e.nodeName == 'A' && dom.hasClass(e, 'mce-item-anchor')) {
-				selection.select(target);
-			}
-
-			editor.nodeChanged();
 		});
-	};
+	}
 
 	/**
 	 * Fixes a Gecko bug where the style attribute gets added to the wrong element when deleting between two block elements.
@@ -862,7 +907,7 @@ tinymce.util.Quirks = function (editor) {
 	 * Instead of:
 	 * <p style="color:red">bla|ed</p>
 	 */
-	function removeStylesWhenDeletingAccrossBlockElements() {
+	function removeStylesWhenDeletingAcrossBlockElements() {
 		function getAttributeApplyFunction() {
 			var template = dom.getAttribs(selection.getStart().cloneNode(false));
 
@@ -880,12 +925,8 @@ tinymce.util.Quirks = function (editor) {
 		}
 
 		function isSelectionAcrossElements() {
-			return !selection.isCollapsed() && dom.getParent(selection.getStart(), dom.isBlock) != dom.getParent(selection.getEnd(), dom.isBlock);
-		}
-
-		function blockEvent(editor, e) {
-			e.preventDefault();
-			return false;
+			return !selection.isCollapsed() &&
+				dom.getParent(selection.getStart(), dom.isBlock) != dom.getParent(selection.getEnd(), dom.isBlock);
 		}
 
 		editor.onKeyPress.add(function (editor, e) {
@@ -905,12 +946,10 @@ tinymce.util.Quirks = function (editor) {
 
 			if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
 				applyAttributes = getAttributeApplyFunction();
-				editor.onKeyUp.addToTop(blockEvent);
 
-				setTimeout(function () {
+				Delay.setEditorTimeout(editor, function () {
 					applyAttributes();
-					editor.onKeyUp.remove(blockEvent);
-				}, 0);
+				});
 			}
 		});
 	}
@@ -919,7 +958,7 @@ tinymce.util.Quirks = function (editor) {
 	 * Fire a nodeChanged when the selection is changed on WebKit this fixes selection issues on iOS5. It only fires the nodeChange
 	 * event every 50ms since it would other wise update the UI when you type and it hogs the CPU.
 	 */
-	function selectionChangeNodeChanged() {
+	/*function selectionChangeNodeChanged() {
 		var lastRng, selectionTimer;
 
 		dom.bind(editor.getDoc(), 'selectionchange', function () {
@@ -938,14 +977,7 @@ tinymce.util.Quirks = function (editor) {
 				}
 			}, 50);
 		});
-	}
-
-	/**
-	 * Screen readers on IE needs to have the role application set on the body.
-	 */
-	function ensureBodyHasRoleApplication() {
-		document.body.setAttribute("role", "application");
-	}
+	}*/
 
 	/**
 	 * Backspacing into a table behaves differently depending upon browser type.
@@ -957,88 +989,9 @@ tinymce.util.Quirks = function (editor) {
 				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
 					var previousSibling = selection.getNode().previousSibling;
 					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "table") {
-						return tinymce.dom.Event.cancel(e);
+						e.preventDefault();
+						return false;
 					}
-				}
-			}
-		})
-	}
-
-	/**
-	 * Old IE versions can't properly render BR elements in PRE tags white in contentEditable mode. So this logic adds a \n before the BR so that it will get rendered.
-	 */
-	function addNewLinesBeforeBrInPre() {
-		// IE8+ rendering mode does the right thing with BR in PRE
-		if (getDocumentMode() > 7) {
-			return;
-		}
-
-		// Enable display: none in area and add a specific class that hides all BR elements in PRE to
-		// avoid the caret from getting stuck at the BR elements while pressing the right arrow key
-		setEditorCommandState('RespectVisibilityInDesign', true);
-		editor.contentStyles.push('.mceHideBrInPre pre br {display: none}');
-		dom.addClass(editor.getBody(), 'mceHideBrInPre');
-
-		// Adds a \n before all BR elements in PRE to get them visual
-		parser.addNodeFilter('pre', function (nodes, name) {
-			var i = nodes.length,
-				brNodes, j, brElm, sibling;
-
-			while (i--) {
-				brNodes = nodes[i].getAll('br');
-				j = brNodes.length;
-				while (j--) {
-					brElm = brNodes[j];
-
-					// Add \n before BR in PRE elements on older IE:s so the new lines get rendered
-					sibling = brElm.prev;
-					if (sibling && sibling.type === 3 && sibling.value.charAt(sibling.value - 1) != '\n') {
-						sibling.value += '\n';
-					} else {
-						brElm.parent.insert(new tinymce.html.Node('#text', 3), brElm, true).value = '\n';
-					}
-				}
-			}
-		});
-
-		// Removes any \n before BR elements in PRE since other browsers and in contentEditable=false mode they will be visible
-		serializer.addNodeFilter('pre', function (nodes, name) {
-			var i = nodes.length,
-				brNodes, j, brElm, sibling;
-
-			while (i--) {
-				brNodes = nodes[i].getAll('br');
-				j = brNodes.length;
-				while (j--) {
-					brElm = brNodes[j];
-					sibling = brElm.prev;
-					if (sibling && sibling.type == 3) {
-						sibling.value = sibling.value.replace(/\r?\n$/, '');
-					}
-				}
-			}
-		});
-	}
-
-	/**
-	 * Moves style width/height to attribute width/height when the user resizes an image on IE.
-	 */
-	function removePreSerializedStylesWhenSelectingControls() {
-		dom.bind(editor.getBody(), 'mouseup', function (e) {
-			var value, node = selection.getNode();
-
-			// Moved styles to attributes on IMG eements
-			if (node.nodeName == 'IMG') {
-				// Convert style width to width attribute
-				if (value = dom.getStyle(node, 'width')) {
-					dom.setAttrib(node, 'width', value.replace(/[^0-9%]+/g, ''));
-					dom.setStyle(node, 'width', '');
-				}
-
-				// Convert style height to height attribute
-				if (value = dom.getStyle(node, 'height')) {
-					dom.setAttrib(node, 'height', value.replace(/[^0-9%]+/g, ''));
-					dom.setStyle(node, 'height', '');
 				}
 			}
 		});
@@ -1058,7 +1011,7 @@ tinymce.util.Quirks = function (editor) {
 	 *
 	 * See: https://bugs.webkit.org/show_bug.cgi?id=81656
 	 */
-	function keepInlineElementOnDeleteBackspace() {
+	/*function keepInlineElementOnDeleteBackspace() {
 		editor.onKeyDown.add(function (editor, e) {
 			var isDelete, rng, container, offset, brElm, sibling, collapsed;
 
@@ -1104,7 +1057,7 @@ tinymce.util.Quirks = function (editor) {
 				}
 			}
 		});
-	}
+	}*/
 
 	/**
 	 * Removes a blockquote when backspace is pressed at the beginning of it.
@@ -1150,28 +1103,26 @@ tinymce.util.Quirks = function (editor) {
 				selection.setRng(rng);
 			}
 		});
-	};
+	}
 
 	/**
 	 * Sets various Gecko editing options on mouse down and before a execCommand to disable inline table editing that is broken etc.
 	 */
 	function setGeckoEditingOptions() {
 		function setOpts() {
-			editor._refreshContentEditable();
-
 			setEditorCommandState("StyleWithCSS", false);
 			setEditorCommandState("enableInlineTableEditing", false);
 
 			if (!settings.object_resizing) {
 				setEditorCommandState("enableObjectResizing", false);
 			}
-		};
+		}
 
 		if (!settings.readonly) {
 			editor.onBeforeExecCommand.add(setOpts);
 			editor.onMouseDown.add(setOpts);
 		}
-	};
+	}
 
 	/**
 	 * Fixes a gecko link bug, when a link is placed at the end of block elements there is
@@ -1184,7 +1135,7 @@ tinymce.util.Quirks = function (editor) {
 	 * <p><b><a href="#">x</a></b><br></p>
 	 */
 	function addBrAfterLastLinks() {
-		function fixLinks(editor, o) {
+		function fixLinks() {
 			each(dom.select('a'), function (node) {
 				var parentNode = node.parentNode,
 					root = dom.getRoot();
@@ -1203,7 +1154,7 @@ tinymce.util.Quirks = function (editor) {
 					});
 				}
 			});
-		};
+		}
 
 		editor.onExecCommand.add(function (editor, cmd) {
 			if (cmd === 'mceInsertLink') {
@@ -1227,494 +1178,31 @@ tinymce.util.Quirks = function (editor) {
 	}
 
 	/**
-	 * Removes ghost selections from images/tables on Gecko.
+	 * Forces Gecko to render a broken image icon if it fails to load an image.
 	 */
-	function removeGhostSelection() {
-		function repaint(sender, args) {
-			if (!sender || !args.initial) {
-				editor.execCommand('mceRepaint');
-			}
-		};
-
-		editor.onUndo.add(repaint);
-		editor.onRedo.add(repaint);
-		editor.onSetContent.add(repaint);
-	};
-
-	/**
-	 * Deletes the selected image on IE instead of navigating to previous page.
-	 */
-	function deleteControlItemOnBackSpace() {
-		editor.onKeyDown.add(function (editor, e) {
-			var rng;
-
-			if (!isDefaultPrevented(e) && e.keyCode == BACKSPACE) {
-				rng = editor.getDoc().selection.createRange();
-				if (rng && rng.item) {
-					e.preventDefault();
-					editor.undoManager.beforeChange();
-					dom.remove(rng.item(0));
-					editor.undoManager.add();
-				}
-			}
-		});
-	};
-
-	/**
-	 * IE10 doesn't properly render block elements with the right height until you add contents to them.
-	 * This fixes that by adding a padding-right to all empty text block elements.
-	 * See: https://connect.microsoft.com/IE/feedback/details/743881
-	 */
-	function renderEmptyBlocksFix() {
-		var emptyBlocksCSS;
-
-		// IE10+
-		if (getDocumentMode() >= 10) {
-			emptyBlocksCSS = '';
-			each('p div h1 h2 h3 h4 h5 h6'.split(' '), function (name, i) {
-				emptyBlocksCSS += (i > 0 ? ',' : '') + name + ':empty';
-			});
-
-			editor.contentStyles.push(emptyBlocksCSS + '{padding-right: 1px !important}');
-		}
-	};
-
-	/**
-	 * Fakes image/table resizing on WebKit/Opera.
-	 */
-	function fakeImageResize() {
-		var dom = editor.dom,
-			each = tinymce.each;
-		var selectedElm, selectedElmGhost, resizeHelper, resizeHandles, selectedHandle;
-		var startX, startY, selectedElmX, selectedElmY, startW, startH, ratio, resizeStarted;
-		var width, height;
-		var editableDoc = editor.getDoc(),
-			rootDocument = document;
-		var abs = Math.abs,
-			round = Math.round,
-			rootElement = editor.getBody();
-		var startScrollWidth, startScrollHeight;
-
-		editor.onObjectResized = new tinymce.util.Dispatcher();
-		editor.onObjectResizeStart = new tinymce.util.Dispatcher();
-
-		if (!settings.object_resizing || settings.webkit_fake_resize === false) {
-			return;
-		}
-
-		// Details about each resize handle how to scale etc
-		resizeHandles = {
-			// Name: x multiplier, y multiplier, delta size x, delta size y
-			/*n: [0.5, 0, 0, -1],
-			e: [1, 0.5, 1, 0],
-			s: [0.5, 1, 0, 1],
-			w: [0, 0.5, -1, 0],*/
-			nw: [0, 0, -1, -1],
-			ne: [1, 0, 1, -1],
-			se: [1, 1, 1, 1],
-			sw: [0, 1, -1, 1]
-		};
-
-		// Add CSS for resize handles, cloned element and selected
-		var rootClass = '.mceContentBody';
-		editor.contentStyles.push(rootClass + ' div.mce-resizehandle {' +
-			'position: absolute;' +
-			'border: 1px solid black;' +
-			'box-sizing: content-box;' +
-			'background: #FFF;' +
-			'width: 7px;' +
-			'height: 7px;' +
-			'z-index: 10000' +
-			'}' +
-			rootClass + ' .mce-resizehandle:hover {' +
-			'background: #000' +
-			'}' +
-			rootClass + ' img[data-mce-selected],' + rootClass + ' hr[data-mce-selected] {' +
-			'outline: 1px solid black;' +
-			'resize: none' + // Have been talks about implementing this in browsers
-			'}' +
-			rootClass + ' .mce-clonedresizable {' +
-			'position: absolute;' +
-			(tinymce.isGecko ? '' : 'outline: 1px dashed black;') + // Gecko produces trails while resizing
-			'opacity: .5;' +
-			'filter: alpha(opacity=50);' +
-			'z-index: 10000' +
-			'}' +
-			rootClass + ' .mce-resize-helper {' +
-			'background: #555;' +
-			'background: rgba(0,0,0,0.75);' +
-			'border-radius: 3px;' +
-			'border: 1px;' +
-			'color: white;' +
-			'display: none;' +
-			'font-family: sans-serif;' +
-			'font-size: 12px;' +
-			'white-space: nowrap;' +
-			'line-height: 14px;' +
-			'margin: 5px 10px;' +
-			'padding: 5px;' +
-			'position: absolute;' +
-			'z-index: 10001' +
-			'}');
-
-		var isImage = function (elm) {
-			return elm && (elm.nodeName === 'IMG' || editor.dom.is(elm, 'figure[data-mce-image]'));
-		};
-
-		var getResizeTarget = function (elm) {
-			return editor.dom.is(elm, 'figure[data-mce-image]') ? elm.querySelector('img') : elm;
-		};
-
-		var isResizable = function (elm) {
-			var selector = editor.settings.object_resizing;
-
-			if (selector === false || tinymce.isIOS) {
-				return false;
-			}
-			if (typeof selector !== 'string') {
-				selector = 'table,img,figure[data-mce-image],div';
-			}
-
-			if (elm.getAttribute('data-mce-resize') === 'false') {
-				return false;
-			}
-
-			if (elm === editor.getBody()) {
-				return false;
-			}
-
-			return editor.dom.is(elm, selector);
-		};
-
-		var resizeGhostElement = function (e) {
-			var deltaX, deltaY, proportional;
-			var resizeHelperX, resizeHelperY;
-			// Calc new width/height
-			deltaX = e.screenX - startX;
-			deltaY = e.screenY - startY;
-			// Calc new size
-			width = deltaX * selectedHandle[2] + startW;
-			height = deltaY * selectedHandle[3] + startH;
-			// Never scale down lower than 5 pixels
-			width = width < 5 ? 5 : width;
-			height = height < 5 ? 5 : height;
-
-			if (isImage(selectedElm) && editor.settings.resize_img_proportional !== false) {
-				proportional = !VK.modifierPressed(e);
-			} else {
-				proportional = VK.modifierPressed(e) || (isImage(selectedElm) && selectedHandle[2] * selectedHandle[3] !== 0);
-			}
-			// Constrain proportions
-			if (proportional) {
-				if (abs(deltaX) > abs(deltaY)) {
-					height = round(width * ratio);
-					width = round(height / ratio);
-				} else {
-					width = round(height / ratio);
-					height = round(width * ratio);
-				}
-			}
-			// Update ghost size
-			dom.setStyles(getResizeTarget(selectedElmGhost), {
-				width: width,
-				height: height
-			});
-			// Update resize helper position
-			resizeHelperX = selectedHandle.startPos.x + deltaX;
-			resizeHelperY = selectedHandle.startPos.y + deltaY;
-			resizeHelperX = resizeHelperX > 0 ? resizeHelperX : 0;
-			resizeHelperY = resizeHelperY > 0 ? resizeHelperY : 0;
-			dom.setStyles(resizeHelper, {
-				left: resizeHelperX,
-				top: resizeHelperY,
-				display: 'block'
-			});
-			resizeHelper.innerHTML = width + ' &times; ' + height;
-			// Update ghost X position if needed
-			if (selectedHandle[2] < 0 && selectedElmGhost.clientWidth <= width) {
-				dom.setStyle(selectedElmGhost, 'left', selectedElmX + (startW - width));
-			}
-			// Update ghost Y position if needed
-			if (selectedHandle[3] < 0 && selectedElmGhost.clientHeight <= height) {
-				dom.setStyle(selectedElmGhost, 'top', selectedElmY + (startH - height));
-			}
-			// Calculate how must overflow we got
-			deltaX = rootElement.scrollWidth - startScrollWidth;
-			deltaY = rootElement.scrollHeight - startScrollHeight;
-			// Re-position the resize helper based on the overflow
-			if (deltaX + deltaY !== 0) {
-				dom.setStyles(resizeHelper, {
-					left: resizeHelperX - deltaX,
-					top: resizeHelperY - deltaY
-				});
-			}
-			if (!resizeStarted) {
-				editor.onObjectResizeStart.dispatch(editor, selectedElm, startW, startH);
-				resizeStarted = true;
-			}
-		};
-
-		var endGhostResize = function () {
-			resizeStarted = false;
-			var setSizeProp = function (name, value) {
-				if (value) {
-					// Resize by using style or attribute
-					/*if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
-						dom.setStyle(getResizeTarget(selectedElm), name, value);
-					}
-					else {
-						dom.setAttrib(getResizeTarget(selectedElm), name, value);
-					}*/
-					dom.setAttrib(getResizeTarget(selectedElm), name, value);
-				}
-			};
-			// Set width/height properties
-			setSizeProp('width', width);
-			setSizeProp('height', height);
-			dom.unbind(editableDoc, 'mousemove', resizeGhostElement);
-			dom.unbind(editableDoc, 'mouseup', endGhostResize);
-			if (rootDocument !== editableDoc) {
-				dom.unbind(rootDocument, 'mousemove', resizeGhostElement);
-				dom.unbind(rootDocument, 'mouseup', endGhostResize);
-			}
-			// Remove ghost/helper and update resize handle positions
-			dom.remove(selectedElmGhost);
-			dom.remove(resizeHelper);
-			showResizeRect(selectedElm);
-			// dispatch event
-			editor.onObjectResized.dispatch(editor, selectedElm, width, height);
-
-			dom.setAttrib(selectedElm, 'style', dom.getAttrib(selectedElm, 'style'));
-			editor.nodeChanged();
-		};
-
-		var showResizeRect = function (targetElm) {
-			var position, targetWidth, targetHeight, rect;
-			hideResizeRect();
-			unbindResizeHandleEvents();
-
-			// Get position and size of target
-			position = dom.getPos(targetElm, rootElement);
-			selectedElmX = position.x;
-			selectedElmY = position.y;
-			rect = targetElm.getBoundingClientRect(); // Fix for Gecko offsetHeight for table with caption
-			targetWidth = rect.width || (rect.right - rect.left);
-			targetHeight = rect.height || (rect.bottom - rect.top);
-
-			// Reset width/height if user selects a new image/table
-			if (selectedElm !== targetElm) {
-				selectedElm = targetElm;
-				width = height = 0;
-			}
-
-			if (isResizable(targetElm)) {
-				each(resizeHandles, function (handle, name) {
-					var handleElm;
-					var startDrag = function (e) {
-						startX = e.screenX;
-						startY = e.screenY;
-						startW = getResizeTarget(selectedElm).clientWidth;
-						startH = getResizeTarget(selectedElm).clientHeight;
-						ratio = startH / startW;
-						selectedHandle = handle;
-						handle.startPos = {
-							x: targetWidth * handle[0] + selectedElmX,
-							y: targetHeight * handle[1] + selectedElmY
-						};
-						startScrollWidth = rootElement.scrollWidth;
-						startScrollHeight = rootElement.scrollHeight;
-						selectedElmGhost = selectedElm.cloneNode(true);
-						dom.addClass(selectedElmGhost, 'mce-clonedresizable');
-						dom.setAttrib(selectedElmGhost, 'data-mce-bogus', 'all');
-						selectedElmGhost.contentEditable = false; // Hides IE move layer cursor
-						selectedElmGhost.unSelectabe = true;
-						dom.setStyles(selectedElmGhost, {
-							left: selectedElmX,
-							top: selectedElmY,
-							margin: 0,
-							width: targetWidth,
-							height: targetHeight
-						});
-						selectedElmGhost.removeAttribute('data-mce-selected');
-						rootElement.appendChild(selectedElmGhost);
-						dom.bind(editableDoc, 'mousemove', resizeGhostElement);
-						dom.bind(editableDoc, 'mouseup', endGhostResize);
-						if (rootDocument !== editableDoc) {
-							dom.bind(rootDocument, 'mousemove', resizeGhostElement);
-							dom.bind(rootDocument, 'mouseup', endGhostResize);
-						}
-						resizeHelper = dom.add(rootElement, 'div', {
-							'class': 'mce-resize-helper',
-							'data-mce-bogus': 'all'
-						}, startW + ' &times; ' + startH);
-					};
-					// Get existing or render resize handle
-					handleElm = dom.get('mceResizeHandle' + name);
-					if (handleElm) {
-						dom.remove(handleElm);
-					}
-					handleElm = dom.add(rootElement, 'div', {
-						'id': 'mceResizeHandle' + name,
-						'data-mce-bogus': 'all',
-						'class': 'mce-resizehandle mce-resizehandle-' + name,
-						'unselectable': true,
-						'style': 'cursor:' + name + '-resize; margin:0; padding:0; user-select: none; -ms-user-select: none;'
-					});
-					// Hides IE move layer cursor
-					// If we set it on Chrome we get this wounderful bug: #6725
-					// Edge doesn't have this issue however setting contenteditable will move the selection to that element on Edge 17 see #TINY-1679
-					if (tinymce.isIE11) {
-						handleElm.contentEditable = false;
-					}
-					dom.bind(handleElm, 'mousedown', function (e) {
-						e.stopImmediatePropagation();
-						e.preventDefault();
-						startDrag(e);
-					});
-					handle.elm = handleElm;
-					// Position element
-					dom.setStyles(handleElm, {
-						left: (targetWidth * handle[0] + selectedElmX) - (handleElm.offsetWidth / 2),
-						top: (targetHeight * handle[1] + selectedElmY) - (handleElm.offsetHeight / 2)
-					});
-				});
-			} else {
-				hideResizeRect();
-			}
-			selectedElm.setAttribute('data-mce-selected', '1');
-		};
-		var hideResizeRect = function () {
-			var name, handleElm;
-			unbindResizeHandleEvents();
-			if (selectedElm) {
-				selectedElm.removeAttribute('data-mce-selected');
-			}
-			for (name in resizeHandles) {
-				handleElm = dom.get('mceResizeHandle' + name);
-				if (handleElm) {
-					dom.unbind(handleElm);
-					dom.remove(handleElm);
-				}
-			}
-		};
-		var updateResizeRect = function (e) {
-			var startElm, controlElm;
-			var isChildOrEqual = function (node, parent) {
-				if (node) {
-					do {
-						if (node === parent) {
-							return true;
-						}
-					} while ((node = node.parentNode));
-				}
-			};
-			// Ignore all events while resizing or if the editor instance was removed
-			if (resizeStarted || editor.removed) {
-				return;
-			}
-			// Remove data-mce-selected from all elements since they might have been copied using Ctrl+c/v
-			each(dom.select('img[data-mce-selected],hr[data-mce-selected]'), function (img) {
-				img.removeAttribute('data-mce-selected');
-			});
-			controlElm = e.type === 'mousedown' ? e.target : selection.getNode();
-			controlElm = dom.closest(controlElm, 'table,img,figure[data-mce-image],hr')[0];
-
-			if (isChildOrEqual(controlElm, rootElement)) {
-				disableGeckoResize();
-				startElm = selection.getStart(true);
-				if (isChildOrEqual(startElm, controlElm) && isChildOrEqual(selection.getEnd(true), controlElm)) {
-					showResizeRect(controlElm);
-					return;
-				}
-			}
-
-			hideResizeRect();
-		};
-
-		var unbindResizeHandleEvents = function () {
-			for (var name in resizeHandles) {
-				var handle = resizeHandles[name];
-				if (handle.elm) {
-					dom.unbind(handle.elm);
-					delete handle.elm;
-				}
-			}
-		};
-
-		var disableGeckoResize = function () {
-			try {
-				// Disable object resizing on Gecko
-				editor.getDoc().execCommand('enableObjectResizing', false, false);
-			} catch (ex) {
-				// Ignore
-			}
-		};
-
-		// Show/hide resize rect when image is selected
-		editor.onNodeChange.add(updateResizeRect);
-
-		// Remove resize rect when getting content from the editor
-		editor.onBeforeGetContent.add(hideResizeRect);
-
-		// Fixes WebKit quirk where it returns IMG on getNode if caret is after last image in container
-		dom.bind(editableDoc, 'selectionchange', updateResizeRect);
-
-		// Remove the internal attribute when serializing the DOM
-		editor.serializer.addAttributeFilter('data-mce-selected', function (nodes, name) {
-			var i = nodes.length;
-
-			while (i--) {
-				nodes[i].attr(name, null);
-			}
-		});
-
-		disableGeckoResize();
+	function showBrokenImageIcon() {
+		editor.contentStyles.push(
+			'img:-moz-broken {' +
+			'-moz-force-broken-image-icon:1;' +
+			'min-width:24px;' +
+			'min-height:24px' +
+			'}'
+		);
 	}
 
 	/**
-	 * Old IE versions can't retain contents within noscript elements so this logic will store the contents
-	 * as a attribute and the insert that value as it's raw text when the DOM is serialized.
+	 * iOS has a bug where it's impossible to type if the document has a touchstart event
+	 * bound and the user touches the document while having the on screen keyboard visible.
+	 *
+	 * The touch event moves the focus to the parent document while having the caret inside the iframe
+	 * this fix moves the focus back into the iframe document.
 	 */
-	function keepNoScriptContents() {
-		if (getDocumentMode() < 9) {
-			parser.addNodeFilter('noscript', function (nodes) {
-				var i = nodes.length,
-					node, textNode;
-
-				while (i--) {
-					node = nodes[i];
-					textNode = node.firstChild;
-
-					if (textNode) {
-						node.attr('data-mce-innertext', textNode.value);
-					}
-				}
-			});
-
-			serializer.addNodeFilter('noscript', function (nodes) {
-				var i = nodes.length,
-					node, textNode, value;
-
-				while (i--) {
-					node = nodes[i];
-					textNode = nodes[i].firstChild;
-
-					if (textNode) {
-						textNode.value = tinymce.html.Entities.decode(textNode.value);
-					} else {
-						// Old IE can't retain noscript value so an attribute is used to store it
-						value = node.attributes.map['data-mce-innertext'];
-						if (value) {
-							node.attr('data-mce-innertext', null);
-							textNode = new tinymce.html.Node('#text', 3);
-							textNode.value = value;
-							textNode.raw = true;
-							node.append(textNode);
-						}
-					}
-				}
-			});
-		}
+	function restoreFocusOnKeyDown() {
+		editor.onKeyDown.add(function () {
+			if (document.activeElement == document.body) {
+				editor.getWin().focus();
+			}
+		});
 	}
 
 	/**
@@ -1724,73 +1212,186 @@ tinymce.util.Quirks = function (editor) {
 	 * object it's not possible anymore. So we need to hack in a ungly CSS to force the
 	 * body to be at least 150px. If the user clicks the HTML element out side this 150px region
 	 * we simply move the focus into the first paragraph. Not ideal since you loose the
-	 * positioning of the caret but goot enough for most cases.
+	 * positioning of the caret but good enough for most cases.
 	 */
 	function bodyHeight() {
-		editor.contentStyles.push('body {min-height: 100px}');
-		editor.onClick.add(function (ed, e) {
-			if (e.target.nodeName == 'HTML') {
-				editor.execCommand('SelectAll');
-				editor.selection.collapse(true);
-				editor.nodeChanged();
+		if (!editor.inline) {
+			editor.contentStyles.push('body {min-height: 150px}');
+			editor.onClick.add(function (editor, e) {
+				var rng;
+
+				if (e.target.nodeName == 'HTML') {
+					// Edge seems to only need focus if we set the range
+					// the caret will become invisible and moved out of the iframe!!
+					if (Env.ie > 11) {
+						editor.getBody().focus();
+						return;
+					}
+
+					// Need to store away non collapsed ranges since the focus call will mess that up see #7382
+					rng = editor.selection.getRng();
+					editor.getBody().focus();
+					editor.selection.setRng(rng);
+					editor.selection.normalize();
+					editor.nodeChanged();
+				}
+			});
+		}
+	}
+
+	/**
+	 * Firefox on Mac OS will move the browser back to the previous page if you press CMD+Left arrow.
+	 * You might then loose all your work so we need to block that behavior and replace it with our own.
+	 */
+	function blockCmdArrowNavigation() {
+		if (tinymce.isMac) {
+			editor.onKeyDown.add(function (editor, e) {
+				if (VK.metaKeyPressed(e) && !e.shiftKey && (e.keyCode == 37 || e.keyCode == 39)) {
+					e.preventDefault();
+					editor.selection.getSel().modify('move', e.keyCode == 37 ? 'backward' : 'forward', 'lineboundary');
+				}
+			});
+		}
+	}
+
+	/**
+	 * Disables the autolinking in IE 9+ this is then re-enabled by the autolink plugin.
+	 */
+	function disableAutoUrlDetect() {
+		setEditorCommandState("AutoUrlDetect", false);
+	}
+
+	/**
+	 * iOS 7.1 introduced two new bugs:
+	 * 1) It's possible to open links within a contentEditable area by clicking on them.
+	 * 2) If you hold down the finger it will display the link/image touch callout menu.
+	 */
+	function tapLinksAndImages() {
+		editor.onClick.add(function (editor, e) {
+			var elm = e.target;
+
+			do {
+				if (elm.tagName === 'A') {
+					e.preventDefault();
+					return;
+				}
+			} while ((elm = elm.parentNode));
+		});
+
+		editor.contentStyles.push('.mce-content-body {-webkit-touch-callout: none}');
+	}
+
+	/**
+	 * iOS Safari and possible other browsers have a bug where it won't fire
+	 * a click event when a contentEditable is focused. This function fakes click events
+	 * by using touchstart/touchend and measuring the time and distance travelled.
+	 */
+	/*
+	function touchClickEvent() {
+		editor.on('touchstart', function(e) {
+			var elm, time, startTouch, changedTouches;
+
+			elm = e.target;
+			time = new Date().getTime();
+			changedTouches = e.changedTouches;
+
+			if (!changedTouches || changedTouches.length > 1) {
+				return;
+			}
+
+			startTouch = changedTouches[0];
+
+			editor.once('touchend', function(e) {
+				var endTouch = e.changedTouches[0], args;
+
+				if (new Date().getTime() - time > 500) {
+					return;
+				}
+
+				if (Math.abs(startTouch.clientX - endTouch.clientX) > 5) {
+					return;
+				}
+
+				if (Math.abs(startTouch.clientY - endTouch.clientY) > 5) {
+					return;
+				}
+
+				args = {
+					target: elm
+				};
+
+				each('pageX pageY clientX clientY screenX screenY'.split(' '), function(key) {
+					args[key] = endTouch[key];
+				});
+
+				args = editor.fire('click', args);
+
+				if (!args.isDefaultPrevented()) {
+					// iOS WebKit can't place the caret properly once
+					// you bind touch events so we need to do this manually
+					// TODO: Expand to the closest word? Touble tap still works.
+					editor.selection.placeCaretAt(endTouch.clientX, endTouch.clientY);
+					editor.nodeChanged();
+				}
+			});
+		});
+	}
+	*/
+
+	/**
+	 * WebKit has a bug where it will allow forms to be submitted if they are inside a contentEditable element.
+	 * For example this: <form><button></form>
+	 */
+	function blockFormSubmitInsideEditor() {
+		editor.onInit.add(function () {
+			editor.dom.bind(editor.getBody(), 'submit', function (e) {
+				e.preventDefault();
+			});
+		});
+	}
+
+	/**
+	 * Sometimes WebKit/Blink generates BR elements with the Apple-interchange-newline class.
+	 *
+	 * Scenario:
+	 *  1) Create a table 2x2.
+	 *  2) Select and copy cells A2-B2.
+	 *  3) Paste and it will add BR element to table cell.
+	 */
+	function removeAppleInterchangeBrs() {
+		parser.addNodeFilter('br', function (nodes) {
+			var i = nodes.length;
+
+			while (i--) {
+				if (nodes[i].attr('class') == 'Apple-interchange-newline') {
+					nodes[i].remove();
+				}
 			}
 		});
 	}
 
 	/**
-	 * Fixes control selection bug #6613 in IE 11 by an ugly hack. IE 11 has a bug where it will return the parent
-	 * element container of an image if you select it as the last child in for
-	 * example this HTML: <p>a<img src="b"></p>
+	 * IE cannot set custom contentType's on drag events, and also does not properly drag/drop between
+	 * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
 	 */
-	function fixControlSelection() {
-		editor.onInit.add(function () {
-			var selectedRng;
-
-			editor.getBody().addEventListener('mscontrolselect', function (e) {
-				setTimeout(function () {
-					if (editor.selection.getNode() != e.target) {
-						selectedRng = editor.selection.getRng();
-						selection.fakeRng = editor.dom.createRng();
-						selection.fakeRng.setStartBefore(e.target);
-						selection.fakeRng.setEndAfter(e.target);
-					}
-				}, 0);
-
-				//e.preventDefault();
-				// This moves the selection from being a control selection to a text like selection like in WebKit #6753
-				// TODO: Fix this the day IE works like other browsers without this nasty native ugly control selections.
-				if (e.target.tagName == 'IMG') {
-					e.preventDefault();
-					window.setTimeout(function () {
-						editor.selection.select(e.target);
-					}, 0);
-				}
-
-
-			}, false);
-
-			editor.getDoc().addEventListener('selectionchange', function (e) {
-				if (selectedRng && !tinymce.dom.RangeUtils.compareRanges(editor.selection.getRng(), selectedRng)) {
-					selection.fakeRng = selectedRng = null;
-				}
-			}, false);
+	function ieInternalDragAndDrop() {
+		editor.onDragStart.add(function (editor, e) {
+			setMceInternalContent(e);
 		});
 
-		if (tinymce.isIE12) {
-			editor.onClick.add(function (editor, e) {
-				e = e.target;
+		editor.onDrop.add(function (editor, e) {
+			if (!isDefaultPrevented(e)) {
+				var internalContent = getMceInternalContent(e);
 
-				if (/^(IMG|HR|TABLE)$/.test(e.nodeName)) {
-					selection.select(e);
+				if (internalContent && internalContent.id != editor.id) {
+					e.preventDefault();
+
+					var rng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, editor.getDoc());
+					selection.setRng(rng);
+					insertClipboardContents(internalContent.html);
 				}
-
-				if (e.nodeName == 'A' && dom.hasClass(e, 'mce-item-anchor')) {
-					selection.select(e);
-				}
-
-				editor.nodeChanged();
-			});
-		}
+			}
+		});
 	}
 
 	/**
@@ -1842,60 +1443,105 @@ tinymce.util.Quirks = function (editor) {
 		});
 	}
 
+	/**
+	 * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
+	 * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
+	 * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
+	 * addRootBlocks), meaning the action does nothing. With this code, FireFox/IE matche the behaviour of other
+	 * browsers.
+	 *
+	 * It also fixes a bug on Firefox where it's impossible to delete HR elements.
+	 */
+	function removeHrOnBackspace() {
+		editor.onKeyDown.add(function (editor, e) {
+			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
+				// Check if there is any HR elements this is faster since getRng on IE 7 & 8 is slow
+				if (!editor.getBody().getElementsByTagName('hr').length) {
+					return;
+				}
+
+				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
+					var node = selection.getNode();
+					var previousSibling = node.previousSibling;
+
+					if (node.nodeName == 'HR') {
+						dom.remove(node);
+						e.preventDefault();
+						return;
+					}
+
+					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "hr") {
+						dom.remove(previousSibling);
+						e.preventDefault();
+					}
+				}
+			}
+		});
+	}
+
+	/**
+	 * Fixes selection issues where the caret can be placed between two inline elements like <b>a</b>|<b>b</b>
+	 * this fix will lean the caret right into the closest inline element.
+	 */
+	function normalizeSelection() {
+		var normalize = function(e) {
+			if (e.keyCode != 65 || !VK.metaKeyPressed(e)) {
+				selection.normalize();
+			}
+		};
+		
+		// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
+		editor.onKeyUp.add(normalize);
+		editor.onMouseUp.add(normalize);
+	}
+
 	// All browsers
-	disableBackspaceIntoATable();
+	normalizeSelection();
+
 	removeBlockQuoteOnBackSpace();
 	emptyEditorWhenDeleting();
 
 	// WebKit
 	if (tinymce.isWebKit) {
-		keepInlineElementOnDeleteBackspace();
 		cleanupStylesWhenDeleting();
 		inputMethodFocus();
-		selectControlElements();
 		setDefaultBlockType();
+		blockFormSubmitInsideEditor();
+		disableBackspaceIntoATable();
+		removeAppleInterchangeBrs();
 		imageFloatLinkBug();
 
+		//touchClickEvent();
+
 		// iOS
-		if (tinymce.isIDevice) {
-			selectionChangeNodeChanged();
+		if (tinymce.isIOS) {
+			restoreFocusOnKeyDown();
+			bodyHeight();
+			tapLinksAndImages();
 		} else {
 			selectAll();
 		}
 	}
 
-	// IE
-	if (tinymce.isIE && !tinymce.isIE11) {
-		removeHrOnBackspace();
-		ensureBodyHasRoleApplication();
-		addNewLinesBeforeBrInPre();
-		removePreSerializedStylesWhenSelectingControls();
-		deleteControlItemOnBackSpace();
-		renderEmptyBlocksFix();
-		keepNoScriptContents();
-	}
-
-	// IE 11+
-	if (tinymce.isIE11) {
+	if (tinymce.isIE) {
 		bodyHeight();
-		//doubleTrailingBrElements();
-		fixControlSelection();
+		selectAll();
+		disableAutoUrlDetect();
+		ieInternalDragAndDrop();
 	}
 
-	// IE 12 / Edge
-	if (tinymce.isIE12) {
-		fixControlSelection();
+	if (tinymce.isIE >= 11) {
+		disableBackspaceIntoATable();
 	}
 
 	// Gecko
-	if (tinymce.isGecko && !tinymce.isIE11) {
+	if (tinymce.isGecko) {
 		removeHrOnBackspace();
-		focusBody();
-		removeStylesWhenDeletingAccrossBlockElements();
+		removeStylesWhenDeletingAcrossBlockElements();
 		setGeckoEditingOptions();
 		addBrAfterLastLinks();
-		removeGhostSelection();
+		showBrokenImageIcon();
+		blockCmdArrowNavigation();
+		disableBackspaceIntoATable();
 	}
-
-	fakeImageResize();
 };
