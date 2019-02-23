@@ -22,8 +22,14 @@ if (/Firefox\/2(\.|$)/.test(navigator.userAgent)) {
 	});
 
 function createRng() {
-	return document.createRange ? document.createRange() : new tinymce.dom.Range(tinymce.DOM);
+	return document.createRange();
 };
+
+if (!document.createRange) {
+	test("Skipped native range tests.", function() {
+		ok(true, "Dummy assert");
+	});
+}
 
 	function getHTML(co) {
 		var div = document.createElement('div'), h;

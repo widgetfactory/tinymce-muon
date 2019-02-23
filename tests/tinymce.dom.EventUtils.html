@@ -27,15 +27,15 @@ eventUtils.bind(window, "ready", function() {});
 test("unbind all", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click = true;
 	});
 
-	eventUtils.bind(window, 'keydown', function(e) {
+	eventUtils.bind(window, 'keydown', function() {
 		result.keydown1 = true;
 	});
 
-	eventUtils.bind(window, 'keydown', function(e) {
+	eventUtils.bind(window, 'keydown', function() {
 		result.keydown2 = true;
 	});
 
@@ -54,15 +54,15 @@ test("unbind all", function() {
 test("unbind event", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click = true;
 	});
 
-	eventUtils.bind(window, 'keydown', function(e) {
+	eventUtils.bind(window, 'keydown', function() {
 		result.keydown1 = true;
 	});
 
-	eventUtils.bind(window, 'keydown', function(e) {
+	eventUtils.bind(window, 'keydown', function() {
 		result.keydown2 = true;
 	});
 
@@ -86,17 +86,17 @@ test("unbind event non existing", function() {
 test("unbind callback", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click = true;
 	});
 
-	eventUtils.bind(window, 'keydown', function(e) {
+	eventUtils.bind(window, 'keydown', function() {
 		result.keydown1 = true;
 	});
 
-	function callback2(e) {
+	function callback2() {
 		result.keydown2 = true;
-	};
+	}
 
 	eventUtils.bind(window, 'keydown', callback2);
 
@@ -145,7 +145,7 @@ test("bind multiple", function() {
 test("bind/fire bubbling", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.window = true;
 	});
 
@@ -189,7 +189,7 @@ test("bind/fire bubbling", function() {
 test("bind/fire stopImmediatePropagation", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click1 = true;
 	});
 
@@ -198,7 +198,7 @@ test("bind/fire stopImmediatePropagation", function() {
 		e.stopImmediatePropagation();
 	});
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click3 = true;
 	});
 
@@ -210,11 +210,11 @@ test("bind/fire stopImmediatePropagation", function() {
 test("bind/fire stopPropagation", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click1 = true;
 	});
 
-	eventUtils.bind(document.body, 'click', function(e) {
+	eventUtils.bind(document.body, 'click', function() {
 		result.click2 = true;
 	});
 
@@ -231,19 +231,19 @@ test("bind/fire stopPropagation", function() {
 test("clean window", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click1 = true;
 	});
 
-	eventUtils.bind(document.body, 'click', function(e) {
+	eventUtils.bind(document.body, 'click', function() {
 		result.click2 = true;
 	});
 
-	eventUtils.bind(document.getElementById('content'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('content'), 'click', function() {
 		result.click3 = true;
 	});
 
-	eventUtils.bind(document.getElementById('inner'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('inner'), 'click', function() {
 		result.click4 = true;
 	});
 
@@ -260,23 +260,23 @@ test("clean window", function() {
 test("clean document", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click1 = true;
 	});
 
-	eventUtils.bind(document, 'click', function(e) {
+	eventUtils.bind(document, 'click', function() {
 		result.click2 = true;
 	});
 
-	eventUtils.bind(document.body, 'click', function(e) {
+	eventUtils.bind(document.body, 'click', function() {
 		result.click3 = true;
 	});
 
-	eventUtils.bind(document.getElementById('content'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('content'), 'click', function() {
 		result.click4 = true;
 	});
 
-	eventUtils.bind(document.getElementById('inner'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('inner'), 'click', function() {
 		result.click5 = true;
 	});
 
@@ -293,19 +293,19 @@ test("clean document", function() {
 test("clean element", function() {
 	var result;
 
-	eventUtils.bind(window, 'click', function(e) {
+	eventUtils.bind(window, 'click', function() {
 		result.click1 = true;
 	});
 
-	eventUtils.bind(document.body, 'click', function(e) {
+	eventUtils.bind(document.body, 'click', function() {
 		result.click2 = true;
 	});
 
-	eventUtils.bind(document.getElementById('content'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('content'), 'click', function() {
 		result.click3 = true;
 	});
 
-	eventUtils.bind(document.getElementById('inner'), 'click', function(e) {
+	eventUtils.bind(document.getElementById('inner'), 'click', function() {
 		result.click4 = true;
 	});
 
@@ -338,23 +338,28 @@ test("mouseenter/mouseleave bind/unbind", function() {
 	deepEqual(result, {});
 });
 
-test("focusin/focusout bind/unbind", function() {
+/*
+asyncTest("focusin/focusout bind/unbind", function() {
 	var result = {};
 
-	eventUtils.bind(document.body, 'focusin focusout', function(e) {
-		// IE will fire a focusout on the parent element if you focus an element within not a big deal so lets detect it in the test
-		if (e.type == "focusout" && e.target.contains(document.activeElement)) {
-			return;
-		}
+	window.setTimeout(function() {
+		eventUtils.bind(document.body, 'focusin focusout', function(e) {
+			// IE will fire a focusout on the parent element if you focus an element within not a big deal so lets detect it in the test
+			if (e.type == "focusout" && e.target.contains(document.activeElement)) {
+				return;
+			}
 
-		result[e.type] = result[e.type] ? ++result[e.type] : 1;
-	});
+			result[e.type] = result[e.type] ? ++result[e.type] : 1;
+		});
 
-	document.getElementById('inner').focus();
-	document.getElementById('content').focus();
+		start();
+		document.getElementById('content').focus();
+		document.getElementById('inner').focus();
 
-	deepEqual(result, {focusin: 2, focusout: 1});
+		deepEqual(result, {focusin: 2, focusout: 1});
+	}, 0);
 });
+*/
 
 test("bind unbind fire clean on null", function() {
 	eventUtils.bind(null, 'click', function() {});
@@ -367,8 +372,11 @@ test("bind unbind fire clean on null", function() {
 test("bind ready when page is loaded", function() {
 	var ready;
 
-	eventUtils.bind(window, 'ready', function() {ready = true;});
+	eventUtils.bind(window, 'ready', function() {
+		ready = true;
+	});
 
+	ok(eventUtils.domLoaded, "DomLoaded state true");
 	ok(ready, "Window is ready.");
 });
 
@@ -380,7 +388,7 @@ test("event states when event object is fired twice", function() {
 
 	var event = {};
 	eventUtils.fire(window, 'keydown', event);
-	eventUtils.fire(window, 'keyup', event);	
+	eventUtils.fire(window, 'keyup', event);
 
 	ok(event.isDefaultPrevented(), "Default is prevented.");
 	ok(event.isPropagationStopped(), "Propagation is stopped.");
@@ -390,16 +398,58 @@ test("event states when event object is fired twice", function() {
 });
 
 test("unbind inside callback", function() {
-	function a() {}
+	var data;
 
-	eventUtils.bind(window, 'click', function() {
-		eventUtils.unbind(window, 'click', a);
-	});
+	function append(value) {
+		return function() {
+			data += value;
+		};
+	}
 
-	eventUtils.bind(window, 'click', a);
+	function callback() {
+		eventUtils.unbind(window, 'click', callback);
+		data += 'b';
+	}
+
+	data = '';
+	eventUtils.bind(window, 'click', append("a"));
+	eventUtils.bind(window, 'click', callback);
+	eventUtils.bind(window, 'click', append("c"));
+
 	eventUtils.fire(window, 'click', {});
+	equal(data, 'abc');
 
-	ok(true, "No exception");
+	data = '';
+	eventUtils.fire(window, 'click', {});
+	equal(data, 'ac');
+});
+
+test("ready/DOMContentLoaded (domLoaded = true)", function() {
+	var evt;
+
+	eventUtils.bind(window, "ready", function(e) {evt = e;});
+	equal(evt.type, "ready");
+});
+
+test("ready/DOMContentLoaded (document.readyState check)", function() {
+	var evt;
+
+	try {
+		document.readyState = "loading";
+	} catch (e) {
+		ok(true, "IE doesn't allow us to set document.readyState");
+		return;
+	}
+
+	eventUtils.domLoaded = false;
+	document.readyState = "loading";
+	eventUtils.bind(window, "ready", function(e) {evt = e;});
+	ok(typeof(evt) !== "undefined");
+
+	eventUtils.domLoaded = false;
+	document.readyState = "complete";
+	eventUtils.bind(window, "ready", function(e) {evt = e;});
+	equal(evt.type, "ready");
 });
 
 /**
