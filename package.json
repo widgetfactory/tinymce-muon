@@ -1,0 +1,32 @@
+{
+  "name": "tinymce-muon",
+  "version": "4.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/widgetfactory/tinymce-muon.git"
+  },
+  "description": "TinyMCE rich text editor",
+  "author": "Johan Sörlin <spocke@moxiecode.com>",
+  "bugs": {
+    "url": ""
+  },
+  "private": true,
+  "engines": {
+    "node": ">=0.10.26"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "devDependencies": {
+    "amdlc": "^0.1.8",
+    "grunt": "~1.0.1",
+    "grunt-contrib-clean": "~1.0.0",
+    "grunt-contrib-copy": "~1.0.0",
+    "grunt-contrib-less": "~1.4.0",
+    "grunt-contrib-qunit": "~1.2.0",
+    "grunt-contrib-uglify": "~2.0.0",
+    "grunt-eslint": "~19.0.0",
+    "grunt-nuget-pack": "^0.0.6",
+    "load-grunt-tasks": "~3.5.2"
+  }
+}
