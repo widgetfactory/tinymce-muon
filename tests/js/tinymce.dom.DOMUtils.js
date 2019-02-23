@@ -313,7 +313,7 @@
 		DOM.remove('test');
 	});
 
-	test('setGetStyles', 7, function() {
+	test('setGetStyles', 8, function() {
 		DOM.add(document.body, 'div', {id : 'test'});
 
 		DOM.setStyle('test', 'font-size', '20px');
@@ -331,6 +331,9 @@
 		equal(DOM.getStyle('test2', 'fontSize'), '22px');
 		equal(DOM.getStyle('test3', 'fontSize'), '22px');
 		equal(DOM.getStyle('test4', 'fontSize'), '22px');
+
+		DOM.setStyle('test', 'float', 'left');
+		equal(DOM.getStyle('test', 'float'), 'left', null, tinymce.isIE);
 
 		DOM.setAttrib('test', 'style', '');
 
