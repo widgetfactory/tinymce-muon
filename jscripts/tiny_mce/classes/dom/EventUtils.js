@@ -2,6 +2,7 @@
  * EventUtils.js
  *
  * Copyright, Moxiecode Systems AB
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
  * Released under LGPL License.
  *
  * License: http://www.tinymce.com/license
@@ -13,8 +14,18 @@
 
 tinymce.dom = {};
 
-(function(namespace, expando) {
-	var w3cEventModel = !!document.addEventListener;
+(function (namespace) {
+	var eventExpandoPrefix = "mce-data-";
+	var mouseEventRe = /^(?:mouse|contextmenu)|click/;
+	var deprecated = {
+		keyLocation: 1,
+		layerX: 1,
+		layerY: 1,
+		returnValue: 1,
+		webkitMovementX: 1,
+		webkitMovementY: 1,
+		keyIdentifier: 1
+	};
 
 	/**
 	 * Binds a native event to a callback on the speified target.
@@ -41,8 +52,9 @@ tinymce.dom = {};
 	/**
 	 * Normalizes a native event object or just adds the event specific methods on a custom event.
 	 */
-	function fix(original_event, data) {
-		var name, event = data || {};
+	function fix(originalEvent, data) {
+		var name, event = data || {},
+			undef;
 
 		// Dummy function that gets replaced on the delegation state functions
 		function returnFalse() {
@@ -55,10 +67,10 @@ tinymce.dom = {};
 		}
 
 		// Copy all properties from the original event
-		for (name in original_event) {
+		for (name in originalEvent) {
 			// layerX/layerY is deprecated in Chrome and produces a warning
-			if (name !== "layerX" && name !== "layerY") {
-				event[name] = original_event[name];
+			if (!deprecated[name]) {
+				event[name] = originalEvent[name];
 			}
 		}
 
@@ -67,36 +79,49 @@ tinymce.dom = {};
 			event.target = event.srcElement || document;
 		}
 
+		// Calculate pageX/Y if missing and clientX/Y available
+		if (originalEvent && mouseEventRe.test(originalEvent.type) && originalEvent.pageX === undef && originalEvent.clientX !== undef) {
+			var eventDoc = event.target.ownerDocument || document;
+			var doc = eventDoc.documentElement;
+			var body = eventDoc.body;
+
+			event.pageX = originalEvent.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+				(doc && doc.clientLeft || body && body.clientLeft || 0);
+
+			event.pageY = originalEvent.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) -
+				(doc && doc.clientTop || body && body.clientTop || 0);
+		}
+
 		// Add preventDefault method
-		event.preventDefault = function() {
+		event.preventDefault = function () {
 			event.isDefaultPrevented = returnTrue;
 
 			// Execute preventDefault on the original event object
-			if (original_event) {
-				if (original_event.preventDefault) {
-					original_event.preventDefault();
+			if (originalEvent) {
+				if (originalEvent.preventDefault) {
+					originalEvent.preventDefault();
 				} else {
-					original_event.returnValue = false; // IE
+					originalEvent.returnValue = false; // IE
 				}
 			}
 		};
 
 		// Add stopPropagation
-		event.stopPropagation = function() {
+		event.stopPropagation = function () {
 			event.isPropagationStopped = returnTrue;
 
 			// Execute stopPropagation on the original event object
-			if (original_event) {
-				if (original_event.stopPropagation) {
-					original_event.stopPropagation();
+			if (originalEvent) {
+				if (originalEvent.stopPropagation) {
+					originalEvent.stopPropagation();
 				} else {
-					original_event.cancelBubble = true; // IE
+					originalEvent.cancelBubble = true; // IE
 				}
-			 }
+			}
 		};
 
 		// Add stopImmediatePropagation
-		event.stopImmediatePropagation = function() {
+		event.stopImmediatePropagation = function () {
 			event.isImmediatePropagationStopped = returnTrue;
 			event.stopPropagation();
 		};
@@ -108,6 +133,11 @@ tinymce.dom = {};
 			event.isImmediatePropagationStopped = returnFalse;
 		}
 
+		// Add missing metaKey for IE 8
+		if (typeof event.metaKey == 'undefined') {
+			event.metaKey = false;
+		}
+
 		return event;
 	}
 
@@ -115,49 +145,61 @@ tinymce.dom = {};
 	 * Bind a DOMContentLoaded event across browsers and executes the callback once the page DOM is initialized.
 	 * It will also set/check the domLoaded state of the event_utils instance so ready isn't called multiple times.
 	 */
-	function bindOnReady(win, callback, event_utils) {
-		var doc = win.document, event = {type: 'ready'};
+	function bindOnReady(win, callback, eventUtils) {
+		var doc = win.document,
+			event = {
+				type: 'ready'
+			};
+
+		if (eventUtils.domLoaded) {
+			callback(event);
+			return;
+		}
 
 		// Gets called when the DOM is ready
 		function readyHandler() {
-			if (!event_utils.domLoaded) {
-				event_utils.domLoaded = true;
+			if (!eventUtils.domLoaded) {
+				eventUtils.domLoaded = true;
 				callback(event);
 			}
 		}
 
-		// Page already loaded then fire it directly
-		if (doc.readyState == "complete") {
+		function waitForDomLoaded() {
+			// Check complete or interactive state if there is a body
+			// element on some iframes IE 8 will produce a null body
+			if (doc.readyState === "complete" || (doc.readyState === "interactive" && doc.body)) {
+				removeEvent(doc, "readystatechange", waitForDomLoaded);
+				readyHandler();
+			}
+		}
+
+		function tryScroll() {
+			try {
+				// If IE is used, use the trick by Diego Perini licensed under MIT by request to the author.
+				// http://javascript.nwbox.com/IEContentLoaded/
+				doc.documentElement.doScroll("left");
+			} catch (ex) {
+				setTimeout(tryScroll, 0);
+				return;
+			}
+
 			readyHandler();
-			return;
 		}
 
 		// Use W3C method
-		if (w3cEventModel) {
-			addEvent(win, 'DOMContentLoaded', readyHandler);
+		if (doc.addEventListener) {
+			if (doc.readyState === "complete") {
+				readyHandler();
+			} else {
+				addEvent(win, 'DOMContentLoaded', readyHandler);
+			}
 		} else {
 			// Use IE method
-			addEvent(doc, "readystatechange", function() {
-				if (doc.readyState === "complete") {
-					removeEvent(doc, "readystatechange", arguments.callee);
-					readyHandler();
-				}
-			});
+			addEvent(doc, "readystatechange", waitForDomLoaded);
 
 			// Wait until we can scroll, when we can the DOM is initialized
-			if (doc.documentElement.doScroll && win === win.top) {
-				(function() {
-					try {
-						// If IE is used, use the trick by Diego Perini licensed under MIT by request to the author.
-						// http://javascript.nwbox.com/IEContentLoaded/
-						doc.documentElement.doScroll("left");
-					} catch (ex) {
-						setTimeout(arguments.callee, 0);
-						return;
-					}
-
-					readyHandler();
-				})();
+			if (doc.documentElement.doScroll && win.self === win.top) {
+				tryScroll();
 			}
 		}
 
@@ -168,12 +210,18 @@ tinymce.dom = {};
 	/**
 	 * This class enables you to bind/unbind native events to elements and normalize it's behavior across browsers.
 	 */
-	function EventUtils(proxy) {
-		var self = this, events = {}, count, isFocusBlurBound, hasFocusIn, hasMouseEnterLeave, mouseEnterLeave;
+	function EventUtils() {
+		var self = this,
+			events = {},
+			count, expando, hasFocusIn, hasMouseEnterLeave, mouseEnterLeave;
 
+		expando = eventExpandoPrefix + (+new Date()).toString(32);
 		hasMouseEnterLeave = "onmouseenter" in document.documentElement;
 		hasFocusIn = "onfocusin" in document.documentElement;
-		mouseEnterLeave = {mouseenter: 'mouseover', mouseleave: 'mouseout'};
+		mouseEnterLeave = {
+			mouseenter: 'mouseover',
+			mouseleave: 'mouseout'
+		};
 		count = 1;
 
 		// State if the DOMContentLoaded was executed or not
@@ -183,17 +231,18 @@ tinymce.dom = {};
 		/**
 		 * Executes all event handler callbacks for a specific event.
 		 *
+		 * @private
 		 * @param {Event} evt Event object.
 		 * @param {String} id Expando id value to look for.
 		 */
 		function executeHandlers(evt, id) {
-			var callbackList, i, l, callback;
+			var callbackList, i, l, callback, container = events[id];
 
-			callbackList = events[id][evt.type];
+			callbackList = container && container[evt.type];
 			if (callbackList) {
 				for (i = 0, l = callbackList.length; i < l; i++) {
 					callback = callbackList[i];
-					
+
 					// Check if callback exists might be removed if a unbind is called inside the callback
 					if (callback && callback.func.call(callback.scope, evt) === false) {
 						evt.preventDefault();
@@ -217,7 +266,7 @@ tinymce.dom = {};
 		 * @param {Object} scope Scope to call the callback function on, defaults to target.
 		 * @return {function} Callback function that got bound.
 		 */
-		self.bind = function(target, names, callback, scope) {
+		self.bind = function (target, names, callback, scope) {
 			var id, callbackList, i, name, fakeName, nativeHandler, capture, win = window;
 
 			// Native event handler function patches the event and executes the callbacks for the expando
@@ -237,10 +286,6 @@ tinymce.dom = {};
 				events[id] = {};
 			} else {
 				id = target[expando];
-
-				if (!events[id]) {
-					events[id] = {};
-				}
 			}
 
 			// Setup the specified scope or use the target as a default
@@ -260,9 +305,10 @@ tinymce.dom = {};
 				}
 
 				// DOM is already ready
-				if ((self.domLoaded || target.readyState == 'complete') && name === "ready") {
-					self.domLoaded = true;
-					callback.call(scope, fix({type: name}));
+				if (self.domLoaded && name === "ready" && target.readyState == 'complete') {
+					callback.call(scope, fix({
+						type: name
+					}));
 					continue;
 				}
 
@@ -271,13 +317,14 @@ tinymce.dom = {};
 					fakeName = mouseEnterLeave[name];
 
 					if (fakeName) {
-						nativeHandler = function(evt) {
+						nativeHandler = function (evt) {
 							var current, related;
 
 							current = evt.currentTarget;
 							related = evt.relatedTarget;
 
-							// Check if related is inside the current target if it's not then the event should be ignored since it's a mouseover/mouseout inside the element
+							// Check if related is inside the current target if it's not then the event should
+							// be ignored since it's a mouseover/mouseout inside the element
 							if (related && current.contains) {
 								// Use contains for performance
 								related = current.contains(related);
@@ -298,11 +345,11 @@ tinymce.dom = {};
 					}
 				}
 
-				// Fake bubbeling of focusin/focusout
+				// Fake bubbling of focusin/focusout
 				if (!hasFocusIn && (name === "focusin" || name === "focusout")) {
 					capture = true;
 					fakeName = name === "focusin" ? "focus" : "blur";
-					nativeHandler = function(evt) {
+					nativeHandler = function (evt) {
 						evt = fix(evt || win.event);
 						evt.type = evt.type === 'focus' ? 'focusin' : 'focusout';
 						executeHandlers(evt, id);
@@ -312,25 +359,36 @@ tinymce.dom = {};
 				// Setup callback list and bind native event
 				callbackList = events[id][name];
 				if (!callbackList) {
-					events[id][name] = callbackList = [{func: callback, scope: scope}];
+					events[id][name] = callbackList = [{
+						func: callback,
+						scope: scope
+					}];
 					callbackList.fakeName = fakeName;
 					callbackList.capture = capture;
+					//callbackList.callback = callback;
 
 					// Add the nativeHandler to the callback list so that we can later unbind it
 					callbackList.nativeHandler = nativeHandler;
-					if (!w3cEventModel) {
-						callbackList.proxyHandler = proxy(id);
-					}
 
 					// Check if the target has native events support
+
 					if (name === "ready") {
 						bindOnReady(target, nativeHandler, self);
 					} else {
-						addEvent(target, fakeName || name, w3cEventModel ? nativeHandler : callbackList.proxyHandler, capture);
+						addEvent(target, fakeName || name, nativeHandler, capture);
 					}
 				} else {
-					// If it already has an native handler then just push the callback
-					callbackList.push({func: callback, scope: scope});
+					if (name === "ready" && self.domLoaded) {
+						callback({
+							type: name
+						});
+					} else {
+						// If it already has an native handler then just push the callback
+						callbackList.push({
+							func: callback,
+							scope: scope
+						});
+					}
 				}
 			}
 
@@ -348,7 +406,7 @@ tinymce.dom = {};
 		 * @param {function} callback Optional callback function to unbind.
 		 * @return {EventUtils} Event utils instance.
 		 */
-		self.unbind = function(target, names, callback) {
+		self.unbind = function (target, names, callback) {
 			var id, callbackList, i, ci, name, eventMap;
 
 			// Don't bind to text nodes or comments
@@ -376,7 +434,17 @@ tinymce.dom = {};
 								ci = callbackList.length;
 								while (ci--) {
 									if (callbackList[ci].func === callback) {
-										callbackList.splice(ci, 1);
+										var nativeHandler = callbackList.nativeHandler;
+										var fakeName = callbackList.fakeName,
+											capture = callbackList.capture;
+
+										// Clone callbackList since unbind inside a callback would otherwise break the handlers loop
+										callbackList = callbackList.slice(0, ci).concat(callbackList.slice(ci + 1));
+										callbackList.nativeHandler = nativeHandler;
+										callbackList.fakeName = fakeName;
+										callbackList.capture = capture;
+
+										eventMap[name] = callbackList;
 									}
 								}
 							}
@@ -384,7 +452,7 @@ tinymce.dom = {};
 							// Remove all callbacks if there isn't a specified callback or there is no callbacks left
 							if (!callback || callbackList.length === 0) {
 								delete eventMap[name];
-								removeEvent(target, callbackList.fakeName || name, w3cEventModel ? callbackList.nativeHandler : callbackList.proxyHandler, callbackList.capture);
+								removeEvent(target, callbackList.fakeName || name, callbackList.nativeHandler, callbackList.capture);
 							}
 						}
 					}
@@ -392,7 +460,7 @@ tinymce.dom = {};
 					// All events for a specific element
 					for (name in eventMap) {
 						callbackList = eventMap[name];
-						removeEvent(target, callbackList.fakeName || name, w3cEventModel ? callbackList.nativeHandler : callbackList.proxyHandler, callbackList.capture);
+						removeEvent(target, callbackList.fakeName || name, callbackList.nativeHandler, callbackList.capture);
 					}
 
 					eventMap = {};
@@ -428,8 +496,8 @@ tinymce.dom = {};
 		 * @param {Object} args Optional arguments to send to the observers.
 		 * @return {EventUtils} Event utils instance.
 		 */
-		self.fire = function(target, name, args) {
-			var id, event;
+		self.fire = function (target, name, args) {
+			var id;
 
 			// Don't bind to text nodes or comments
 			if (!target || target.nodeType === 3 || target.nodeType === 8) {
@@ -437,19 +505,20 @@ tinymce.dom = {};
 			}
 
 			// Build event object by patching the args
-			event = fix(null, args);
-			event.type = name;
+			args = fix(null, args);
+			args.type = name;
+			args.target = target;
 
 			do {
 				// Found an expando that means there is listeners to execute
 				id = target[expando];
 				if (id) {
-					executeHandlers(event, id);
+					executeHandlers(args, id);
 				}
 
 				// Walk up the DOM
 				target = target.parentNode || target.ownerDocument || target.defaultView || target.parentWindow;
-			} while (target && !event.isPropagationStopped());
+			} while (target && !args.isPropagationStopped());
 
 			return self;
 		};
@@ -462,15 +531,15 @@ tinymce.dom = {};
 		 * @param {Object} target Target node/window object.
 		 * @return {EventUtils} Event utils instance.
 		 */
-		self.clean = function(target) {
+		self.clean = function (target) {
 			var i, children, unbind = self.unbind;
-	
+
 			// Don't bind to text nodes or comments
 			if (!target || target.nodeType === 3 || target.nodeType === 8) {
 				return self;
 			}
 
-			// Unbind any element on the specificed target
+			// Unbind any element on the specified target
 			if (target[expando]) {
 				unbind(target);
 			}
@@ -498,24 +567,26 @@ tinymce.dom = {};
 			return self;
 		};
 
-		self.callNativeHandler = function(id, evt) {
-			if (events) {
-				events[id][evt.type].nativeHandler(evt);
-			}
-		};
-
 		/**
 		 * Destroys the event object. Call this on IE to remove memory leaks.
 		 */
-		self.destory = function() {
+		self.destroy = function () {
 			events = {};
 		};
 
-		// Legacy function calls
+		// Legacy function for canceling events
+		self.cancel = function (e) {
+			if (e) {
+				e.preventDefault();
+				e.stopImmediatePropagation();
+			}
 
-		self.add = function(target, events, func, scope) {
+			return false;
+		};
+
+		self.add = function (target, events, func, scope) {
 			// Old API supported direct ID assignment
-			if (typeof(target) === "string") {
+			if (typeof (target) === "string") {
 				target = document.getElementById(target);
 			}
 
@@ -538,13 +609,13 @@ tinymce.dom = {};
 			return self.bind(target, events instanceof Array ? events.join(' ') : events, func, scope);
 		};
 
-		self.remove = function(target, events, func, scope) {
+		self.remove = function (target, events, func, scope) {
 			if (!target) {
 				return self;
 			}
 
 			// Old API supported direct ID assignment
-			if (typeof(target) === "string") {
+			if (typeof (target) === "string") {
 				target = document.getElementById(target);
 			}
 
@@ -562,55 +633,26 @@ tinymce.dom = {};
 			return self.unbind(target, events instanceof Array ? events.join(' ') : events, func);
 		};
 
-		self.clear = function(target) {
+		self.clear = function (target) {
 			// Old API supported direct ID assignment
-			if (typeof(target) === "string") {
+			if (typeof (target) === "string") {
 				target = document.getElementById(target);
 			}
 
 			return self.clean(target);
 		};
-
-		self.cancel = function(e) {
-			if (e) {
-				self.prevent(e);
-				self.stop(e);
-			}
-
-			return false;
-		};
-
-		self.prevent = function(e) {
-			if (!e.preventDefault) {
-				e = fix(e);
-			}
-
-			e.preventDefault();
-
-			return false;
-		};
-
-		self.stop = function(e) {
-			if (!e.stopPropagation) {
-				e = fix(e);
-			}
-
-			e.stopPropagation();
-
-			return false;
-		};
 	}
 
 	namespace.EventUtils = EventUtils;
 
-	namespace.Event = new EventUtils(function(id) {
-		return function(evt) {
+	namespace.Event = new EventUtils(function (id) {
+		return function (evt) {
 			tinymce.dom.Event.callNativeHandler(id, evt);
 		};
 	});
 
 	// Bind ready event when tinymce script is loaded
-	namespace.Event.bind(window, 'ready', function() {});
+	namespace.Event.bind(window, 'ready', function () {});
 
 	namespace = 0;
-})(tinymce.dom, 'data-mce-expando'); // Namespace and expando
+})(tinymce.dom); // Namespace and expando
