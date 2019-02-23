@@ -105,6 +105,7 @@
 	include('dom/Serializer.js');
 	include('dom/ScriptLoader.js');
 	include('dom/RangeUtils.js');
+	include('dom/ControlSelection.js');
 
 	// tinymce.ui.*
 	include('ui/KeyboardNavigation.js');
