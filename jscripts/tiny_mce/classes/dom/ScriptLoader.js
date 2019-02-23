@@ -78,36 +78,6 @@
 
 			id = dom.uniqueId();
 
-			if (tinymce.isIE6) {
-				uri = new tinymce.util.URI(url);
-				loc = location;
-
-				// If script is from same domain and we
-				// use IE 6 then use XHR since it's more reliable
-				if (uri.host == loc.hostname && uri.port == loc.port && (uri.protocol + ':') == loc.protocol && uri.protocol.toLowerCase() != 'file') {
-					tinymce.util.XHR.send({
-						url : tinymce._addVer(uri.getURI()),
-						success : function(content) {
-							// Create new temp script element
-							var script = dom.create('script', {
-								type : 'text/javascript'
-							});
-
-							// Evaluate script in global scope
-							script.text = content;
-							document.getElementsByTagName('head')[0].appendChild(script);
-							dom.remove(script);
-
-							done();
-						},
-
-						error : error
-					});
-
-					return;
-				}
-			}
-
 			// Create new script element
 			elm = document.createElement('script');
 			// prevent cloudflare rocket-loader caching
