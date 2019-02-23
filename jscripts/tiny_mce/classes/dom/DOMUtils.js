@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	// Shorten names
 	var each = tinymce.each,
 		is = tinymce.is,
@@ -30,23 +30,23 @@
 	 * tinyMCE.activeEditor.dom.addClass('someid', 'someclass');
 	 */
 	tinymce.create('tinymce.dom.DOMUtils', {
-		doc : null,
-		root : null,
-		files : null,
-		pixelStyles : /^(top|left|bottom|right|width|height|maxWidth|maxHeight|minWidth|minHeight|borderWidth)$/,
-		props : {
-			"for" : "htmlFor",
-			"class" : "className",
-			className : "className",
-			checked : "checked",
-			disabled : "disabled",
-			maxlength : "maxLength",
-			readonly : "readOnly",
-			selected : "selected",
-			value : "value",
-			id : "id",
-			name : "name",
-			type : "type"
+		doc: null,
+		root: null,
+		files: null,
+		pixelStyles: /^(top|left|bottom|right|width|height|maxWidth|maxHeight|minWidth|minHeight|borderWidth)$/,
+		props: {
+			"for": "htmlFor",
+			"class": "className",
+			className: "className",
+			checked: "checked",
+			disabled: "disabled",
+			maxlength: "maxLength",
+			readonly: "readOnly",
+			selected: "selected",
+			value: "value",
+			id: "id",
+			name: "name",
+			type: "type"
 		},
 
 		/**
@@ -57,32 +57,33 @@
 		 * @param {Document} d Document reference to bind the utility class to.
 		 * @param {settings} s Optional settings collection.
 		 */
-		DOMUtils : function(d, s) {
-			var t = this, globalStyle, name, blockElementsMap;
+		DOMUtils: function (d, s) {
+			var self = this,
+				globalStyle, name, blockElementsMap;
 
-			t.doc = d;
-			t.win = window;
-			t.files = {};
-			t.cssFlicker = false;
-			t.counter = 0;
-			t.stdMode = !tinymce.isIE || d.documentMode >= 8;
-			t.boxModel = !tinymce.isIE || d.compatMode == "CSS1Compat" || t.stdMode;
-			t.hasOuterHTML = "outerHTML" in d.createElement("a");
+			self.doc = d;
+			self.win = window;
+			self.files = {};
+			self.cssFlicker = false;
+			self.counter = 0;
+			self.stdMode = !tinymce.isIE || d.documentMode >= 8;
+			self.boxModel = !tinymce.isIE || d.compatMode == "CSS1Compat" || self.stdMode;
+			self.hasOuterHTML = "outerHTML" in d.createElement("a");
 
-			t.settings = s = tinymce.extend({
-				keep_values : false,
-				hex_colors : 1
+			self.settings = s = tinymce.extend({
+				keep_values: false,
+				hex_colors: 1
 			}, s);
-			
-			t.schema = s.schema;
-			t.styles = new tinymce.html.Styles({
-				url_converter : s.url_converter,
-				url_converter_scope : s.url_converter_scope
+
+			self.schema = s.schema;
+			self.styles = new tinymce.html.Styles({
+				url_converter: s.url_converter,
+				url_converter_scope: s.url_converter_scope
 			}, s.schema);
 
-			t.fixDoc(d);
-			t.events = s.ownEvents ? new tinymce.dom.EventUtils(s.proxy) : tinymce.dom.Event;
-			tinymce.addUnload(t.destroy, t);
+			self.fixDoc(d);
+			self.events = s.ownEvents ? new tinymce.dom.EventUtils(s.proxy) : tinymce.dom.Event;
+			tinymce.addUnload(self.destroy, this);
 			blockElementsMap = s.schema ? s.schema.getBlockElements() : {};
 
 			/**
@@ -92,7 +93,7 @@
 			 * @param {Node/String} node Element/Node to check.
 			 * @return {Boolean} True/False state if the node is a block element or not.
 			 */
-			t.isBlock = function(node) {
+			self.isBlock = function (node) {
 				// Fix for #5446
 				if (!node) {
 					return false;
@@ -109,16 +110,17 @@
 			};
 		},
 
-		fixDoc: function(doc) {
-			var settings = this.settings, name;
+		fixDoc: function (doc) {
+			var settings = this.settings,
+				name;
 
-			if (isIE && !tinymce.isIE11 && !tinymce.isIE12 && settings.schema) {
+			if (isIE < 11 && settings.schema) {
 				// Add missing HTML 4/5 elements to IE
 				('abbr article aside audio canvas ' +
-				'details figcaption figure footer ' +
-				'header hgroup mark menu meter nav ' +
-				'output progress section summary ' +
-				'time video').replace(/\w+/g, function(name) {
+					'details figcaption figure footer ' +
+					'header hgroup mark menu meter nav ' +
+					'output progress section summary ' +
+					'time video').replace(/\w+/g, function (name) {
 					doc.createElement(name);
 				});
 
@@ -129,8 +131,9 @@
 			}
 		},
 
-		clone: function(node, deep) {
-			var self = this, clone, doc;
+		clone: function (node, deep) {
+			var self = this,
+				clone, doc;
 
 			// TODO: Add feature detection here in the future
 			if (!isIE || tinymce.isIE11 || node.nodeType !== 1 || deep) {
@@ -144,25 +147,25 @@
 				clone = doc.createElement(node.nodeName);
 
 				// Copy attribs
-				each(self.getAttribs(node), function(attr) {
+				each(self.getAttribs(node), function (attr) {
 					self.setAttrib(clone, attr.nodeName, self.getAttrib(node, attr.nodeName));
 				});
 
 				return clone;
 			}
-/*
-			// Setup HTML5 patched document fragment
-			if (!self.frag) {
-				self.frag = doc.createDocumentFragment();
-				self.fixDoc(self.frag);
-			}
+			/*
+						// Setup HTML5 patched document fragment
+						if (!self.frag) {
+							self.frag = doc.createDocumentFragment();
+							self.fixDoc(self.frag);
+						}
 
-			// Make a deep copy by adding it to the document fragment then removing it this removed the :section
-			clone = doc.createElement('div');
-			self.frag.appendChild(clone);
-			clone.innerHTML = node.outerHTML;
-			self.frag.removeChild(clone);
-*/
+						// Make a deep copy by adding it to the document fragment then removing it this removed the :section
+						clone = doc.createElement('div');
+						self.frag.appendChild(clone);
+						clone.innerHTML = node.outerHTML;
+						self.frag.removeChild(clone);
+			*/
 			return clone.firstChild;
 		},
 
@@ -173,10 +176,11 @@
 		 * @method getRoot
 		 * @return {Element} Root element for the utility class.
 		 */
-		getRoot : function() {
-			var t = this, s = t.settings;
+		getRoot: function () {
+			var self = this,
+				s = self.settings;
 
-			return (s && t.get(s.root_element)) || t.doc.body;
+			return (s && self.get(s.root_element)) || self.doc.body;
 		},
 
 		/**
@@ -186,7 +190,7 @@
 		 * @param {Window} w Optional window to get viewport of.
 		 * @return {Object} Viewport object with fields x, y, w and h.
 		 */
-		getViewPort : function(w) {
+		getViewPort: function (w) {
 			var d, b;
 
 			w = !w ? this.win : w;
@@ -195,10 +199,10 @@
 
 			// Returns viewport size excluding scrollbars
 			return {
-				x : w.pageXOffset || b.scrollLeft,
-				y : w.pageYOffset || b.scrollTop,
-				w : w.innerWidth || b.clientWidth,
-				h : w.innerHeight || b.clientHeight
+				x: w.pageXOffset || b.scrollLeft,
+				y: w.pageYOffset || b.scrollTop,
+				w: w.innerWidth || b.clientWidth,
+				h: w.innerHeight || b.clientHeight
 			};
 		},
 
@@ -209,18 +213,19 @@
 		 * @param {Element/String} e Element object or element ID to get rectange from.
 		 * @return {object} Rectange for specified element object with x, y, w, h fields.
 		 */
-		getRect : function(e) {
-			var p, t = this, sr;
+		getRect: function (e) {
+			var p, self = this,
+				sr;
 
-			e = t.get(e);
-			p = t.getPos(e);
-			sr = t.getSize(e);
+			e = self.get(e);
+			p = self.getPos(e);
+			sr = self.getSize(e);
 
 			return {
-				x : p.x,
-				y : p.y,
-				w : sr.w,
-				h : sr.h
+				x: p.x,
+				y: p.y,
+				w: sr.w,
+				h: sr.h
 			};
 		},
 
@@ -231,12 +236,13 @@
 		 * @param {Element/String} e Element object or element ID to get rectange from.
 		 * @return {object} Rectange for specified element object with w, h fields.
 		 */
-		getSize : function(e) {
-			var t = this, w, h;
+		getSize: function (e) {
+			var self = this,
+				w, h;
 
-			e = t.get(e);
-			w = t.getStyle(e, 'width');
-			h = t.getStyle(e, 'height');
+			e = self.get(e);
+			w = self.getStyle(e, 'width');
+			h = self.getStyle(e, 'height');
 
 			// Non pixel value, then force offset/clientWidth
 			if (w.indexOf('px') === -1)
@@ -247,8 +253,8 @@
 				h = 0;
 
 			return {
-				w : parseInt(w, 10) || e.offsetWidth || e.clientWidth,
-				h : parseInt(h, 10) || e.offsetHeight || e.clientHeight
+				w: parseInt(w, 10) || e.offsetWidth || e.clientWidth,
+				h: parseInt(h, 10) || e.offsetHeight || e.clientHeight
 			};
 		},
 
@@ -264,7 +270,7 @@
 		 * @param {Node} r Optional root element, never go below this point.
 		 * @return {Node} DOM Node or null if it wasn't found.
 		 */
-		getParent : function(n, f, r) {
+		getParent: function (n, f, r) {
 			return this.getParents(n, f, r, false);
 		},
 
@@ -278,24 +284,28 @@
 		 * @param {Node} r Optional root element, never go below this point.
 		 * @return {Array} Array of nodes or null if it wasn't found.
 		 */
-		getParents : function(n, f, r, c) {
-			var t = this, na, se = t.settings, o = [];
+		getParents: function (n, f, r, c) {
+			var self = this,
+				na, se = self.settings,
+				o = [];
 
-			n = t.get(n);
+			n = self.get(n);
 			c = c === undefined;
 
 			if (se.strict_root)
-				r = r || t.getRoot();
+				r = r || self.getRoot();
 
 			// Wrap node name as func
 			if (is(f, 'string')) {
 				na = f;
 
 				if (f === '*') {
-					f = function(n) {return n.nodeType == 1;};
+					f = function (n) {
+						return n.nodeType == 1;
+					};
 				} else {
-					f = function(n) {
-						return t.is(n, na);
+					f = function (n) {
+						return self.is(n, na);
 					};
 				}
 			}
@@ -324,10 +334,10 @@
 		 * @param {String/Element} n Element id to look for or element to just pass though.
 		 * @return {Element} Element matching the specified id or null if it wasn't found.
 		 */
-		get : function(e) {
+		get: function (e) {
 			var n;
 
-			if (e && this.doc && typeof(e) == 'string') {
+			if (e && this.doc && typeof (e) == 'string') {
 				n = e;
 				e = this.doc.getElementById(e);
 
@@ -347,7 +357,7 @@
 		 * @param {String/function} selector Selector CSS expression or function.
 		 * @return {Node} Next node item matching the selector or null if it wasn't found.
 		 */
-		getNext : function(node, selector) {
+		getNext: function (node, selector) {
 			return this._findSib(node, selector, 'nextSibling');
 		},
 
@@ -359,7 +369,7 @@
 		 * @param {String/function} selector Selector CSS expression or function.
 		 * @return {Node} Previous node item matching the selector or null if it wasn't found.
 		 */
-		getPrev : function(node, selector) {
+		getPrev: function (node, selector) {
 			return this._findSib(node, selector, 'previousSibling');
 		},
 
@@ -381,10 +391,10 @@
 		 * // Adds a class to all spans that has the test class in the currently active editor
 		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('span.test'), 'someclass')
 		 */
-		select : function(pa, s) {
-			var t = this;
+		select: function (pa, s) {
+			var self = this;
 
-			return tinymce.dom.Sizzle(pa, t.get(s) || t.get(t.settings.root_element) || t.doc, []);
+			return tinymce.dom.Sizzle(pa, self.get(s) || self.get(self.settings.root_element) || self.doc, []);
 		},
 
 		/**
@@ -394,7 +404,7 @@
 		 * @param {Node/NodeList} n DOM node to match or an array of nodes to match.
 		 * @param {String} selector CSS pattern to match the element agains.
 		 */
-		is : function(n, selector) {
+		is: function (n, selector) {
 			var i;
 
 			// If it isn't an array then try to do some simple selectors instead of Sizzle for to boost performance
@@ -419,23 +429,24 @@
 
 			return tinymce.dom.Sizzle.matches(selector, n.nodeType ? [n] : n).length > 0;
 		},
-		
-		closest: function(n, selector) {
-			var t = this, result = [];
-			
-			while (n) {
-        		if (typeof selector === 'string' && t.is(n, selector)) {
-          			result.push(n);
-          			break;
-        		} else if (n === selector) {
-          			result.push(n);
-          			break;
-        		}
 
-        		n = n.parentNode;
-      		}	
-      		
-      		return result;
+		closest: function (n, selector) {
+			var self = this,
+				result = [];
+
+			while (n) {
+				if (typeof selector === 'string' && self.is(n, selector)) {
+					result.push(n);
+					break;
+				} else if (n === selector) {
+					result.push(n);
+					break;
+				}
+
+				n = n.parentNode;
+			}
+
+			return result;
 		},
 
 		// #endif
@@ -454,20 +465,20 @@
 		 * // Adds a new paragraph to the end of the active editor
 		 * tinyMCE.activeEditor.dom.add(tinyMCE.activeEditor.getBody(), 'p', {title : 'my title'}, 'Some content');
 		 */
-		add : function(p, n, a, h, c) {
-			var t = this;
+		add: function (p, n, a, h, c) {
+			var self = this;
 
-			return this.run(p, function(p) {
+			return this.run(p, function (p) {
 				var e, k;
 
-				e = is(n, 'string') ? t.doc.createElement(n) : n;
-				t.setAttribs(e, a);
+				e = is(n, 'string') ? self.doc.createElement(n) : n;
+				self.setAttribs(e, a);
 
 				if (h) {
 					if (h.nodeType)
 						e.appendChild(h);
 					else
-						t.setHTML(e, h);
+						self.setHTML(e, h);
 				}
 
 				return !c ? p.appendChild(e) : e;
@@ -487,7 +498,7 @@
 		 * var el = tinyMCE.activeEditor.dom.create('div', {id : 'test', 'class' : 'myclass'}, 'some content');
 		 * tinyMCE.activeEditor.selection.setNode(el);
 		 */
-		create : function(n, a, h) {
+		create: function (n, a, h) {
 			return this.add(this.doc.createElement(n), n, a, h, 1);
 		},
 
@@ -503,18 +514,20 @@
 		 * // Creates a html chunk and inserts it at the current selection/caret location
 		 * tinyMCE.activeEditor.selection.setContent(tinyMCE.activeEditor.dom.createHTML('a', {href : 'test.html'}, 'some line'));
 		 */
-		createHTML : function(n, a, h) {
-			var o = '', t = this, k;
+		createHTML: function (n, a, h) {
+			var o = '',
+				self = this,
+				k;
 
 			o += '<' + n;
 
 			for (k in a) {
 				if (a.hasOwnProperty(k))
-					o += ' ' + k + '="' + t.encode(a[k]) + '"';
+					o += ' ' + k + '="' + self.encode(a[k]) + '"';
 			}
 
 			// A call to tinymce.is doesn't work for some odd reason on IE9 possible bug inside their JS runtime
-			if (typeof(h) != "undefined")
+			if (typeof (h) != "undefined")
 				return o + '>' + h + '</' + n + '>';
 
 			return o + ' />';
@@ -527,8 +540,9 @@
 		 * @param {String} html Html string to create fragment from.
 		 * @return {DocumentFragment} Document fragment node.
 		 */
-		createFragment: function(html) {
-			var frag, node, doc = this.doc, container;
+		createFragment: function (html) {
+			var frag, node, doc = this.doc,
+				container;
 
 			container = doc.createElement("div");
 			frag = doc.createDocumentFragment();
@@ -558,8 +572,8 @@
 		 * // Removes a element by id in the document
 		 * tinyMCE.DOM.remove('mydiv');
 		 */
-		remove : function(node, keep_children) {
-			return this.run(node, function(node) {
+		remove: function (node, keep_children) {
+			return this.run(node, function (node) {
 				var child, parent = node.parentNode;
 
 				if (!parent)
@@ -586,8 +600,8 @@
 		 * @method empty
 		 * @return {Boolean}
 		 */
-		empty: function(node) {
-			return this.run(node, function(node) {
+		empty: function (node) {
+			return this.run(node, function (node) {
 				var n, i = node.length;
 
 				while (i--) {
@@ -616,49 +630,34 @@
 		 * // Sets a style value to an element by id in the current document
 		 * tinyMCE.DOM.setStyle('mydiv', 'background-color', 'red');
 		 */
-		setStyle : function(n, na, v) {
-			var t = this;
+		setStyle: function (n, na, v) {
+			var self = this;
 
-			return t.run(n, function(e) {
+			return self.run(n, function (e) {
 				var s, i;
 
 				s = e.style;
 
 				// Camelcase it, if needed
-				na = na.replace(/-(\D)/g, function(a, b){
+				na = na.replace(/-(\D)/g, function (a, b) {
 					return b.toUpperCase();
 				});
 
 				// Default px suffix on these
-				if (t.pixelStyles.test(na) && (tinymce.is(v, 'number') || /^[\-0-9\.]+$/.test(v)))
+				if (self.pixelStyles.test(na) && (tinymce.is(v, 'number') || /^[\-0-9\.]+$/.test(v))) {
 					v += 'px';
-
-				switch (na) {
-					case 'opacity':
-						// IE specific opacity
-						if (isIE && ! tinymce.isIE11 && ! tinymce.isIE12) {
-							s.filter = v === '' ? '' : "alpha(opacity=" + (v * 100) + ")";
-
-							if (!n.currentStyle || !n.currentStyle.hasLayout)
-								s.display = 'inline-block';
-						}
-
-						// Fix for older browsers
-						s[na] = s['-moz-opacity'] = s['-khtml-opacity'] = v || '';
-						break;
-
-					case 'float':
-						(isIE && ! tinymce.isIE11 && ! tinymce.isIE12) ? s.styleFloat = v : s.cssFloat = v;
-						break;
-					
-					default:
-						s[na] = v || '';
 				}
 
+				if (na == 'float') {
+					na = tinymce.isIE && tinymce.isIE < 12 ? 'styleFloat' : 'cssFloat';
+				}
+
+				s[na] = v || '';
+
 				// Force update of the style data
-				if (t.settings.update_styles) {
-					v = t.serializeStyle(t.parseStyle(e.style.cssText), e.nodeName);
-					t.setAttrib(e, 'data-mce-style', v);
+				if (self.settings.update_styles) {
+					v = self.serializeStyle(self.parseStyle(e.style.cssText), e.nodeName);
+					self.setAttrib(e, 'data-mce-style', v);
 				}
 			});
 		},
@@ -672,16 +671,17 @@
 		 * @param {Boolean} c Computed style.
 		 * @return {String} Current style or computed style value of a element.
 		 */
-		getStyle : function(n, na, c) {
+		getStyle: function (n, na, c) {
 			n = this.get(n);
 
-			if (!n)
+			if (!n) {
 				return;
+			}
 
 			// Gecko
 			if (this.doc.defaultView && c) {
 				// Remove camelcase
-				na = na.replace(/[A-Z]/g, function(a){
+				na = na.replace(/[A-Z]/g, function (a) {
 					return '-' + a;
 				});
 
@@ -694,16 +694,18 @@
 			}
 
 			// Camelcase it, if needed
-			na = na.replace(/-(\D)/g, function(a, b){
+			na = na.replace(/-(\D)/g, function (a, b) {
 				return b.toUpperCase();
 			});
 
-			if (na == 'float')
-				na = isIE ? 'styleFloat' : 'cssFloat';
+			if (na == 'float') {
+				na = 'cssFloat';
+			}
 
 			// IE & Opera
-			if (n.currentStyle && c)
+			if (n.currentStyle && c)  {
 				return n.currentStyle[na];
+			}
 
 			return n.style ? n.style[na] : undefined;
 		},
@@ -721,22 +723,24 @@
 		 * // Sets styles to an element by id in the current document
 		 * tinyMCE.DOM.setStyles('mydiv', {'background-color' : 'red', 'color' : 'green'});
 		 */
-		setStyles : function(e, o) {
-			var t = this, s = t.settings, ol, v;
+		setStyles: function (e, o) {
+			var self = this,
+				s = self.settings,
+				ol, v;
 
 			ol = s.update_styles;
 			s.update_styles = 0;
 
-			each(o, function(v, n) {
-				t.setStyle(e, n, v);
+			each(o, function (v, n) {
+				self.setStyle(e, n, v);
 			});
 
 			s.update_styles = ol;
-			
+
 			if (ol) {
 				// Force update of the style data
-				v = t.serializeStyle(t.parseStyle(e.style.cssText), e.nodeName);
-				t.setAttrib(e, 'data-mce-style', v);
+				v = self.serializeStyle(self.parseStyle(e.style.cssText), e.nodeName);
+				self.setAttrib(e, 'data-mce-style', v);
 			}
 		},
 
@@ -745,29 +749,29 @@
 		 * 
 		 * @param {Element/String/Array} e DOM element, element id string or array of elements/ids to remove attributes from.
 		 */
-		removeAllAttribs: function(e) {
-			return this.run(e, function(e) {
+		removeAllAttribs: function (e) {
+			return this.run(e, function (e) {
 				var i, attrs = e.attributes;
 				for (i = attrs.length - 1; i >= 0; i--) {
 					e.removeAttributeNode(attrs.item(i));
 				}
 			});
 		},
-		
-		removeAttrib: function(e, n) {
-			var t = this;
-			
+
+		removeAttrib: function (e, n) {
+			var self = this;
+
 			// Whats the point
 			if (!e || !n)
 				return;
-				
+
 			// Strict XML mode
-			if (t.settings.strict)
+			if (self.settings.strict)
 				n = n.toLowerCase();
 
-			return this.run(e, function(e) {
+			return this.run(e, function (e) {
 				e.removeAttribute(n, 2);
-			});	
+			});
 		},
 
 		/**
@@ -784,26 +788,26 @@
 		 * // Sets an attribute to a specific element in the current page
 		 * tinyMCE.dom.setAttrib('mydiv', 'class', 'myclass');
 		 */
-		setAttrib : function(e, n, v) {
-			var t = this;
+		setAttrib: function (e, n, v) {
+			var self = this;
 
 			// Whats the point
 			if (!e || !n)
 				return;
 
 			// Strict XML mode
-			if (t.settings.strict)
+			if (self.settings.strict)
 				n = n.toLowerCase();
 
-			return this.run(e, function(e) {
-				var s = t.settings;
+			return this.run(e, function (e) {
+				var s = self.settings;
 				var originalValue = e.getAttribute(n);
 				if (v !== null) {
 					switch (n) {
 						case "style":
 							if (!is(v, 'string')) {
-								each(v, function(v, n) {
-									t.setStyle(e, n, v);
+								each(v, function (v, n) {
+									self.setStyle(e, n, v);
 								});
 
 								return;
@@ -811,7 +815,7 @@
 
 							// No mce_style for elements with these since they might get resized by the user
 							if (s.keep_values) {
-								if (v && !t._isRes(v))
+								if (v && !self._isRes(v))
 									e.setAttribute('data-mce-style', v, 2);
 								else
 									e.removeAttribute('data-mce-style', 2);
@@ -828,9 +832,9 @@
 						case "href":
 							if (s.keep_values) {
 								if (s.url_converter)
-									v = s.url_converter.call(s.url_converter_scope || t, v, n, e);
+									v = s.url_converter.call(s.url_converter_scope || self, v, n, e);
 
-								t.setAttrib(e, 'data-mce-' + n, v, 2);
+								self.setAttrib(e, 'data-mce-' + n, v, 2);
 							}
 
 							break;
@@ -866,12 +870,12 @@
 		 * // Sets some attributes to a specific element in the current page
 		 * tinyMCE.DOM.setAttribs('mydiv', {'class' : 'myclass', title : 'some title'});
 		 */
-		setAttribs : function(e, o) {
-			var t = this;
+		setAttribs: function (e, o) {
+			var self = this;
 
-			return this.run(e, function(e) {
-				each(o, function(v, n) {
-					t.setAttrib(e, n, v);
+			return this.run(e, function (e) {
+				each(o, function (v, n) {
+					self.setAttrib(e, n, v);
 				});
 			});
 		},
@@ -885,10 +889,11 @@
 		 * @param {String} dv Optional default value to return if the attribute didn't exist.
 		 * @return {String} Attribute value string, default value or null if the attribute wasn't found.
 		 */
-		getAttrib : function(e, n, dv) {
-			var v, t = this, undef;
+		getAttrib: function (e, n, dv) {
+			var v, self = this,
+				undef;
 
-			e = t.get(e);
+			e = self.get(e);
 
 			if (!e || e.nodeType !== 1)
 				return dv === undef ? false : dv;
@@ -904,8 +909,8 @@
 					return v;
 			}
 
-			if (isIE && t.props[n]) {
-				v = e[t.props[n]];
+			if (isIE && self.props[n]) {
+				v = e[self.props[n]];
 				v = v && v.nodeValue ? v.nodeValue : v;
 			}
 
@@ -914,7 +919,7 @@
 
 			// Check boolean attribs
 			if (/^(checked|compact|declare|defer|disabled|ismap|multiple|nohref|noshade|nowrap|readonly|selected)$/.test(n)) {
-				if (e[t.props[n]] === true && v === '')
+				if (e[self.props[n]] === true && v === '')
 					return n;
 
 				return v ? n : '';
@@ -928,9 +933,9 @@
 				v = v || e.style.cssText;
 
 				if (v) {
-					v = t.serializeStyle(t.parseStyle(v), e.nodeName);
+					v = self.serializeStyle(self.parseStyle(v), e.nodeName);
 
-					if (t.settings.keep_values && !t._isRes(v))
+					if (self.settings.keep_values && !self._isRes(v))
 						e.setAttribute('data-mce-style', v);
 				}
 			}
@@ -1014,25 +1019,32 @@
 		 * @param {Element} ro Optional root element to stop calculations at.
 		 * @return {object} Absolute position of the specified element object with x, y fields.
 		 */
-		getPos : function(n, ro) {
-			var t = this, x = 0, y = 0, e, d = t.doc, r, body = d.body;
+		getPos: function (n, ro) {
+			var self = this,
+				x = 0,
+				y = 0,
+				e, d = self.doc,
+				r, body = d.body;
 
-			n = t.get(n);
+			n = self.get(n);
 			ro = ro || body;
 
 			if (n) {
-			
+
 				// Use getBoundingClientRect if it exists since it's faster than looping offset nodes
-				if (ro === body && n.getBoundingClientRect && t.getStyle(body, 'position') === 'static') {
+				if (ro === body && n.getBoundingClientRect && self.getStyle(body, 'position') === 'static') {
 					n = n.getBoundingClientRect();
-					e = t.boxModel ? d.documentElement : d.body;
+					e = self.boxModel ? d.documentElement : d.body;
 
 					// Add scroll offsets from documentElement or body since IE with the wrong box model will use d.body and so do WebKit
 					// Also remove the body/documentelement clientTop/clientLeft on IE 6, 7 since they offset the position
 					x = n.left + (d.documentElement.scrollLeft || d.body.scrollLeft) - e.clientTop;
 					y = n.top + (d.documentElement.scrollTop || d.body.scrollTop) - e.clientLeft;
 
-					return {x : x, y : y};
+					return {
+						x: x,
+						y: y
+					};
 				}
 
 				r = n;
@@ -1050,7 +1062,10 @@
 				}
 			}
 
-			return {x : x, y : y};
+			return {
+				x: x,
+				y: y
+			};
 		},
 
 		/**
@@ -1062,7 +1077,7 @@
 		 * @param {String} st Style value to parse for example: border:1px solid red;.
 		 * @return {Object} Object representation of that style like {border : '1px solid red'}
 		 */
-		parseStyle : function(st) {
+		parseStyle: function (st) {
 			return this.styles.parse(st);
 		},
 
@@ -1074,7 +1089,7 @@
 		 * @param {String} name Optional element name.
 		 * @return {String} String representation of the style object for example: border: 1px solid red.
 		 */
-		serializeStyle : function(o, name) {
+		serializeStyle: function (o, name) {
 			return this.styles.serialize(o, name);
 		},
 
@@ -1084,14 +1099,15 @@
 		 * @method addStyle
 		 * @param {String} cssText CSS Text style to add to top of head of document.
 		 */
-		addStyle: function(cssText) {
-			var doc = this.doc, head;
+		addStyle: function (cssText) {
+			var doc = this.doc,
+				head;
 
 			// Create style element if needed
 			styleElm = doc.getElementById('mceDefaultStyles');
 			if (!styleElm) {
 				styleElm = doc.createElement('style'),
-				styleElm.id = 'mceDefaultStyles';
+					styleElm.id = 'mceDefaultStyles';
 				styleElm.type = 'text/css';
 
 				head = doc.getElementsByTagName('head')[0];
@@ -1128,28 +1144,33 @@
 		 * // Loads multiple CSS files into the current document
 		 * tinymce.DOM.loadCSS('somepath/some.css,somepath/someother.css');
 		 */
-		loadCSS : function(u) {
-			var t = this, d = t.doc, head;
+		loadCSS: function (u) {
+			var self = this,
+				d = self.doc,
+				head;
 
 			if (!u)
 				u = '';
 
 			head = d.getElementsByTagName('head')[0];
 
-			each(u.split(','), function(u) {
+			each(u.split(','), function (u) {
 				var link;
 
-				if (t.files[u])
+				if (self.files[u])
 					return;
 
-				t.files[u] = true;
-				link = t.create('link', {rel : 'stylesheet', href : tinymce._addVer(u)});
+				self.files[u] = true;
+				link = self.create('link', {
+					rel: 'stylesheet',
+					href: tinymce._addVer(u)
+				});
 
 				// IE 8 has a bug where dynamically loading stylesheets would produce a 1 item remaining bug
 				// This fix seems to resolve that issue by realcing the document ones a stylesheet finishes loading
 				// It's ugly but it seems to work fine.
 				if (isIE && !tinymce.isIE11 && d.documentMode && d.recalc) {
-					link.onload = function() {
+					link.onload = function () {
 						if (d.recalc)
 							d.recalc();
 
@@ -1175,8 +1196,8 @@
 		 * // Adds a class to a specific element in the current page
 		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
 		 */
-		addClass : function(e, c) {
-			return this.run(e, function(e) {
+		addClass: function (e, c) {
+			return this.run(e, function (e) {
 				var o;
 
 				if (!c)
@@ -1205,13 +1226,14 @@
 		 * // Removes a class from a specific element in the current page
 		 * tinyMCE.DOM.removeClass('mydiv', 'myclass');
 		 */
-		removeClass : function(e, c) {
-			var t = this, re;
+		removeClass: function (e, c) {
+			var self = this,
+				re;
 
-			return t.run(e, function(e) {
+			return self.run(e, function (e) {
 				var v;
 
-				if (t.hasClass(e, c)) {
+				if (self.hasClass(e, c)) {
 					if (!re)
 						re = new RegExp("(^|\\s+)" + c + "(\\s+|$)", "g");
 
@@ -1241,7 +1263,7 @@
 		 * @param {String} c CSS class to check for.
 		 * @return {Boolean} true/false if the specified element has the specified class.
 		 */
-		hasClass : function(n, c) {
+		hasClass: function (n, c) {
 			n = this.get(n);
 
 			if (!n || !c)
@@ -1256,7 +1278,7 @@
 		 * @method show
 		 * @param {String/Element/Array} e ID of DOM element or DOM element or array with elements or IDs to show.
 		 */
-		show : function(e) {
+		show: function (e) {
 			return this.setStyle(e, 'display', 'block');
 		},
 
@@ -1269,7 +1291,7 @@
 		 * // Hides a element by id in the document
 		 * tinymce.DOM.hide('myid');
 		 */
-		hide : function(e) {
+		hide: function (e) {
 			return this.setStyle(e, 'display', 'none');
 		},
 
@@ -1280,7 +1302,7 @@
 		 * @param {String/Element} e Id or element to check display state on.
 		 * @return {Boolean} true/false if the element is hidden or not.
 		 */
-		isHidden : function(e) {
+		isHidden: function (e) {
 			e = this.get(e);
 
 			return !e || e.style.display == 'none' || this.getStyle(e, 'display') == 'none';
@@ -1294,7 +1316,7 @@
 		 * @param {String} p Optional prefix to add infront of all ids defaults to "mce_".
 		 * @return {String} Unique id.
 		 */
-		uniqueId : function(p) {
+		uniqueId: function (p) {
 			return (!p ? 'mce_' : p) + (this.counter++);
 		},
 
@@ -1312,10 +1334,10 @@
 		 * // Sets the inner HTML of a element by id in the document
 		 * tinyMCE.DOM.setHTML('mydiv', 'some inner html');
 		 */
-		setHTML : function(element, html) {
+		setHTML: function (element, html) {
 			var self = this;
 
-			return self.run(element, function(element) {
+			return self.run(element, function (element) {
 				if (isIE) {
 					// Remove all child nodes, IE keeps empty text nodes in DOM
 					while (element.firstChild)
@@ -1335,7 +1357,7 @@
 						newElement.innerHTML = '<br />' + html;
 
 						// Add all children from div to target
-						each (tinymce.grep(newElement.childNodes), function(node, i) {
+						each(tinymce.grep(newElement.childNodes), function (node, i) {
 							// Skip br element
 							if (i && element.canHaveHTML)
 								element.appendChild(node);
@@ -1358,7 +1380,7 @@
 		 * tinymce.DOM.getOuterHTML(editorElement);
 		 * tinyMCE.activeEditor.getOuterHTML(tinyMCE.activeEditor.getBody());
 		 */
-		getOuterHTML : function(elm) {
+		getOuterHTML: function (elm) {
 			var doc, self = this;
 
 			elm = self.get(elm);
@@ -1389,8 +1411,8 @@
 		 * // Sets the outer HTML of a element by id in the document
 		 * tinyMCE.DOM.setOuterHTML('mydiv', '<div>some html</div>');
 		 */
-		setOuterHTML : function(e, h, d) {
-			var t = this;
+		setOuterHTML: function (e, h, d) {
+			var self = this;
 
 			function setHTML(e, h, d) {
 				var n, tp;
@@ -1400,19 +1422,19 @@
 
 				n = tp.lastChild;
 				while (n) {
-					t.insertAfter(n.cloneNode(true), e);
+					self.insertAfter(n.cloneNode(true), e);
 					n = n.previousSibling;
 				}
 
-				t.remove(e);
+				self.remove(e);
 			};
 
-			return this.run(e, function(e) {
-				e = t.get(e);
+			return this.run(e, function (e) {
+				e = self.get(e);
 
 				// Only set HTML on elements
 				if (e.nodeType == 1) {
-					d = d || e.ownerDocument || t.doc;
+					d = d || e.ownerDocument || self.doc;
 
 					if (isIE) {
 						try {
@@ -1438,7 +1460,7 @@
 		 * @param {String} s String to decode entities on.
 		 * @return {String} Entity decoded string.
 		 */
-		decode : Entities.decode,
+		decode: Entities.decode,
 
 		/**
 		 * Entity encodes a string, encodes the most common entities <>"& into entities.
@@ -1447,7 +1469,7 @@
 		 * @param {String} text String to encode with entities.
 		 * @return {String} Entity encoded string.
 		 */
-		encode : Entities.encodeAllRaw,
+		encode: Entities.encodeAllRaw,
 
 		/**
 		 * Inserts a element after the reference element.
@@ -1457,10 +1479,10 @@
 		 * @param {Element/String/Array} reference_node Reference element, element id or array of elements to insert after.
 		 * @return {Element/Array} Element that got added or an array with elements. 
 		 */
-		insertAfter : function(node, reference_node) {
+		insertAfter: function (node, reference_node) {
 			reference_node = this.get(reference_node);
 
-			return this.run(node, function(node) {
+			return this.run(node, function (node) {
 				var parent, nextSibling;
 
 				parent = reference_node.parentNode;
@@ -1484,15 +1506,15 @@
 		 * @param {Element/String/Array} o Element DOM node, element id or array of elements or ids to replace.
 		 * @param {Boolean} k Optional keep children state, if set to true child nodes from the old object will be added to new ones.
 		 */
-		replace : function(n, o, k) {
-			var t = this;
+		replace: function (n, o, k) {
+			var self = this;
 
 			if (is(o, 'array'))
 				n = n.cloneNode(true);
 
-			return t.run(o, function(o) {
+			return self.run(o, function (o) {
 				if (k) {
-					each(tinymce.grep(o.childNodes), function(c) {
+					each(tinymce.grep(o.childNodes), function (c) {
 						n.appendChild(c);
 					});
 				}
@@ -1509,20 +1531,21 @@
 		 * @param {String} name Name of the new element.
 		 * @return New element or the old element if it needed renaming.
 		 */
-		rename : function(elm, name) {
-			var t = this, newElm;
+		rename: function (elm, name) {
+			var self = this,
+				newElm;
 
 			if (elm.nodeName != name.toUpperCase()) {
 				// Rename block element
-				newElm = t.create(name);
+				newElm = self.create(name);
 
 				// Copy attribs to new block
-				each(t.getAttribs(elm), function(attr_node) {
-					t.setAttrib(newElm, attr_node.nodeName, t.getAttrib(elm, attr_node.nodeName));
+				each(self.getAttribs(elm), function (attr_node) {
+					self.setAttrib(newElm, attr_node.nodeName, self.getAttrib(elm, attr_node.nodeName));
 				});
 
 				// Replace block
-				t.replace(newElm, elm, 1);
+				self.replace(newElm, elm, 1);
 			}
 
 			return newElm || elm;
@@ -1536,8 +1559,9 @@
 		 * @param {Element} b Element to find common ancestor of.
 		 * @return {Element} Common ancestor element of the two input elements.
 		 */
-		findCommonAncestor : function(a, b) {
-			var ps = a, pe;
+		findCommonAncestor: function (a, b) {
+			var ps = a,
+				pe;
 
 			while (ps) {
 				pe = b;
@@ -1564,7 +1588,7 @@
 		 * @param {String} s RGB string value like rgb(1,2,3)
 		 * @return {String} Hex version of that RGB value like #FF00FF.
 		 */
-		toHex : function(s) {
+		toHex: function (s) {
 			var c = /^\s*rgb\s*?\(\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?\)\s*$/i.exec(s);
 
 			function hex(s) {
@@ -1589,25 +1613,29 @@
 		 * @method getClasses
 		 * @return {Array} Array with class objects each object has a class field might be other fields in the future.
 		 */
-		getClasses : function() {
-			var t = this, cl = [], i, lo = {}, f = t.settings.class_filter, ov;
+		getClasses: function () {
+			var self = this,
+				cl = [],
+				i, lo = {},
+				f = self.settings.class_filter,
+				ov;
 
-			if (t.classes)
-				return t.classes;
+			if (self.classes)
+				return self.classes;
 
 			function addClasses(s) {
 				// IE style imports
-				each(s.imports, function(r) {
+				each(s.imports, function (r) {
 					addClasses(r);
 				});
 
-				each(s.cssRules || s.rules, function(r) {
+				each(s.cssRules || s.rules, function (r) {
 					// Real type or fake it on IE
 					switch (r.type || 1) {
 						// Rule
 						case 1:
 							if (r.selectorText) {
-								each(r.selectorText.split(','), function(v) {
+								each(r.selectorText.split(','), function (v) {
 									v = v.replace(/^\s*|\s*$|^\s\./g, "");
 
 									// Is internal or it doesn't contain a class
@@ -1623,14 +1651,16 @@
 										return;
 
 									if (!lo[v]) {
-										cl.push({'class' : v});
+										cl.push({
+											'class': v
+										});
 										lo[v] = 1;
 									}
 								});
 							}
 							break;
 
-						// Import
+							// Import
 						case 3:
 							try {
 								addClasses(r.styleSheet);
@@ -1644,13 +1674,13 @@
 			};
 
 			try {
-				each(t.doc.styleSheets, addClasses);
+				each(self.doc.styleSheets, addClasses);
 			} catch (ex) {
 				// Ignore
 			}
 
 			if (cl.length > 0)
-				t.classes = cl;
+				self.classes = cl;
 
 			return cl;
 		},
@@ -1664,11 +1694,12 @@
 		 * @param {Object} s Optional scope to execute the function in.
 		 * @return {Object/Array} Single object or array with objects depending on multiple input or not.
 		 */
-		run : function(e, f, s) {
-			var t = this, o;
+		run: function (e, f, s) {
+			var self = this,
+				o;
 
-			if (t.doc && typeof(e) === 'string')
-				e = t.get(e);
+			if (self.doc && typeof (e) === 'string')
+				e = self.get(e);
 
 			if (!e)
 				return false;
@@ -1677,10 +1708,10 @@
 			if (!e.nodeType && (e.length || e.length === 0)) {
 				o = [];
 
-				each(e, function(e, i) {
+				each(e, function (e, i) {
 					if (e) {
-						if (typeof(e) == 'string')
-							e = t.doc.getElementById(e);
+						if (typeof (e) == 'string')
+							e = self.doc.getElementById(e);
 
 						o.push(f.call(s, e, i));
 					}
@@ -1699,7 +1730,7 @@
 		 * @param {HTMLElement/string} n Element node or string id to get attributes from.
 		 * @return {NodeList} NodeList with attributes.
 		 */
-		getAttribs : function(n) {
+		getAttribs: function (n) {
 			var o;
 
 			n = this.get(n);
@@ -1716,11 +1747,17 @@
 
 				// IE doesn't keep the selected attribute if you clone option elements
 				if (n.nodeName === 'OPTION' && this.getAttrib(n, 'selected'))
-					o.push({specified : 1, nodeName : 'selected'});
+					o.push({
+						specified: 1,
+						nodeName: 'selected'
+					});
 
 				// It's crazy that this is faster in IE but it's because it returns all attributes all the time
-				n.cloneNode(false).outerHTML.replace(/<\/?[\w:\-]+ ?|=[\"][^\"]+\"|=\'[^\']+\'|=[\w\-]+|>/gi, '').replace(/[\w:\-]+/gi, function(a) {
-					o.push({specified : 1, nodeName : a});
+				n.cloneNode(false).outerHTML.replace(/<\/?[\w:\-]+ ?|=[\"][^\"]+\"|=\'[^\']+\'|=[\w\-]+|>/gi, '').replace(/[\w:\-]+/gi, function (a) {
+					o.push({
+						specified: 1,
+						nodeName: a
+					});
 				});
 
 				return o;
@@ -1738,8 +1775,9 @@
 		 * @param {Object} elements Optional name/value object with elements that are automatically treated as non empty elements.
 		 * @return {Boolean} true/false if the node is empty or not.
 		 */
-		isEmpty : function(node, elements) {
-			var self = this, i, attributes, type, walker, name, brCount = 0;
+		isEmpty: function (node, elements) {
+			var self = this,
+				i, attributes, type, walker, name, brCount = 0;
 
 			node = node.firstChild;
 			if (node) {
@@ -1794,19 +1832,18 @@
 		 *
 		 * @method destroy
 		 */
-		destroy : function(s) {
-			var t = this;
+		destroy: function (s) {
+			var self = this;
 
-			t.win = t.doc = t.root = t.events = t.frag = null;
+			self.win = self.doc = self.root = self.events = self.frag = null;
 
 			// Manual destroy then remove unload handler
 			if (!s)
-				tinymce.removeUnload(t.destroy);
+				tinymce.removeUnload(self.destroy);
 		},
 
 		/**
-		 * Created a new DOM Range object. This will use the native DOM Range API if it's
-		 * available if it's not it will fallback to the custom TinyMCE implementation.
+		 * Created a new DOM Range object. This will use the native DOM Range API
 		 *
 		 * @method createRng
 		 * @return {DOMRange} DOM Range object.
@@ -1814,10 +1851,8 @@
 		 * var rng = tinymce.DOM.createRng();
 		 * alert(rng.startContainer + "," + rng.startOffset);
 		 */
-		createRng : function() {
-			var d = this.doc;
-
-			return d.createRange ? d.createRange() : new tinymce.dom.Range(this);
+		createRng: function () {
+			return this.doc.createRange();
 		},
 
 		/**
@@ -1827,8 +1862,9 @@
 		 * @param {boolean} normalized Optional true/false state if the index is what it would be after a normalization.
 		 * @return {Number} Index of the specified node.
 		 */
-		nodeIndex : function(node, normalized) {
-			var idx = 0, lastNodeType, lastNode, nodeType;
+		nodeIndex: function (node, normalized) {
+			var idx = 0,
+				lastNodeType, lastNode, nodeType;
 
 			if (node) {
 				for (lastNodeType = node.nodeType, node = node.previousSibling, lastNode = node; node; node = node.previousSibling) {
@@ -1858,8 +1894,10 @@
 		 * @param {Element} re Optional replacement element to replace the split element by.
 		 * @return {Element} Returns the split element or the replacement element if that is specified.
 		 */
-		split : function(pe, e, re) {
-			var t = this, r = t.createRng(), bef, aft, pa;
+		split: function (pe, e, re) {
+			var self = this,
+				r = self.createRng(),
+				bef, aft, pa;
 
 			// W3C valid browsers tend to leave empty nodes to the left/right side of the contents, this makes sense
 			// but we don't want that in our code since it serves no purpose for the end user
@@ -1870,7 +1908,8 @@
 			// this function will then trim of empty edges and produce:
 			//   <p>text 1</p><b>CHOP</b><p>text 2</p>
 			function trim(node) {
-				var i, children = node.childNodes, type = node.nodeType;
+				var i, children = node.childNodes,
+					type = node.nodeType;
 
 				function surroundedBySpans(node) {
 					var previousIsSpan = node.previousSibling && node.previousSibling.nodeName == 'SPAN';
@@ -1891,7 +1930,7 @@
 						// Also keep text nodes with only spaces if surrounded by spans.
 						// eg. "<p><span>a</span> <span>b</span></p>" should keep space between a and b
 						var trimmedLength = tinymce.trim(node.nodeValue).length;
-						if (!t.isBlock(node.parentNode) || trimmedLength > 0 || trimmedLength === 0 && surroundedBySpans(node))
+						if (!self.isBlock(node.parentNode) || trimmedLength > 0 || trimmedLength === 0 && surroundedBySpans(node))
 							return;
 					} else if (type == 1) {
 						// If the only child is a bookmark then move it up
@@ -1904,7 +1943,7 @@
 							return;
 					}
 
-					t.remove(node);
+					self.remove(node);
 				}
 
 				return node;
@@ -1912,14 +1951,14 @@
 
 			if (pe && e) {
 				// Get before chunk
-				r.setStart(pe.parentNode, t.nodeIndex(pe));
-				r.setEnd(e.parentNode, t.nodeIndex(e));
+				r.setStart(pe.parentNode, self.nodeIndex(pe));
+				r.setEnd(e.parentNode, self.nodeIndex(e));
 				bef = r.extractContents();
 
 				// Get after chunk
-				r = t.createRng();
-				r.setStart(e.parentNode, t.nodeIndex(e) + 1);
-				r.setEnd(pe.parentNode, t.nodeIndex(pe) + 1);
+				r = self.createRng();
+				r.setStart(e.parentNode, self.nodeIndex(e) + 1);
+				r.setEnd(pe.parentNode, self.nodeIndex(pe) + 1);
 				aft = r.extractContents();
 
 				// Insert before chunk
@@ -1928,13 +1967,13 @@
 
 				// Insert middle chunk
 				if (re)
-				pa.replaceChild(re, e);
-			else
-				pa.insertBefore(e, pe);
+					pa.replaceChild(re, e);
+				else
+					pa.insertBefore(e, pe);
 
 				// Insert after chunk
 				pa.insertBefore(trim(aft), pe);
-				t.remove(pe);
+				self.remove(pe);
 
 				return re || e;
 			}
@@ -1950,7 +1989,7 @@
 		 * @param {Object} s Optional scope to execute the function in.
 		 * @return {function} Function callback handler the same as the one passed in.
 		 */
-		bind : function(target, name, func, scope) {
+		bind: function (target, name, func, scope) {
 			return this.events.add(target, name, func, scope || this);
 		},
 
@@ -1963,7 +2002,7 @@
 		 * @param {function} f Function to remove.
 		 * @return {bool/Array} Bool state if true if the handler was removed or an array with states if multiple elements where passed in.
 		 */
-		unbind : function(target, name, func) {
+		unbind: function (target, name, func) {
 			return this.events.remove(target, name, func);
 		},
 
@@ -1976,12 +2015,12 @@
 		 * @param {Object} evt Event object to send.
 		 * @return {Event} Event object.
 		 */
-		fire : function(target, name, evt) {
+		fire: function (target, name, evt) {
 			return this.events.fire(target, name, evt);
 		},
 
 		// Returns the content editable state of a node
-		getContentEditable: function(node) {
+		getContentEditable: function (node) {
 			var contentEditable;
 
 			// Check type
@@ -1998,8 +2037,8 @@
 			// Check for real content editable
 			return node.contentEditable !== "inherit" ? node.contentEditable : null;
 		},
-		
-		isChildOf: function(node, parent) {
+
+		isChildOf: function (node, parent) {
 			while (node) {
 				if (parent === node) {
 					return true;
@@ -2013,20 +2052,21 @@
 
 		// #ifdef debug
 
-		dumpRng : function(r) {
+		dumpRng: function (r) {
 			return 'startContainer: ' + r.startContainer.nodeName + ', startOffset: ' + r.startOffset + ', endContainer: ' + r.endContainer.nodeName + ', endOffset: ' + r.endOffset;
 		},
 
 		// #endif
 
-		_findSib : function(node, selector, name) {
-			var t = this, f = selector;
+		_findSib: function (node, selector, name) {
+			var self = this,
+				f = selector;
 
 			if (node) {
 				// If expression make a function of it using is
 				if (is(f, 'string')) {
-					f = function(node) {
-						return t.is(node, selector);
+					f = function (node) {
+						return self.is(node, selector);
 					};
 				}
 
@@ -2040,7 +2080,7 @@
 			return null;
 		},
 
-		_isRes : function(c) {
+		_isRes: function (c) {
 			// Is live resizble element
 			return /^(top|left|bottom|right|width|height)/i.test(c) || /;\s*(top|left|bottom|right|width|height)/i.test(c);
 		}
@@ -2086,5 +2126,7 @@
 	 * // Example of how to add a class to some element by id
 	 * tinymce.DOM.addClass('someid', 'someclass');
 	 */
-	tinymce.DOM = new tinymce.dom.DOMUtils(document, {process_html : 0});
+	tinymce.DOM = new tinymce.dom.DOMUtils(document, {
+		process_html: 0
+	});
 })(tinymce);

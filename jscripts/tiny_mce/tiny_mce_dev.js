@@ -97,8 +97,6 @@
 	include('dom/EventUtils.js');
 	include('dom/TreeWalker.js');
 	include('dom/DOMUtils.js');
-	include('dom/Range.js');
-	include('dom/TridentSelection.js');
 	include('dom/Sizzle.js');
 	include('dom/Element.js');
 	include('dom/Selection.js');
