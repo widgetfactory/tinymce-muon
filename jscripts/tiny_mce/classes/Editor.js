@@ -551,15 +551,6 @@
 				t.iframeHTML += '<base href="' + t.documentBaseURI.getURI() + '" />';
 			}
 
-			// IE8 doesn't support carets behind images setting ie7_compat would force IE8+ to run in IE7 compat mode.
-			if (tinymce.isIE8) {
-				if (s.ie7_compat) {
-					t.iframeHTML += '<meta http-equiv="X-UA-Compatible" content="IE=7" />';
-				} else {
-					t.iframeHTML += '<meta http-equiv="X-UA-Compatible" content="IE=edge" />';
-				}
-			}
-
 			t.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 
 			// Load the CSS by injecting them into the HTML this will reduce "flicker"
@@ -832,6 +823,8 @@
 			self.onPostRender.dispatch(self);
 
 			self.quirks = tinymce.util.Quirks(self);
+
+			self.controlSelection = tinymce.dom.ControlSelection(self);
 
 			if (settings.directionality) {
 				body.dir = settings.directionality;
@@ -1463,6 +1456,8 @@
 			DOM.show(self.getContainer());
 			DOM.hide(self.id);
 			self.load();
+
+			self.onShow.dispatch(self);
 		},
 
 		/**
@@ -1484,6 +1479,8 @@
 			// defer the call to hide to prevent an IE9 crash #4921
 			DOM.hide(self.getContainer());
 			DOM.setStyle(self.id, 'display', self.orgDisplay);
+
+			self.onHide.dispatch(self);
 		},
 
 		/**
