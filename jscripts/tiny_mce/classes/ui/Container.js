@@ -22,10 +22,10 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 	 * @constructor
 	 * @method Container
 	 * @param {String} id Control id to use for the container.
-	 * @param {Object} s Optional name/value settings object.
+	 * @param {Object} settings Optional name/value settings object.
 	 */
-	Container : function(id, s, editor) {
-		this.parent(id, s, editor);
+	Container: function (id, settings, editor) {
+		this.parent(id, settings, editor);
 
 		/**
 		 * Array of controls added to the container.
@@ -45,22 +45,21 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 	 * @param {tinymce.ui.Control} c Control instance to add to the container.
 	 * @return {tinymce.ui.Control} Same control instance that got passed in.
 	 */
-	add : function(c) {
-		this.lookup[c.id] = c;
-		this.controls.push(c);
+	add: function (ctrl) {
+		this.lookup[ctrl.id] = ctrl;
+		this.controls.push(ctrl);
 
-		return c;
+		return ctrl;
 	},
 
 	/**
 	 * Returns a control by id from the containers collection.
 	 *
 	 * @method get
-	 * @param {String} n Id for the control to retrive.
+	 * @param {String} id Id for the control to retrive.
 	 * @return {tinymce.ui.Control} Control instance by the specified name or undefined if it wasn't found.
 	 */
-	get : function(n) {
-		return this.lookup[n];
+	get: function (id) {
+		return this.lookup[id];
 	}
 });
-

@@ -8,22 +8,25 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * @class tinymce
 	 */
 
 	// Shorten names
-	var each = tinymce.each, extend = tinymce.extend,
-		DOM = tinymce.DOM, Event = tinymce.dom.Event,
-		ThemeManager = tinymce.ThemeManager, PluginManager = tinymce.PluginManager,
+	var each = tinymce.each,
+		extend = tinymce.extend,
+		DOM = tinymce.DOM,
+		Event = tinymce.dom.Event,
 		explode = tinymce.explode,
-		Dispatcher = tinymce.util.Dispatcher, undef, instanceCounter = 0;
+		Dispatcher = tinymce.util.Dispatcher,
+		undef, instanceCounter = 0;
 
 	// Setup some URLs where the editor API is located and where the document is
 	tinymce.documentBaseURL = window.location.href.replace(/[\?#].*$/, '').replace(/[\/\\][^\/]+$/, '');
-	if (!/[\/\\]$/.test(tinymce.documentBaseURL))
+	if (!/[\/\\]$/.test(tinymce.documentBaseURL)) {
 		tinymce.documentBaseURL += '/';
+	}
 
 	tinymce.baseURL = new tinymce.util.URI(tinymce.documentBaseURL).toAbsolute(tinymce.baseURL);
 
@@ -41,7 +44,7 @@
 	tinymce.onBeforeUnload = new Dispatcher(tinymce);
 
 	// Must be on window or IE will leak if the editor is placed in frame or iframe
-	Event.add(window, 'beforeunload', function(e) {
+	Event.add(window, 'beforeunload', function (e) {
 		tinymce.onBeforeUnload.dispatch(tinymce, e);
 	});
 
@@ -78,7 +81,7 @@
 		 * for (edId in tinyMCE.editors)
 		 *     tinyMCE.editors[edId].save();
 		 */
-		editors : [],
+		editors: [],
 
 		/**
 		 * Collection of language pack data.
@@ -86,7 +89,7 @@
 		 * @property i18n
 		 * @type Object
 		 */
-		i18n : {},
+		i18n: {},
 
 		/**
 		 * Currently active editor instance.
@@ -97,7 +100,7 @@
 		 * tinyMCE.activeEditor.selection.getContent();
 		 * tinymce.EditorManager.activeEditor.selection.getContent();
 		 */
-		activeEditor : null,
+		activeEditor: null,
 
 		/**
 		 * Initializes a set of editors. This method will create a bunch of editors based in the input.
@@ -109,22 +112,24 @@
 		 * tinymce.EditorManager.init({
 		 *    some_settings : 'some value'
 		 * });
-		 * 
+		 *
 		 * // Initializes a editor instance using the shorter version
 		 * tinyMCE.init({
 		 *    some_settings : 'some value'
 		 * });
 		 */
-		init : function(s) {
-			var t = this, pl, sl = tinymce.ScriptLoader, e, el = [], ed;
+		init: function (s) {
+			var self = this,
+				el = [],
+				ed;
 
 			function createId(elm) {
 				var id = elm.id;
-	
+
 				// Use element id, or unique name or generate a unique id
 				if (!id) {
 					id = elm.name;
-	
+
 					if (id && !DOM.get(id)) {
 						id = elm.name;
 					} else {
@@ -136,13 +141,14 @@
 				}
 
 				return id;
-			};
+			}
 
 			function execCallback(se, n, s) {
 				var f = se[n];
 
-				if (!f)
+				if (!f) {
 					return;
+				}
 
 				if (tinymce.is(f, 'string')) {
 					s = f.replace(/\.\w+$/, '');
@@ -151,16 +157,16 @@
 				}
 
 				return f.apply(s || this, Array.prototype.slice.call(arguments, 2));
-			};
+			}
 
 			function hasClass(n, c) {
 				return c.constructor === RegExp ? c.test(n.className) : DOM.hasClass(n, c);
-			};
+			}
 
-			t.settings = s;
+			this.settings = s;
 
 			// Legacy call
-			Event.bind(window, 'ready', function() {
+			Event.bind(window, 'ready', function () {
 				var l, co;
 
 				execCallback(s, 'onpageload');
@@ -169,15 +175,15 @@
 					case "exact":
 						l = s.elements || '';
 
-						if(l.length > 0) {
-							each(explode(l), function(v) {
+						if (l.length > 0) {
+							each(explode(l), function (v) {
 								if (DOM.get(v)) {
 									ed = new tinymce.Editor(v, s);
 									el.push(ed);
 									ed.render(1);
 								} else {
-									each(document.forms, function(f) {
-										each(f.elements, function(e) {
+									each(document.forms, function (f) {
+										each(f.elements, function (e) {
 											if (e.name === v) {
 												v = 'mce_editor_' + instanceCounter++;
 												DOM.setAttrib(e, 'id', v);
@@ -195,31 +201,32 @@
 
 					case "textareas":
 					case "specific_textareas":
-						each(DOM.select('textarea'), function(elm) {
-							if (s.editor_deselector && hasClass(elm, s.editor_deselector))
+						each(DOM.select('textarea'), function (elm) {
+							if (s.editor_deselector && hasClass(elm, s.editor_deselector)) {
 								return;
+							}
 
 							if (!s.editor_selector || hasClass(elm, s.editor_selector)) {
-								
+
 								var id = createId(elm);
-								
+
 								// don't create an editor that is already created
-								if (t.get(id)) {
+								if (self.get(id)) {
 									return;
 								}
-								
+
 								ed = new tinymce.Editor(id, s);
 								el.push(ed);
 								ed.render(1);
 							}
 						});
 						break;
-					
+
 					default:
 						if (s.types) {
 							// Process type specific selector
-							each(s.types, function(type) {
-								each(DOM.select(type.selector), function(elm) {
+							each(s.types, function (type) {
+								each(DOM.select(type.selector), function (elm) {
 									var editor = new tinymce.Editor(createId(elm), tinymce.extend({}, s, type));
 									el.push(editor);
 									editor.render(1);
@@ -227,7 +234,7 @@
 							});
 						} else if (s.selector) {
 							// Process global selector
-							each(DOM.select(s.selector), function(elm) {
+							each(DOM.select(s.selector), function (elm) {
 								var editor = new tinymce.Editor(createId(elm), s);
 								el.push(editor);
 								editor.render(1);
@@ -239,24 +246,27 @@
 				if (s.oninit) {
 					l = co = 0;
 
-					each(el, function(ed) {
+					each(el, function (ed) {
 						co++;
 
 						if (!ed.initialized) {
 							// Wait for it
-							ed.onInit.add(function() {
+							ed.onInit.add(function () {
 								l++;
 
 								// All done
-								if (l == co)
+								if (l == co) {
 									execCallback(s, 'oninit');
+								}
 							});
-						} else
+						} else {
 							l++;
+						}
 
 						// All done
-						if (l == co)
-							execCallback(s, 'oninit');					
+						if (l == co) {
+							execCallback(s, 'oninit');
+						}
 					});
 				}
 			});
@@ -273,18 +283,20 @@
 		 * tinyMCE.get('mytextbox').onClick.add(function(ed, e) {
 		 *    ed.windowManager.alert('Hello world!');
 		 * });
-		 * 
+		 *
 		 * // Adds an onclick event to an editor by id (longer version)
 		 * tinymce.EditorManager.get('mytextbox').onClick.add(function(ed, e) {
 		 *    ed.windowManager.alert('Hello world!');
 		 * });
 		 */
-		get : function(id) {
-			if (id === undef)
+		get: function (id) {
+			if (id === undef) {
 				return this.editors;
+			}
 
-			if (!this.editors.hasOwnProperty(id))
+			if (!this.editors.hasOwnProperty(id)) {
 				return undef;
+			}
 
 			return this.editors[id];
 		},
@@ -298,7 +310,7 @@
 		 * @deprecated Use get method instead.
 		 * @see #get
 		 */
-		getInstanceById : function(id) {
+		getInstanceById: function (id) {
 			return this.get(id);
 		},
 
@@ -309,8 +321,9 @@
 		 * @param {tinymce.Editor} editor Editor instance to add to the collection.
 		 * @return {tinymce.Editor} The same instance that got passed in.
 		 */
-		add : function(editor) {
-			var self = this, editors = self.editors;
+		add: function (editor) {
+			var self = this,
+				editors = self.editors;
 
 			// Add named and index editor instance
 			editors[editor.id] = editor;
@@ -318,14 +331,6 @@
 
 			self._setActive(editor);
 			self.onAddEditor.dispatch(self, editor);
-
-			// #ifdef jquery
-
-			// Patch the tinymce.Editor instance with jQuery adapter logic
-			if (tinymce.adapter)
-				tinymce.adapter.patchEditor(editor);
-
-			// #endif
 
 			return editor;
 		},
@@ -337,9 +342,9 @@
 		 * @param {tinymce.Editor} e Editor instance to remove.
 		 * @return {tinymce.Editor} The editor that got passed in will be return if it was found otherwise null.
 		 */
-		remove : function(editor) {
-			var t = this, i, editors = t.editors;
-			
+		remove: function (editor) {
+			var i, editors = this.editors;
+
 			// no value given
 			if (!editor) {
 				return null;
@@ -360,11 +365,12 @@
 			}
 
 			// Select another editor since the active one was removed
-			if (t.activeEditor == editor)
-				t._setActive(editors[0]);
+			if (this.activeEditor == editor) {
+				this._setActive(editors[0]);
+			}
 
 			editor.destroy();
-			t.onRemoveEditor.dispatch(t, editor);
+			this.onRemoveEditor.dispatch(this, editor);
 
 			return editor;
 		},
@@ -378,14 +384,9 @@
 		 * @param {String} v Optional value parameter like for example an URL to a link.
 		 * @return {Boolean} true/false if the command was executed or not.
 		 */
-		execCommand : function(c, u, v) {
-			var t = this, ed = t.get(v), w;
-
-			function clr() {
-				ed.destroy();
-				w.detachEvent('onunload', clr);
-				w = w.tinyMCE = w.tinymce = null; // IE leak
-			};
+		execCommand: function (c, u, v) {
+			var ed = this.get(v),
+				win;
 
 			// Manager commands
 			switch (c) {
@@ -395,28 +396,24 @@
 
 				case "mceAddEditor":
 				case "mceAddControl":
-					if (!t.get(v))
-						new tinymce.Editor(v, t.settings).render();
+					if (!this.get(v)) {
+						new tinymce.Editor(v, this.settings).render();
+					}
 
 					return true;
 
 				case "mceAddFrameControl":
-					w = v.window;
+					win = v.window;
 
 					// Add tinyMCE global instance and tinymce namespace to specified window
-					w.tinyMCE = tinyMCE;
-					w.tinymce = tinymce;
+					win.tinyMCE = tinyMCE;
+					win.tinymce = tinymce;
 
-					tinymce.DOM.doc = w.document;
-					tinymce.DOM.win = w;
+					tinymce.DOM.doc = win.document;
+					tinymce.DOM.win = win;
 
 					ed = new tinymce.Editor(v.element_id, v);
 					ed.render();
-
-					// Fix IE memory leaks
-					if (tinymce.isIE && ! tinymce.isIE11) {
-						w.attachEvent('onunload', clr);
-					}
 
 					v.page_window = null;
 
@@ -424,28 +421,30 @@
 
 				case "mceRemoveEditor":
 				case "mceRemoveControl":
-					if (ed)
+					if (ed) {
 						ed.remove();
-
+					}
 					return true;
 
 				case 'mceToggleEditor':
 					if (!ed) {
-						t.execCommand('mceAddControl', 0, v);
+						this.execCommand('mceAddControl', 0, v);
 						return true;
 					}
 
-					if (ed.isHidden())
+					if (ed.isHidden()) {
 						ed.show();
-					else
+					} else {
 						ed.hide();
+					}
 
 					return true;
 			}
 
 			// Run command on active editor
-			if (t.activeEditor)
-				return t.activeEditor.execCommand(c, u, v);
+			if (this.activeEditor) {
+				return this.activeEditor.execCommand(c, u, v);
+			}
 
 			return false;
 		},
@@ -461,11 +460,12 @@
 		 * @param {String} v Optional value parameter like for example an URL to a link.
 		 * @return {Boolean} true/false if the command was executed or not.
 		 */
-		execInstanceCommand : function(id, c, u, v) {
+		execInstanceCommand: function (id, c, u, v) {
 			var ed = this.get(id);
 
-			if (ed)
+			if (ed) {
 				return ed.execCommand(c, u, v);
+			}
 
 			return false;
 		},
@@ -478,8 +478,8 @@
 		 * // Saves all contents
 		 * tinyMCE.triggerSave();
 		 */
-		triggerSave : function() {
-			each(this.editors, function(e) {
+		triggerSave: function () {
+			each(this.editors, function (e) {
 				e.save();
 			});
 		},
@@ -491,22 +491,23 @@
 		 * @param {String} p Prefix for the language items. For example en.myplugin
 		 * @param {Object} o Name/Value collection with items to add to the language group.
 		 */
-		addI18n : function(p, o) {
-			var lo, i18n = this.i18n;
+		addI18n: function (p, o) {
+			var i18n = this.i18n;
 
 			if (!tinymce.is(p, 'string')) {
-				each(p, function(o, lc) {
-					each(o, function(o, g) {
-						each(o, function(o, k) {
-							if (g === 'common')
+				each(p, function (o, lc) {
+					each(o, function (o, g) {
+						each(o, function (o, k) {
+							if (g === 'common') {
 								i18n[lc + '.' + k] = o;
-							else
+							} else {
 								i18n[lc + '.' + g + '.' + k] = o;
+							}
 						});
 					});
 				});
 			} else {
-				each(o, function(o, k) {
+				each(o, function (o, k) {
 					i18n[p + '.' + k] = o;
 				});
 			}
@@ -514,7 +515,7 @@
 
 		// Private methods
 
-		_setActive : function(editor) {
+		_setActive: function (editor) {
 			this.selectedInstance = this.activeEditor = editor;
 		}
 	});

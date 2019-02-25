@@ -8,8 +8,11 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, is = tinymce.is, each = tinymce.each;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event,
+		is = tinymce.is,
+		each = tinymce.each;
 
 	/**
 	 * This class is used to create UI color split button. A color split button will present show a small color picker
@@ -26,12 +29,10 @@
 		 * @method ColorSplitButton
 		 * @param {String} id Control id for the color split button.
 		 * @param {Object} s Optional name/value settings object.
-		 * @param {Editor} ed The editor instance this button is for.
+		 * @param {Editor} editor The editor instance this button is for.
 		 */
-		ColorSplitButton : function(id, s, ed) {
-			var t = this;
-
-			t.parent(id, s, ed);
+		ColorSplitButton: function (id, settings, editor) {
+			this.parent(id, settings, editor);
 
 			/**
 			 * Settings object.
@@ -39,25 +40,25 @@
 			 * @property settings
 			 * @type Object
 			 */
-			t.settings = s = tinymce.extend({
-				colors : '000000,993300,333300,003300,003366,000080,333399,333333,800000,FF6600,808000,008000,008080,0000FF,666699,808080,FF0000,FF9900,99CC00,339966,33CCCC,3366FF,800080,999999,FF00FF,FFCC00,FFFF00,00FF00,00FFFF,00CCFF,993366,FFFFFF,FF99CC,FFCC99,FFFF99,CCFFCC,CCFFFF,99CCFF,CC99FF',
-				grid_width : 8,
-				default_color : '#888888'
-			}, t.settings);
+			this.settings = tinymce.extend({
+				colors: '000000,993300,333300,003300,003366,000080,333399,333333,800000,FF6600,808000,008000,008080,0000FF,666699,808080,FF0000,FF9900,99CC00,339966,33CCCC,3366FF,800080,999999,FF00FF,FFCC00,FFFF00,00FF00,00FFFF,00CCFF,993366,FFFFFF,FF99CC,FFCC99,FFFF99,CCFFCC,CCFFFF,99CCFF,CC99FF',
+				grid_width: 8,
+				default_color: '#888888'
+			}, settings || {});
 
 			/**
 			 * Fires when the menu is shown.
 			 *
 			 * @event onShowMenu
 			 */
-			t.onShowMenu = new tinymce.util.Dispatcher(t);
+			this.onShowMenu = new tinymce.util.Dispatcher(this);
 
 			/**
 			 * Fires when the menu is hidden.
 			 *
 			 * @event onHideMenu
 			 */
-			t.onHideMenu = new tinymce.util.Dispatcher(t);
+			this.onHideMenu = new tinymce.util.Dispatcher(this);
 
 			/**
 			 * Current color value.
@@ -65,7 +66,7 @@
 			 * @property value
 			 * @type String
 			 */
-			t.value = s.default_color;
+			this.value = settings.default_color;
 		},
 
 		/**
@@ -74,54 +75,61 @@
 		 *
 		 * @method showMenu
 		 */
-		showMenu : function() {
-			var t = this, r, p, e, p2;
+		showMenu: function () {
+			var self = this,
+				elm, pos;
 
-			if (t.isDisabled())
+			if (this.isDisabled()) {
 				return;
-
-			if (!t.isMenuRendered) {
-				t.renderMenu();
-				t.isMenuRendered = true;
 			}
 
-			if (t.isMenuVisible)
-				return t.hideMenu();
+			if (!this.isMenuRendered) {
+				this.renderMenu();
+				this.isMenuRendered = true;
+			}
 
-			e = DOM.get(t.id);
-			DOM.show(t.id + '_menu');
-			DOM.addClass(e, 'mceSplitButtonSelected');
-			p2 = DOM.getPos(e);
-			DOM.setStyles(t.id + '_menu', {
-				left : p2.x,
-				top : p2.y + e.firstChild.clientHeight,
-				zIndex : 200000
+			if (this.isMenuVisible) {
+				return this.hideMenu();
+			}
+
+			elm = DOM.get(this.id);
+
+			DOM.show(this.id + '_menu');
+			DOM.addClass(elm, 'mceSplitButtonSelected');
+			pos = DOM.getPos(elm);
+
+			DOM.setStyles(this.id + '_menu', {
+				left: pos.x,
+				top: pos.y + elm.firstChild.clientHeight,
+				zIndex: 200000
 			});
-			e = 0;
 
-			Event.add(DOM.doc, 'mousedown', t.hideMenu, t);
-			t.onShowMenu.dispatch(t);
+			elm = 0;
 
-			if (t._focused) {
-				t._keyHandler = Event.add(t.id + '_menu', 'keydown', function(e) {
-					if (e.keyCode == 27)
-						t.hideMenu();
+			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
+			this.onShowMenu.dispatch(this);
+
+			if (this._focused) {
+				this._keyHandler = Event.add(this.id + '_menu', 'keydown', function (e) {
+					if (e.keyCode == 27) {
+						this.hideMenu();
+					}
 				});
 
-				DOM.select('a', t.id + '_menu')[0].focus(); // Select first link
+				DOM.select('a', this.id + '_menu')[0].focus(); // Select first link
 			}
 
-			t.keyboardNav = new tinymce.ui.KeyboardNavigation({
-				root: t.id + '_menu',
-				items: DOM.select('a', t.id + '_menu'),
-				onCancel: function() {
-					t.hideMenu();
-					t.focus();
+			this.keyboardNav = new tinymce.ui.KeyboardNavigation({
+				root: this.id + '_menu',
+				items: DOM.select('a', this.id + '_menu'),
+				onCancel: function () {
+					self.hideMenu();
+					self.focus();
 				}
 			});
 
-			t.keyboardNav.focus();
-			t.isMenuVisible = 1;
+			this.keyboardNav.focus();
+			this.isMenuVisible = 1;
 		},
 
 		/**
@@ -131,24 +139,31 @@
 		 * @method hideMenu
 		 * @param {Event} e Optional event object.
 		 */
-		hideMenu : function(e) {
-			var t = this;
+		hideMenu: function (e) {
+			var self = this;
 
-			if (t.isMenuVisible) {
+			if (this.isMenuVisible) {
 				// Prevent double toogles by canceling the mouse click event to the button
-				if (e && e.type == "mousedown" && DOM.getParent(e.target, function(e) {return e.id === t.id + '_open';}))
-					return;
+				if (e && e.type == "mousedown") {
+					var parent = DOM.getParent(e.target, function (elm) {
+						return elm.id === self.id + '_open';
+					});
 
-				if (!e || !DOM.getParent(e.target, '.mceSplitButtonMenu')) {
-					DOM.removeClass(t.id, 'mceSplitButtonSelected');
-					Event.remove(DOM.doc, 'mousedown', t.hideMenu, t);
-					Event.remove(t.id + '_menu', 'keydown', t._keyHandler);
-					DOM.hide(t.id + '_menu');
+					if (parent) {
+						return;
+					}
 				}
 
-				t.isMenuVisible = 0;
-				t.onHideMenu.dispatch();
-				t.keyboardNav.destroy();
+				if (!e || !DOM.getParent(e.target, '.mceSplitButtonMenu')) {
+					DOM.removeClass(this.id, 'mceSplitButtonSelected');
+					Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
+					Event.remove(this.id + '_menu', 'keydown', this._keyHandler);
+					DOM.hide(this.id + '_menu');
+				}
+
+				this.isMenuVisible = 0;
+				this.onHideMenu.dispatch();
+				this.keyboardNav.destroy();
 			}
 		},
 
@@ -157,122 +172,155 @@
 		 *
 		 * @method renderMenu
 		 */
-		renderMenu : function() {
-			var t = this, m, i = 0, s = t.settings, n, tb, tr, w, context;
-			
-			if (s.menu_class.indexOf('defaultSkin') === -1) {
-				s.menu_class = 'defaultSkin ' + s.menu_class;
+		renderMenu: function () {
+			var self = this,
+				menu, i = 0,
+				settings = this.settings,
+				node, tb, tr, list, context;
+
+			if (settings.menu_class.indexOf('defaultSkin') === -1) {
+				settings.menu_class = 'defaultSkin ' + settings.menu_class;
 			}
 
-			w = DOM.add(s.menu_container, 'div', {role: 'listbox', id : t.id + '_menu', 'class' : s.menu_class + ' ' + s['class'], style : 'position:absolute;left:0;top:-1000px;'});
-			m = DOM.add(w, 'div', {'class' : s['class'] + ' mceSplitButtonMenu'});
-			DOM.add(m, 'span', {'class' : 'mceMenuLine'});
+			list = DOM.add(settings.menu_container, 'div', {
+				role: 'listbox',
+				id: this.id + '_menu',
+				'class': settings.menu_class + ' ' + settings['class'],
+				style: 'position:absolute;left:0;top:-1000px;'
+			});
 
-			n = DOM.add(m, 'table', {role: 'presentation', 'class' : 'mceColorSplitMenu'});
-			tb = DOM.add(n, 'tbody');
+			menu = DOM.add(list, 'div', {
+				'class': settings['class'] + ' mceSplitButtonMenu'
+			});
+
+			DOM.add(menu, 'span', {
+				'class': 'mceMenuLine'
+			});
+
+			node = DOM.add(menu, 'table', {
+				role: 'presentation',
+				'class': 'mceColorSplitMenu'
+			});
+			tb = DOM.add(node, 'tbody');
 
 			// Generate color grid
 			i = 0;
-			each(is(s.colors, 'array') ? s.colors : s.colors.split(','), function(c) {
-				c = c.replace(/^#/, '');
+			each(is(settings.colors, 'array') ? settings.colors : settings.colors.split(','), function (color) {
+				color = color.replace(/^#/, '');
 
 				if (!i--) {
 					tr = DOM.add(tb, 'tr');
-					i = s.grid_width - 1;
+					i = settings.grid_width - 1;
 				}
 
-				n = DOM.add(tr, 'td');
-				var settings = {
-					href : 'javascript:;',
-					style : {
-						backgroundColor : '#' + c
+				node = DOM.add(tr, 'td');
+
+				var args = {
+					href: 'javascript:;',
+					style: {
+						backgroundColor: '#' + color
 					},
-					'title': t.editor.getLang('colors.' + c, '#' + c),
-					'data-mce-color' : '#' + c
+					'title': self.editor.getLang('colors.' + color, '#' + color),
+					'data-mce-color': '#' + color
 				};
 
 				// adding a proper ARIA role = button causes JAWS to read things incorrectly on IE.
-				if (!tinymce.isIE ) {
-					settings.role = 'option';
-				}
+				args.role = 'option';
 
-				n = DOM.add(n, 'a', settings);
+				node = DOM.add(node, 'a', args);
 
-				if (t.editor.forcedHighContrastMode) {
-					n = DOM.add(n, 'canvas', { width: 16, height: 16, 'aria-hidden': 'true' });
-					if (n.getContext && (context = n.getContext("2d"))) {
-						context.fillStyle = '#' + c;
+				if (self.editor.forcedHighContrastMode) {
+					node = DOM.add(node, 'canvas', {
+						width: 16,
+						height: 16,
+						'aria-hidden': 'true'
+					});
+					if (node.getContext && (context = node.getContext("2d"))) {
+						context.fillStyle = '#' + color;
 						context.fillRect(0, 0, 16, 16);
 					} else {
-						// No point leaving a canvas element around if it's not supported for drawing on anyway.
-						DOM.remove(n);
+						// No point leaving a canvas element around if it'settings not supported for drawing on anyway.
+						DOM.remove(node);
 					}
 				}
 			});
-			
-			n = DOM.add(tr, 'td', {'class' : 'mceRemoveColor'});
-			n = DOM.add(n, 'a', {
-				href : 'javascript:;',
-				'title': t.editor.getLang('advanced.no_color', 'No Colour'),
-				'data-mce-color' : '',
+
+			node = DOM.add(tr, 'td', {
+				'class': 'mceRemoveColor'
+			});
+
+			node = DOM.add(node, 'a', {
+				href: 'javascript:;',
+				'title': this.editor.getLang('advanced.no_color', 'No Colour'),
+				'data-mce-color': '',
 				role: 'option'
 			});
 
-			if (s.more_colors_func) {
-				n = DOM.add(tb, 'tr');
-				n = DOM.add(n, 'td', {colspan : s.grid_width, 'class' : 'mceMoreColors'});
-				n = DOM.add(n, 'a', {role: 'option', id : t.id + '_more', href : 'javascript:;', onclick : 'return false;', 'class' : 'mceMoreColors'}, s.more_colors_title);
+			if (settings.more_colors_func) {
+				node = DOM.add(tb, 'tr');
+				node = DOM.add(node, 'td', {
+					colspan: settings.grid_width,
+					'class': 'mceMoreColors'
+				});
 
-				Event.add(n, 'click', function(e) {
-					s.more_colors_func.call(s.more_colors_scope || this);
+				node = DOM.add(node, 'a', {
+					role: 'option',
+					id: this.id + '_more',
+					href: 'javascript:;',
+					onclick: 'return false;',
+					'class': 'mceMoreColors'
+				}, settings.more_colors_title);
+
+				Event.add(node, 'click', function (e) {
+					settings.more_colors_func.call(settings.more_colors_scope || this);
 					return Event.cancel(e); // Cancel to fix onbeforeunload problem
 				});
 			}
 
-			DOM.addClass(m, 'mceColorSplitMenu');
+			DOM.addClass(menu, 'mceColorSplitMenu');
 
 			// Prevent IE from scrolling and hindering click to occur #4019
-			Event.add(t.id + '_menu', 'mousedown', function(e) {return Event.cancel(e);});
+			Event.add(this.id + '_menu', 'mousedown', function (e) {
+				return Event.cancel(e);
+			});
 
-			Event.add(t.id + '_menu', 'click', function(e) {
-				e = DOM.getParent(e.target, 'a', tb);
-				
-				var c = e.getAttribute('data-mce-color');
+			Event.add(this.id + '_menu', 'click', function (e) {
+				var elm = DOM.getParent(e.target, 'a', tb);
 
-				if (e && e.nodeName.toLowerCase() == 'a' && typeof c !== "undefined") {
-					t.setColor(c);
+				var color = elm.getAttribute('data-mce-color');
+
+				if (elm && elm.nodeName.toLowerCase() == 'a' && typeof color !== "undefined") {
+					this.setColor(color);
 				}
 
 				return false; // Prevent IE auto save warning
 			});
 
-			return w;
+			return list;
 		},
 
 		/**
 		 * Sets the current color for the control and hides the menu if it should be visible.
 		 *
 		 * @method setColor
-		 * @param {String} c Color code value in hex for example: #FF00FF
+		 * @param {String} color Color code value in hex for example: #FF00FF
 		 */
-		setColor : function(c) {
-			this.displayColor(c);
+		setColor: function (color) {
+			this.displayColor(color);
 			this.hideMenu();
-			this.settings.onselect(c);
+			this.settings.onselect(color);
 		},
-		
+
 		/**
 		 * Change the currently selected color for the control.
 		 *
 		 * @method displayColor
 		 * @param {String} c Color code value in hex for example: #FF00FF
 		 */
-		displayColor : function(c) {
-			var t = this;
+		displayColor: function (color) {
+			DOM.setStyle(this.id + '_preview', 'backgroundColor', color);
 
-			DOM.setStyle(t.id + '_preview', 'backgroundColor', c);
-
-			t.value = c;
+			this.value = color;
 		},
 
 		/**
@@ -281,12 +329,15 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, id = t.id;
+		postRender: function () {
+			this.parent();
 
-			t.parent();
-			DOM.add(id + '_action', 'div', {id : id + '_preview', 'class' : 'mceColorPreview'});
-			DOM.setStyle(t.id + '_preview', 'backgroundColor', t.value);
+			DOM.add(this.id + '_action', 'div', {
+				id: this.id + '_preview',
+				'class': 'mceColorPreview'
+			});
+
+			DOM.setStyle(this.id + '_preview', 'backgroundColor', this.value);
 		},
 
 		/**
@@ -295,17 +346,15 @@
 		 *
 		 * @method destroy
 		 */
-		destroy : function() {
-			var self = this;
-
+		destroy: function () {
 			self.parent();
 
-			Event.clear(self.id + '_menu');
-			Event.clear(self.id + '_more');
-			DOM.remove(self.id + '_menu');
+			Event.clear(this.id + '_menu');
+			Event.clear(this.id + '_more');
+			DOM.remove(this.id + '_menu');
 
-			if (self.keyboardNav) {
-				self.keyboardNav.destroy();
+			if (this.keyboardNav) {
+				this.keyboardNav.destroy();
 			}
 		}
 	});

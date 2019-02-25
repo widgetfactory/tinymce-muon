@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
 	 *
@@ -24,12 +24,16 @@
 	 * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
 	 * @param {tinymce.html.Schema} schema Optional schema reference.
 	 */
-	tinymce.dom.Serializer = function(settings, dom, schema) {
-		var self = this, onPreProcess, onPostProcess, isIE = tinymce.isIE, each = tinymce.each, htmlParser;
+	tinymce.dom.Serializer = function (settings, dom, schema) {
+		var self = this,
+			onPreProcess, onPostProcess, isIE = tinymce.isIE,
+			each = tinymce.each,
+			htmlParser;
 
 		// Support the old apply_source_formatting option
-		if (!settings.apply_source_formatting)
+		if (!settings.apply_source_formatting) {
 			settings.indent = false;
+		}
 
 		// Default DOM and Schema if they are undefined
 		dom = dom || tinymce.DOM;
@@ -98,8 +102,9 @@
 		htmlParser = new tinymce.html.DomParser(settings, schema);
 
 		// Convert tabindex back to elements when serializing contents
-		htmlParser.addAttributeFilter('data-mce-tabindex', function(nodes, name) {
-			var i = nodes.length, node;
+		htmlParser.addAttributeFilter('data-mce-tabindex', function (nodes, name) {
+			var i = nodes.length,
+				node;
 
 			while (i--) {
 				node = nodes[i];
@@ -109,8 +114,12 @@
 		});
 
 		// Convert move data-mce-src, data-mce-href and data-mce-style into nodes or process them if needed
-		htmlParser.addAttributeFilter('src,href,style', function(nodes, name) {
-			var i = nodes.length, node, value, internalName = 'data-mce-' + name, urlConverter = settings.url_converter, urlConverterScope = settings.url_converter_scope, undef;
+		htmlParser.addAttributeFilter('src,href,style', function (nodes, name) {
+			var i = nodes.length,
+				node, value, internalName = 'data-mce-' + name,
+				urlConverter = settings.url_converter,
+				urlConverterScope = settings.url_converter_scope,
+				undef;
 
 			while (i--) {
 				node = nodes[i];
@@ -136,8 +145,9 @@
 		});
 
 		// Remove internal classes mceItem<..> or mceSelected
-		htmlParser.addAttributeFilter('class', function(nodes, name) {
-			var i = nodes.length, node, value;
+		htmlParser.addAttributeFilter('class', function (nodes) {
+			var i = nodes.length,
+				node, value;
 
 			while (i--) {
 				node = nodes[i];
@@ -151,8 +161,9 @@
 		});
 
 		// Remove bookmark elements
-		htmlParser.addAttributeFilter('data-mce-type', function(nodes, name, args) {
-			var i = nodes.length, node;
+		htmlParser.addAttributeFilter('data-mce-type', function (nodes, name, args) {
+			var i = nodes.length,
+				node;
 
 			while (i--) {
 				node = nodes[i];
@@ -162,7 +173,7 @@
 				}
 			}
 		});
-		
+
 		// Remove bogus elements
 		/*htmlParser.addAttributeFilter('data-mce-bogus', function(nodes, name, args) {
 			var i = nodes.length, node;
@@ -176,8 +187,9 @@
 			}
 		});*/
 
-		htmlParser.addNodeFilter('noscript', function(nodes) {
-			var i = nodes.length, node;
+		htmlParser.addNodeFilter('noscript', function (nodes) {
+			var i = nodes.length,
+				node;
 
 			while (i--) {
 				node = nodes[i].firstChild;
@@ -189,14 +201,15 @@
 		});
 
 		// Force script into CDATA sections and remove the mce- prefix also add comments around styles
-		htmlParser.addNodeFilter('script,style', function(nodes, name) {
-			var i = nodes.length, node, value;
+		htmlParser.addNodeFilter('script,style', function (nodes, name) {
+			var i = nodes.length,
+				node, value, type;
 
 			function trim(value) {
 				return value.replace(/(<!--\[CDATA\[|\]\]-->)/g, '\n')
-						.replace(/^[\r\n]*|[\r\n]*$/g, '')
-						.replace(/^\s*((<!--)?(\s*\/\/)?\s*<!\[CDATA\[|(<!--\s*)?\/\*\s*<!\[CDATA\[\s*\*\/|(\/\/)?\s*<!--|\/\*\s*<!--\s*\*\/)\s*[\r\n]*/gi, '')
-						.replace(/\s*(\/\*\s*\]\]>\s*\*\/(-->)?|\s*\/\/\s*\]\]>(-->)?|\/\/\s*(-->)?|\]\]>|\/\*\s*-->\s*\*\/|\s*-->\s*)\s*$/g, '');
+					.replace(/^[\r\n]*|[\r\n]*$/g, '')
+					.replace(/^\s*((<!--)?(\s*\/\/)?\s*<!\[CDATA\[|(<!--\s*)?\/\*\s*<!\[CDATA\[\s*\*\/|(\/\/)?\s*<!--|\/\*\s*<!--\s*\*\/)\s*[\r\n]*/gi, '')
+					.replace(/\s*(\/\*\s*\]\]>\s*\*\/(-->)?|\s*\/\/\s*\]\]>(-->)?|\/\/\s*(-->)?|\]\]>|\/\*\s*-->\s*\*\/|\s*-->\s*)\s*$/g, '');
 			}
 
 			while (i--) {
@@ -207,6 +220,7 @@
 					// Remove mce- prefix from script elements and remove default type since the user specified
 					// a script element without type attribute
 					type = node.attr('type');
+
 					if (type) {
 						node.attr('type', type == 'mce-no/type' ? null : type.replace(/^mce\-/, ''));
 					}
@@ -223,8 +237,9 @@
 		});
 
 		// Convert comments to cdata and handle protected comments
-		htmlParser.addNodeFilter('#comment', function(nodes, name) {
-			var i = nodes.length, node;
+		htmlParser.addNodeFilter('#comment', function (nodes) {
+			var i = nodes.length,
+				node;
 
 			while (i--) {
 				node = nodes[i];
@@ -242,8 +257,9 @@
 			}
 		});
 
-		htmlParser.addNodeFilter('xml:namespace,input', function(nodes, name) {
-			var i = nodes.length, node;
+		htmlParser.addNodeFilter('xml:namespace,input', function (nodes, name) {
+			var i = nodes.length,
+				node;
 
 			while (i--) {
 				node = nodes[i];
@@ -259,8 +275,9 @@
 
 		// Fix list elements, TODO: Replace this later
 		if (settings.fix_list_elements) {
-			htmlParser.addNodeFilter('ul,ol', function(nodes, name) {
-				var i = nodes.length, node, parentNode;
+			htmlParser.addNodeFilter('ul,ol', function (nodes) {
+				var i = nodes.length,
+					node, parentNode;
 
 				while (i--) {
 					node = nodes[i];
@@ -281,7 +298,7 @@
 			'data-mce-selected,data-mce-expando,' +
 			'data-mce-type,data-mce-resize,data-mce-new',
 
-			function(nodes, name) {
+			function (nodes, name) {
 				var i = nodes.length;
 
 				while (i--) {
@@ -297,7 +314,7 @@
 			 *
 			 * @field {tinymce.html.Schema} schema
 			 */
-			schema : schema,
+			schema: schema,
 
 			/**
 			 * Adds a node filter function to the parser used by the serializer, the parser will collect the specified nodes by name
@@ -313,7 +330,7 @@
 			 * @method {String} name Comma separated list of nodes to collect.
 			 * @param {function} callback Callback function to execute once it has collected nodes.
 			 */
-			addNodeFilter : htmlParser.addNodeFilter,
+			addNodeFilter: htmlParser.addNodeFilter,
 
 			/**
 			 * Adds a attribute filter function to the parser used by the serializer, the parser will collect nodes that has the specified attributes
@@ -329,7 +346,7 @@
 			 * @method {String} name Comma separated list of nodes to collect.
 			 * @param {function} callback Callback function to execute once it has collected nodes.
 			 */
-			addAttributeFilter : htmlParser.addAttributeFilter,
+			addAttributeFilter: htmlParser.addAttributeFilter,
 
 			/**
 			 * Fires when the Serializer does a preProcess on the contents.
@@ -343,7 +360,7 @@
 			 * @option {Boolean} set Is true if the process is on a setContent operation.
 			 * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
 			 */
-			onPreProcess : onPreProcess,
+			onPreProcess: onPreProcess,
 
 			/**
 			 * Fires when the Serializer does a postProcess on the contents.
@@ -352,7 +369,7 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Object} obj PreProcess object.
 			 */
-			onPostProcess : onPostProcess,
+			onPostProcess: onPostProcess,
 
 			/**
 			 * Serializes the specified browser DOM node into a HTML string.
@@ -361,8 +378,8 @@
 			 * @param {DOMNode} node DOM node to serialize.
 			 * @param {Object} args Arguments option that gets passed to event handlers.
 			 */
-			serialize : function(node, args) {
-				var impl, doc, oldDoc, htmlSerializer, content;
+			serialize: function (node, args) {
+				var impl, doc, oldDoc, htmlSerializer, content, rootNode;
 
 				// Explorer won't clone contents of script and style and the
 				// selected index of select elements are cleared on a clone operation.
@@ -384,7 +401,7 @@
 					doc = impl.createHTMLDocument("");
 
 					// Add the element or it's children if it's a body element to the new document
-					each(node.nodeName == 'BODY' ? node.childNodes : [node], function(node) {
+					each(node.nodeName == 'BODY' ? node.childNodes : [node], function (node) {
 						doc.body.appendChild(doc.importNode(node, true));
 					});
 
@@ -450,7 +467,7 @@
 			 * @method addRules
 			 * @param {String} rules Valid elements rules string to add to schema.
 			 */
-			addRules : function(rules) {
+			addRules: function (rules) {
 				schema.addValidElements(rules);
 			},
 
@@ -462,7 +479,7 @@
 			 * @method setRules
 			 * @param {String} rules Valid elements rules string.
 			 */
-			setRules : function(rules) {
+			setRules: function (rules) {
 				schema.setValidElements(rules);
 			}
 		};

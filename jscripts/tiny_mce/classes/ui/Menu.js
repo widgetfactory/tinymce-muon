@@ -8,8 +8,9 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var is = tinymce.is, DOM = tinymce.DOM, each = tinymce.each, walk = tinymce.walk;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		walk = tinymce.walk;
 
 	/**
 	 * This class is base class for all menu types like DropMenus etc. This class should not
@@ -27,14 +28,12 @@
 		 * @param {String} id Button control id for the button.
 		 * @param {Object} s Optional name/value settings object.
 		 */
-		Menu : function(id, s) {
-			var t = this;
-
-			t.parent(id, s);
-			t.items = {};
-			t.collapsed = false;
-			t.menuCount = 0;
-			t.onAddItem = new tinymce.util.Dispatcher(this);
+		Menu: function (id, settings) {
+			this.parent(id, settings);
+			this.items = {};
+			this.collapsed = false;
+			this.menuCount = 0;
+			this.onAddItem = new tinymce.util.Dispatcher(this);
 		},
 
 		/**
@@ -43,36 +42,38 @@
 		 * @method expand
 		 * @param {Boolean} d Optional deep state. If this is set to true all children will be expanded as well.
 		 */
-		expand : function(d) {
-			var t = this;
+		expand: function (d) {
+			var self = this;
 
 			if (d) {
-				walk(t, function(o) {
-					if (o.expand)
+				walk(self, function (o) {
+					if (o.expand) {
 						o.expand();
-				}, 'items', t);
+					}
+				}, 'items', self);
 			}
 
-			t.collapsed = false;
+			this.collapsed = false;
 		},
 
 		/**
 		 * Collapses the menu, this will hide the menu and all menu items.
 		 *
 		 * @method collapse
-		 * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
+		 * @param {Boolean} state Optional deep state. If this is set to true all children will be collapsed as well.
 		 */
-		collapse : function(d) {
-			var t = this;
+		collapse: function (state) {
+			var self = this;
 
-			if (d) {
-				walk(t, function(o) {
-					if (o.collapse)
-						o.collapse();
-				}, 'items', t);
+			if (state) {
+				walk(self, function (menu) {
+					if (menu.collapse) {
+						menu.collapse();
+					}
+				}, 'items', self);
 			}
 
-			t.collapsed = true;
+			this.collapsed = true;
 		},
 
 		/**
@@ -81,7 +82,7 @@
 		 * @method isCollapsed
 		 * @return {Boolean} True/false state if the menu has been collapsed or not.
 		 */
-		isCollapsed : function() {
+		isCollapsed: function () {
 			return this.collapsed;
 		},
 
@@ -89,16 +90,17 @@
 		 * Adds a new menu, menu item or sub classes of them to the drop menu.
 		 *
 		 * @method add
-		 * @param {tinymce.ui.Control} o Menu or menu item to add to the drop menu.
+		 * @param {tinymce.ui.Control} menu Menu or menu item to add to the drop menu.
 		 * @return {tinymce.ui.Control} Same as the input control, the menu or menu item.
 		 */
-		add : function(o) {
-			if (!o.settings)
-				o = new tinymce.ui.MenuItem(o.id || DOM.uniqueId(), o);
+		add: function (menu) {
+			if (!menu.settings) {
+				menu = new tinymce.ui.MenuItem(menu.id || DOM.uniqueId(), menu);
+			}
 
-			this.onAddItem.dispatch(this, o);
+			this.onAddItem.dispatch(this, menu);
 
-			return this.items[o.id] = o;
+			return this.items[menu.id] = menu;
 		},
 
 		/**
@@ -107,24 +109,27 @@
 		 * @method addSeparator
 		 * @return {tinymce.ui.MenuItem} Menu item instance for the separator.
 		 */
-		addSeparator : function() {
-			return this.add({separator : true});
+		addSeparator: function () {
+			return this.add({
+				separator: true
+			});
 		},
 
 		/**
 		 * Adds a sub menu to the menu.
 		 *
 		 * @method addMenu
-		 * @param {Object} o Menu control or a object with settings to be created into an control.
+		 * @param {Object} menu Menu control or a object with settings to be created into an control.
 		 * @return {tinymce.ui.Menu} Menu control instance passed in or created.
 		 */
-		addMenu : function(o) {
-			if (!o.collapse)
-				o = this.createMenu(o);
+		addMenu: function (menu) {
+			if (!menu.collapse) {
+				menu = this.createMenu(menu);
+			}
 
 			this.menuCount++;
 
-			return this.add(o);
+			return this.add(menu);
 		},
 
 		/**
@@ -133,7 +138,7 @@
 		 * @method hasMenus
 		 * @return {Boolean} True/false state if the menu has sub menues or not.
 		 */
-		hasMenus : function() {
+		hasMenus: function () {
 			return this.menuCount !== 0;
 		},
 
@@ -141,11 +146,11 @@
 		 * Removes a specific sub menu or menu item from the menu.
 		 *
 		 * @method remove
-		 * @param {tinymce.ui.Control} o Menu item or menu to remove from menu.
+		 * @param {tinymce.ui.Control} menu Menu item or menu to remove from menu.
 		 * @return {tinymce.ui.Control} Control instance or null if it wasn't found.
 		 */
-		remove : function(o) {
-			delete this.items[o.id];
+		remove: function (menu) {
+			delete this.items[menu.id];
 		},
 
 		/**
@@ -153,34 +158,35 @@
 		 *
 		 * @method removeAll
 		 */
-		removeAll : function() {
-			var t = this;
+		removeAll: function () {
+			var self = this;
 
-			walk(t, function(o) {
-				if (o.removeAll)
-					o.removeAll();
-				else
-					o.remove();
+			walk(self, function (menu) {
+				if (menu.removeAll) {
+					menu.removeAll();
+				} else {
+					menu.remove();
+				}
 
-				o.destroy();
-			}, 'items', t);
+				menu.destroy();
+			}, 'items', self);
 
-			t.items = {};
+			this.items = {};
 		},
 
 		/**
 		 * Created a new sub menu for the menu control.
 		 *
 		 * @method createMenu
-		 * @param {Object} s Optional name/value settings object.
+		 * @param {Object} settings Optional name/value settings object.
 		 * @return {tinymce.ui.Menu} New drop menu instance.
 		 */
-		createMenu : function(o) {
-			var m = new tinymce.ui.Menu(o.id || DOM.uniqueId(), o);
+		createMenu: function (settings) {
+			var menu = new tinymce.ui.Menu(settings.id || DOM.uniqueId(), settings);
 
-			m.onAddItem.add(this.onAddItem.dispatch, this.onAddItem);
+			menu.onAddItem.add(this.onAddItem.dispatch, this.onAddItem);
 
-			return m;
+			return menu;
 		}
 	});
 })(tinymce);

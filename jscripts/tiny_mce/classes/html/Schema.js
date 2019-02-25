@@ -9,8 +9,13 @@
  */
 
 (function (tinymce) {
-    var mapCache = {}, dummyObj = {};
-    var makeMap = tinymce.makeMap, each = tinymce.each, extend = tinymce.extend, explode = tinymce.explode, inArray = tinymce.inArray;
+    var mapCache = {},
+        dummyObj = {};
+    var makeMap = tinymce.makeMap,
+        each = tinymce.each,
+        extend = tinymce.extend,
+        explode = tinymce.explode,
+        inArray = tinymce.inArray;
 
     function split(items, delim) {
         return items ? items.split(delim || ' ') : [];
@@ -24,14 +29,16 @@
      * @return {Object} Schema lookup table.
      */
     function compileSchema(type) {
-        var schema = {}, globalAttributes, blockContent;
-        var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, mediaEvents;
+        var schema = {},
+            globalAttributes, blockContent;
+        var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, eventAttributes;
 
         function add(name, attributes, children) {
             var ni, i, attributesOrder, args = arguments;
 
             function arrayToMap(array, obj) {
-                var map = {}, i, l;
+                var map = {},
+                    i, l;
 
                 for (i = 0, l = array.length; i < l; i++) {
                     map[array[i]] = obj || {};
@@ -77,11 +84,11 @@
             while (ni--) {
                 schemaItem = schema[name[ni]];
                 for (i = 0, l = attributes.length; i < l; i++) {
-                
-                	// avoid duplicates
-                	if (schemaItem.attributes[attributes[i]]) {
-                		continue;
-                	}
+
+                    // avoid duplicates
+                    if (schemaItem.attributes[attributes[i]]) {
+                        continue;
+                    }
 
                     schemaItem.attributes[attributes[i]] = {};
                     schemaItem.attributesOrder.push(attributes[i]);
@@ -99,30 +106,30 @@
 
         // global event attributes
         globalAttributes.push.apply(globalAttributes, split("onclick ondblclick onmousedown " +
-                "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup"));
+            "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup"));
 
         // html5 mouse events
         if (type != "html4") {
             globalAttributes.push.apply(globalAttributes, split("ondrag ondragend ondragenter " +
-                    "ondragleave ondragover ondragstart ondrop onmousewheel onscroll"));
+                "ondragleave ondragover ondragstart ondrop onmousewheel onscroll"));
         }
 
         // Event attributes can be opt-in/opt-out
         eventAttributes = split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
-         "ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
-         "onerror onfocus oninput oninvalid onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart " +
-         "onmouseenter onmouseleave onpause onplay onplaying onprogress onratechange " +
-         "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
-         "onwaiting onwheel" 
-         );
-         
-         if (type != "html4") {
+            "ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
+            "onerror onfocus oninput oninvalid onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart " +
+            "onmouseenter onmouseleave onpause onplay onplaying onprogress onratechange " +
+            "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
+            "onwaiting onwheel"
+        );
+
+        if (type != "html4") {
             globalAttributes.push.apply(globalAttributes, eventAttributes);
         }
-        
+
         // schema.org attributes
         globalAttributes.push.apply(globalAttributes, split("itemscope itemtype itemid itemprop itemref"));
-        
+
         // aria attributes
         globalAttributes.push.apply(globalAttributes, split("role"));
 
@@ -141,10 +148,10 @@
         // Add HTML5 items to globalAttributes, blockContent, phrasingContent
         if (type != "html4") {
             globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
-                    "hidden spellcheck translate"));
+                "hidden spellcheck translate"));
             blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
             phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
-				"progress time wbr video ruby bdi keygen"));
+                "progress time wbr video ruby bdi keygen"));
         }
 
         // Add HTML4 elements unless it's html5-strict
@@ -183,8 +190,8 @@
         add("style", "media type scoped");
         add("script", "src async defer type charset");
         add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
-                "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
-                "onpopstate onresize onscroll onstorage onunload", flowContent);
+            "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
+            "onpopstate onresize onscroll onstorage onunload", flowContent);
         add("address dt dd div caption", "", flowContent);
         add("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", phrasingContent);
         add("blockquote", "cite", flowContent);
@@ -213,10 +220,10 @@
         add("fieldset", "disabled form name", flowContent, "legend");
         add("label", "form for", phrasingContent);
         add("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate " +
-                "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
-                );
+            "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
+        );
         add("button", "disabled form formaction formenctype formmethod formnovalidate formtarget name type value",
-                type == "html4" ? flowContent : phrasingContent);
+            type == "html4" ? flowContent : phrasingContent);
         add("select", "disabled form multiple name required size", "option optgroup");
         add("optgroup", "disabled label", "option");
         add("option", "disabled label selected value");
@@ -232,7 +239,7 @@
             add("mark rt rp summary bdi", "", phrasingContent);
             add("canvas", "width height", flowContent);
             add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-                    "muted controls width height buffered controlslist playsinline", flowContent, "track source");
+                "muted controls width height buffered controlslist playsinline", flowContent, "track source");
             add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
             add("picture", "", "img source");
             add("source", "src srcset type media sizes");
@@ -249,7 +256,7 @@
             add("meter", "value min max low high optimum", phrasingContent);
             add("details", "open", flowContent, "summary");
             add("keygen", "autofocus challenge disabled form keytype name");
-            
+
             // update with flowContent
             add("a", "href target rel media hreflang type", flowContent);
         }
@@ -310,9 +317,9 @@
 
             // media events
             addAttrs("video audio", "onabort oncanplay oncanplaythrough ondurationchange onemptied onended " +
-                    "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
-                    "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
-                    "onvolumechange onwaiting");
+                "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
+                "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
+                "onvolumechange onwaiting");
         }
 
         // Special: iframe, ruby, video, audio, label
@@ -372,10 +379,15 @@
      * @param {Object} settings Name/value settings object.
      */
     tinymce.html.Schema = function (settings) {
-        var self = this, elements = {}, children = {}, patternElements = [], validStyles, invalidStyles, schemaItems;
+        var self = this,
+            elements = {},
+            children = {},
+            patternElements = [],
+            validStyles, invalidStyles, schemaItems;
         var whiteSpaceElementsMap, selfClosingElementsMap, shortEndedElementsMap, boolAttrMap, validClasses;
         var blockElementsMap, nonEmptyElementsMap, moveCaretBeforeOnEnterElementsMap, textBlockElementsMap, textInlineElementsMap;
-        var customElementsMap = {}, specialElements = {};
+        var customElementsMap = {},
+            specialElements = {};
 
         // Creates an lookup table map object for the specified option or the default value
         function createLookupTable(option, default_value, extendWith) {
@@ -415,18 +427,18 @@
         whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object');
         selfClosingElementsMap = createLookupTable('self_closing_elements', 'colgroup dd dt li option p td tfoot th thead tr');
         shortEndedElementsMap = createLookupTable('short_ended_elements', 'area base basefont br col frame hr img input isindex link ' +
-                'meta param embed source wbr track');
+            'meta param embed source wbr track');
         boolAttrMap = createLookupTable('boolean_attributes', 'checked compact declare defer disabled ismap multiple nohref noresize ' +
-                'noshade nowrap readonly selected autoplay loop controls itemscope playsinline');
+            'noshade nowrap readonly selected autoplay loop controls itemscope playsinline');
         nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script', shortEndedElementsMap);
         moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
         textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
-                'blockquote center dir fieldset header footer article section hgroup aside nav figure');
+            'blockquote center dir fieldset header footer article section hgroup aside nav figure');
         blockElementsMap = createLookupTable('block_elements', 'hr table tbody thead tfoot ' +
-                'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
-                'datalist select optgroup', textBlockElementsMap);
+            'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
+            'datalist select optgroup', textBlockElementsMap);
         textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
-                'dfn code mark q sup sub samp');
+            'dfn code mark q sup sub samp');
 
         each((settings.special || 'script noscript style textarea').split(' '), function (name) {
             specialElements[name] = new RegExp('<\/' + name + '[^>]*>', 'gi');
@@ -441,10 +453,10 @@
         // This function is a bit hard to read since it's heavily optimized for speed
         function addValidElements(validElements) {
             var ei, el, ai, al, matches, element, attr, attrData, elementName, attrName, attrType, attributes, attributesOrder,
-                    prefix, outputName, globalAttributes, globalAttributesOrder, key, value,
-                    elementRuleRegExp = /^([#+\-])?([^\[!\/]+)(?:\/([^\[!]+))?(?:(!?)\[([^\]]+)\])?$/,
-                    attrRuleRegExp = /^([!\-])?(\w+::\w+|[^=:<]+)?(?:([=:<])(.*))?$/,
-                    hasPatternsRegExp = /[*?+]/;
+                prefix, outputName, globalAttributes, globalAttributesOrder, key, value,
+                elementRuleRegExp = /^([#+\-])?([^\[!\/]+)(?:\/([^\[!]+))?(?:(!?)\[([^\]]+)\])?$/,
+                attrRuleRegExp = /^([!\-])?(\w+::\w+|[^=:<]+)?(?:([=:<])(.*))?$/,
+                hasPatternsRegExp = /[*?+]/;
 
             if (validElements) {
                 // Split valid elements into an array with rules
@@ -530,14 +542,20 @@
                                         // Default value
                                         if (prefix === '=') {
                                             element.attributesDefault = element.attributesDefault || [];
-                                            element.attributesDefault.push({name: attrName, value: value});
+                                            element.attributesDefault.push({
+                                                name: attrName,
+                                                value: value
+                                            });
                                             attr.defaultValue = value;
                                         }
 
                                         // Forced value
                                         if (prefix === ':') {
                                             element.attributesForced = element.attributesForced || [];
-                                            element.attributesForced.push({name: attrName, value: value});
+                                            element.attributesForced.push({
+                                                name: attrName,
+                                                value: value
+                                            });
                                             attr.forcedValue = value;
                                         }
 
@@ -609,9 +627,9 @@
 
                 each(split(customElements, ','), function (rule) {
                     var matches = customElementRegExp.exec(rule),
-                            inline = matches[1] === '~',
-                            cloneName = inline ? 'span' : 'div',
-                            name = matches[2];
+                        inline = matches[1] === '~',
+                        cloneName = inline ? 'span' : 'div',
+                        name = matches[2];
 
                     children[name] = children[cloneName];
                     customElementsMap[name] = cloneName;
@@ -650,7 +668,8 @@
 
             if (validChildren) {
                 each(split(validChildren, ','), function (rule) {
-                    var matches = childRuleRegExp.exec(rule), parent, prefix;
+                    var matches = childRuleRegExp.exec(rule),
+                        parent, prefix;
 
                     if (matches) {
                         prefix = matches[1];
@@ -659,7 +678,9 @@
                         if (prefix) {
                             parent = children[matches[2]];
                         } else {
-                            parent = children[matches[2]] = {'#comment': {}};
+                            parent = children[matches[2]] = {
+                                '#comment': {}
+                            };
                         }
 
                         parent = children[matches[2]];
@@ -681,7 +702,8 @@
         }
 
         function getElementRule(name) {
-            var element = elements[name], i;
+            var element = elements[name],
+                i;
 
             // Exact match found
             if (element) {
@@ -719,7 +741,10 @@
             }
 
             // Add default alt attribute for images
-            elements.img.attributesDefault = [{name: 'alt', value: ''}];
+            elements.img.attributesDefault = [{
+                name: 'alt',
+                value: ''
+            }];
 
             // Remove these if they are empty by default
             each(split('ol ul sub sup blockquote font table tbody tr strong b'), function (name) {

@@ -8,8 +8,9 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event;
 
 	/**
 	 * This class is used to create a UI button. A button is basically a link
@@ -27,23 +28,23 @@
 	 *                     title : 'My menu button',
 	 *                     image : 'some.gif'
 	 *                 });
-	 * 
+	 *
 	 *                 c.onRenderMenu.add(function(c, m) {
 	 *                     m.add({title : 'Some title', 'class' : 'mceMenuItemTitle'}).setDisabled(1);
-	 * 
+	 *
 	 *                     m.add({title : 'Some item 1', onclick : function() {
 	 *                         alert('Some item 1 was clicked.');
 	 *                     }});
-	 * 
+	 *
 	 *                     m.add({title : 'Some item 2', onclick : function() {
 	 *                         alert('Some item 2 was clicked.');
 	 *                     }});
 	 *               });
-	 * 
+	 *
 	 *               // Return the new menubutton instance
 	 *               return c;
 	 *         }
-	 * 
+	 *
 	 *         return null;
 	 *     }
 	 * });
@@ -58,8 +59,8 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		MenuButton : function(id, s, ed) {
-			this.parent(id, s, ed);
+		MenuButton: function (id, settings, editor) {
+			this.parent(id, settings, editor);
 
 			/**
 			 * Fires when the menu is rendered.
@@ -68,7 +69,7 @@
 			 */
 			this.onRenderMenu = new tinymce.util.Dispatcher(this);
 
-			s.menu_container = s.menu_container || DOM.doc.body;
+			settings.menu_container = settings.menu_container || DOM.doc.body;
 		},
 
 		/**
@@ -76,35 +77,37 @@
 		 *
 		 * @method showMenu
 		 */
-		showMenu : function() {
-			var t = this, p1, p2, e = DOM.get(t.id), m;
+		showMenu: function () {
+			var pos, elm = DOM.get(this.id),
+				menu;
 
-			if (t.isDisabled())
+			if (this.isDisabled()) {
 				return;
-
-			if (!t.isMenuRendered) {
-				t.renderMenu();
-				t.isMenuRendered = true;
 			}
 
-			if (t.isMenuVisible)
-				return t.hideMenu();
+			if (!this.isMenuRendered) {
+				this.renderMenu();
+				this.isMenuRendered = true;
+			}
 
-			p1 = DOM.getPos(t.settings.menu_container);
-			p2 = DOM.getPos(e);
+			if (this.isMenuVisible) {
+				return this.hideMenu();
+			}
 
-			m = t.menu;
-			m.settings.offset_x = p2.x;
-			m.settings.offset_y = p2.y;
-			m.settings.vp_offset_x = p2.x;
-			m.settings.vp_offset_y = p2.y;
-			m.settings.keyboard_focus = t._focused;
-			m.showMenu(0, e.firstChild.clientHeight);
+			pos = DOM.getPos(elm);
 
-			Event.add(DOM.doc, 'mousedown', t.hideMenu, t);
-			t.setState('Selected', 1);
+			menu = this.menu;
+			menu.settings.offset_x = pos.x;
+			menu.settings.offset_y = pos.y;
+			menu.settings.vp_offset_x = pos.x;
+			menu.settings.vp_offset_y = pos.y;
+			menu.settings.keyboard_focus = this._focused;
+			menu.showMenu(0, elm.firstChild.clientHeight);
 
-			t.isMenuVisible = 1;
+			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
+			this.setState('Selected', 1);
+
+			this.isMenuVisible = 1;
 		},
 
 		/**
@@ -112,22 +115,22 @@
 		 *
 		 * @method renderMenu
 		 */
-		renderMenu : function() {
-			var t = this, m;
+		renderMenu: function () {
+			var menu;
 
-			m = t.settings.control_manager.createDropMenu(t.id + '_menu', {
-				menu_line : 1,
-				'class' : this.classPrefix + 'Menu',
-				icons : t.settings.icons
+			menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
+				menu_line: 1,
+				'class': this.classPrefix + 'Menu',
+				icons: this.settings.icons
 			});
 
-			m.onHideMenu.add(function() {
-				t.hideMenu();
-				t.focus();
+			menu.onHideMenu.add(function () {
+				this.hideMenu();
+				this.focus();
 			});
 
-			t.onRenderMenu.dispatch(t, m);
-			t.menu = m;
+			this.onRenderMenu.dispatch(this, menu);
+			this.menu = menu;
 		},
 
 		/**
@@ -137,21 +140,29 @@
 		 * @method hideMenu
 		 * @param {Event} e Optional event object.
 		 */
-		hideMenu : function(e) {
-			var t = this;
+		hideMenu: function (e) {
+			var self = this;
 
 			// Prevent double toogles by canceling the mouse click event to the button
-			if (e && e.type == "mousedown" && DOM.getParent(e.target, function(e) {return e.id === t.id || e.id === t.id + '_open';}))
-				return;
+			var parent = DOM.getParent(e.target, function (e) {
+				return e.id === self.id || e.id === self.id + '_open';
+			});
 
-			if (!e || !DOM.getParent(e.target, '.mceMenu')) {
-				t.setState('Selected', 0);
-				Event.remove(DOM.doc, 'mousedown', t.hideMenu, t);
-				if (t.menu)
-					t.menu.hideMenu();
+			if (e && e.type == "mousedown" && parent) {
+				return;
 			}
 
-			t.isMenuVisible = 0;
+			if (!e || !DOM.getParent(e.target, '.mceMenu')) {
+				this.setState('Selected', 0);
+
+				Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
+
+				if (this.menu) {
+					this.menu.hideMenu();
+				}
+			}
+
+			this.isMenuVisible = 0;
 		},
 
 		/**
@@ -160,15 +171,17 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, s = t.settings;
+		postRender: function () {
+			var self = this,
+				settings = this.settings;
 
-			Event.add(t.id, 'click', function() {
-				if (!t.isDisabled()) {
-					if (s.onclick)
-						s.onclick(t.value);
+			Event.add(this.id, 'click', function () {
+				if (!this.isDisabled()) {
+					if (settings.onclick) {
+						settings.onclick(self.value);
+					}
 
-					t.showMenu();
+					self.showMenu();
 				}
 			});
 		}

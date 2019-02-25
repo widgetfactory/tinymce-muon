@@ -22,67 +22,60 @@
  * });
  */
 tinymce.create('static tinymce.util.XHR', {
-	/**
-	 * Sends a XMLHTTPRequest.
-	 * Consult the Wiki for details on what settings this method takes.
-	 *
-	 * @method send
-	 * @param {Object} o Object will target URL, callbacks and other info needed to make the request.
-	 */
-	send : function(o) {
-		var x, t, w = window, c = 0;
+    /**
+     * Sends a XMLHTTPRequest.
+     * Consult the Wiki for details on what settings this method takes.
+     *
+     * @method send
+     * @param {Object} o Object will target URL, callbacks and other info needed to make the request.
+     */
+    send: function (o) {
+        var xhr, c = 0;
 
-		function ready() {
-			if (!o.async || x.readyState == 4 || c++ > 10000) {
-				if (o.success && c < 10000 && x.status == 200)
-					o.success.call(o.success_scope, '' + x.responseText, x, o);
-				else if (o.error)
-					o.error.call(o.error_scope, c > 10000 ? 'TIMED_OUT' : 'GENERAL', x, o);
+        function ready() {
+            if (!o.async || xhr.readyState == 4 || c++ > 10000) {
+                if (o.success && c < 10000 && xhr.status == 200) {
+                    o.success.call(o.success_scope, '' + xhr.responseText, xhr, o);
+                } else if (o.error) {
+                    o.error.call(o.error_scope, c > 10000 ? 'TIMED_OUT' : 'GENERAL', xhr, o);
+                }
+                xhr = null;
+            } else {
+                window.setTimeout(ready, 10);
+            }
+        }
 
-				x = null;
-			} else
-				w.setTimeout(ready, 10);
-		};
+        // Default settings
+        o.scope = o.scope || this;
+        o.success_scope = o.success_scope || o.scope;
+        o.error_scope = o.error_scope || o.scope;
+        o.async = o.async === false ? false : true;
+        o.data = o.data || '';
 
-		// Default settings
-		o.scope = o.scope || this;
-		o.success_scope = o.success_scope || o.scope;
-		o.error_scope = o.error_scope || o.scope;
-		o.async = o.async === false ? false : true;
-		o.data = o.data || '';
+        xhr = new XMLHttpRequest();
 
-		function get(s) {
-			x = 0;
+        if (xhr) {
+            if (xhr.overrideMimeType) {
+                xhr.overrideMimeType(o.content_type);
+            }
 
-			try {
-				x = new ActiveXObject(s);
-			} catch (ex) {
-			}
+            xhr.open(o.type || (o.data ? 'POST' : 'GET'), o.url, o.async);
 
-			return x;
-		};
+            if (o.content_type) {
+                xhr.setRequestHeader('Content-Type', o.content_type);
+            }
 
-		x = w.XMLHttpRequest ? new XMLHttpRequest() : get('Microsoft.XMLHTTP') || get('Msxml2.XMLHTTP');
+            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
 
-		if (x) {
-			if (x.overrideMimeType)
-				x.overrideMimeType(o.content_type);
+            xhr.send(o.data);
 
-			x.open(o.type || (o.data ? 'POST' : 'GET'), o.url, o.async);
+            // Syncronous request
+            if (!o.async) {
+                return ready();
+            }
 
-			if (o.content_type)
-				x.setRequestHeader('Content-Type', o.content_type);
-
-			x.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-
-			x.send(o.data);
-
-			// Syncronous request
-			if (!o.async)
-				return ready();
-
-			// Wait for response, onReadyStateChange can not be used since it leaks memory in IE
-			t = w.setTimeout(ready, 10);
-		}
-	}
+            // Wait for response, onReadyStateChange can not be used since it leaks memory in IE
+            window.setTimeout(ready, 10);
+        }
+    }
 });

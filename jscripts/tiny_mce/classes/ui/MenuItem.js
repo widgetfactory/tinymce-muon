@@ -8,9 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var is = tinymce.is, DOM = tinymce.DOM, each = tinymce.each, walk = tinymce.walk;
-
+(function (tinymce) {
 	/**
 	 * This class is base class for all menu item types like DropMenus items etc. This class should not
 	 * be instantiated directly other menu items should inherit from this one.
@@ -27,8 +25,8 @@
 		 * @param {String} id Button control id for the button.
 		 * @param {Object} s Optional name/value settings object.
 		 */
-		MenuItem : function(id, s) {
-			this.parent(id, s);
+		MenuItem: function (id, settings) {
+			this.parent(id, settings);
 			this.classPrefix = 'mceMenuItem';
 		},
 
@@ -37,12 +35,12 @@
 		 * element that contains the control. So that it can be selected visually.
 		 *
 		 * @method setSelected
-		 * @param {Boolean} s Boolean state if the control should be selected or not.
+		 * @param {Boolean} state Boolean state if the control should be selected or not.
 		 */
-		setSelected : function(s) {
-			this.setState('Selected', s);
-			this.setAriaProperty('checked', !!s);
-			this.selected = s;
+		setSelected: function (state) {
+			this.setState('Selected', state);
+			this.setAriaProperty('checked', !!state);
+			this.selected = state;
 		},
 
 		/**
@@ -51,7 +49,7 @@
 		 * @method isSelected
 		 * @return {Boolean} true/false if the control is selected or not.
 		 */
-		isSelected : function() {
+		isSelected: function () {
 			return this.selected;
 		},
 
@@ -61,14 +59,13 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this;
-			
-			t.parent();
+		postRender: function () {
+			this.parent();
 
 			// Set pending state
-			if (is(t.selected))
-				t.setSelected(t.selected);
+			if (tinymce.is(this.selected)) {
+				this.setSelected(this.selected);
+			}
 		}
 	});
 })(tinymce);

@@ -8,9 +8,11 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	// Shorten names
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each, extend = tinymce.extend;
+	var Event = tinymce.dom.Event,
+		each = tinymce.each,
+		extend = tinymce.extend;
 
 	/**
 	 * This class is responsible for managing UI control instances. It's both a factory and a collection for the controls.
@@ -26,19 +28,19 @@
 		 * @param {tinymce.Editor} ed TinyMCE editor instance to add the control to.
 		 * @param {Object} s Optional settings object for the control manager.
 		 */
-		ControlManager : function(ed, s) {
-			var t = this, i;
+		ControlManager: function (ed, s) {
+			var self = this;
 
 			s = s || {};
-			t.editor = ed;
-			t.controls = {};
-			t.onAdd = new tinymce.util.Dispatcher(t);
-			t.onPostRender = new tinymce.util.Dispatcher(t);
-			t.prefix = s.prefix || ed.id + '_';
-			t._cls = {};
+			self.editor = ed;
+			self.controls = {};
+			self.onAdd = new tinymce.util.Dispatcher(self);
+			self.onPostRender = new tinymce.util.Dispatcher(self);
+			self.prefix = s.prefix || ed.id + '_';
+			self._cls = {};
 
-			t.onPostRender.add(function() {
-				each(t.controls, function(c) {
+			self.onPostRender.add(function () {
+				each(self.controls, function (c) {
 					c.postRender();
 				});
 			});
@@ -51,7 +53,7 @@
 		 * @param {String} id Control instance name.
 		 * @return {tinymce.ui.Control} Control instance or undefined.
 		 */
-		get : function(id) {
+		get: function (id) {
 			return this.controls[this.prefix + id] || this.controls[id];
 		},
 
@@ -63,11 +65,12 @@
 		 * @param {Boolean} s Active state true/false.
 		 * @return {tinymce.ui.Control} Control instance that got activated or null if it wasn't found.
 		 */
-		setActive : function(id, s) {
-			var c = null;
+		setActive: function (id, s) {
+			var c = this.get(id);
 
-			if (c = this.get(id))
+			if (c) {
 				c.setActive(s);
+			}
 
 			return c;
 		},
@@ -80,11 +83,12 @@
 		 * @param {Boolean} s Active state true/false.
 		 * @return {tinymce.ui.Control} Control instance that got disabled or null if it wasn't found.
 		 */
-		setDisabled : function(id, s) {
-			var c = null;
+		setDisabled: function (id, s) {
+			var c = c = this.get(id);
 
-			if (c = this.get(id))
+			if (c) {
 				c.setDisabled(s);
+			}
 
 			return c;
 		},
@@ -96,12 +100,12 @@
 		 * @param {tinymce.ui.Control} Control instance to add to collection.
 		 * @return {tinymce.ui.Control} Control instance that got passed in.
 		 */
-		add : function(c) {
-			var t = this;
+		add: function (c) {
+			var self = this;
 
 			if (c) {
-				t.controls[c.id] = c;
-				t.onAdd.dispatch(c, t);
+				self.controls[c.id] = c;
+				self.onAdd.dispatch(c, self);
 			}
 
 			return c;
@@ -116,13 +120,15 @@
 		 * @param {String} name Control name to create for example "separator".
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createControl : function(name) {
-			var ctrl, i, l, self = this, editor = self.editor, factories, ctrlName;
+		createControl: function (name) {
+			var ctrl, i, l, self = this,
+				editor = self.editor,
+				factories;
 
 			// Build control factory cache
 			if (!self.controlFactories) {
 				self.controlFactories = [];
-				each(editor.plugins, function(plugin) {
+				each(editor.plugins, function (plugin) {
 					if (plugin.createControl) {
 						self.controlFactories.push(plugin);
 					}
@@ -161,50 +167,58 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createDropMenu : function(id, s, cc) {
-			var t = this, ed = t.editor, c, bm, v, cls;
+		createDropMenu: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, bm, v, cls;
 
 			s = extend({
-				'class' : 'mceDropDown',
-				constrain : ed.settings.constrain_menus
+				'class': 'mceDropDown',
+				constrain: ed.settings.constrain_menus
 			}, s);
 
 			s['class'] = s['class'] + ' ' + ed.getParam('skin') + 'Skin';
-			if (v = ed.getParam('skin_variant'))
+
+			v = ed.getParam('skin_variant');
+
+			if (v) {
 				s['class'] += ' ' + ed.getParam('skin') + 'Skin' + v.substring(0, 1).toUpperCase() + v.substring(1);
+			}
 
 			s['class'] += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
 
-			id = t.prefix + id;
-			cls = cc || t._cls.dropmenu || tinymce.ui.DropMenu;
-			c = t.controls[id] = new cls(id, s);
-			c.onAddItem.add(function(c, o) {
+			id = self.prefix + id;
+			cls = cc || self._cls.dropmenu || tinymce.ui.DropMenu;
+			c = self.controls[id] = new cls(id, s);
+
+			c.onAddItem.add(function (c, o) {
 				var s = o.settings;
 
 				s.title = ed.getLang(s.title, s.title);
 
 				if (!s.onclick) {
-					s.onclick = function(v) {
-						if (s.cmd)
+					s.onclick = function () {
+						if (s.cmd) {
 							ed.execCommand(s.cmd, s.ui || false, s.value);
+						}
 					};
 				}
 			});
 
-			ed.onRemove.add(function() {
+			ed.onRemove.add(function () {
 				c.destroy();
 			});
 
 			// Fix for bug #1897785, #1898007
 			if (tinymce.isIE) {
-				c.onShowMenu.add(function() {
+				c.onShowMenu.add(function () {
 					// IE 8 needs focus in order to store away a range with the current collapsed caret location
 					ed.focus();
 
 					bm = ed.selection.getBookmark(1);
 				});
 
-				c.onHideMenu.add(function() {
+				c.onHideMenu.add(function () {
 					if (bm) {
 						ed.selection.moveToBookmark(bm);
 						bm = 0;
@@ -212,7 +226,7 @@
 				});
 			}
 
-			return t.add(c);
+			return self.add(c);
 		},
 
 		/**
@@ -225,64 +239,67 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createListBox : function(id, s, cc) {
-			var t = this, ed = t.editor, cmd, c, cls;
+		createListBox: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, cls;
 
-			if (t.get(id))
+			if (self.get(id)) {
 				return null;
+			}
 
 			s.title = ed.translate(s.title);
 			s.scope = s.scope || ed;
 
 			if (!s.onselect) {
-				s.onselect = function(v) {
+				s.onselect = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
 			s = extend({
-				title : s.title,
-				'class' : 'mce_' + id,
-				scope : s.scope,
-				control_manager : t
+				title: s.title,
+				'class': 'mce_' + id,
+				scope: s.scope,
+				control_manager: self
 			}, s);
 
-			id = t.prefix + id;
-
+			id = self.prefix + id;
 
 			function useNativeListForAccessibility(ed) {
-				return ed.settings.use_accessible_selects && !tinymce.isGecko
+				return ed.settings.use_accessible_selects && !tinymce.isGecko;
 			}
 
-			if (ed.settings.use_native_selects || useNativeListForAccessibility(ed))
+			if (ed.settings.use_native_selects || useNativeListForAccessibility(ed)) {
 				c = new tinymce.ui.NativeListBox(id, s);
-			else {
-				cls = cc || t._cls.listbox || tinymce.ui.ListBox;
+			} else {
+				cls = cc || self._cls.listbox || tinymce.ui.ListBox;
 				c = new cls(id, s, ed);
 			}
 
-			t.controls[id] = c;
+			self.controls[id] = c;
 
 			// Fix focus problem in Safari
 			if (tinymce.isWebKit) {
-				c.onPostRender.add(function(c, n) {
+				c.onPostRender.add(function (c, n) {
 					// Store bookmark on mousedown
-					Event.add(n, 'mousedown', function() {
+					Event.add(n, 'mousedown', function () {
 						ed.bookmark = ed.selection.getBookmark(1);
 					});
 
 					// Restore on focus, since it might be lost
-					Event.add(n, 'focus', function() {
+					Event.add(n, 'focus', function () {
 						ed.selection.moveToBookmark(ed.bookmark);
 						ed.bookmark = null;
 					});
 				});
 			}
 
-			if (c.hideMenu)
+			if (c.hideMenu) {
 				ed.onMouseDown.add(c.hideMenu, c);
+			}
 
-			return t.add(c);
+			return self.add(c);
 		},
 
 		/**
@@ -294,42 +311,44 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createButton : function(id, s, cc) {
-			var t = this, ed = t.editor, o, c, cls;
+		createButton: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, cls;
 
-			if (t.get(id))
+			if (self.get(id)) {
 				return null;
-
+			}
 			s.title = ed.translate(s.title);
 			s.label = ed.translate(s.label);
 			s.scope = s.scope || ed;
 
 			if (!s.onclick && !s.menu_button) {
-				s.onclick = function() {
+				s.onclick = function () {
 					ed.execCommand(s.cmd, s.ui || false, s.value);
 				};
 			}
 
 			s = extend({
-				title : s.title,
-				'class' : 'mce_' + id,
-				unavailable_prefix : ed.getLang('unavailable', ''),
-				scope : s.scope,
-				control_manager : t
+				title: s.title,
+				'class': 'mce_' + id,
+				unavailable_prefix: ed.getLang('unavailable', ''),
+				scope: s.scope,
+				control_manager: self
 			}, s);
 
-			id = t.prefix + id;
+			id = self.prefix + id;
 
 			if (s.menu_button) {
-				cls = cc || t._cls.menubutton || tinymce.ui.MenuButton;
+				cls = cc || self._cls.menubutton || tinymce.ui.MenuButton;
 				c = new cls(id, s, ed);
 				ed.onMouseDown.add(c.hideMenu, c);
 			} else {
-				cls = t._cls.button || tinymce.ui.Button;
+				cls = self._cls.button || tinymce.ui.Button;
 				c = new cls(id, s, ed);
 			}
 
-			return t.add(c);
+			return self.add(c);
 		},
 
 		/**
@@ -341,7 +360,7 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createMenuButton : function(id, s, cc) {
+		createMenuButton: function (id, s, cc) {
 			s = s || {};
 			s.menu_button = 1;
 
@@ -357,37 +376,40 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createSplitButton : function(id, s, cc) {
-			var t = this, ed = t.editor, cmd, c, cls;
+		createSplitButton: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, cls;
 
-			if (t.get(id))
+			if (self.get(id)) {
 				return null;
+			}
 
 			s.title = ed.translate(s.title);
 			s.scope = s.scope || ed;
 
 			if (!s.onclick) {
-				s.onclick = function(v) {
+				s.onclick = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
 			if (!s.onselect) {
-				s.onselect = function(v) {
+				s.onselect = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
 			s = extend({
-				title : s.title,
-				'class' : 'mce_' + id,
-				scope : s.scope,
-				control_manager : t
+				title: s.title,
+				'class': 'mce_' + id,
+				scope: s.scope,
+				control_manager: self
 			}, s);
 
-			id = t.prefix + id;
-			cls = cc || t._cls.splitbutton || tinymce.ui.SplitButton;
-			c = t.add(new cls(id, s, ed));
+			id = self.prefix + id;
+			cls = cc || self._cls.splitbutton || tinymce.ui.SplitButton;
+			c = self.add(new cls(id, s, ed));
 			ed.onMouseDown.add(c.hideMenu, c);
 
 			return c;
@@ -402,57 +424,61 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createColorSplitButton : function(id, s, cc) {
-			var t = this, ed = t.editor, cmd, c, cls, bm;
+		createColorSplitButton: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, cls, bm;
 
-			if (t.get(id))
+			if (self.get(id)) {
 				return null;
+			}
 
 			s.title = ed.translate(s.title);
 			s.scope = s.scope || ed;
 
 			if (!s.onclick) {
-				s.onclick = function(v) {
-					if (tinymce.isIE)
+				s.onclick = function (v) {
+					if (tinymce.isIE) {
 						bm = ed.selection.getBookmark(1);
+					}
 
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
 			if (!s.onselect) {
-				s.onselect = function(v) {
+				s.onselect = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
 			s = extend({
-				title : s.title,
-				'class' : 'mce_' + id,
-				'menu_class' : ed.getParam('skin') + 'Skin',
-				scope : s.scope,
-				more_colors_title : ed.getLang('more_colors')
+				title: s.title,
+				'class': 'mce_' + id,
+				'menu_class': ed.getParam('skin') + 'Skin',
+				scope: s.scope,
+				more_colors_title: ed.getLang('more_colors')
 			}, s);
 
-			id = t.prefix + id;
-			cls = cc || t._cls.colorsplitbutton || tinymce.ui.ColorSplitButton;
+			id = self.prefix + id;
+			cls = cc || self._cls.colorsplitbutton || tinymce.ui.ColorSplitButton;
 			c = new cls(id, s, ed);
 			ed.onMouseDown.add(c.hideMenu, c);
 
 			// Remove the menu element when the editor is removed
-			ed.onRemove.add(function() {
+			ed.onRemove.add(function () {
 				c.destroy();
 			});
 
 			// Fix for bug #1897785, #1898007
 			if (tinymce.isIE) {
-				c.onShowMenu.add(function() {
+				c.onShowMenu.add(function () {
 					// IE 8 needs focus in order to store away a range with the current collapsed caret location
 					ed.focus();
 					bm = ed.selection.getBookmark(1);
 				});
 
-				c.onHideMenu.add(function() {
+				c.onHideMenu.add(function () {
 					if (bm) {
 						ed.selection.moveToBookmark(bm);
 						bm = 0;
@@ -460,7 +486,7 @@
 				});
 			}
 
-			return t.add(c);
+			return self.add(c);
 		},
 
 		/**
@@ -472,29 +498,33 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createToolbar : function(id, s, cc) {
-			var c, t = this, cls;
+		createToolbar: function (id, s, cc) {
+			var c, self = this,
+				cls;
 
-			id = t.prefix + id;
-			cls = cc || t._cls.toolbar || tinymce.ui.Toolbar;
-			c = new cls(id, s, t.editor);
+			id = self.prefix + id;
+			cls = cc || self._cls.toolbar || tinymce.ui.Toolbar;
+			c = new cls(id, s, self.editor);
 
-			if (t.get(id))
+			if (self.get(id)) {
 				return null;
+			}
 
-			return t.add(c);
+			return self.add(c);
 		},
-		
-		createToolbarGroup : function(id, s, cc) {
-			var c, t = this, cls;
-			id = t.prefix + id;
+
+		createToolbarGroup: function (id, s, cc) {
+			var c, self = this,
+				cls;
+			id = self.prefix + id;
 			cls = cc || this._cls.toolbarGroup || tinymce.ui.ToolbarGroup;
-			c = new cls(id, s, t.editor);
-			
-			if (t.get(id))
+			c = new cls(id, s, self.editor);
+
+			if (self.get(id)) {
 				return null;
-			
-			return t.add(c);
+			}
+
+			return self.add(c);
 		},
 
 		/**
@@ -504,7 +534,7 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		createSeparator : function(cc) {
+		createSeparator: function (cc) {
 			var cls = cc || this._cls.separator || tinymce.ui.Separator;
 
 			return new cls();
@@ -518,17 +548,17 @@
 		 * @param {function} c Class reference to use instead of the default one.
 		 * @return {function} Same as the class reference.
 		 */
-		setControlType : function(n, c) {
+		setControlType: function (n, c) {
 			return this._cls[n.toLowerCase()] = c;
 		},
-	
+
 		/**
 		 * Destroy.
 		 *
 		 * @method destroy
 		 */
-		destroy : function() {
-			each(this.controls, function(c) {
+		destroy: function () {
+			each(this.controls, function (c) {
 				c.destroy();
 			});
 

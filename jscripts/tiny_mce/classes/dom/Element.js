@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * Element class, this enables element blocking in IE. Element blocking is a method to block out select blockes that
 	 * gets visible though DIVs on IE 6 it uses a iframe for this blocking. This class also shortens the length of some DOM API calls
@@ -18,7 +18,7 @@
 	 * @example
 	 * // Creates an basic element for an existing element
 	 * var elm = new tinymce.dom.Element('someid');
-	 * 
+	 *
 	 * elm.setStyle('background-color', 'red');
 	 * elm.moveTo(10, 10);
 	 */
@@ -31,37 +31,36 @@
 	 * @param {String} id Element ID to bind/execute methods on.
 	 * @param {Object} settings Optional settings name/value collection.
 	 */
-	tinymce.dom.Element = function(id, settings) {
-		var t = this, dom, el;
+	tinymce.dom.Element = function (id, settings) {
+		var self = this,
+			dom;
 
-		t.settings = settings = settings || {};
-		t.id = id;
-		t.dom = dom = settings.dom || tinymce.DOM;
-
-		// Only IE leaks DOM references, this is a lot faster
-		if (!tinymce.isIE)
-			el = dom.get(t.id);
+		self.settings = settings = settings || {};
+		self.id = id;
+		self.dom = dom = settings.dom || tinymce.DOM;
 
 		tinymce.each(
-				('getPos,getRect,getParent,add,setStyle,getStyle,setStyles,' + 
-				'setAttrib,setAttribs,getAttrib,addClass,removeClass,' + 
-				'hasClass,getOuterHTML,setOuterHTML,remove,show,hide,' + 
-				'isHidden,setHTML,get').split(/,/), function(k) {
-					t[k] = function() {
-						var a = [id], i;
+			('getPos,getRect,getParent,add,setStyle,getStyle,setStyles,' +
+				'setAttrib,setAttribs,getAttrib,addClass,removeClass,' +
+				'hasClass,getOuterHTML,setOuterHTML,remove,show,hide,' +
+				'isHidden,setHTML,get').split(/,/),
+			function (k) {
+				self[k] = function () {
+					var a = [id],
+						i;
 
-						for (i = 0; i < arguments.length; i++)
-							a.push(arguments[i]);
+					for (i = 0; i < arguments.length; i++) {
+						a.push(arguments[i]);
+					}
 
-						a = dom[k].apply(dom, a);
-						t.update(k);
+					a = dom[k].apply(dom, a);
 
-						return a;
-					};
+					return a;
+				};
 			}
 		);
 
-		tinymce.extend(t, {
+		tinymce.extend(self, {
 			/**
 			 * Adds a event handler to the element.
 			 *
@@ -71,8 +70,8 @@
 			 * @param {Object} s Optional scope to execute function on.
 			 * @return {function} Event handler function the same as the input function.
 			 */
-			on : function(n, f, s) {
-				return tinymce.dom.Event.add(t.id, n, f, s);
+			on: function (n, f, s) {
+				return tinymce.dom.Event.add(self.id, n, f, s);
 			},
 
 			/**
@@ -81,10 +80,10 @@
 			 * @method getXY
 			 * @return {Object} Objext with x, y cordinate fields.
 			 */
-			getXY : function() {
+			getXY: function () {
 				return {
-					x : parseInt(t.getStyle('left')),
-					y : parseInt(t.getStyle('top'))
+					x: parseInt(self.getStyle('left')),
+					y: parseInt(self.getStyle('top'))
 				};
 			},
 
@@ -94,12 +93,12 @@
 			 * @method getSize
 			 * @return {Object} Object with element size with a w and h field.
 			 */
-			getSize : function() {
-				var n = dom.get(t.id);
+			getSize: function () {
+				var n = dom.get(self.id);
 
 				return {
-					w : parseInt(t.getStyle('width') || n.clientWidth),
-					h : parseInt(t.getStyle('height') || n.clientHeight)
+					w: parseInt(self.getStyle('width') || n.clientWidth),
+					h: parseInt(self.getStyle('height') || n.clientHeight)
 				};
 			},
 
@@ -110,8 +109,11 @@
 			 * @param {Number} x X cordinate of element position.
 			 * @param {Number} y Y cordinate of element position.
 			 */
-			moveTo : function(x, y) {
-				t.setStyles({left : x, top : y});
+			moveTo: function (x, y) {
+				self.setStyles({
+					left: x,
+					top: y
+				});
 			},
 
 			/**
@@ -121,10 +123,10 @@
 			 * @param {Number} x Relative X cordinate of element position.
 			 * @param {Number} y Relative Y cordinate of element position.
 			 */
-			moveBy : function(x, y) {
-				var p = t.getXY();
+			moveBy: function (x, y) {
+				var p = self.getXY();
 
-				t.moveTo(p.x + x, p.y + y);
+				self.moveTo(p.x + x, p.y + y);
 			},
 
 			/**
@@ -134,8 +136,11 @@
 			 * @param {Number} w New width of element.
 			 * @param {Numner} h New height of element.
 			 */
-			resizeTo : function(w, h) {
-				t.setStyles({width : w, height : h});
+			resizeTo: function (w, h) {
+				self.setStyles({
+					width: w,
+					height: h
+				});
 			},
 
 			/**
@@ -145,10 +150,10 @@
 			 * @param {Number} w Relative width of element.
 			 * @param {Numner} h Relative height of element.
 			 */
-			resizeBy : function(w, h) {
-				var s = t.getSize();
+			resizeBy: function (w, h) {
+				var s = self.getSize();
 
-				t.resizeTo(s.w + w, s.h + h);
+				self.resizeTo(s.w + w, s.h + h);
 			},
 
 			/**
@@ -157,8 +162,7 @@
 			 * @method update
 			 * @param {String} k Optional function key. Used internally.
 			 */
-			update : function(k) {
-			}
+			update: function () {}
 		});
 	};
 })(tinymce);

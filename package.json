@@ -1,6 +1,6 @@
 {
   "name": "tinymce-muon",
-  "version": "4.0",
+  "version": "3.6.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/widgetfactory/tinymce-muon.git"
@@ -14,9 +14,7 @@
   "engines": {
     "node": ">=0.10.26"
   },
-  "scripts": {
-    "test": "grunt test"
-  },
+  "scripts": {},
   "devDependencies": {
     "amdlc": "^0.1.8",
     "grunt": "~1.0.1",
@@ -26,6 +24,7 @@
     "grunt-contrib-qunit": "~1.2.0",
     "grunt-contrib-uglify": "~2.0.0",
     "grunt-eslint": "~19.0.0",
+    "grunt-jsbeautifier": "^0.2.13",
     "grunt-nuget-pack": "^0.0.6",
     "load-grunt-tasks": "~3.5.2"
   }

@@ -8,19 +8,21 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var whiteSpaceRegExp = /^[ \t\r\n]*$/, typeLookup = {
-		'#text' : 3,
-		'#comment' : 8,
-		'#cdata' : 4,
-		'#pi' : 7,
-		'#doctype' : 10,
-		'#document-fragment' : 11
-	};
+(function (tinymce) {
+	var whiteSpaceRegExp = /^[ \t\r\n]*$/,
+		typeLookup = {
+			'#text': 3,
+			'#comment': 8,
+			'#cdata': 4,
+			'#pi': 7,
+			'#doctype': 10,
+			'#document-fragment': 11
+		};
 
 	// Walks the tree left/right
 	function walk(node, root_node, prev) {
-		var sibling, parent, startName = prev ? 'lastChild' : 'firstChild', siblingName = prev ? 'prev' : 'next';
+		var sibling, parent, startName = prev ? 'lastChild' : 'firstChild',
+			siblingName = prev ? 'prev' : 'next';
 
 		// Walk into nodes if it has a start
 		if (node[startName]) {
@@ -44,7 +46,7 @@
 				}
 			}
 		}
-	};
+	}
 
 	/**
 	 * This class is a minimalistic implementation of a DOM like node used by the DomParser class.
@@ -86,7 +88,7 @@
 		 * @param {tinymce.html.Node} node Node to replace the current node with.
 		 * @return {tinymce.html.Node} The old node that got replaced.
 		 */
-		replace : function(node) {
+		replace: function (node) {
 			var self = this;
 
 			if (node.parent) {
@@ -112,8 +114,9 @@
 		 * @param {String} value Optional value to set.
 		 * @return {String/tinymce.html.Node} String or undefined on a get operation or the current node on a set operation.
 		 */
-		attr : function(name, value) {
-			var self = this, attrs, i, undef;
+		attr: function (name, value) {
+			var self = this,
+				attrs, i, undef;
 
 			if (typeof name !== "string") {
 				for (i in name) {
@@ -146,7 +149,7 @@
 					if (name in attrs.map) {
 						// stringify value
 						value = '' + value;
-						
+
 						// Set attribute
 						i = attrs.length;
 						while (i--) {
@@ -156,7 +159,10 @@
 							}
 						}
 					} else {
-						attrs.push({name: name, value: value});
+						attrs.push({
+							name: name,
+							value: value
+						});
 					}
 
 					attrs.map[name] = value;
@@ -178,8 +184,10 @@
 		 * @method clone
 		 * @return {tinymce.html.Node} New copy of the original node.
 		 */
-		clone : function() {
-			var self = this, clone = new Node(self.name, self.type), i, l, selfAttrs, selfAttr, cloneAttrs;
+		clone: function () {
+			var self = this,
+				clone = new Node(self.name, self.type),
+				i, l, selfAttrs, selfAttr, cloneAttrs;
 
 			// Clone element attributes
 			if ((selfAttrs = self.attributes)) {
@@ -191,7 +199,10 @@
 
 					// Clone everything except id
 					if (selfAttr.name !== 'id') {
-						cloneAttrs[cloneAttrs.length] = {name: selfAttr.name, value: selfAttr.value};
+						cloneAttrs[cloneAttrs.length] = {
+							name: selfAttr.name,
+							value: selfAttr.value
+						};
 						cloneAttrs.map[selfAttr.name] = selfAttr.value;
 					}
 				}
@@ -213,7 +224,7 @@
 		 *
 		 * @method wrap
 		 */
-		wrap : function(wrapper) {
+		wrap: function (wrapper) {
 			var self = this;
 
 			self.parent.insert(wrapper, self);
@@ -230,8 +241,9 @@
 		 *
 		 * @method unwrap
 		 */
-		unwrap : function() {
-			var self = this, node, next;
+		unwrap: function () {
+			var self = this,
+				node, next;
 
 			for (node = self.firstChild; node;) {
 				next = node.next;
@@ -251,8 +263,11 @@
 		 * @method remove
 		 * @return {tinymce.html.Node} Current node that got removed.
 		 */
-		remove : function() {
-			var self = this, parent = self.parent, next = self.next, prev = self.prev;
+		remove: function () {
+			var self = this,
+				parent = self.parent,
+				next = self.next,
+				prev = self.prev;
 
 			if (parent) {
 				if (parent.firstChild === self) {
@@ -291,8 +306,9 @@
 		 * @param {tinymce.html.Node} node Node to append as a child of the current one.
 		 * @return {tinymce.html.Node} The node that got appended.
 		 */
-		append : function(node) {
-			var self = this, last;
+		append: function (node) {
+			var self = this,
+				last;
 
 			if (node.parent) {
 				node.remove();
@@ -324,7 +340,7 @@
 		 * @param {Boolean} before Optional state to insert the node before the reference node.
 		 * @return {tinymce.html.Node} The node that got inserted.
 		 */
-		insert : function(node, ref_node, before) {
+		insert: function (node, ref_node, before) {
 			var parent;
 
 			if (node.parent) {
@@ -367,8 +383,9 @@
 		 * @param {String} name Name of the child nodes to collect.
 		 * @return {Array} Array with child nodes matchin the specified name.
 		 */
-		getAll : function(name) {
-			var self = this, node, collection = [];
+		getAll: function (name) {
+			var self = this,
+				node, collection = [];
 
 			for (node = self.firstChild; node; node = walk(node, self)) {
 				if (node.name === name) {
@@ -385,8 +402,9 @@
 		 * @method empty
 		 * @return {tinymce.html.Node} The current node that got cleared.
 		 */
-		empty : function() {
-			var self = this, nodes, i, node;
+		empty: function () {
+			var self = this,
+				nodes, i, node;
 
 			// Remove all children
 			if (self.firstChild) {
@@ -419,8 +437,10 @@
 		 * @param {Object} elements Name/value object with elements that are automatically treated as non empty elements.
 		 * @return {Boolean} true/false if the node is empty or not.
 		 */
-		isEmpty : function(elements) {
-			var self = this, node = self.firstChild, i, name;
+		isEmpty: function (elements) {
+			var self = this,
+				node = self.firstChild,
+				i, name;
 
 			if (node) {
 				do {
@@ -467,7 +487,7 @@
 		 * @param {Boolean} prev Optional previous node state defaults to false.
 		 * @return {tinymce.html.Node} Node that is next to or previous of the current node.
 		 */
-		walk : function(prev) {
+		walk: function (prev) {
 			return walk(this, null, prev);
 		}
 	});
@@ -481,7 +501,7 @@
 		 * @param {String} name Name of the node type to create for example "b" or "#text".
 		 * @param {Object} attrs Name/value collection of attributes that will be applied to elements.
 		 */
-		create : function(name, attrs) {
+		create: function (name, attrs) {
 			var node, attrName;
 
 			// Create node

@@ -9,10 +9,6 @@
  */
 
 (function (tinymce) {
-	function trimNl(s) {
-		return s.replace(/[\n\r]+/g, '');
-	};
-
 	// Shorten names
 	var is = tinymce.is,
 		isIE = tinymce.isIE,
@@ -39,12 +35,12 @@
 		 * @param {tinymce.dom.Serializer} serializer DOM serialization class to use for getContent.
 		 */
 		Selection: function (dom, win, serializer, editor) {
-			var t = this;
+			var self = this;
 
-			t.dom = dom;
-			t.win = win;
-			t.serializer = serializer;
-			t.editor = editor;
+			self.dom = dom;
+			self.win = win;
+			self.serializer = serializer;
+			self.editor = editor;
 
 			// Add events
 			each([
@@ -84,7 +80,7 @@
 				 */
 				'onGetContent'
 			], function (e) {
-				t[e] = new tinymce.util.Dispatcher(t);
+				self[e] = new tinymce.util.Dispatcher(self);
 			});
 
 			if (tinymce.isIE && !tinymce.isIE11 && dom.boxModel) {
@@ -92,7 +88,7 @@
 			}
 
 			// Prevent leaks
-			tinymce.addUnload(t.destroy, t);
+			tinymce.addUnload(self.destroy, self);
 		},
 
 		/**
@@ -101,26 +97,21 @@
 		 * @param offset Offset from the start of the node to put the cursor at.
 		 */
 		setCursorLocation: function (node, offset) {
-			var t = this;
-			var r = t.dom.createRng();
+			var self = this;
+			var r = self.dom.createRng();
 			r.setStart(node, offset);
 			r.setEnd(node, offset);
-			t.setRng(r);
-			t.collapse(false);
+			self.setRng(r);
+			self.collapse(false);
 		},
 
 		getContextualFragment: function (rng, frag) {
-			var t = this,
-				ed = t.editor,
-				dom = t.dom;
+			var self = this,
+				ed = self.editor,
+				dom = self.dom;
 
 			function isBlock(elm) {
 				return dom.isBlock(elm) && !/H[1-6]/.test(elm.nodeName);
-			}
-
-			function isAllTextSelected(rng) {
-				var node = rng.commonAncestorContainer;
-				return rng.endOffset - rng.startOffset === node.nodeValue.length;
 			}
 
 			var node = rng.commonAncestorContainer;
@@ -195,10 +186,10 @@
 		 * alert(tinyMCE.activeEditor.selection.getContent({format : 'text'}));
 		 */
 		getContent: function (s) {
-			var t = this,
-				r = t.getRng(),
-				e = t.dom.create("body"),
-				se = t.getSel(),
+			var self = this,
+				r = self.getRng(),
+				e = self.dom.create("body"),
+				se = self.getSel(),
 				wb, wa, frag;
 
 			s = s || {};
@@ -206,10 +197,10 @@
 			s.get = true;
 			s.format = s.format || 'html';
 			s.forced_root_block = '';
-			t.onBeforeGetContent.dispatch(t, s);
+			self.onBeforeGetContent.dispatch(self, s);
 
 			if (s.format == 'text') {
-				return t.isCollapsed() ? '' : (r.text || (se.toString ? se.toString() : ''));
+				return self.isCollapsed() ? '' : (r.text || (se.toString ? se.toString() : ''));
 			}
 
 			if (r.cloneContents) {
@@ -219,7 +210,7 @@
 
 					// internal content selection for cut/copy
 					if (s.contextual) {
-						frag = t.getContextualFragment(r, frag);
+						frag = self.getContextualFragment(r, frag);
 					}
 
 					e.appendChild(frag);
@@ -245,9 +236,9 @@
 
 			s.getInner = true;
 
-			s.content = t.isCollapsed() ? '' : wb + t.serializer.serialize(e, s) + wa;
+			s.content = self.isCollapsed() ? '' : wb + self.serializer.serialize(e, s) + wa;
 
-			t.onGetContent.dispatch(t, s);
+			self.onGetContent.dispatch(self, s);
 
 			return s.content;
 		},
@@ -277,8 +268,9 @@
 			content = args.content = content;
 
 			// Dispatch before set content event
-			if (!args.no_events)
+			if (!args.no_events) {
 				self.onBeforeSetContent.dispatch(self, args);
+			}
 
 			content = args.content;
 
@@ -340,13 +332,15 @@
 				if (/^\s+/.test(content)) {
 					rng.pasteHTML('<span id="__mce_tmp">_</span>' + content);
 					self.dom.remove('__mce_tmp');
-				} else
+				} else {
 					rng.pasteHTML(content);
+				}
 			}
 
 			// Dispatch set content event
-			if (!args.no_events)
+			if (!args.no_events) {
 				self.onSetContent.dispatch(self, args);
+			}
 		},
 
 		/**
@@ -363,8 +357,9 @@
 
 			if (rng.duplicate || rng.item) {
 				// Control selection, return first item
-				if (rng.item)
+				if (rng.item) {
 					return rng.item(0);
+				}
 
 				// Get start element
 				checkRng = rng.duplicate();
@@ -377,6 +372,7 @@
 				// Check if range parent is inside the start element, then return the inner parent element
 				// This will fix issues when a single element is selected, IE would otherwise return the wrong start element
 				parentElement = node = rng.parentElement();
+
 				while (node = node.parentNode) {
 					if (node == startElement) {
 						startElement = parentElement;
@@ -388,11 +384,13 @@
 			} else {
 				startElement = rng.startContainer;
 
-				if (startElement.nodeType == 1 && startElement.hasChildNodes())
+				if (startElement.nodeType == 1 && startElement.hasChildNodes()) {
 					startElement = startElement.childNodes[Math.min(startElement.childNodes.length - 1, rng.startOffset)];
+				}
 
-				if (startElement && startElement.nodeType == 3)
+				if (startElement && startElement.nodeType == 3) {
 					return startElement.parentNode;
+				}
 
 				return startElement;
 			}
@@ -411,8 +409,9 @@
 				endElement, endOffset;
 
 			if (rng.duplicate || rng.item) {
-				if (rng.item)
+				if (rng.item) {
 					return rng.item(0);
+				}
 
 				rng = rng.duplicate();
 				rng.collapse(0);
@@ -421,19 +420,22 @@
 					endElement = self.dom.getRoot();
 				}
 
-				if (endElement && endElement.nodeName == 'BODY')
+				if (endElement && endElement.nodeName == 'BODY') {
 					return endElement.lastChild || endElement;
+				}
 
 				return endElement;
 			} else {
 				endElement = rng.endContainer;
 				endOffset = rng.endOffset;
 
-				if (endElement.nodeType == 1 && endElement.hasChildNodes())
+				if (endElement.nodeType == 1 && endElement.hasChildNodes()) {
 					endElement = endElement.childNodes[endOffset > 0 ? endOffset - 1 : endOffset];
+				}
 
-				if (endElement && endElement.nodeType == 3)
+				if (endElement && endElement.nodeType == 3) {
 					return endElement.parentNode;
+				}
 
 				return endElement;
 			}
@@ -457,21 +459,22 @@
 		 * tinyMCE.activeEditor.selection.moveToBookmark(bm);
 		 */
 		getBookmark: function (type, normalized) {
-			var t = this,
-				dom = t.dom,
-				rng, rng2, id, collapsed, name, element, index, chr = '\uFEFF',
+			var self = this,
+				dom = self.dom,
+				rng, rng2, id, collapsed, name, element, chr = '\uFEFF',
 				styles;
 
 			function findIndex(name, element) {
 				var index = 0;
 
 				each(dom.select(name), function (node, i) {
-					if (node == element)
+					if (node == element) {
 						index = i;
+					}
 				});
 
 				return index;
-			};
+			}
 
 			function normalizeTableCellSelection(rng) {
 				function moveEndPoint(start) {
@@ -488,16 +491,16 @@
 							rng['set' + (start ? 'Start' : 'End')](container, offset);
 						}
 					}
-				};
+				}
 
 				moveEndPoint(true);
 				moveEndPoint();
 
 				return rng;
-			};
+			}
 
 			function getLocation() {
-				var rng = t.getRng(true),
+				var rng = self.getRng(true),
 					root = dom.getRoot(),
 					bookmark = {};
 
@@ -509,8 +512,9 @@
 
 					if (container.nodeType == 3) {
 						if (normalized) {
-							for (node = container.previousSibling; node && node.nodeType == 3; node = node.previousSibling)
+							for (node = container.previousSibling; node && node.nodeType == 3; node = node.previousSibling) {
 								offset += node.nodeValue.length;
+							}
 						}
 
 						point.push(offset);
@@ -522,22 +526,24 @@
 							offset = Math.max(0, childNodes.length - 1);
 						}
 
-						point.push(t.dom.nodeIndex(childNodes[offset], normalized) + after);
+						point.push(self.dom.nodeIndex(childNodes[offset], normalized) + after);
 					}
 
-					for (; container && container != root; container = container.parentNode)
-						point.push(t.dom.nodeIndex(container, normalized));
+					for (; container && container != root; container = container.parentNode) {
+						point.push(self.dom.nodeIndex(container, normalized));
+					}
 
 					return point;
-				};
+				}
 
 				bookmark.start = getPoint(rng, true);
 
-				if (!t.isCollapsed())
+				if (!self.isCollapsed()) {
 					bookmark.end = getPoint(rng);
+				}
 
 				return bookmark;
-			};
+			}
 
 			if (type == 2) {
 				return getLocation();
@@ -545,7 +551,7 @@
 
 			// Handle simple range
 			if (type) {
-				rng = t.getRng();
+				rng = self.getRng();
 
 				if (rng.setStart) {
 					rng = {
@@ -561,7 +567,7 @@
 				};
 			}
 
-			rng = t.getRng();
+			rng = self.getRng();
 			id = dom.uniqueId();
 			collapsed = tinyMCE.activeEditor.selection.isCollapsed();
 			styles = 'overflow:hidden;line-height:0px';
@@ -583,8 +589,9 @@
 
 							// Detect the empty space after block elements in IE and move the end back one character <p></p>] becomes <p>]</p>
 							rng.moveToElementText(rng2.parentElement());
-							if (rng.compareEndPoints('StartToEnd', rng2) === 0)
+							if (rng.compareEndPoints('StartToEnd', rng2) === 0) {
 								rng2.move('character', -1);
+							}
 
 							rng2.pasteHTML('<span data-mce-type="bookmark" id="' + id + '_end" style="' + styles + '">' + chr + '</span>');
 						}
@@ -603,13 +610,14 @@
 					};
 				}
 			} else {
-				element = t.getNode();
+				element = self.getNode();
 				name = element.nodeName;
-				if (name == 'IMG')
+				if (name == 'IMG') {
 					return {
 						name: name,
 						index: findIndex(name, element)
 					};
+				}
 
 				// W3C method
 				rng2 = normalizeTableCellSelection(rng.cloneRange());
@@ -633,7 +641,7 @@
 				}, chr));
 			}
 
-			t.moveToBookmark({
+			self.moveToBookmark({
 				id: id,
 				keep: 1
 			});
@@ -659,9 +667,9 @@
 		 * tinyMCE.activeEditor.selection.moveToBookmark(bm);
 		 */
 		moveToBookmark: function (bookmark) {
-			var t = this,
-				dom = t.dom,
-				marker1, marker2, rng, rng2, root, startContainer, endContainer, startOffset, endOffset;
+			var self = this,
+				dom = self.dom,
+				rng, rng2, root, startContainer, endContainer, startOffset, endOffset;
 
 			function setEndPoint(start) {
 				var point = bookmark[start ? 'start' : 'end'],
@@ -674,29 +682,33 @@
 					for (node = root, i = point.length - 1; i >= 1; i--) {
 						children = node.childNodes;
 
-						if (point[i] > children.length - 1)
+						if (point[i] > children.length - 1) {
 							return;
+						}
 
 						node = children[point[i]];
 					}
 
 					// Move text offset to best suitable location
-					if (node.nodeType === 3)
+					if (node.nodeType === 3) {
 						offset = Math.min(point[0], node.nodeValue.length);
+					}
 
 					// Move element offset to best suitable location
-					if (node.nodeType === 1)
+					if (node.nodeType === 1) {
 						offset = Math.min(point[0], node.childNodes.length);
+					}
 
 					// Set offset within container node
-					if (start)
+					if (start) {
 						rng.setStart(node, offset);
-					else
+					} else {
 						rng.setEnd(node, offset);
+					}
 				}
 
 				return true;
-			};
+			}
 
 			function restoreEndPoint(suffix) {
 				var marker = dom.get(bookmark.id + '_' + suffix),
@@ -733,14 +745,16 @@
 
 						// Remove all marker text nodes
 						each(tinymce.grep(marker.childNodes), function (node) {
-							if (node.nodeType == 3)
+							if (node.nodeType == 3) {
 								node.nodeValue = node.nodeValue.replace(/\uFEFF/g, '');
+							}
 						});
 
 						// Remove marker but keep children if for example contents where inserted into the marker
 						// Also remove duplicated instances of the marker for example by a split operation or by WebKit auto split on paste feature
-						while (marker = dom.get(bookmark.id + '_' + suffix))
+						while (marker = dom.get(bookmark.id + '_' + suffix)) {
 							dom.remove(marker, 1);
+						}
 
 						// If siblings are text nodes then merge them unless it's Opera since it some how removes the node
 						// and we are sniffing since adding a lot of detection code for a browser with 3% of the market isn't worth the effort. Sorry, Opera but it's just a fact
@@ -759,15 +773,16 @@
 						}
 					}
 				}
-			};
+			}
 
 			function addBogus(node) {
 				// Adds a bogus BR element for empty block elements
-				if (dom.isBlock(node) && !node.innerHTML && !isIE)
+				if (dom.isBlock(node) && !node.innerHTML && !isIE) {
 					node.innerHTML = '<br data-mce-bogus="1" />';
+				}
 
 				return node;
-			};
+			}
 
 			if (bookmark) {
 				if (bookmark.start) {
@@ -775,7 +790,7 @@
 					root = dom.getRoot();
 
 					if (setEndPoint(true) && setEndPoint()) {
-						t.setRng(rng);
+						self.setRng(rng);
 					}
 				} else if (bookmark.id) {
 					// Restore start/end points
@@ -786,15 +801,15 @@
 						rng = dom.createRng();
 						rng.setStart(addBogus(startContainer), startOffset);
 						rng.setEnd(addBogus(endContainer), endOffset);
-						t.setRng(rng);
+						self.setRng(rng);
 					}
 				} else if (bookmark.name) {
-					t.select(dom.select(bookmark.name)[bookmark.index]);
+					self.select(dom.select(bookmark.name)[bookmark.index]);
 				} else if (bookmark.rng) {
 					rng = bookmark.rng;
 
 					if (rng.startContainer) {
-						rng2 = t.dom.createRng();
+						rng2 = self.dom.createRng();
 
 						try {
 							rng2.setStart(rng.startContainer, rng.startOffset);
@@ -806,7 +821,7 @@
 						rng = rng2;
 					}
 
-					t.setRng(rng);
+					self.setRng(rng);
 				}
 			}
 		},
@@ -823,8 +838,8 @@
 		 * tinyMCE.activeEditor.selection.select(tinyMCE.activeEditor.dom.select('p')[0]);
 		 */
 		select: function (node, content) {
-			var t = this,
-				dom = t.dom,
+			var self = this,
+				dom = self.dom,
 				rng = dom.createRng(),
 				idx;
 
@@ -834,25 +849,27 @@
 				do {
 					// Text node
 					if (node.nodeType == 3 && tinymce.trim(node.nodeValue).length !== 0) {
-						if (start)
+						if (start) {
 							rng.setStart(node, 0);
-						else
+						} else {
 							rng.setEnd(node, node.nodeValue.length);
+						}
 
 						return;
 					}
 
 					// BR element
 					if (node.nodeName == 'BR') {
-						if (start)
+						if (start) {
 							rng.setStartBefore(node);
-						else
+						} else {
 							rng.setEndBefore(node);
+						}
 
 						return;
 					}
 				} while (node = (start ? walker.next() : walker.prev()));
-			};
+			}
 
 			if (node) {
 				idx = dom.nodeIndex(node);
@@ -865,7 +882,7 @@
 					setPoint(node);
 				}
 
-				t.setRng(rng);
+				self.setRng(rng);
 			}
 
 			return node;
@@ -878,15 +895,17 @@
 		 * @return {Boolean} true/false state if the selection range is collapsed or not. Collapsed means if it's a caret or a larger selection.
 		 */
 		isCollapsed: function () {
-			var t = this,
-				r = t.getRng(),
-				s = t.getSel();
+			var self = this,
+				r = self.getRng(),
+				s = self.getSel();
 
-			if (!r || r.item)
+			if (!r || r.item) {
 				return false;
+			}
 
-			if (r.compareEndPoints)
+			if (r.compareEndPoints) {
 				return r.compareEndPoints('StartToEnd', r) === 0;
+			}
 
 			return !s || r.collapsed;
 		},
@@ -920,8 +939,7 @@
 		 * @return {Selection} Internal browser selection object.
 		 */
 		getSel: function () {
-			var t = this,
-				w = this.win;
+			var w = this.win;
 
 			return w.getSelection ? w.getSelection() : w.document.selection;
 		},
@@ -930,12 +948,11 @@
 		 * Returns the browsers internal range object.
 		 *
 		 * @method getRng
-		 * @param {Boolean} w3c Forces a compatible W3C range on IE.
 		 * @return {Range} Internal browser range object.
 		 * @see http://www.quirksmode.org/dom/range_intro.html
 		 * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
 		 */
-		getRng: function (w3c) {
+		getRng: function () {
 			var self = this,
 				selection, rng, elm, doc = self.win.document;
 
@@ -987,7 +1004,7 @@
 		 * @param {Range} r Range to select.
 		 */
 		setRng: function (r, forward) {
-			var s, t = this;
+			var s, self = this;
 
 			if (!r) {
 				return;
@@ -1004,10 +1021,10 @@
 				return;
 			}
 
-			s = t.getSel();
+			s = self.getSel();
 
 			if (s) {
-				t.explicitRange = r;
+				self.explicitRange = r;
 
 				try {
 					s.removeAllRanges();
@@ -1023,7 +1040,7 @@
 				}
 
 				// adding range isn't always successful so we need to check range count otherwise an exception can occur
-				t.selectedRange = s.rangeCount > 0 ? s.getRangeAt(0) : null;
+				self.selectedRange = s.rangeCount > 0 ? s.getRangeAt(0) : null;
 			}
 		},
 
@@ -1038,9 +1055,9 @@
 		 * tinyMCE.activeEditor.selection.setNode(tinyMCE.activeEditor.dom.create('img', {src : 'some.gif', title : 'some title'}));
 		 */
 		setNode: function (n) {
-			var t = this;
+			var self = this;
 
-			t.setContent(t.dom.getOuterHTML(n));
+			self.setContent(self.dom.getOuterHTML(n));
 
 			return n;
 		},
@@ -1055,9 +1072,8 @@
 		 * alert(tinyMCE.activeEditor.selection.getNode().nodeName);
 		 */
 		getNode: function () {
-			var t = this,
-				rng = t.getRng(),
-				sel = t.getSel(),
+			var self = this,
+				rng = self.getRng(),
 				elm, start = rng.startContainer,
 				end = rng.endContainer;
 
@@ -1067,11 +1083,12 @@
 					n = forwards ? n.nextSibling : n.previousSibling;
 				}
 				return n || orig;
-			};
+			}
 
 			// Range maybe lost after the editor is made visible again
-			if (!rng)
-				return t.dom.getRoot();
+			if (!rng) {
+				return self.dom.getRoot();
+			}
 
 			if (rng.setStart) {
 				elm = rng.commonAncestorContainer;
@@ -1080,8 +1097,9 @@
 				if (!rng.collapsed) {
 					if (rng.startContainer == rng.endContainer) {
 						if (rng.endOffset - rng.startOffset < 2) {
-							if (rng.startContainer.hasChildNodes())
+							if (rng.startContainer.hasChildNodes()) {
 								elm = rng.startContainer.childNodes[rng.startOffset];
+							}
 						}
 					}
 
@@ -1103,13 +1121,15 @@
 							end = end.parentNode;
 						}
 
-						if (start && start === end)
+						if (start && start === end) {
 							return start;
+						}
 					}
 				}
 
-				if (elm && elm.nodeType == 3)
+				if (elm && elm.nodeType == 3) {
 					return elm.parentNode;
+				}
 
 				return elm;
 			}
@@ -1118,28 +1138,31 @@
 		},
 
 		getSelectedBlocks: function (st, en) {
-			var t = this,
-				dom = t.dom,
+			var self = this,
+				dom = self.dom,
 				sb, eb, n, bl = [];
 
-			sb = dom.getParent(st || t.getStart(), dom.isBlock);
-			eb = dom.getParent(en || t.getEnd(), dom.isBlock);
+			sb = dom.getParent(st || self.getStart(), dom.isBlock);
+			eb = dom.getParent(en || self.getEnd(), dom.isBlock);
 
-			if (sb)
+			if (sb) {
 				bl.push(sb);
+			}
 
 			if (sb && eb && sb != eb) {
 				n = sb;
 
 				var walker = new TreeWalker(sb, dom.getRoot());
 				while ((n = walker.next()) && n != eb) {
-					if (dom.isBlock(n))
+					if (dom.isBlock(n)) {
 						bl.push(n);
+					}
 				}
 			}
 
-			if (eb && sb != eb)
+			if (eb && sb != eb) {
 				bl.push(eb);
+			}
 
 			return bl;
 		},
@@ -1167,12 +1190,12 @@
 
 		normalize: function () {
 			var self = this,
-				rng, normalized, collapsed, node, sibling;
+				rng, normalized, collapsed;
 
 			function normalizeEndPoint(start) {
 				var container, offset, walker, dom = self.dom,
 					body = dom.getRoot(),
-					node, nonEmptyElementsMap, nodeName;
+					node, nonEmptyElementsMap;
 
 				function hasBrBeforeAfter(node, left) {
 					var walker = new TreeWalker(node, dom.getParent(node.parentNode, dom.isBlock) || body);
@@ -1182,7 +1205,7 @@
 							return true;
 						}
 					}
-				};
+				}
 
 				// Walks the dom left/right to find a suitable text node to move the endpoint into
 				// It will only walk within the current parent block or body and will stop if it hits a block or a BR/IMG
@@ -1216,7 +1239,7 @@
 						normalized = true;
 						offset = 0;
 					}
-				};
+				}
 
 				container = rng[(start ? 'start' : 'end') + 'Container'];
 				offset = rng[(start ? 'start' : 'end') + 'Offset'];
@@ -1234,7 +1257,6 @@
 					if (start) {
 						node = container.childNodes[offset > 0 ? offset - 1 : 0];
 						if (node) {
-							nodeName = node.nodeName.toLowerCase();
 							if (nonEmptyElementsMap[node.nodeName] || node.nodeName == "TABLE") {
 								return;
 							}
@@ -1308,13 +1330,15 @@
 				}
 
 				// Set endpoint if it was normalized
-				if (normalized)
+				if (normalized) {
 					rng['set' + (start ? 'Start' : 'End')](container, offset);
-			};
+				}
+			}
 
 			// Normalize only on non IE browsers for now
-			if (tinymce.isIE)
+			if (tinymce.isIE) {
 				return;
+			}
 
 			rng = self.getRng();
 			collapsed = rng.collapsed;
@@ -1322,8 +1346,9 @@
 			// Normalize the end points
 			normalizeEndPoint(true);
 
-			if (!collapsed)
+			if (!collapsed) {
 				normalizeEndPoint();
+			}
 
 			// Set the selection if it was normalized
 			if (normalized) {
@@ -1428,8 +1453,9 @@
 			self.win = null;
 
 			// Manual destroy then remove unload handler
-			if (!manual)
+			if (!manual) {
 				tinymce.removeUnload(self.destroy);
+			}
 		},
 
 		// IE has an issue where you can't select/move the caret by clicking outside the body if the document is in standards mode
@@ -1451,7 +1477,7 @@
 				}
 
 				return rng;
-			};
+			}
 
 			// Fires while the selection is changing
 			function selectionChange(e) {
@@ -1464,15 +1490,17 @@
 
 					if (pointRng) {
 						// Check if pointRange is before/after selection then change the endPoint
-						if (pointRng.compareEndPoints('StartToStart', startRng) > 0)
+						if (pointRng.compareEndPoints('StartToStart', startRng) > 0) {
 							pointRng.setEndPoint('StartToStart', startRng);
-						else
+						} else {
 							pointRng.setEndPoint('EndToEnd', startRng);
+						}
 
 						pointRng.select();
 					}
-				} else
+				} else {
 					endSelection();
+				}
 			}
 
 			// Removes listeners
@@ -1480,13 +1508,14 @@
 				var rng = doc.selection.createRange();
 
 				// If the range is collapsed then use the last start range
-				if (startRng && !rng.item && rng.compareEndPoints('StartToEnd', rng) === 0)
+				if (startRng && !rng.item && rng.compareEndPoints('StartToEnd', rng) === 0) {
 					startRng.select();
+				}
 
 				dom.unbind(doc, 'mouseup', endSelection);
 				dom.unbind(doc, 'mousemove', selectionChange);
 				startRng = started = 0;
-			};
+			}
 
 			// Make HTML element unselectable since we are going to handle selection by hand
 			doc.documentElement.unselectable = true;
@@ -1494,13 +1523,15 @@
 			// Detect when user selects outside BODY
 			dom.bind(doc, ['mousedown', 'contextmenu'], function (e) {
 				if (e.target.nodeName === 'HTML') {
-					if (started)
+					if (started) {
 						endSelection();
+					}
 
 					// Detect vertical scrollbar, since IE will fire a mousedown on the scrollbar and have target set as HTML
 					htmlElm = doc.documentElement;
-					if (htmlElm.scrollHeight > htmlElm.clientHeight)
+					if (htmlElm.scrollHeight > htmlElm.clientHeight) {
 						return;
+					}
 
 					started = 1;
 					// Setup start position

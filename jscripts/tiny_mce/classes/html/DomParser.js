@@ -8,8 +8,12 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var Node = tinymce.html.Node, each = tinymce.each, explode = tinymce.explode, extend = tinymce.extend, makeMap = tinymce.makeMap;
+(function (tinymce) {
+	var Node = tinymce.html.Node,
+		each = tinymce.each,
+		explode = tinymce.explode,
+		extend = tinymce.extend,
+		makeMap = tinymce.makeMap;
 
 	/**
 	 * This class parses HTML code into a DOM like structure of nodes it will remove redundant whitespace and make
@@ -31,8 +35,12 @@
 	 * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
 	 * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
 	 */
-	tinymce.html.DomParser = function(settings, schema) {
-		var self = this, nodeFilters = {}, attributeFilters = [], matchedNodes = {}, matchedAttributes = {};
+	tinymce.html.DomParser = function (settings, schema) {
+		var self = this,
+			nodeFilters = {},
+			attributeFilters = [],
+			matchedNodes = {},
+			matchedAttributes = {};
 
 		settings = settings || {};
 		settings.validate = "validate" in settings ? settings.validate : true;
@@ -120,7 +128,7 @@
 
 					// Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
 					parent = parents[0];
-					
+
 					if (parent.isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
 						parent.empty().remove();
 					}
@@ -165,7 +173,7 @@
 		 * @param {tinymce.html.Node} Node the node to run filters on.
 		 * @return {tinymce.html.Node} The passed in node.
 		 */
-		self.filterNode = function(node) {
+		self.filterNode = function (node) {
 			var i, name, list;
 
 			// Run element filters
@@ -212,8 +220,8 @@
 		 * @method {String} name Comma separated list of nodes to collect.
 		 * @param {function} callback Callback function to execute once it has collected nodes.
 		 */
-		self.addNodeFilter = function(name, callback) {
-			each(explode(name), function(name) {
+		self.addNodeFilter = function (name, callback) {
+			each(explode(name), function (name) {
 				var list = nodeFilters[name];
 
 				if (!list) {
@@ -238,8 +246,8 @@
 		 * @method {String} name Comma separated list of nodes to collect.
 		 * @param {function} callback Callback function to execute once it has collected nodes.
 		 */
-		self.addAttributeFilter = function(name, callback) {
-			each(explode(name), function(name) {
+		self.addAttributeFilter = function (name, callback) {
+			each(explode(name), function (name) {
 				var i;
 
 				for (i = 0; i < attributeFilters.length; i++) {
@@ -249,7 +257,10 @@
 					}
 				}
 
-				attributeFilters.push({name: name, callbacks: [callback]});
+				attributeFilters.push({
+					name: name,
+					callbacks: [callback]
+				});
 			});
 		};
 
@@ -263,9 +274,10 @@
 		 * @param {Object} args Optional args object that gets passed to all filter functions.
 		 * @return {tinymce.html.Node} Root node containing the tree.
 		 */
-		self.parse = function(html, args) {
+		self.parse = function (html, args) {
 			var parser, rootNode, node, nodes, i, l, fi, fl, list, name, validate;
-			var blockElements, startWhiteSpaceRegExp, invalidChildren = [], isInWhiteSpacePreservedElement;
+			var blockElements, startWhiteSpaceRegExp, invalidChildren = [],
+				isInWhiteSpacePreservedElement;
 			var endWhiteSpaceRegExp, allWhiteSpaceRegExp, isAllWhiteSpaceRegExp, whiteSpaceElements;
 			var children, nonEmptyElements, rootBlockName;
 
@@ -285,7 +297,8 @@
 			isAllWhiteSpaceRegExp = /^[ \t\r\n]+$/;
 
 			function addRootBlocks() {
-				var node = rootNode.firstChild, next, rootBlockNode;
+				var node = rootNode.firstChild,
+					next, rootBlockNode;
 
 				// Removes whitespace at beginning and end of block so:
 				// <p> x </p> -> <p>x</p>
@@ -312,7 +325,7 @@
 					next = node.next;
 
 					if (node.type == 3 || (node.type == 1 && node.name !== 'p' &&
-						!blockElements[node.name] && !node.attr('data-mce-type'))) {
+							!blockElements[node.name] && !node.attr('data-mce-type'))) {
 						if (!rootBlockNode) {
 							// Create a new root block element
 							rootBlockNode = createNode(rootBlockName, 1);
@@ -334,7 +347,8 @@
 			}
 
 			function createNode(name, type) {
-				var node = new Node(name, type), list;
+				var node = new Node(name, type),
+					list;
 
 				if (name in nodeFilters) {
 					list = matchedNodes[name];
@@ -403,11 +417,11 @@
 				// Exclude P and LI from DOM parsing since it's treated better by the DOM parser
 				self_closing_elements: cloneAndExcludeBlocks(schema.getSelfClosingElements()),
 
-				cdata: function(text) {
+				cdata: function (text) {
 					node.append(createNode('#cdata', 4)).value = text;
 				},
 
-				text: function(text, raw) {
+				text: function (text, raw) {
 					var textNode;
 
 					// Trim all redundant whitespace on non white space elements
@@ -427,16 +441,16 @@
 					}
 				},
 
-				comment: function(text) {
+				comment: function (text) {
 					node.append(createNode('#comment', 8)).value = text;
 				},
 
-				pi: function(name, text) {
+				pi: function (name, text) {
 					node.append(createNode(name, 7)).value = text;
 					removeWhitespaceBefore(node);
 				},
 
-				doctype: function(text) {
+				doctype: function (text) {
 					var newNode;
 
 					newNode = node.append(createNode('#doctype', 10));
@@ -444,7 +458,7 @@
 					removeWhitespaceBefore(node);
 				},
 
-				start: function(name, attrs, empty) {
+				start: function (name, attrs, empty) {
 					var newNode, attrFiltersLen, elementRule, attrName, parent;
 
 					elementRule = validate ? schema.getElementRule(name) : {};
@@ -494,11 +508,11 @@
 					}
 				},
 
-				end: function(name) {
+				end: function (name) {
 					var textNode, elementRule, text, sibling, tempNode;
 
 					elementRule = validate ? schema.getElementRule(name) : {};
-					
+
 					if (elementRule) {
 						if (blockElements[name]) {
 							if (!isInWhiteSpacePreservedElement) {
@@ -673,11 +687,13 @@
 		// Remove <br> at end of block elements Gecko and WebKit injects BR elements to
 		// make it possible to place the caret inside empty blocks. This logic tries to remove
 		// these elements and keep br elements that where intended to be there intact
-		if (settings.remove_trailing_brs) {			
-			self.addNodeFilter('br', function(nodes) {
-				var i, l = nodes.length, node, blockElements = extend({}, schema.getBlockElements());
-				var nonEmptyElements = schema.getNonEmptyElements(), parent, lastParent, prev, prevName;
-				var elementRule, textNode;
+		if (settings.remove_trailing_brs) {
+			self.addNodeFilter('br', function (nodes) {
+				var i, l = nodes.length,
+					node, blockElements = extend({}, schema.getBlockElements());
+				var nonEmptyElements = schema.getNonEmptyElements(),
+					parent, lastParent, prev, prevName;
+				var textNode;
 
 				// Remove brs from body element as well
 				blockElements.body = 1;
@@ -712,12 +728,12 @@
 						}
 
 						if (node) {
-						
+
 							// skip breaks with style
 							if (node.attr('style')) {
 								continue;
 							}
-							
+
 							node.remove();
 
 							// Is the parent to be considered empty after we removed the BR
@@ -757,40 +773,42 @@
 				}
 			});
 		}
-		
+
 		self.addAttributeFilter('href', function (nodes) {
-        	var i = nodes.length, node;
+			var i = nodes.length,
+				node;
 
-        	var appendRel = function (rel) {
-          		var parts = rel.split(' ').filter(function (p) {
-            		return p.length > 0;
-          		});
-          		return parts.concat(['noopener']).sort().join(' ');
-        	};
+			var appendRel = function (rel) {
+				var parts = rel.split(' ').filter(function (p) {
+					return p.length > 0;
+				});
+				return parts.concat(['noopener']).sort().join(' ');
+			};
 
-        	var addNoOpener = function (rel) {
-          		var newRel = rel ? tinymce.trim(rel) : '';
-          		if (!/\b(noopener)\b/g.test(newRel)) {
-            		return appendRel(newRel);
-          		} else {
-            		return newRel;
-          		}
-        	};
+			var addNoOpener = function (rel) {
+				var newRel = rel ? tinymce.trim(rel) : '';
+				if (!/\b(noopener)\b/g.test(newRel)) {
+					return appendRel(newRel);
+				} else {
+					return newRel;
+				}
+			};
 
-        	if (!settings.allow_unsafe_link_target) {
-         		while (i--) {
-            		node = nodes[i];
-            		if (node.name === 'a' && node.attr('target') === '_blank' && /:\/\//.test(node.attr('href'))) {
-              			node.attr('rel', addNoOpener(node.attr('rel')));
-            		}
-          		}
-        	}
-      	});
+			if (!settings.allow_unsafe_link_target) {
+				while (i--) {
+					node = nodes[i];
+					if (node.name === 'a' && node.attr('target') === '_blank' && /:\/\//.test(node.attr('href'))) {
+						node.attr('rel', addNoOpener(node.attr('rel')));
+					}
+				}
+			}
+		});
 
 		// Force anchor names closed, unless the setting "allow_html_in_named_anchor" is explicitly included.
 		if (!settings.allow_html_in_named_anchor) {
-			self.addAttributeFilter('id,name', function(nodes) {
-				var i = nodes.length, sibling, prevSibling, parent, node;
+			self.addAttributeFilter('id,name', function (nodes) {
+				var i = nodes.length,
+					sibling, prevSibling, parent, node;
 
 				while (i--) {
 					node = nodes[i];
@@ -810,9 +828,11 @@
 		}
 
 		if (settings.validate && schema.getValidClasses()) {
-			self.addAttributeFilter('class', function(nodes) {
-				var i = nodes.length, node, classList, ci, className, classValue;
-				var validClasses = schema.getValidClasses(), validClassesMap, valid;
+			self.addAttributeFilter('class', function (nodes) {
+				var i = nodes.length,
+					node, classList, ci, className, classValue;
+				var validClasses = schema.getValidClasses(),
+					validClassesMap, valid;
 
 				while (i--) {
 					node = nodes[i];
@@ -850,5 +870,5 @@
 				}
 			});
 		}
-	}
+	};
 })(tinymce);

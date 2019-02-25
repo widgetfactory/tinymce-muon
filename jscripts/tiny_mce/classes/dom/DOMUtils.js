@@ -59,7 +59,7 @@
 		 */
 		DOMUtils: function (d, s) {
 			var self = this,
-				globalStyle, name, blockElementsMap;
+				blockElementsMap;
 
 			self.doc = d;
 			self.win = window;
@@ -103,8 +103,9 @@
 				var type = node.nodeType;
 
 				// If it's a node then check the type and use the nodeName
-				if (type)
+				if (type) {
 					return !!(type === 1 && blockElementsMap[node.nodeName]);
+				}
 
 				return !!blockElementsMap[node];
 			};
@@ -245,12 +246,14 @@
 			h = self.getStyle(e, 'height');
 
 			// Non pixel value, then force offset/clientWidth
-			if (w.indexOf('px') === -1)
+			if (w.indexOf('px') === -1) {
 				w = 0;
+			}
 
 			// Non pixel value, then force offset/clientWidth
-			if (h.indexOf('px') === -1)
+			if (h.indexOf('px') === -1) {
 				h = 0;
+			}
 
 			return {
 				w: parseInt(w, 10) || e.offsetWidth || e.clientWidth,
@@ -292,8 +295,9 @@
 			n = self.get(n);
 			c = c === undefined;
 
-			if (se.strict_root)
+			if (se.strict_root) {
 				r = r || self.getRoot();
+			}
 
 			// Wrap node name as func
 			if (is(f, 'string')) {
@@ -311,14 +315,16 @@
 			}
 
 			while (n) {
-				if (n == r || !n.nodeType || n.nodeType === 9)
+				if (n == r || !n.nodeType || n.nodeType === 9) {
 					break;
+				}
 
 				if (!f || f(n)) {
-					if (c)
+					if (c) {
 						o.push(n);
-					else
+					} else {
 						return n;
+					}
 				}
 
 				n = n.parentNode;
@@ -342,8 +348,9 @@
 				e = this.doc.getElementById(e);
 
 				// IE and Opera returns meta elements when they match the specified input ID, but getElementsByName seems to do the trick
-				if (e && e.id !== n)
+				if (e && e.id !== n) {
 					return this.doc.getElementsByName(n)[1];
+				}
 			}
 
 			return e;
@@ -381,53 +388,64 @@
 		 * on more complex patterns.
 		 *
 		 * @method select
-		 * @param {String} p CSS level 1 pattern to select/find elements by.
-		 * @param {Object} s Optional root element/scope element to search in.
+		 * @param {String} selector CSS level 1 pattern to select/find elements by.
+		 * @param {Object} scope Optional root element/scope element to search in.
 		 * @return {Array} Array with all matched elements.
 		 * @example
 		 * // Adds a class to all paragraphs in the currently active editor
 		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
-		 * 
+		 *
 		 * // Adds a class to all spans that has the test class in the currently active editor
-		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('span.test'), 'someclass')
+		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('span.test'), 'someclass');
 		 */
-		select: function (pa, s) {
+		select: function (selector, scope) {
 			var self = this;
 
-			return tinymce.dom.Sizzle(pa, self.get(s) || self.get(self.settings.root_element) || self.doc, []);
+			/*eslint new-cap:0 */
+			return tinymce.dom.Sizzle(selector, self.get(scope) || self.settings.root_element || self.doc, []);
 		},
 
 		/**
 		 * Returns true/false if the specified element matches the specified css pattern.
 		 *
 		 * @method is
-		 * @param {Node/NodeList} n DOM node to match or an array of nodes to match.
+		 * @param {Node/NodeList} elm DOM node to match or an array of nodes to match.
 		 * @param {String} selector CSS pattern to match the element agains.
 		 */
-		is: function (n, selector) {
+		is: function (elm, selector) {
 			var i;
 
 			// If it isn't an array then try to do some simple selectors instead of Sizzle for to boost performance
-			if (n.length === undefined) {
+			if (elm.length === undefined) {
 				// Simple all selector
-				if (selector === '*')
-					return n.nodeType == 1;
+				if (selector === '*') {
+					return elm.nodeType == 1;
+				}
 
 				// Simple selector just elements
 				if (simpleSelectorRe.test(selector)) {
 					selector = selector.toLowerCase().split(/,/);
-					n = n.nodeName.toLowerCase();
+					elm = elm.nodeName.toLowerCase();
 
 					for (i = selector.length - 1; i >= 0; i--) {
-						if (selector[i] == n)
+						if (selector[i] == elm) {
 							return true;
+						}
 					}
 
 					return false;
 				}
 			}
 
-			return tinymce.dom.Sizzle.matches(selector, n.nodeType ? [n] : n).length > 0;
+			// Is non element
+			if (elm.nodeType && elm.nodeType != 1) {
+				return false;
+			}
+
+			var elms = elm.nodeType ? [elm] : elm;
+
+			/*eslint new-cap:0 */
+			return tinymce.dom.Sizzle(selector, elms[0].ownerDocument || elms[0], null, elms).length > 0;
 		},
 
 		closest: function (n, selector) {
@@ -469,16 +487,17 @@
 			var self = this;
 
 			return this.run(p, function (p) {
-				var e, k;
+				var e;
 
 				e = is(n, 'string') ? self.doc.createElement(n) : n;
 				self.setAttribs(e, a);
 
 				if (h) {
-					if (h.nodeType)
+					if (h.nodeType) {
 						e.appendChild(h);
-					else
+					} else {
 						self.setHTML(e, h);
+					}
 				}
 
 				return !c ? p.appendChild(e) : e;
@@ -522,13 +541,15 @@
 			o += '<' + n;
 
 			for (k in a) {
-				if (a.hasOwnProperty(k))
+				if (a.hasOwnProperty(k)) {
 					o += ' ' + k + '="' + self.encode(a[k]) + '"';
+				}
 			}
 
 			// A call to tinymce.is doesn't work for some odd reason on IE9 possible bug inside their JS runtime
-			if (typeof (h) != "undefined")
+			if (typeof (h) != "undefined") {
 				return o + '>' + h + '</' + n + '>';
+			}
 
 			return o + ' />';
 		},
@@ -568,7 +589,7 @@
 		 * @example
 		 * // Removes all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.remove(tinyMCE.activeEditor.dom.select('p'));
-		 * 
+		 *
 		 * // Removes a element by id in the document
 		 * tinyMCE.DOM.remove('mydiv');
 		 */
@@ -576,16 +597,18 @@
 			return this.run(node, function (node) {
 				var child, parent = node.parentNode;
 
-				if (!parent)
+				if (!parent) {
 					return null;
+				}
 
 				if (keep_children) {
 					while (child = node.firstChild) {
 						// IE 8 will crash if you don't remove completely empty text nodes
-						if (!tinymce.isIE || child.nodeType !== 3 || child.nodeValue)
+						if (!tinymce.isIE || child.nodeType !== 3 || child.nodeValue) {
 							parent.insertBefore(child, node);
-						else
+						} else {
 							node.removeChild(child);
+						}
 					}
 				}
 
@@ -626,7 +649,7 @@
 		 * @example
 		 * // Sets a style value on all paragraphs in the currently active editor
 		 * tinyMCE.activeEditor.dom.setStyle(tinyMCE.activeEditor.dom.select('p'), 'background-color', 'red');
-		 * 
+		 *
 		 * // Sets a style value to an element by id in the current document
 		 * tinyMCE.DOM.setStyle('mydiv', 'background-color', 'red');
 		 */
@@ -634,7 +657,7 @@
 			var self = this;
 
 			return self.run(n, function (e) {
-				var s, i;
+				var s;
 
 				s = e.style;
 
@@ -703,7 +726,7 @@
 			}
 
 			// IE & Opera
-			if (n.currentStyle && c)  {
+			if (n.currentStyle && c) {
 				return n.currentStyle[na];
 			}
 
@@ -719,7 +742,7 @@
 		 * @example
 		 * // Sets styles on all paragraphs in the currently active editor
 		 * tinyMCE.activeEditor.dom.setStyles(tinyMCE.activeEditor.dom.select('p'), {'background-color' : 'red', 'color' : 'green'});
-		 * 
+		 *
 		 * // Sets styles to an element by id in the current document
 		 * tinyMCE.DOM.setStyles('mydiv', {'background-color' : 'red', 'color' : 'green'});
 		 */
@@ -746,7 +769,7 @@
 
 		/**
 		 * Removes all attributes from an element or elements.
-		 * 
+		 *
 		 * @param {Element/String/Array} e DOM element, element id string or array of elements/ids to remove attributes from.
 		 */
 		removeAllAttribs: function (e) {
@@ -762,12 +785,14 @@
 			var self = this;
 
 			// Whats the point
-			if (!e || !n)
+			if (!e || !n) {
 				return;
+			}
 
 			// Strict XML mode
-			if (self.settings.strict)
+			if (self.settings.strict) {
 				n = n.toLowerCase();
+			}
 
 			return this.run(e, function (e) {
 				e.removeAttribute(n, 2);
@@ -784,7 +809,7 @@
 		 * @example
 		 * // Sets an attribute to all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.setAttrib(tinyMCE.activeEditor.dom.select('p'), 'class', 'myclass');
-		 * 
+		 *
 		 * // Sets an attribute to a specific element in the current page
 		 * tinyMCE.dom.setAttrib('mydiv', 'class', 'myclass');
 		 */
@@ -792,12 +817,14 @@
 			var self = this;
 
 			// Whats the point
-			if (!e || !n)
+			if (!e || !n) {
 				return;
+			}
 
 			// Strict XML mode
-			if (self.settings.strict)
+			if (self.settings.strict) {
 				n = n.toLowerCase();
+			}
 
 			return this.run(e, function (e) {
 				var s = self.settings;
@@ -815,10 +842,11 @@
 
 							// No mce_style for elements with these since they might get resized by the user
 							if (s.keep_values) {
-								if (v && !self._isRes(v))
+								if (v && !self._isRes(v)) {
 									e.setAttribute('data-mce-style', v, 2);
-								else
+								} else {
 									e.removeAttribute('data-mce-style', 2);
+								}
 							}
 
 							e.style.cssText = v;
@@ -831,8 +859,9 @@
 						case "src":
 						case "href":
 							if (s.keep_values) {
-								if (s.url_converter)
+								if (s.url_converter) {
 									v = s.url_converter.call(s.url_converter_scope || self, v, n, e);
+								}
 
 								self.setAttrib(e, 'data-mce-' + n, v, 2);
 							}
@@ -844,10 +873,11 @@
 							break;
 					}
 				}
-				if (is(v) && v !== null && v.length !== 0)
+				if (is(v) && v !== null && v.length !== 0) {
 					e.setAttribute(n, '' + v, 2);
-				else
+				} else {
 					e.removeAttribute(n, 2);
+				}
 
 				// fire onChangeAttrib event for attributes that have changed
 				if (tinyMCE.activeEditor && originalValue != v) {
@@ -866,7 +896,7 @@
 		 * @example
 		 * // Sets some attributes to all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.setAttribs(tinyMCE.activeEditor.dom.select('p'), {'class' : 'myclass', title : 'some title'});
-		 * 
+		 *
 		 * // Sets some attributes to a specific element in the current page
 		 * tinyMCE.DOM.setAttribs('mydiv', {'class' : 'myclass', title : 'some title'});
 		 */
@@ -895,18 +925,20 @@
 
 			e = self.get(e);
 
-			if (!e || e.nodeType !== 1)
+			if (!e || e.nodeType !== 1) {
 				return dv === undef ? false : dv;
+			}
 
-			if (!is(dv))
+			if (!is(dv)) {
 				dv = '';
-
+			}
 			// Try the mce variant for these
 			if (/^(src|href|style|coords|shape)$/.test(n)) {
 				v = e.getAttribute("data-mce-" + n);
 
-				if (v)
+				if (v) {
 					return v;
+				}
 			}
 
 			if (isIE && self.props[n]) {
@@ -914,20 +946,23 @@
 				v = v && v.nodeValue ? v.nodeValue : v;
 			}
 
-			if (!v)
+			if (!v) {
 				v = e.getAttribute(n, 2);
+			}
 
 			// Check boolean attribs
 			if (/^(checked|compact|declare|defer|disabled|ismap|multiple|nohref|noshade|nowrap|readonly|selected)$/.test(n)) {
-				if (e[self.props[n]] === true && v === '')
+				if (e[self.props[n]] === true && v === '') {
 					return n;
+				}
 
 				return v ? n : '';
 			}
 
 			// Inner input elements will override attributes on form elements
-			if (e.nodeName === "FORM" && e.getAttributeNode(n))
+			if (e.nodeName === "FORM" && e.getAttributeNode(n)) {
 				return e.getAttributeNode(n).nodeValue;
+			}
 
 			if (n === 'style') {
 				v = v || e.style.cssText;
@@ -935,14 +970,16 @@
 				if (v) {
 					v = self.serializeStyle(self.parseStyle(v), e.nodeName);
 
-					if (self.settings.keep_values && !self._isRes(v))
+					if (self.settings.keep_values && !self._isRes(v)) {
 						e.setAttribute('data-mce-style', v);
+					}
 				}
 			}
 
 			// Remove Apple and WebKit stuff
-			if (isWebKit && n === "class" && v)
+			if (isWebKit && n === "class" && v) {
 				v = v.replace(/(apple|webkit)\-[a-z\-]+/gi, '');
+			}
 
 			// Handle IE issues
 			if (isIE) {
@@ -950,15 +987,17 @@
 					case 'rowspan':
 					case 'colspan':
 						// IE returns 1 as default value
-						if (v === 1)
+						if (v === 1) {
 							v = '';
+						}
 
 						break;
 
 					case 'size':
 						// IE returns +0 as default value for size
-						if (v === '+0' || v === 20 || v === 0)
+						if (v === '+0' || v === 20 || v === 0) {
 							v = '';
+						}
 
 						break;
 
@@ -968,23 +1007,26 @@
 					case 'checked':
 					case 'disabled':
 					case 'readonly':
-						if (v === 0)
+						if (v === 0) {
 							v = '';
+						}
 
 						break;
 
 					case 'hspace':
 						// IE returns -1 as default value
-						if (v === -1)
+						if (v === -1) {
 							v = '';
+						}
 
 						break;
 
 					case 'maxlength':
 					case 'tabindex':
 						// IE returns default value
-						if (v === 32768 || v === 2147483647 || v === '32768')
+						if (v === 32768 || v === 2147483647 || v === '32768') {
 							v = '';
+						}
 
 						break;
 
@@ -992,8 +1034,9 @@
 					case 'compact':
 					case 'noshade':
 					case 'nowrap':
-						if (v === 65535)
+						if (v === 65535) {
 							return n;
+						}
 
 						return dv;
 
@@ -1003,8 +1046,9 @@
 
 					default:
 						// IE has odd anonymous function for event attributes
-						if (n.indexOf('on') === 0 && v)
+						if (n.indexOf('on') === 0 && v) {
 							v = tinymce._replace(/^function\s+\w+\(\)\s+\{\s+(.*)\s+\}$/, '$1', '' + v);
+						}
 				}
 			}
 
@@ -1101,13 +1145,14 @@
 		 */
 		addStyle: function (cssText) {
 			var doc = this.doc,
-				head;
+				head, styleElm;
 
 			// Create style element if needed
 			styleElm = doc.getElementById('mceDefaultStyles');
 			if (!styleElm) {
-				styleElm = doc.createElement('style'),
-					styleElm.id = 'mceDefaultStyles';
+				styleElm = doc.createElement('style');
+
+				styleElm.id = 'mceDefaultStyles';
 				styleElm.type = 'text/css';
 
 				head = doc.getElementsByTagName('head')[0];
@@ -1134,13 +1179,13 @@
 		 * @example
 		 * // Loads a CSS file dynamically into the current document
 		 * tinymce.DOM.loadCSS('somepath/some.css');
-		 * 
+		 *
 		 * // Loads a CSS file into the currently active editor instance
 		 * tinyMCE.activeEditor.dom.loadCSS('somepath/some.css');
-		 * 
+		 *
 		 * // Loads a CSS file into an editor instance by id
 		 * tinyMCE.get('someid').dom.loadCSS('somepath/some.css');
-		 * 
+		 *
 		 * // Loads multiple CSS files into the current document
 		 * tinymce.DOM.loadCSS('somepath/some.css,somepath/someother.css');
 		 */
@@ -1149,16 +1194,18 @@
 				d = self.doc,
 				head;
 
-			if (!u)
+			if (!u) {
 				u = '';
+			}
 
 			head = d.getElementsByTagName('head')[0];
 
 			each(u.split(','), function (u) {
 				var link;
 
-				if (self.files[u])
+				if (self.files[u]) {
 					return;
+				}
 
 				self.files[u] = true;
 				link = self.create('link', {
@@ -1171,8 +1218,9 @@
 				// It's ugly but it seems to work fine.
 				if (isIE && !tinymce.isIE11 && d.documentMode && d.recalc) {
 					link.onload = function () {
-						if (d.recalc)
+						if (d.recalc) {
 							d.recalc();
+						}
 
 						link.onload = null;
 					};
@@ -1192,7 +1240,7 @@
 		 * @example
 		 * // Adds a class to all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'myclass');
-		 * 
+		 *
 		 * // Adds a class to a specific element in the current page
 		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
 		 */
@@ -1200,11 +1248,13 @@
 			return this.run(e, function (e) {
 				var o;
 
-				if (!c)
+				if (!c) {
 					return 0;
+				}
 
-				if (this.hasClass(e, c))
+				if (this.hasClass(e, c)) {
 					return e.className;
+				}
 
 				o = this.removeClass(e, c);
 
@@ -1222,7 +1272,7 @@
 		 * @example
 		 * // Removes a class from all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.removeClass(tinyMCE.activeEditor.dom.select('p'), 'myclass');
-		 * 
+		 *
 		 * // Removes a class from a specific element in the current page
 		 * tinyMCE.DOM.removeClass('mydiv', 'myclass');
 		 */
@@ -1234,9 +1284,9 @@
 				var v;
 
 				if (self.hasClass(e, c)) {
-					if (!re)
+					if (!re) {
 						re = new RegExp("(^|\\s+)" + c + "(\\s+|$)", "g");
-
+					}
 					v = e.className.replace(re, ' ');
 					v = tinymce.trim(v != ' ' ? v : '');
 
@@ -1266,8 +1316,9 @@
 		hasClass: function (n, c) {
 			n = this.get(n);
 
-			if (!n || !c)
+			if (!n || !c) {
 				return false;
+			}
 
 			return (' ' + n.className + ' ').indexOf(' ' + c + ' ') !== -1;
 		},
@@ -1330,7 +1381,7 @@
 		 * @example
 		 * // Sets the inner HTML of all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.setHTML(tinyMCE.activeEditor.dom.select('p'), 'some inner html');
-		 * 
+		 *
 		 * // Sets the inner HTML of a element by id in the document
 		 * tinyMCE.DOM.setHTML('mydiv', 'some inner html');
 		 */
@@ -1340,8 +1391,9 @@
 			return self.run(element, function (element) {
 				if (isIE) {
 					// Remove all child nodes, IE keeps empty text nodes in DOM
-					while (element.firstChild)
+					while (element.firstChild) {
 						element.removeChild(element.firstChild);
+					}
 
 					try {
 						// IE will remove comments from the beginning
@@ -1359,12 +1411,14 @@
 						// Add all children from div to target
 						each(tinymce.grep(newElement.childNodes), function (node, i) {
 							// Skip br element
-							if (i && element.canHaveHTML)
+							if (i && element.canHaveHTML) {
 								element.appendChild(node);
+							}
 						});
 					}
-				} else
+				} else {
 					element.innerHTML = html;
+				}
 
 				return html;
 			});
@@ -1385,11 +1439,13 @@
 
 			elm = self.get(elm);
 
-			if (!elm)
+			if (!elm) {
 				return null;
+			}
 
-			if (elm.nodeType === 1 && self.hasOuterHTML)
+			if (elm.nodeType === 1 && self.hasOuterHTML) {
 				return elm.outerHTML;
+			}
 
 			doc = (elm.ownerDocument || self.doc).createElement("body");
 			doc.appendChild(elm.cloneNode(true));
@@ -1407,7 +1463,7 @@
 		 * @example
 		 * // Sets the outer HTML of all paragraphs in the active editor
 		 * tinyMCE.activeEditor.dom.setOuterHTML(tinyMCE.activeEditor.dom.select('p'), '<div>some html</div>');
-		 * 
+		 *
 		 * // Sets the outer HTML of a element by id in the document
 		 * tinyMCE.DOM.setOuterHTML('mydiv', '<div>some html</div>');
 		 */
@@ -1427,7 +1483,7 @@
 				}
 
 				self.remove(e);
-			};
+			}
 
 			return this.run(e, function (e) {
 				e = self.get(e);
@@ -1439,16 +1495,18 @@
 					if (isIE) {
 						try {
 							// Try outerHTML for IE it sometimes produces an unknown runtime error
-							if (isIE && e.nodeType == 1)
+							if (isIE && e.nodeType == 1) {
 								e.outerHTML = h;
-							else
+							} else {
 								setHTML(e, h, d);
+							}
 						} catch (ex) {
 							// Fix for unknown runtime error
 							setHTML(e, h, d);
 						}
-					} else
+					} else {
 						setHTML(e, h, d);
+					}
 				}
 			});
 		},
@@ -1477,7 +1535,7 @@
 		 * @method insertAfter
 		 * @param {Element} node Element to insert after the reference.
 		 * @param {Element/String/Array} reference_node Reference element, element id or array of elements to insert after.
-		 * @return {Element/Array} Element that got added or an array with elements. 
+		 * @return {Element/Array} Element that got added or an array with elements.
 		 */
 		insertAfter: function (node, reference_node) {
 			reference_node = this.get(reference_node);
@@ -1488,10 +1546,11 @@
 				parent = reference_node.parentNode;
 				nextSibling = reference_node.nextSibling;
 
-				if (nextSibling)
+				if (nextSibling) {
 					parent.insertBefore(node, nextSibling);
-				else
+				} else {
 					parent.appendChild(node);
+				}
 
 				return node;
 			});
@@ -1509,8 +1568,9 @@
 		replace: function (n, o, k) {
 			var self = this;
 
-			if (is(o, 'array'))
+			if (is(o, 'array')) {
 				n = n.cloneNode(true);
+			}
 
 			return self.run(o, function (o) {
 				if (k) {
@@ -1566,17 +1626,20 @@
 			while (ps) {
 				pe = b;
 
-				while (pe && ps != pe)
+				while (pe && ps != pe) {
 					pe = pe.parentNode;
+				}
 
-				if (ps == pe)
+				if (ps == pe) {
 					break;
+				}
 
 				ps = ps.parentNode;
 			}
 
-			if (!ps && a.ownerDocument)
+			if (!ps && a.ownerDocument) {
 				return a.ownerDocument.documentElement;
+			}
 
 			return ps;
 		},
@@ -1595,7 +1658,7 @@
 				s = parseInt(s, 10).toString(16);
 
 				return s.length > 1 ? s : '0' + s; // 0 -> 00
-			};
+			}
 
 			if (c) {
 				s = '#' + hex(c[1]) + hex(c[2]) + hex(c[3]);
@@ -1616,12 +1679,13 @@
 		getClasses: function () {
 			var self = this,
 				cl = [],
-				i, lo = {},
+				lo = {},
 				f = self.settings.class_filter,
 				ov;
 
-			if (self.classes)
+			if (self.classes) {
 				return self.classes;
+			}
 
 			function addClasses(s) {
 				// IE style imports
@@ -1639,16 +1703,18 @@
 									v = v.replace(/^\s*|\s*$|^\s\./g, "");
 
 									// Is internal or it doesn't contain a class
-									if (/\.mce/.test(v) || !/\.[\w\-]+$/.test(v))
+									if (/\.mce/.test(v) || !/\.[\w\-]+$/.test(v)) {
 										return;
+									}
 
 									// Remove everything but class name
 									ov = v;
 									v = tinymce._replace(/.*\.([a-z0-9_\-]+).*/i, '$1', v);
 
 									// Filter classes
-									if (f && !(v = f(v, ov)))
+									if (f && !(v = f(v, ov))) {
 										return;
+									}
 
 									if (!lo[v]) {
 										cl.push({
@@ -1671,7 +1737,7 @@
 							break;
 					}
 				});
-			};
+			}
 
 			try {
 				each(self.doc.styleSheets, addClasses);
@@ -1679,8 +1745,9 @@
 				// Ignore
 			}
 
-			if (cl.length > 0)
+			if (cl.length > 0) {
 				self.classes = cl;
+			}
 
 			return cl;
 		},
@@ -1698,11 +1765,13 @@
 			var self = this,
 				o;
 
-			if (self.doc && typeof (e) === 'string')
+			if (self.doc && typeof (e) === 'string') {
 				e = self.get(e);
+			}
 
-			if (!e)
+			if (!e) {
 				return false;
+			}
 
 			s = s || this;
 			if (!e.nodeType && (e.length || e.length === 0)) {
@@ -1710,8 +1779,9 @@
 
 				each(e, function (e, i) {
 					if (e) {
-						if (typeof (e) == 'string')
+						if (typeof (e) == 'string') {
 							e = self.doc.getElementById(e);
+						}
 
 						o.push(f.call(s, e, i));
 					}
@@ -1735,22 +1805,25 @@
 
 			n = this.get(n);
 
-			if (!n)
+			if (!n) {
 				return [];
+			}
 
 			if (isIE) {
 				o = [];
 
 				// Object will throw exception in IE
-				if (n.nodeName == 'OBJECT')
+				if (n.nodeName == 'OBJECT') {
 					return n.attributes;
+				}
 
 				// IE doesn't keep the selected attribute if you clone option elements
-				if (n.nodeName === 'OPTION' && this.getAttrib(n, 'selected'))
+				if (n.nodeName === 'OPTION' && this.getAttrib(n, 'selected')) {
 					o.push({
 						specified: 1,
 						nodeName: 'selected'
 					});
+				}
 
 				// It's crazy that this is faster in IE but it's because it returns all attributes all the time
 				n.cloneNode(false).outerHTML.replace(/<\/?[\w:\-]+ ?|=[\"][^\"]+\"|=\'[^\']+\'|=[\w\-]+|>/gi, '').replace(/[\w:\-]+/gi, function (a) {
@@ -1777,20 +1850,25 @@
 		 */
 		isEmpty: function (node, elements) {
 			var self = this,
-				i, attributes, type, walker, name, brCount = 0;
+				i, attributes, type, whitespace, walker, name, brCount = 0;
 
 			node = node.firstChild;
+
 			if (node) {
 				walker = new tinymce.dom.TreeWalker(node, node.parentNode);
-				elements = elements || self.schema ? self.schema.getNonEmptyElements() : null;
+				elements = elements || (self.schema ? self.schema.getNonEmptyElements() : null);
+				whitespace = self.schema ? self.schema.getWhiteSpaceElements() : {};
 
 				do {
 					type = node.nodeType;
 
 					if (type === 1) {
 						// Ignore bogus elements
-						if (node.getAttribute('data-mce-bogus'))
+						var bogusVal = node.getAttribute('data-mce-bogus');
+						if (bogusVal) {
+							node = walker.next(bogusVal === 'all');
 							continue;
+						}
 
 						// Keep empty elements like <img />
 						name = node.nodeName.toLowerCase();
@@ -1798,6 +1876,7 @@
 							// Ignore single BR elements in blocks like <p><br /></p> or <p><span><br /></span></p>
 							if (name === 'br') {
 								brCount++;
+								node = walker.next();
 								continue;
 							}
 
@@ -1806,22 +1885,32 @@
 
 						// Keep elements with data-bookmark attributes or name attribute like <a name="1"></a>
 						attributes = self.getAttribs(node);
-						i = node.attributes.length;
+						i = attributes.length;
 						while (i--) {
-							name = node.attributes[i].nodeName;
-							if (name === "name" || name === 'data-mce-bookmark')
+							name = attributes[i].nodeName;
+							if (name === "name" || name === 'data-mce-bookmark') {
 								return false;
+							}
 						}
 					}
 
 					// Keep comment nodes
-					if (type == 8)
+					if (type == 8) {
 						return false;
+					}
 
 					// Keep non whitespace text nodes
-					if ((type === 3 && !whiteSpaceRegExp.test(node.nodeValue)))
+					if (type === 3 && !whiteSpaceRegExp.test(node.nodeValue)) {
 						return false;
-				} while (node = walker.next());
+					}
+
+					// Keep whitespace preserve elements
+					if (type === 3 && node.parentNode && whitespace[node.parentNode.nodeName] && whiteSpaceRegExp.test(node.nodeValue)) {
+						return false;
+					}
+
+					node = walker.next();
+				} while (node);
 			}
 
 			return brCount <= 1;
@@ -1838,8 +1927,9 @@
 			self.win = self.doc = self.root = self.events = self.frag = null;
 
 			// Manual destroy then remove unload handler
-			if (!s)
+			if (!s) {
 				tinymce.removeUnload(self.destroy);
+			}
 		},
 
 		/**
@@ -1864,16 +1954,17 @@
 		 */
 		nodeIndex: function (node, normalized) {
 			var idx = 0,
-				lastNodeType, lastNode, nodeType;
+				lastNodeType, nodeType;
 
 			if (node) {
-				for (lastNodeType = node.nodeType, node = node.previousSibling, lastNode = node; node; node = node.previousSibling) {
+				for (lastNodeType = node.nodeType, node = node.previousSibling; node; node = node.previousSibling) {
 					nodeType = node.nodeType;
 
 					// Normalize text nodes
 					if (normalized && nodeType == 3) {
-						if (nodeType == lastNodeType || !node.nodeValue.length)
+						if (nodeType == lastNodeType || !node.nodeValue.length) {
 							continue;
+						}
 					}
 					idx++;
 					lastNodeType = nodeType;
@@ -1886,7 +1977,7 @@
 		/**
 		 * Splits an element into two new elements and places the specified split
 		 * element or element between the new ones. For example splitting the paragraph at the bold element in
-		 * this example <p>abc<b>abc</b>123</p> would produce <p>abc</p><b>abc</b><p>123</p>. 
+		 * this example <p>abc<b>abc</b>123</p> would produce <p>abc</p><b>abc</b><p>123</p>.
 		 *
 		 * @method split
 		 * @param {Element} pe Parent element to split.
@@ -1917,11 +2008,13 @@
 					return previousIsSpan && nextIsSpan;
 				}
 
-				if (type == 1 && node.getAttribute('data-mce-type') == 'bookmark')
+				if (type == 1 && node.getAttribute('data-mce-type') == 'bookmark') {
 					return;
+				}
 
-				for (i = children.length - 1; i >= 0; i--)
+				for (i = children.length - 1; i >= 0; i--) {
 					trim(children[i]);
+				}
 
 				if (type != 9) {
 					// Keep non whitespace text nodes
@@ -1930,24 +2023,27 @@
 						// Also keep text nodes with only spaces if surrounded by spans.
 						// eg. "<p><span>a</span> <span>b</span></p>" should keep space between a and b
 						var trimmedLength = tinymce.trim(node.nodeValue).length;
-						if (!self.isBlock(node.parentNode) || trimmedLength > 0 || trimmedLength === 0 && surroundedBySpans(node))
+						if (!self.isBlock(node.parentNode) || trimmedLength > 0 || trimmedLength === 0 && surroundedBySpans(node)) {
 							return;
+						}
 					} else if (type == 1) {
 						// If the only child is a bookmark then move it up
 						children = node.childNodes;
-						if (children.length == 1 && children[0] && children[0].nodeType == 1 && children[0].getAttribute('data-mce-type') == 'bookmark')
+						if (children.length == 1 && children[0] && children[0].nodeType == 1 && children[0].getAttribute('data-mce-type') == 'bookmark') {
 							node.parentNode.insertBefore(children[0], node);
+						}
 
 						// Keep non empty elements or img, hr etc
-						if (children.length || /^(br|hr|input|img)$/i.test(node.nodeName))
+						if (children.length || /^(br|hr|input|img)$/i.test(node.nodeName)) {
 							return;
+						}
 					}
 
 					self.remove(node);
 				}
 
 				return node;
-			};
+			}
 
 			if (pe && e) {
 				// Get before chunk
@@ -1966,10 +2062,11 @@
 				pa.insertBefore(trim(bef), pe);
 
 				// Insert middle chunk
-				if (re)
+				if (re) {
 					pa.replaceChild(re, e);
-				else
+				} else {
 					pa.insertBefore(e, pe);
+				}
 
 				// Insert after chunk
 				pa.insertBefore(trim(aft), pe);
@@ -2072,8 +2169,9 @@
 
 				// Loop all siblings
 				for (node = node[name]; node; node = node[name]) {
-					if (f(node))
+					if (f(node)) {
 						return node;
+					}
 				}
 			}
 

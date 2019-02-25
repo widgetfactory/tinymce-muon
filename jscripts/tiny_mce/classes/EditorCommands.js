@@ -8,9 +8,11 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	// Added for compression purposes
-	var each = tinymce.each, undef, TRUE = true, FALSE = false, isOldIE = tinymce.isIE && !tinymce.isIE11;
+	var each = tinymce.each,
+		undef, TRUE = true,
+		FALSE = false;
 	var TreeWalker = tinymce.dom.TreeWalker;
 
 	/**
@@ -19,10 +21,14 @@
 	 *
 	 * @class tinymce.EditorCommands
 	 */
-	tinymce.EditorCommands = function(editor) {
+	tinymce.EditorCommands = function (editor) {
 		var dom = editor.dom,
 			selection = editor.selection,
-			commands = {state: {}, exec : {}, value : {}},
+			commands = {
+				state: {},
+				exec: {},
+				value: {}
+			},
 			settings = editor.settings,
 			formatter = editor.formatter,
 			bookmark;
@@ -40,13 +46,15 @@
 			var func;
 
 			command = command.toLowerCase();
-			if (func = commands.exec[command]) {
+			func = commands.exec[command];
+
+			if (func) {
 				func(command, ui, value);
 				return TRUE;
 			}
 
 			return FALSE;
-		};
+		}
 
 		/**
 		 * Queries the current state for a command for example if the current selection is "bold".
@@ -59,11 +67,14 @@
 			var func;
 
 			command = command.toLowerCase();
-			if (func = commands.state[command])
+			func = commands.state[command];
+
+			if (func) {
 				return func(command);
+			}
 
 			return -1;
-		};
+		}
 
 		/**
 		 * Queries the command value for example the current fontsize.
@@ -76,11 +87,14 @@
 			var func;
 
 			command = command.toLowerCase();
-			if (func = commands.value[command])
+			func = commands.value[command];
+
+			if (func) {
 				return func(command);
+			}
 
 			return FALSE;
-		};
+		}
 
 		/**
 		 * Adds commands to the command collection.
@@ -92,61 +106,66 @@
 		function addCommands(command_list, type) {
 			type = type || 'exec';
 
-			each(command_list, function(callback, command) {
-				each(command.toLowerCase().split(','), function(command) {
+			each(command_list, function (callback, command) {
+				each(command.toLowerCase().split(','), function (command) {
 					commands[type][command] = callback;
 				});
 			});
-		};
+		}
 
 		// Expose public methods
 		tinymce.extend(this, {
-			execCommand : execCommand,
-			queryCommandState : queryCommandState,
-			queryCommandValue : queryCommandValue,
-			addCommands : addCommands
+			execCommand: execCommand,
+			queryCommandState: queryCommandState,
+			queryCommandValue: queryCommandValue,
+			addCommands: addCommands
 		});
 
 		// Private methods
 
 		function execNativeCommand(command, ui, value) {
-			if (ui === undef)
+			if (ui === undef) {
 				ui = FALSE;
+			}
 
-			if (value === undef)
+			if (value === undef) {
 				value = null;
+			}
 
 			return editor.getDoc().execCommand(command, ui, value);
-		};
+		}
 
 		function isFormatMatch(name) {
 			return formatter.match(name);
-		};
+		}
 
 		function toggleFormat(name, value) {
-			formatter.toggle(name, value ? {value : value} : undef);
-		};
+			formatter.toggle(name, value ? {
+				value: value
+			} : undef);
+		}
 
 		function storeSelection(type) {
 			bookmark = selection.getBookmark(type);
-		};
+		}
 
 		function restoreSelection() {
 			selection.moveToBookmark(bookmark);
-		};
+		}
 
 		// Add execCommand overrides
 		addCommands({
 			// Ignore these, added for compatibility
-			'mceResetDesignMode,mceBeginUndoLevel' : function() {},
+			'mceResetDesignMode,mceBeginUndoLevel': function () {},
 
 			// Add undo manager logic
-			'mceEndUndoLevel,mceAddUndoLevel' : function() {
+			'mceEndUndoLevel,mceAddUndoLevel': function () {
 				editor.undoManager.add();
 			},
 
-			'Cut,Copy,Paste' : function(command) {
-				var doc = editor.getDoc(), failed;
+			'Cut,Copy,Paste': function (command) {
+				var doc = editor.getDoc(),
+					failed;
 
 				// Try executing the native command
 				try {
@@ -159,19 +178,22 @@
 				// Present alert message about clipboard access not being available
 				if (failed || !doc.queryCommandSupported(command)) {
 					if (tinymce.isGecko) {
-						editor.windowManager.confirm(editor.getLang('clipboard_msg'), function(state) {
-							if (state)
+						editor.windowManager.confirm(editor.getLang('clipboard_msg'), function (state) {
+							if (state) {
 								open('http://www.mozilla.org/editor/midasdemo/securityprefs.html', '_blank');
+							}
 						});
-					} else
+					} else {
 						editor.windowManager.alert(editor.getLang('clipboard_no_support'));
+					}
 				}
 			},
 
 			// Override unlink command
-			unlink: function() {
+			unlink: function () {
 				if (selection.isCollapsed()) {
 					var elm = selection.getNode();
+
 					if (elm.tagName == 'A') {
 						editor.dom.remove(elm, true);
 					}
@@ -183,13 +205,14 @@
 			},
 
 			// Override justify commands to use the text formatter engine
-			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull' : function(command) {
+			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function (command) {
 				var align = command.substring(7);
 
 				// Remove all other alignments first
-				each('left,center,right,full'.split(','), function(name) {
-					if (align != name)
+				each('left,center,right,full'.split(','), function (name) {
+					if (align != name) {
 						formatter.remove('align' + name);
+					}
 				});
 
 				toggleFormat('align' + align);
@@ -197,7 +220,7 @@
 			},
 
 			// Override list commands to fix WebKit bug
-			'InsertUnorderedList,InsertOrderedList': function(command) {
+			'InsertUnorderedList,InsertOrderedList': function (command) {
 				var listElm, listParent;
 
 				execNativeCommand(command);
@@ -219,16 +242,16 @@
 			},
 
 			// Override commands to use the text formatter engine
-			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript' : function(command) {
+			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript': function (command) {
 				toggleFormat(command);
 			},
 
 			// Override commands to use the text formatter engine
-			'ForeColor,HiliteColor,FontName' : function(command, ui, value) {
+			'ForeColor,HiliteColor,FontName': function (command, ui, value) {
 				toggleFormat(command, value);
 			},
 
-			FontSize : function(command, ui, value) {
+			FontSize: function (command, ui, value) {
 				var fontClasses, fontSizes;
 
 				// Convert font size 1-7 to styles
@@ -236,36 +259,41 @@
 					fontSizes = tinymce.explode(settings.font_size_style_values);
 					fontClasses = tinymce.explode(settings.font_size_classes);
 
-					if (fontClasses)
+					if (fontClasses) {
 						value = fontClasses[value - 1] || value;
-					else
+					} else {
 						value = fontSizes[value - 1] || value;
+					}
 				}
 
 				toggleFormat(command, value);
 			},
 
-			RemoveFormat : function(command) {
+			RemoveFormat: function (command) {
 				formatter.remove(command);
 			},
 
-			mceBlockQuote : function(command) {
+			mceBlockQuote: function () {
 				toggleFormat('blockquote');
 			},
 
-			FormatBlock : function(command, ui, value) {
+			FormatBlock: function (command, ui, value) {
 				return toggleFormat(value || 'p');
 			},
 
-			mceCleanup : function() {
+			mceCleanup: function () {
 				var bookmark = selection.getBookmark();
 
-				editor.setContent(editor.getContent({cleanup : TRUE}), {cleanup : TRUE});
+				editor.setContent(editor.getContent({
+					cleanup: TRUE
+				}), {
+					cleanup: TRUE
+				});
 
 				selection.moveToBookmark(bookmark);
 			},
 
-			mceRemoveNode : function(command, ui, value) {
+			mceRemoveNode: function (command, ui, value) {
 				var node = value || selection.getNode();
 
 				// Make sure that the body node isn't removed
@@ -276,10 +304,10 @@
 				}
 			},
 
-			mceSelectNodeDepth : function(command, ui, value) {
+			mceSelectNodeDepth: function (command, ui, value) {
 				var counter = 0;
 
-				dom.getParent(selection.getNode(), function(node) {
+				dom.getParent(selection.getNode(), function (node) {
 					if (node.nodeType == 1 && counter++ == value) {
 						selection.select(node);
 						return FALSE;
@@ -287,11 +315,11 @@
 				}, editor.getBody());
 			},
 
-			mceSelectNode : function(command, ui, value) {
+			mceSelectNode: function (command, ui, value) {
 				selection.select(value);
 			},
 
-			mceInsertContent: function(command, ui, value) {
+			mceInsertContent: function (command, ui, value) {
 				var parser, serializer, parentNode, rootNode, fragment, args;
 				var marker, rng, node, node2, bookmarkHtml, merge;
 				var textInlineElements = editor.schema.getTextInlineElements();
@@ -359,22 +387,6 @@
 					}
 				}
 
-				function reduceInlineTextElements() {
-					if (merge) {
-						var root = editor.getBody(), elementUtils = new ElementUtils(dom);
-
-						each(dom.select('*[data-mce-new]'), function(node) {
-							node.removeAttribute('data-mce-new');
-
-							for (var testNode = node.parentNode; testNode && testNode != root; testNode = testNode.parentNode) {
-								if (elementUtils.compare(testNode, node)) {
-									dom.remove(node, true);
-								}
-							}
-						});
-					}
-				}
-
 				if (typeof value != 'string') {
 					merge = value.merge;
 					value = value.content;
@@ -391,7 +403,10 @@
 				bookmarkHtml = '<span id="mce_marker" data-mce-type="bookmark">&#xFEFF;&#x200B;</span>';
 
 				// Run beforeSetContent handlers on the HTML to be inserted
-				args = {content: value, format: 'html'};
+				args = {
+					content: value,
+					format: 'html'
+				};
 				selection.onBeforeSetContent.dispatch(selection, args);
 				value = args.content;
 
@@ -425,7 +440,9 @@
 				parentNode = selection.getNode();
 
 				// Parse the fragment within the context of the parent node
-				var parserArgs = {context: parentNode.nodeName.toLowerCase()};
+				var parserArgs = {
+					context: parentNode.nodeName.toLowerCase()
+				};
 				fragment = parser.parse(value, parserArgs);
 
 				markInlineFormatElements(fragment);
@@ -484,7 +501,7 @@
 					value = serializer.serialize(
 						parser.parse(
 							// Need to replace by using a function since $ in the contents would otherwise be a problem
-							value.replace(/<span (id="mce_marker"|id=mce_marker).+?<\/span>/i, function() {
+							value.replace(/<span (id="mce_marker"|id=mce_marker).+?<\/span>/i, function () {
 								return serializer.serialize(fragment);
 							})
 						)
@@ -532,20 +549,22 @@
 				editor.addVisual();
 			},
 
-			mceInsertRawHTML : function(command, ui, value) {
+			mceInsertRawHTML: function (command, ui, value) {
 				selection.setContent('tiny_mce_marker');
-				editor.setContent(editor.getContent().replace(/tiny_mce_marker/g, function() { return value }));
+				editor.setContent(editor.getContent().replace(/tiny_mce_marker/g, function () {
+					return value;
+				}));
 			},
 
-			mceToggleFormat : function(command, ui, value) {
+			mceToggleFormat: function (command, ui, value) {
 				toggleFormat(value);
 			},
 
-			mceSetContent : function(command, ui, value) {
+			mceSetContent: function (command, ui, value) {
 				editor.setContent(value);
 			},
 
-			'Indent,Outdent': function(command) {
+			'Indent,Outdent': function (command) {
 				var intentValue, indentUnit, value;
 
 				// Setup indent level
@@ -559,7 +578,7 @@
 						formatter.apply('div');
 					}
 
-					each(selection.getSelectedBlocks(), function(element) {
+					each(selection.getSelectedBlocks(), function (element) {
 						if (element.nodeName != "LI") {
 							var indentStyleName = editor.getParam('indent_use_margin', false) ? 'margin' : 'padding';
 
@@ -579,9 +598,7 @@
 				}
 			},
 
-			mceRepaint : function() {
-				var bookmark;
-
+			mceRepaint: function () {
 				if (tinymce.isGecko) {
 					try {
 						storeSelection(TRUE);
@@ -598,28 +615,28 @@
 				}
 			},
 
-			mceToggleFormat : function(command, ui, value) {
-				formatter.toggle(value);
-			},
-
-			InsertHorizontalRule : function() {
+			InsertHorizontalRule: function () {
 				editor.execCommand('mceInsertContent', false, '<hr />');
 			},
 
-			mceToggleVisualAid : function() {
+			mceToggleVisualAid: function () {
 				editor.hasVisual = !editor.hasVisual;
 				editor.addVisual();
 			},
 
-			mceReplaceContent : function(command, ui, value) {
-				editor.execCommand('mceInsertContent', false, value.replace(/\{\$selection\}/g, selection.getContent({format : 'text'})));
+			mceReplaceContent: function (command, ui, value) {
+				editor.execCommand('mceInsertContent', false, value.replace(/\{\$selection\}/g, selection.getContent({
+					format: 'text'
+				})));
 			},
 
-			mceInsertLink : function(command, ui, value) {
+			mceInsertLink: function (command, ui, value) {
 				var anchor;
 
 				if (typeof value == 'string') {
-					value = {href: value};
+					value = {
+						href: value
+					};
 				}
 
 				anchor = dom.getParent(selection.getNode(), 'a');
@@ -630,7 +647,7 @@
 				// Remove existing links if there could be child links or that the href isn't specified
 				if (!anchor || !value.href) {
 					formatter.remove('link');
-				}		
+				}
 
 				// Apply new link to selection
 				if (value.href) {
@@ -638,8 +655,9 @@
 				}
 			},
 
-			selectAll : function() {
-				var root = dom.getRoot(), rng = dom.createRng();
+			selectAll: function () {
+				var root = dom.getRoot(),
+					rng = dom.createRng();
 
 				// Old IE does a better job with selectall than new versions
 				if (selection.getRng().setStart) {
@@ -660,7 +678,7 @@
 				}
 			},
 
-			"delete": function() {
+			"delete": function () {
 				execNativeCommand("Delete");
 
 				// Check if body is empty after the delete call if so then set the contents
@@ -679,17 +697,17 @@
 				}
 			},
 
-			mceNewDocument: function() {
+			mceNewDocument: function () {
 				editor.setContent('');
 			},
 
-			InsertLineBreak: function(command, ui, value) {
+			InsertLineBreak: function (command, ui, value) {
 				// We load the current event in from EnterKey.js when appropriate to heed
 				// certain event-specific variations such as ctrl-enter in a list
 				var evt = value;
 				var brElm, extraBr, marker;
 				var rng = selection.getRng(true);
-				
+
 				new tinymce.dom.RangeUtils(dom).normalize(rng);
 
 				var offset = rng.startOffset;
@@ -708,7 +726,7 @@
 				}
 
 				var parentBlock = dom.getParent(container, dom.isBlock);
-				var parentBlockName = parentBlock ? parentBlock.nodeName.toUpperCase() : ''; // IE < 9 & HTML5
+				//var parentBlockName = parentBlock ? parentBlock.nodeName.toUpperCase() : ''; // IE < 9 & HTML5
 				var containerBlock = parentBlock ? dom.getParent(parentBlock.parentNode, dom.isBlock) : null;
 				var containerBlockName = containerBlock ? containerBlock.nodeName.toUpperCase() : ''; // IE < 9 & HTML5
 
@@ -716,12 +734,13 @@
 				var isControlKey = evt && evt.ctrlKey;
 				if (containerBlockName == 'LI' && !isControlKey) {
 					parentBlock = containerBlock;
-					parentBlockName = containerBlockName;
+					//parentBlockName = containerBlockName;
 				}
 
 				// Walks the parent block to the right and look for BR elements
 				function hasRightSideContent() {
-					var walker = new TreeWalker(container, parentBlock), node;
+					var walker = new TreeWalker(container, parentBlock),
+						node;
 					var nonEmptyElementsMap = editor.schema.getNonEmptyElements();
 
 					while ((node = walker.next())) {
@@ -733,7 +752,7 @@
 
 				if (container && container.nodeType == 3 && offset >= container.nodeValue.length) {
 					// Insert extra BR element at the end block elements
-					if (!isOldIE && !hasRightSideContent()) {
+					if (!hasRightSideContent()) {
 						brElm = dom.create('br');
 						rng.insertNode(brElm);
 						rng.setStartAfter(brElm);
@@ -744,12 +763,6 @@
 
 				brElm = dom.create('br');
 				rng.insertNode(brElm);
-
-				// Rendering modes below IE8 doesn't display BR elements in PRE unless we have a \n before it
-				var documentMode = dom.doc.documentMode;
-				if (isOldIE && parentBlockName == 'PRE' && (!documentMode || documentMode < 8)) {
-					brElm.parentNode.insertBefore(dom.doc.createTextNode('\r'), brElm);
-				}
 
 				// Insert temp marker and scroll to that
 				marker = dom.create('span', {}, '&nbsp;');
@@ -775,24 +788,24 @@
 		// Add queryCommandState overrides
 		addCommands({
 			// Override justify commands
-			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function(command) {
+			'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function (command) {
 				var name = 'align' + command.substring(7);
 				var nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
-				var matches = tinymce.map(nodes, function(node) {
+				var matches = tinymce.map(nodes, function (node) {
 					return !!formatter.matchNode(node, name);
 				});
 				return tinymce.inArray(matches, TRUE) !== -1;
 			},
 
-			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript': function(command) {
+			'Bold,Italic,Underline,Strikethrough,Superscript,Subscript': function (command) {
 				return isFormatMatch(command);
 			},
 
-			mceBlockQuote: function() {
+			mceBlockQuote: function () {
 				return isFormatMatch('blockquote');
 			},
 
-			Outdent: function() {
+			Outdent: function () {
 				var node;
 
 				if (settings.inline_styles) {
@@ -812,7 +825,7 @@
 				);
 			},
 
-			'InsertUnorderedList,InsertOrderedList': function(command) {
+			'InsertUnorderedList,InsertOrderedList': function (command) {
 				var list = dom.getParent(selection.getNode(), 'ul,ol,dl');
 
 				return list &&
@@ -825,8 +838,9 @@
 
 		// Add queryCommandValue overrides
 		addCommands({
-			'FontSize,FontName' : function(command) {
-				var value = 0, parent;
+			'FontSize,FontName': function (command) {
+				var value = 0,
+					parent;
 
 				if ((parent = dom.getParent(selection.getNode(), 'span'))) {
 					if (command == 'fontsize') {
@@ -842,11 +856,11 @@
 
 		// Add undo manager logic
 		addCommands({
-			Undo : function() {
+			Undo: function () {
 				editor.undoManager.undo();
 			},
 
-			Redo : function() {
+			Redo: function () {
 				editor.undoManager.redo();
 			}
 		});

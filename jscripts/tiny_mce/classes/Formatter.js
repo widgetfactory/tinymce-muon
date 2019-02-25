@@ -9,7 +9,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * Text formatter engine class. This class is used to apply formats like bold, italic, font size
 	 * etc to the current selection or specific nodes. This engine was build to replace the browsers
@@ -31,7 +31,7 @@
 	 * @constructor Formatter
 	 * @param {tinymce.Editor} ed Editor instance to construct the formatter engine to.
 	 */
-	tinymce.Formatter = function(ed) {
+	tinymce.Formatter = function (ed) {
 		var formats = {},
 			each = tinymce.each,
 			dom = ed.dom,
@@ -76,87 +76,241 @@
 
 		function defaultFormats() {
 			register({
-				valigntop: [
-					{selector: 'td,th', styles: {'verticalAlign': 'top'}}
+				valigntop: [{
+					selector: 'td,th',
+					styles: {
+						'verticalAlign': 'top'
+					}
+				}],
+
+				valignmiddle: [{
+					selector: 'td,th',
+					styles: {
+						'verticalAlign': 'middle'
+					}
+				}],
+
+				valignbottom: [{
+					selector: 'td,th',
+					styles: {
+						'verticalAlign': 'bottom'
+					}
+				}],
+
+				alignleft: [{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							'float': 'left'
+						}
+					},
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'left'
+						},
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'img,table',
+						collapsed: false,
+						styles: {
+							'float': 'left'
+						}
+					}
 				],
 
-				valignmiddle: [
-					{selector: 'td,th', styles: {'verticalAlign': 'middle'}}
+				aligncenter: [{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							marginLeft: 'auto',
+							marginRight: 'auto',
+							display: 'table'
+						}
+					},
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'center'
+						},
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'img',
+						collapsed: false,
+						styles: {
+							display: 'block',
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						}
+					},
+					{
+						selector: 'table',
+						collapsed: false,
+						styles: {
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						}
+					}
 				],
 
-				valignbottom: [
-					{selector: 'td,th', styles: {'verticalAlign': 'bottom'}}
+				alignright: [{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							'float': 'right'
+						}
+					},
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'right'
+						},
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'img,table',
+						collapsed: false,
+						styles: {
+							'float': 'right'
+						}
+					}
 				],
 
-				alignleft: [
-					{selector: 'figure[data-mce-image]', collapsed: false, styles: {'float': 'left'}},
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'left'}, defaultBlock: 'div'},
-					{selector: 'img,table', collapsed: false, styles: {'float': 'left'}}
+				alignfull: [{
+					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+					styles: {
+						textAlign: 'justify'
+					},
+					defaultBlock: 'div'
+				}],
+
+				bold: [{
+						inline: 'strong',
+						remove: 'all'
+					},
+					{
+						inline: 'span',
+						styles: {
+							fontWeight: 'bold'
+						}
+					},
+					{
+						inline: 'b',
+						remove: 'all'
+					}
 				],
 
-				aligncenter: [
-					{selector: 'figure[data-mce-image]', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto', display: 'table'}},
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'center'}, defaultBlock: 'div'},
-					{selector: 'img', collapsed: false, styles: {display: 'block', marginLeft: 'auto', marginRight: 'auto'}},
-					{selector: 'table', collapsed: false, styles: {marginLeft: 'auto', marginRight: 'auto'}}
+				italic: [{
+						inline: 'em',
+						remove: 'all'
+					},
+					{
+						inline: 'span',
+						styles: {
+							fontStyle: 'italic'
+						}
+					},
+					{
+						inline: 'i',
+						remove: 'all'
+					}
 				],
 
-				alignright: [
-					{selector: 'figure[data-mce-image]', collapsed: false, styles: {'float': 'right'}},
-					{selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li', styles: {textAlign: 'right'}, defaultBlock: 'div'},
-					{selector: 'img,table', collapsed: false, styles: {'float': 'right'}}
+				underline: [{
+						inline: 'span',
+						styles: {
+							textDecoration: 'underline'
+						},
+						exact: true
+					},
+					{
+						inline: 'u',
+						remove: 'all'
+					}
 				],
 
-				alignfull : [
-					{selector : 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li', styles : {textAlign : 'justify'}, defaultBlock: 'div'}
+				strikethrough: [{
+						inline: 'span',
+						styles: {
+							textDecoration: 'line-through'
+						},
+						exact: true
+					},
+					{
+						inline: 'strike',
+						remove: 'all'
+					}
 				],
 
-				bold : [
-					{inline : 'strong', remove : 'all'},
-					{inline : 'span', styles : {fontWeight : 'bold'}},
-					{inline : 'b', remove : 'all'}
-				],
+				forecolor: {
+					inline: 'span',
+					styles: {
+						color: '%value'
+					},
+					links: true,
+					remove_similar: true
+				},
+				hilitecolor: {
+					inline: 'span',
+					styles: {
+						backgroundColor: '%value'
+					},
+					links: true,
+					remove_similar: true
+				},
+				fontname: {
+					inline: 'span',
+					styles: {
+						fontFamily: '%value'
+					}
+				},
+				fontsize: {
+					inline: 'span',
+					styles: {
+						fontSize: '%value'
+					}
+				},
+				fontsize_class: {
+					inline: 'span',
+					attributes: {
+						'class': '%value'
+					}
+				},
+				blockquote: {
+					block: 'blockquote',
+					wrapper: 1,
+					remove: 'all'
+				},
+				subscript: {
+					inline: 'sub'
+				},
+				superscript: {
+					inline: 'sup'
+				},
+				code: {
+					inline: 'code'
+				},
 
-				italic : [
-					{inline : 'em', remove : 'all'},
-					{inline : 'span', styles : {fontStyle : 'italic'}},
-					{inline : 'i', remove : 'all'}
-				],
-
-				underline : [
-					{inline : 'span', styles : {textDecoration : 'underline'}, exact : true},
-					{inline : 'u', remove : 'all'}
-				],
-
-				strikethrough : [
-					{inline : 'span', styles : {textDecoration : 'line-through'}, exact : true},
-					{inline : 'strike', remove : 'all'}
-				],
-
-				forecolor: {inline: 'span', styles: {color: '%value'}, links: true, remove_similar: true},
-				hilitecolor: {inline: 'span', styles: {backgroundColor: '%value'}, links: true, remove_similar: true},
-				fontname: {inline: 'span', styles: {fontFamily: '%value'}},
-				fontsize: {inline: 'span', styles: {fontSize: '%value'}},
-				fontsize_class: {inline: 'span', attributes: {'class': '%value'}},
-				blockquote: {block: 'blockquote', wrapper: 1, remove: 'all'},
-				subscript: {inline: 'sub'},
-				superscript: {inline: 'sup'},
-				code: {inline: 'code'},
-
-				link : {inline : 'a', selector : 'a', remove : 'all', split : true, deep : true,
-					onmatch : function() {
+				link: {
+					inline: 'a',
+					selector: 'a',
+					remove: 'all',
+					split: true,
+					deep: true,
+					onmatch: function () {
 						return true;
 					},
 
-					onformat : function(elm, fmt, vars) {
-						each(vars, function(value, key) {
+					onformat: function (elm, fmt, vars) {
+						each(vars, function (value, key) {
 							dom.setAttrib(elm, key, value);
 						});
 					}
 				},
 
-				removeformat: [
-					{
+				removeformat: [{
 						selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
 						remove: 'all',
 						split: true,
@@ -164,14 +318,30 @@
 						block_expand: true,
 						deep: true
 					},
-					{selector: 'span', attributes: ['style', 'class'], remove: 'empty', split: true, expand: false, deep: true},
-					{selector: '*', attributes: ['style', 'class'], split: false, expand: false, deep: true}
+					{
+						selector: 'span',
+						attributes: ['style', 'class'],
+						remove: 'empty',
+						split: true,
+						expand: false,
+						deep: true
+					},
+					{
+						selector: '*',
+						attributes: ['style', 'class'],
+						split: false,
+						expand: false,
+						deep: true
+					}
 				]
 			});
 
 			// Register default block formats
-			each('p h1 h2 h3 h4 h5 h6 div address pre div code samp dt dd dl'.split(/\s/), function(name) {
-				register(name, {block : name, remove : 'all'});
+			each('p h1 h2 h3 h4 h5 h6 div address pre div code samp dt dd dl'.split(/\s/), function (name) {
+				register(name, {
+					block: name,
+					remove: 'all'
+				});
 			});
 
 			// Register user defined formats
@@ -189,12 +359,12 @@
 				//ed.addShortcut('alt+shift+' + i, '', ['FormatBlock', false, 'h' + i]);
 				// keep legacy shortcuts
 				ed.addShortcut('ctrl+' + i, '', ['FormatBlock', false, 'h' + i]);
-				
+
 			}
-			
-			each(['p', 'div', 'address'], function(name, i) {
+
+			each(['p', 'div', 'address'], function (name, i) {
 				var n = 7 + i;
-			
+
 				//ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
 				ed.addShortcut('ctrl+' + n, '', ['FormatBlock', false, name]);
 			});
@@ -222,15 +392,15 @@
 		 */
 		function register(name, format) {
 			if (name) {
-				if (typeof(name) !== 'string') {
-					each(name, function(format, name) {
+				if (typeof (name) !== 'string') {
+					each(name, function (format, name) {
 						register(name, format);
 					});
 				} else {
 					// Force format into array and add it to internal collection
 					format = format.length ? format : [format];
 
-					each(format, function(format) {
+					each(format, function (format) {
 						// Set deep to false by default on selector formats this to avoid removing
 						// alignment on images inside paragraphs when alignment is changed on paragraphs
 						if (format.deep === undef) {
@@ -254,7 +424,7 @@
 						}
 
 						// Split classes if needed
-						if (typeof(format.classes) === 'string') {
+						if (typeof (format.classes) === 'string') {
 							format.classes = format.classes.split(/\s+/);
 						}
 					});
@@ -295,7 +465,7 @@
 		function getTextDecoration(node) {
 			var decoration;
 
-			ed.dom.getParent(node, function(n) {
+			ed.dom.getParent(node, function (n) {
 				decoration = ed.dom.getStyle(n, 'text-decoration');
 				return decoration && decoration !== 'none';
 			});
@@ -324,35 +494,37 @@
 		 * @param {Node} node Optional node to apply the format to defaults to current selection.
 		 */
 		function apply(name, vars, node) {
-			var formatList = get(name), format = formatList[0], bookmark, rng, isCollapsed = !node && selection.isCollapsed();
+			var formatList = get(name),
+				format = formatList[0],
+				bookmark, rng, isCollapsed = !node && selection.isCollapsed();
 
 			function setElementFormat(elm, fmt) {
 				fmt = fmt || format;
-				
+
 				if (elm) {
 					if (fmt.onformat) {
 						fmt.onformat(elm, fmt, vars, node);
 					}
 
-					each(fmt.styles, function(value, name) {
+					each(fmt.styles, function (value, name) {
 						dom.setStyle(elm, name, replaceVars(value, vars));
 					});
 
 					// Needed for the WebKit span spam bug
 					// TODO: Remove this once WebKit/Blink fixes this
-					if (fmt.styles) {						
-						var styleVal = dom.serializeStyle(dom.parseStyle(elm.style.cssText), elm.nodeName);			
+					if (fmt.styles) {
+						var styleVal = dom.serializeStyle(dom.parseStyle(elm.style.cssText), elm.nodeName);
 
 						if (styleVal) {
 							elm.setAttribute('data-mce-style', styleVal);
 						}
 					}
 
-					each(fmt.attributes, function(value, name) {
+					each(fmt.attributes, function (value, name) {
 						dom.setAttrib(elm, name, replaceVars(value, vars));
 					});
 
-					each(fmt.classes, function(value) {
+					each(fmt.classes, function (value) {
 						value = replaceVars(value, vars);
 
 						if (!dom.hasClass(elm, value)) {
@@ -370,7 +542,7 @@
 				}
 
 				// Look for matching formats
-				each(formatList, function(format) {
+				each(formatList, function (format) {
 					// Check collapsed state if it exists
 					if ('collapsed' in format && format.collapsed !== isCollapsed) {
 						return;
@@ -391,7 +563,7 @@
 				function findSelectionEnd(start, end) {
 					var walker = new TreeWalker(end);
 					for (node = walker.prev2(); node; node = walker.prev2()) {
-						if (node.nodeType == 3 && node.data.length > 0) {						
+						if (node.nodeType == 3 && node.data.length > 0) {
 							return node;
 						}
 
@@ -417,51 +589,17 @@
 				return rng;
 			}
 
-			function findNestedList(node) {
-				var listIndex = -1;
-				var list;
-				each(node.childNodes, function(n, index) {
-					if (n.nodeName === "UL" || n.nodeName === "OL") {
-						listIndex = index;
-						list = n;
-						return false;
-					}
-				});
-				return {
-					listIndex: listIndex,
-					list: list
-				};
-			}
-
-			function getBookmarkIndex(node, bookmark) {
-				var startIndex = -1;
-				var endIndex = -1;
-				each(node.childNodes, function(n, index) {
-					if (n.nodeName === "SPAN" && dom.getAttrib(n, "data-mce-type") == "bookmark") {
-						if (n.id == bookmark.id + "_start") {
-							startIndex = index;
-						} else if (n.id == bookmark.id + "_end") {
-							endIndex = index;
-						}
-					}
-				});
-
-				return {
-					startIndex : startIndex,
-					endIndex : endIndex
-				};
-			}
-
 			function applyRngStyle(rng, bookmark, node_specific) {
-				var newWrappers = [], wrapName, wrapElm, contentEditable = true;
+				var newWrappers = [],
+					wrapName, wrapElm, contentEditable = true;
 
 				// Setup wrapper element
 				wrapName = format.inline || format.block;
 				wrapElm = dom.create(wrapName);
-				
+
 				setElementFormat(wrapElm);
 
-				rangeUtils.walk(rng, function(nodes) {
+				rangeUtils.walk(rng, function (nodes) {
 					var currentWrapElm;
 
 					/**
@@ -513,7 +651,7 @@
 						// Handle selector patterns
 						if (format.selector) {
 							// Look for matching formats
-							var found = applyNodeStyle(formatList, node);
+							found = applyNodeStyle(formatList, node);
 
 							// Continue processing if a selector match wasn't found and a inline element is defined
 							if (!format.inline || found) {
@@ -525,11 +663,11 @@
 						// Is it valid to wrap this item
 						// TODO: Break this if up, too complex
 						if (contentEditable && !hasContentEditableState && isValidChild(wrapName, nodeName) && isValidChild(parentName, wrapName) &&
-								!(!node_specific && node.nodeType === 3 &&
+							!(!node_specific && node.nodeType === 3 &&
 								node.nodeValue.length === 1 &&
 								node.nodeValue.charCodeAt(0) === 65279) &&
-								!isCaretNode(node) &&
-								(!format.inline || !isBlock(node))) {
+							!isCaretNode(node) &&
+							(!format.inline || !isBlock(node))) {
 							// Start wrapping
 							if (!currentWrapElm) {
 								// Wrap the node
@@ -560,10 +698,8 @@
 
 				// Apply formats to links as well to get the color of the underline to change as well
 				if (format.links === true || format.wrap_links === false) {
-					each(newWrappers, function(node) {
+					each(newWrappers, function (node) {
 						function process(node) {
-							var i, currentWrapElm, children;
-
 							if (node.nodeName === 'A') {
 								setElementFormat(node, format);
 							}
@@ -577,13 +713,13 @@
 
 				// Cleanup
 
-				each(newWrappers, function(node) {
+				each(newWrappers, function (node) {
 					var childCount;
 
 					function getChildCount(node) {
 						var count = 0;
 
-						each(node.childNodes, function(node) {
+						each(node.childNodes, function (node) {
 							if (!isWhiteSpaceNode(node) && !isBookmarkNode(node)) {
 								count++;
 							}
@@ -591,31 +727,16 @@
 
 						return count;
 					}
-					
+
 					function getChildElementNode(root) {
 						var child = false;
-						each(root.childNodes, function(node) {
+						each(root.childNodes, function (node) {
 							if (isElementNode(node)) {
 								child = node;
 								return false; // break loop
 							}
 						});
 						return child;
-					}
-
-					function matchNestedWrapper(node, filter) {
-						do {
-							if (getChildCount(node) !== 1) {
-								return false;
-							}
-
-							node = getChildElementNode(node);
-							if (!node) {
-								return false;
-							} else if (filter(node)) {
-								return node;
-							}
-						} while (node);
 					}
 
 					function mergeStyles(node) {
@@ -660,11 +781,11 @@
 						}
 
 						// Remove/merge children
-						each(formatList, function(format) {
+						each(formatList, function (format) {
 							// Merge all children of similar type will move styles from child to parent
 							// this: <span style="color:red"><b><span style="color:red; font-size:10px">text</span></b></span>
 							// will become: <span style="color:red"><b><span style="font-size:10px">text</span></b></span>
-							each(dom.select(format.inline, node), function(child) {
+							each(dom.select(format.inline, node), function (child) {
 								if (isBookmarkNode(child)) {
 									return;
 								}
@@ -682,7 +803,7 @@
 
 						// Look for parent with similar style format
 						if (format.merge_with_parents) {
-							dom.getParent(node.parentNode, function(parent) {
+							dom.getParent(node.parentNode, function (parent) {
 								if (matchNode(parent, name, vars)) {
 									dom.remove(node, 1);
 									node = 0;
@@ -714,7 +835,7 @@
 
 			if (format) {
 				if (node) {
-					if (node.nodeType) {						
+					if (node.nodeType) {
 						if (!applyNodeStyle(formatList, node)) {
 							rng = dom.createRng();
 							rng.setStartBefore(node);
@@ -728,7 +849,7 @@
 					if (!isCollapsed || !format.inline || dom.select('td.mceSelected,th.mceSelected').length) {
 						// Obtain selection node before selection is unselected by applyRngStyle()
 						var curSelNode = selection.getNode();
-						
+
 						// If the formats have a default block and we can't find a parent block then start wrapping it with a DIV this is for forced_root_blocks: false
 						// It's kind of a hack but people should be using the default block type P since all desktop editors work that way
 						if (!forcedRootBlock && formatList[0].defaultBlock && !dom.getParent(curSelNode, dom.isBlock)) {
@@ -765,7 +886,9 @@
 		 * @param {Node/Range} node Optional node or DOM range to remove the format from defaults to current selection.
 		 */
 		function remove(name, vars, node, similar) {
-			var formatList = get(name), format = formatList[0], bookmark, rng, contentEditable = true;
+			var formatList = get(name),
+				format = formatList[0],
+				bookmark, rng, contentEditable = true;
 
 			// Merges the styles for each node
 			function process(node) {
@@ -808,7 +931,7 @@
 				var formatRoot;
 
 				// Find format root
-				each(getParents(container.parentNode).reverse(), function(parent) {
+				each(getParents(container.parentNode).reverse(), function (parent) {
 					var format;
 
 					// Find format root element
@@ -929,15 +1052,24 @@
 
 						if (dom.isChildOf(startContainer, endContainer) && !isBlock(endContainer) &&
 							!isTableCell(startContainer) && !isTableCell(endContainer)) {
-							startContainer = wrap(startContainer, 'span', {id: '_start', 'data-mce-type': 'bookmark'});
+							startContainer = wrap(startContainer, 'span', {
+								id: '_start',
+								'data-mce-type': 'bookmark'
+							});
 							splitToFormatRoot(startContainer);
 							startContainer = unwrap(TRUE);
 							return;
 						}
 
 						// Wrap start/end nodes in span element since these might be cloned/moved
-						startContainer = wrap(startContainer, 'span', {id : '_start', 'data-mce-type' : 'bookmark'});
-						endContainer = wrap(endContainer, 'span', {id : '_end', 'data-mce-type' : 'bookmark'});
+						startContainer = wrap(startContainer, 'span', {
+							id: '_start',
+							'data-mce-type': 'bookmark'
+						});
+						endContainer = wrap(endContainer, 'span', {
+							id: '_end',
+							'data-mce-type': 'bookmark'
+						});
 
 						// Split start/end
 						splitToFormatRoot(startContainer);
@@ -958,8 +1090,8 @@
 				}
 
 				// Remove items between start/end
-				rangeUtils.walk(rng, function(nodes) {
-					each(nodes, function(node) {
+				rangeUtils.walk(rng, function (nodes) {
+					each(nodes, function (node) {
 						process(node);
 
 						// Remove parent span if it only contains text-decoration: underline, yet a parent node is also underlined.
@@ -991,7 +1123,7 @@
 
 				return;
 			}
-			
+
 			if (getContentEditable(selection.getNode()) === "false") {
 				node = selection.getNode();
 				for (var i = 0, l = formatList.length; i < l; i++) {
@@ -1050,10 +1182,12 @@
 		 * @return {Object} Returns the format object it matches or undefined if it doesn't match.
 		 */
 		function matchNode(node, name, vars, similar) {
-			var formatList = get(name), format, i, classes;
+			var formatList = get(name),
+				format, i, classes;
 
 			function matchItems(node, format, item_name) {
-				var key, value, items = format[item_name], i;
+				var key, value, items = format[item_name],
+					i;
 
 				// Custom match
 				if (format.onmatch) {
@@ -1136,7 +1270,7 @@
 				}
 
 				// Find first node with similar format settings
-				node = dom.getParent(node, function(node) {
+				node = dom.getParent(node, function (node) {
 					if (matchesUnInheritedFormatSelector(node, name)) {
 						return true;
 					}
@@ -1179,11 +1313,12 @@
 		 * @return {Array} Array with matched formats.
 		 */
 		function matchAll(names, vars) {
-			var startElement, matchedFormatNames = [], checkedMap = {};
+			var startElement, matchedFormatNames = [],
+				checkedMap = {};
 
 			// Check start of selection for formats
 			startElement = selection.getStart();
-			dom.getParent(startElement, function(node) {
+			dom.getParent(startElement, function (node) {
 				var i, name;
 
 				for (i = 0; i < names.length; i++) {
@@ -1207,7 +1342,8 @@
 		 * @return {boolean} true/false if the specified format can be applied to the current selection/node.
 		 */
 		function canApply(name) {
-			var formatList = get(name), startNode, parents, i, x, selector;
+			var formatList = get(name),
+				startNode, parents, i, x, selector;
 
 			if (formatList) {
 				startNode = selection.getStart();
@@ -1249,22 +1385,27 @@
 				formatChangeData = {};
 				currentFormats = {};
 
-				ed.onNodeChange.addToTop(function(ed, cm, node) {
-					var parents = getParents(node), matchedFormats = {};
+				ed.onNodeChange.addToTop(function (ed, cm, node) {
+					var parents = getParents(node),
+						matchedFormats = {};
 
 					// Ignore bogus nodes like the <a> tag created by moveStart()
-					parents = tinymce.grep(parents, function(node) {
+					parents = tinymce.grep(parents, function (node) {
 						return node.nodeType == 1 && !node.getAttribute('data-mce-bogus');
 					});
 
 					// Check for new formats
-					each(formatChangeData, function(callbacks, format) {
-						each(parents, function(node) {
+					each(formatChangeData, function (callbacks, format) {
+						each(parents, function (node) {
 							if (matchNode(node, format, {}, callbacks.similar)) {
 								if (!currentFormats[format]) {
 									// Execute callbacks
-									each(callbacks, function(callback) {
-										callback(true, {node: node, format: format, parents: parents});
+									each(callbacks, function (callback) {
+										callback(true, {
+											node: node,
+											format: format,
+											parents: parents
+										});
 									});
 
 									currentFormats[format] = callbacks;
@@ -1281,12 +1422,16 @@
 					});
 
 					// Check if current formats still match
-					each(currentFormats, function(callbacks, format) {
+					each(currentFormats, function (callbacks, format) {
 						if (!matchedFormats[format]) {
 							delete currentFormats[format];
 
-							each(callbacks, function(callback) {
-								callback(false, {node: node, format: format, parents: parents});
+							each(callbacks, function (callback) {
+								callback(false, {
+									node: node,
+									format: format,
+									parents: parents
+								});
 							});
 						}
 					});
@@ -1294,7 +1439,7 @@
 			}
 
 			// Add format listeners
-			each(formats.split(','), function(format) {
+			each(formats.split(','), function (format) {
 				if (!formatChangeData[format]) {
 					formatChangeData[format] = [];
 					formatChangeData[format].similar = similar;
@@ -1306,31 +1451,18 @@
 			return this;
 		}
 
-		/**
-		 * Returns a preview css text for the specified format.
-		 *
-		 * @method getCssText
-		 * @param {String/Object} format Format to generate preview css text for.
-		 * @return {String} Css text for the specified format.
-		 * @example
-		 * var cssText1 = editor.formatter.getCssText('bold');
-		 * var cssText2 = editor.formatter.getCssText({inline: 'b'});
-		 */
-		function getCssText(format) {
-			return Preview.getCssText(ed, format);
-		}
-
 		// Expose to public
 		tinymce.extend(this, {
-			get : get,
-			register : register,
-			apply : apply,
-			remove : remove,
-			toggle : toggle,
-			match : match,
-			matchAll : matchAll,
-			matchNode : matchNode,
-			canApply : canApply,
+			get: get,
+			register: register,
+			unregister: unregister,
+			apply: apply,
+			remove: remove,
+			toggle: toggle,
+			match: match,
+			matchAll: matchAll,
+			matchNode: matchNode,
+			canApply: canApply,
 			formatChanged: formatChanged
 		});
 
@@ -1387,12 +1519,6 @@
 			return node.nodeType == 1 && !isBookmarkNode(node) && !isWhiteSpaceNode(node) && !isCaretNode(node);
 		}
 
-		function hasStyle(name) {
-			return tinymce.curry(function(name, node) {
-				return !!(node && getStyle(node, name));
-			}, name);
-		}
-
 		/**
 		 * Returns the style by name on the specified node. This method modifies the style
 		 * contents to make it more easy to match. This will resolve a few browser issues.
@@ -1442,10 +1568,10 @@
 		 * @return {String} New value with replaced variables.
 		 */
 		function replaceVars(value, vars) {
-			if (typeof(value) != "string") {
+			if (typeof (value) != "string") {
 				value = value(vars);
 			} else if (vars) {
-				value = value.replace(/%(\w+)/g, function(str, name) {
+				value = value.replace(/%(\w+)/g, function (str, name) {
 					return vars[name] || str;
 				});
 			}
@@ -1541,7 +1667,10 @@
 						offset = node.nodeType === 3 ? node.length : node.childNodes.length;
 					}
 				}
-				return { node: node, offset: offset };
+				return {
+					node: node,
+					offset: offset
+				};
 			}
 
 			// If index based start position then resolve it
@@ -1585,7 +1714,7 @@
 				function findSpace(node, offset) {
 					var pos, pos2, str = node.nodeValue;
 
-					if (typeof(offset) == "undefined") {
+					if (typeof (offset) == "undefined") {
 						offset = start ? str.length : 0;
 					}
 
@@ -1611,7 +1740,10 @@
 					pos = findSpace(container, offset);
 
 					if (pos !== -1) {
-						return {container : container, offset : pos};
+						return {
+							container: container,
+							offset: pos
+						};
 					}
 
 					lastTextNode = container;
@@ -1625,7 +1757,10 @@
 						pos = findSpace(node);
 
 						if (pos !== -1) {
-							return {container : node, offset : pos};
+							return {
+								container: node,
+								offset: pos
+							};
 						}
 					} else if (isBlock(node)) {
 						break;
@@ -1639,7 +1774,10 @@
 						offset = lastTextNode.length;
 					}
 
-					return {container: lastTextNode, offset: offset};
+					return {
+						container: lastTextNode,
+						offset: offset
+					};
 				}
 			}
 
@@ -1679,7 +1817,7 @@
 
 				// Expand to first wrappable block element or any block element
 				if (!node) {
-					node = dom.getParent(container.nodeType == 3 ? container.parentNode : container, function(node) {
+					node = dom.getParent(container.nodeType == 3 ? container.parentNode : container, function (node) {
 						// Fixes #6183 where it would expand to editable parent element in inline mode
 						return node != root && isTextBlock(node);
 					});
@@ -1756,7 +1894,7 @@
 					}
 
 					if (leaf.node && leaf.offset > 0 && leaf.node.nodeType === 3 &&
-							leaf.node.nodeValue.charAt(leaf.offset - 1) === ' ') {
+						leaf.node.nodeValue.charAt(leaf.offset - 1) === ' ') {
 
 						if (leaf.offset > 1) {
 							endContainer = leaf.node;
@@ -1770,7 +1908,7 @@
 			// Example * becomes !: !<p><b><i>*text</i><i>text*</i></b></p>!
 			// This will reduce the number of wrapper elements that needs to be created
 			// Move start point up the tree
-			if (format[0].inline || format[0].block_expand) {				
+			if (format[0].inline || format[0].block_expand) {
 				if (!format[0].inline || (startContainer.nodeType != 3 || startOffset === 0)) {
 					if (!isBlock(startContainer)) {
 						startContainer = findParentContainer(true);
@@ -1823,10 +1961,10 @@
 
 			// Return new range like object
 			return {
-				startContainer : startContainer,
-				startOffset : startOffset,
-				endContainer : endContainer,
-				endOffset : endOffset
+				startContainer: startContainer,
+				startOffset: startOffset,
+				endContainer: endContainer,
+				endOffset: endOffset
 			};
 		}
 
@@ -1856,11 +1994,11 @@
 			// Should we compare with format attribs and styles
 			if (format.remove != 'all') {
 				// Remove styles
-				each(format.styles, function(value, name) {
+				each(format.styles, function (value, name) {
 					value = normalizeStyleValue(replaceVars(value, vars), name);
 
 					// Indexed array
-					if (typeof(name) === 'number') {
+					if (typeof (name) === 'number') {
 						name = value;
 						compare_node = 0;
 					}
@@ -1879,13 +2017,13 @@
 				}
 
 				// Remove attributes
-				each(format.attributes, function(value, name) {
+				each(format.attributes, function (value, name) {
 					var valueOut;
 
 					value = replaceVars(value, vars);
 
 					// Indexed array
-					if (typeof(name) === 'number') {
+					if (typeof (name) === 'number') {
 						name = value;
 						compare_node = 0;
 					}
@@ -1897,7 +2035,7 @@
 							if (value) {
 								// Build new class value where everything is removed except the internal prefixed classes
 								valueOut = '';
-								each(value.split(/\s+/), function(cls) {
+								each(value.split(/\s+/), function (cls) {
 									if (/mce\w+/.test(cls)) {
 										valueOut += (valueOut ? ' ' : '') + cls;
 									}
@@ -1926,7 +2064,7 @@
 				});
 
 				// Remove classes
-				each(format.classes, function(value) {
+				each(format.classes, function (value) {
 					value = replaceVars(value, vars);
 
 					if (!compare_node || dom.hasClass(compare_node, value)) {
@@ -1970,7 +2108,8 @@
 		 * @return {Node} Input node.
 		 */
 		function removeNode(node, format) {
-			var parentNode = node.parentNode, rootBlockElm;
+			var parentNode = node.parentNode,
+				rootBlockElm;
 
 			function find(node, next, inc) {
 				node = getNonWhiteSpaceSibling(node, next, inc);
@@ -1994,7 +2133,7 @@
 					// Wrap the block in a forcedRootBlock if we are at the root of document
 					if (parentNode == dom.getRoot()) {
 						if (!format.list_block || !isEq(node, format.list_block)) {
-							each(tinymce.grep(node.childNodes), function(node) {
+							each(tinymce.grep(node.childNodes), function (node) {
 								if (isValidChild(forcedRootBlock, node.nodeName.toLowerCase())) {
 									if (!rootBlockElm) {
 										rootBlockElm = wrap(node, forcedRootBlock);
@@ -2086,7 +2225,7 @@
 				function getAttribs(node) {
 					var attribs = {};
 
-					each(dom.getAttribs(node), function(attr) {
+					each(dom.getAttribs(node), function (attr) {
 						var name = attr.nodeName.toLowerCase();
 
 						// Don't compare internal attributes or style
@@ -2186,7 +2325,7 @@
 					dom.remove(next);
 
 					// Move children into prev node
-					each(tinymce.grep(next.childNodes), function(node) {
+					each(tinymce.grep(next.childNodes), function (node) {
 						prev.appendChild(node);
 					});
 
@@ -2227,11 +2366,16 @@
 		}
 
 		function performCaretAction(type, name, vars, similar) {
-			var caretContainerId = '_mce_caret', debug = ed.settings.caret_debug;
+			var caretContainerId = '_mce_caret',
+				debug = ed.settings.caret_debug;
 
 			// Creates a caret container bogus element
 			function createCaretContainer(fill) {
-				var caretContainer = dom.create('span', {id: caretContainerId, 'data-mce-bogus': true, style: debug ? 'color:red' : ''});
+				var caretContainer = dom.create('span', {
+					id: caretContainerId,
+					'data-mce-bogus': true,
+					style: debug ? 'color:red' : ''
+				});
 
 				if (fill) {
 					caretContainer.appendChild(ed.getDoc().createTextNode(INVISIBLE_CHAR));
@@ -2328,22 +2472,6 @@
 				}
 			}
 
-			function rangeParentBody(rngContainer) {
-				var name = rngContainer.nodeName.toLowerCase();
-				switch (name) {
-					case 'html', '#document':
-						return false;
-					case 'body':
-						return true;
-					default:
-						return rangeParentBody(rngContainer.parentNode);
-				}
-			}
-
-			function rangeInBody(rng) {
-				return rangeParentBody(rng.startContainer) || rangeParentBody(rng.endContainer);
-			}
-
 			// Applies formatting to the caret postion
 			function applyCaretFormat() {
 				var rng, caretContainer, textNode, offset, bookmark, container, text;
@@ -2394,8 +2522,10 @@
 			}
 
 			function removeCaretFormat() {
-				var rng = selection.getRng(true), container, offset, bookmark,
-					hasContentAfter, node, formatNode, parents = [], i, caretContainer;
+				var rng = selection.getRng(true),
+					container, offset, bookmark,
+					hasContentAfter, node, formatNode, parents = [],
+					i, caretContainer;
 
 				container = rng.startContainer;
 				offset = rng.startOffset;
@@ -2485,7 +2615,7 @@
 
 				caretContainer = getParentCaretContainer(selection.getStart());
 				if (caretContainer && !dom.isEmpty(caretContainer)) {
-					tinymce.walk(caretContainer, function(node) {
+					tinymce.walk(caretContainer, function (node) {
 						if (node.nodeType == 1 && node.id !== caretContainerId && !dom.isEmpty(node)) {
 							dom.setAttrib(node, 'data-mce-bogus', null);
 						}
@@ -2496,8 +2626,9 @@
 			// Only bind the caret events once
 			if (!ed._hasCaretEvents) {
 				// Mark current caret container elements as bogus when getting the contents so we don't end up with empty elements
-				ed.onBeforeGetContent.addToTop(function() {
-					var nodes = [], i;
+				ed.onBeforeGetContent.addToTop(function () {
+					var nodes = [],
+						i;
 					if (isCaretContainerEmpty(getParentCaretContainer(selection.getStart()), nodes)) {
 						// Mark children
 						i = nodes.length;
@@ -2508,15 +2639,15 @@
 				});
 
 				// Remove caret container on mouse up and on key up
-				tinymce.each('onMouseUp onKeyUp'.split(' '), function(name) {
-					ed[name].addToTop(function() {
+				tinymce.each('onMouseUp onKeyUp'.split(' '), function (name) {
+					ed[name].addToTop(function () {
 						removeCaretContainer();
 						unmarkBogusCaretParents();
 					});
 				});
 
 				// Remove caret container on keydown and it's a backspace, enter or left/right arrow keys
-				ed.onKeyDown.addToTop(function(ed, e) {
+				ed.onKeyDown.addToTop(function (ed, e) {
 					var keyCode = e.keyCode;
 
 					// Remove caret container on keydown and it's a backspace, enter or left/right arrow keys
@@ -2547,8 +2678,9 @@
 		 */
 		function moveStart(rng) {
 			var container = rng.startContainer,
-					offset = rng.startOffset, isAtEndOfText,
-					walker, node, nodes, tmpNode;
+				offset = rng.startOffset,
+				isAtEndOfText,
+				walker, node, nodes, tmpNode;
 
 			if (rng.startContainer == rng.endContainer) {
 				if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
@@ -2579,7 +2711,9 @@
 					if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
 						// IE has a "neat" feature where it moves the start node into the closest element
 						// we can avoid this by inserting an element before it and then remove it after we set the selection
-						tmpNode = dom.create('a', {'data-mce-bogus': 'all'}, INVISIBLE_CHAR);
+						tmpNode = dom.create('a', {
+							'data-mce-bogus': 'all'
+						}, INVISIBLE_CHAR);
 						node.parentNode.insertBefore(tmpNode, node);
 
 						// Set selection and remove tmpNode

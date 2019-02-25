@@ -23,6 +23,9 @@ tinymce.util.Quirks = function (editor) {
 		each = tinymce.each,
 		RangeUtils = tinymce.dom.RangeUtils,
 		TreeWalker = tinymce.dom.TreeWalker;
+
+	var mceInternalUrlPrefix = 'data:text/mce-internal,';
+	var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
 	/**
 	 * Executes a command with a specific state this can be to enable/disable browser editing features.
 	 */
@@ -170,7 +173,7 @@ tinymce.util.Quirks = function (editor) {
 			var node;
 
 			for (node = node1.nextSibling; node && node != node2; node = node.nextSibling) {
-				if (node.nodeType == 3 && $.trim(node.data).length === 0) {
+				if (node.nodeType == 3 && tinymce.trim(node.data).length === 0) {
 					continue;
 				}
 
@@ -720,7 +723,7 @@ tinymce.util.Quirks = function (editor) {
 					// produces a green plus icon. When this happens the caretRangeFromPoint
 					// will return "null" even though the x, y coordinate is correct.
 					// But if we detach the insert from the drop event we will get a proper range
-					Delay.setEditorTimeout(editor, function () {
+					setTimeout(editor, function () {
 						var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
 
 						if (dragStartRng) {
@@ -731,7 +734,7 @@ tinymce.util.Quirks = function (editor) {
 
 						selection.setRng(pointRng);
 						insertClipboardContents(internalContent.html);
-					});
+					}, 0);
 				}
 			}
 		});
@@ -854,6 +857,17 @@ tinymce.util.Quirks = function (editor) {
 				if (e.target == editor.getDoc().documentElement) {
 					rng = selection.getRng();
 					editor.getBody().focus();
+
+					if (e.type == 'mousedown') {
+						/*if (CaretContainer.isCaretContainer(rng.startContainer)) {
+							return;
+						}*/
+
+						// Edge case for mousedown, drag select and mousedown again within selection on Chrome Windows to render caret
+						selection.placeCaretAt(e.clientX, e.clientY);
+					} else {
+						selection.setRng(rng);
+					}
 				}
 			});
 		}
@@ -947,9 +961,9 @@ tinymce.util.Quirks = function (editor) {
 			if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
 				applyAttributes = getAttributeApplyFunction();
 
-				Delay.setEditorTimeout(editor, function () {
+				setTimeout(editor, function () {
 					applyAttributes();
-				});
+				}, 0);
 			}
 		});
 	}
@@ -1163,7 +1177,7 @@ tinymce.util.Quirks = function (editor) {
 		});
 
 		editor.onSetContent.add(selection.onSetContent.add(fixLinks));
-	};
+	}
 
 	/**
 	 * WebKit will produce DIV elements here and there by default. But since TinyMCE uses paragraphs by
@@ -1223,7 +1237,7 @@ tinymce.util.Quirks = function (editor) {
 				if (e.target.nodeName == 'HTML') {
 					// Edge seems to only need focus if we set the range
 					// the caret will become invisible and moved out of the iframe!!
-					if (Env.ie > 11) {
+					if (tinymce.isIE12) {
 						editor.getBody().focus();
 						return;
 					}
@@ -1394,27 +1408,8 @@ tinymce.util.Quirks = function (editor) {
 		});
 	}
 
-	/**
-	 * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
-	 * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
-	 * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
-	 * but not as the lastChild of the body. However is we add a BR element to the body then remove it
-	 * it doesn't seem to add these BR elements makes sence right?!
-	 *
-	 * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
-	 */
-	function doubleTrailingBrElements() {
-		function fn() {
-			var br = editor.dom.create('br');
-			editor.getBody().appendChild(br);
-			br.parentNode.removeChild(br);
-		}
-
-		editor.onBeforeGetContent.add(fn);
-	}
-
 	function imageFloatLinkBug() {
-		editor.onBeforeExecCommand.add(function (ed, cmd, ui, v, o) {
+		editor.onBeforeExecCommand.add(function (ed, cmd) {
 			// remove img styles
 			if (cmd == 'mceInsertLink') {
 				var se = ed.selection,
@@ -1428,7 +1423,7 @@ tinymce.util.Quirks = function (editor) {
 			}
 		});
 
-		editor.onExecCommand.add(function (ed, cmd, ui, v, o) {
+		editor.onExecCommand.add(function (ed, cmd) {
 			// restore img styles
 			if (cmd == 'mceInsertLink') {
 				var se = ed.selection,
@@ -1444,37 +1439,27 @@ tinymce.util.Quirks = function (editor) {
 	}
 
 	/**
-	 * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
-	 * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
-	 * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
-	 * addRootBlocks), meaning the action does nothing. With this code, FireFox/IE matche the behaviour of other
-	 * browsers.
-	 *
-	 * It also fixes a bug on Firefox where it's impossible to delete HR elements.
+	 * WebKit has a bug where it isn't possible to select image, hr or anchor elements
+	 * by clicking on them so we need to fake that.
 	 */
-	function removeHrOnBackspace() {
-		editor.onKeyDown.add(function (editor, e) {
-			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
-				// Check if there is any HR elements this is faster since getRng on IE 7 & 8 is slow
-				if (!editor.getBody().getElementsByTagName('hr').length) {
-					return;
-				}
+	function selectControlElements() {
+		editor.onClick.add(function (editor, e) {
+			var target = e.target;
 
-				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
-					var node = selection.getNode();
-					var previousSibling = node.previousSibling;
+			function selectElm(e) {
+				e.preventDefault();
+				selection.select(target);
+				editor.nodeChanged();
+			}
 
-					if (node.nodeName == 'HR') {
-						dom.remove(node);
-						e.preventDefault();
-						return;
-					}
+			// Workaround for bug, http://bugs.webkit.org/show_bug.cgi?id=12250
+			// WebKit can't even do simple things like selecting an image
+			if (/^(IMG|HR)$/.test(target.nodeName)) {
+				selectElm(e);
+			}
 
-					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "hr") {
-						dom.remove(previousSibling);
-						e.preventDefault();
-					}
-				}
+			if (target.nodeName == 'A' && dom.hasClass(target, 'mce-item-anchor')) {
+				selectElm(e);
 			}
 		});
 	}
@@ -1484,12 +1469,12 @@ tinymce.util.Quirks = function (editor) {
 	 * this fix will lean the caret right into the closest inline element.
 	 */
 	function normalizeSelection() {
-		var normalize = function(e) {
+		var normalize = function (e) {
 			if (e.keyCode != 65 || !VK.metaKeyPressed(e)) {
 				selection.normalize();
 			}
 		};
-		
+
 		// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
 		editor.onKeyUp.add(normalize);
 		editor.onMouseUp.add(normalize);
@@ -1510,7 +1495,7 @@ tinymce.util.Quirks = function (editor) {
 		disableBackspaceIntoATable();
 		removeAppleInterchangeBrs();
 		imageFloatLinkBug();
-
+		selectControlElements();
 		//touchClickEvent();
 
 		// iOS

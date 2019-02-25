@@ -8,8 +8,11 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each, Dispatcher = tinymce.util.Dispatcher, undef;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event,
+		each = tinymce.each,
+		undef;
 
 	/**
 	 * This class is used to create list boxes/select list. This one will generate
@@ -25,10 +28,10 @@
 		 * @constructor
 		 * @method NativeListBox
 		 * @param {String} id Button control id for the button.
-		 * @param {Object} s Optional name/value settings object.
+		 * @param {Object} settings Optional name/value settings object.
 		 */
-		NativeListBox : function(id, s) {
-			this.parent(id, s);
+		NativeListBox: function (id, settings) {
+			this.parent(id, settings);
 			this.classPrefix = 'mceNativeListBox';
 		},
 
@@ -39,9 +42,9 @@
 		 * @method setDisabled
 		 * @param {Boolean} s Boolean state if the control should be disabled or not.
 		 */
-		setDisabled : function(s) {
-			DOM.get(this.id).disabled = s;
-			this.setAriaProperty('disabled', s);
+		setDisabled: function (settings) {
+			DOM.get(this.id).disabled = settings;
+			this.setAriaProperty('disabled', settings);
 		},
 
 		/**
@@ -51,7 +54,7 @@
 		 * @method isDisabled
 		 * @return {Boolean} true/false if the control is disabled or not.
 		 */
-		isDisabled : function() {
+		isDisabled: function () {
 			return DOM.get(this.id).disabled;
 		},
 
@@ -60,36 +63,39 @@
 		 * item and change the title of the control to the title of the option.
 		 *
 		 * @method select
-		 * @param {String/function} va Value to look for inside the list box or a function selector.
+		 * @param {String/function} value Value to look for inside the list box or a function selector.
 		 */
-		select : function(va) {
-			var t = this, fv, f;
+		select: function (value) {
+			var self = this,
+				fv, fn;
 
-			if (va == undef)
-				return t.selectByIndex(-1);
+			if (value == undef) {
+				return this.selectByIndex(-1);
+			}
 
 			// Is string or number make function selector
-			if (va && typeof(va)=="function")
-				f = va;
-			else {
-				f = function(v) {
-					return v == va;
+			if (value && typeof (value) == "function") {
+				fn = value;
+			} else {
+				fn = function (val) {
+					return val == value;
 				};
 			}
 
 			// Do we need to do something?
-			if (va != t.selectedValue) {
+			if (value != this.selectedValue) {
 				// Find item
-				each(t.items, function(o, i) {
-					if (f(o.value)) {
+				each(this.items, function (o, i) {
+					if (fn(o.value)) {
 						fv = 1;
-						t.selectByIndex(i);
+						self.selectByIndex(i);
 						return false;
 					}
 				});
 
-				if (!fv)
-					t.selectByIndex(-1);
+				if (!fv) {
+					this.selectByIndex(-1);
+				}
 			}
 		},
 
@@ -100,7 +106,7 @@
 		 * @method selectByIndex
 		 * @param {String} idx Index to select, pass -1 to select menu/title of select box.
 		 */
-		selectByIndex : function(idx) {
+		selectByIndex: function (idx) {
 			DOM.get(this.id).selectedIndex = idx + 1;
 			this.selectedValue = this.items[idx] ? this.items[idx].value : null;
 		},
@@ -109,27 +115,28 @@
 		 * Adds a option item to the list box.
 		 *
 		 * @method add
-		 * @param {String} n Title for the new option.
-		 * @param {String} v Value for the new option.
-		 * @param {Object} o Optional object with settings like for example class.
+		 * @param {String} name Title for the new option.
+		 * @param {String} value Value for the new option.
+		 * @param {Object} attribs Optional object with settings like for example class.
 		 */
-		add : function(n, v, a) {
-			var o, t = this;
+		add: function (name, value, attribs) {
+			var obj;
 
-			a = a || {};
-			a.value = v;
+			attribs = attribs || {};
+			attribs.value = value;
 
-			if (t.isRendered())
-				DOM.add(DOM.get(this.id), 'option', a, n);
+			if (this.isRendered()) {
+				DOM.add(DOM.get(this.id), 'option', attribs, name);
+			}
 
-			o = {
-				title : n,
-				value : v,
-				attribs : a
+			obj = {
+				title: name,
+				value: value,
+				attribs: attribs
 			};
 
-			t.items.push(o);
-			t.onAdd.dispatch(t, o);
+			this.items.push(obj);
+			this.onAdd.dispatch(this, obj);
 		},
 
 		/**
@@ -137,7 +144,7 @@
 		 *
 		 * @method getLength
 		 */
-		getLength : function() {
+		getLength: function () {
 			return this.items.length;
 		},
 
@@ -148,18 +155,31 @@
 		 * @method renderHTML
 		 * @return {String} HTML for the list box control element.
 		 */
-		renderHTML : function() {
-			var h, t = this;
+		renderHTML: function () {
+			var html;
 
-			h = DOM.createHTML('option', {value : ''}, '-- ' + t.settings.title + ' --');
+			html = DOM.createHTML('option', {
+				value: ''
+			}, '-- ' + this.settings.title + ' --');
 
-			each(t.items, function(it) {
-				h += DOM.createHTML('option', {value : it.value}, it.title);
+			each(this.items, function (item) {
+				html += DOM.createHTML('option', {
+					value: item.value
+				}, item.title);
 			});
 
-			h = DOM.createHTML('select', {id : t.id, 'class' : 'mceNativeListBox', 'aria-labelledby': t.id + '_aria'}, h);
-			h += DOM.createHTML('span', {id : t.id + '_aria', 'style': 'display: none'}, t.settings.title);
-			return h;
+			html = DOM.createHTML('select', {
+				id: this.id,
+				'class': 'mceNativeListBox',
+				'aria-labelledby': this.id + '_aria'
+			}, html);
+
+			html += DOM.createHTML('span', {
+				id: this.id + '_aria',
+				'style': 'display: none'
+			}, this.settings.title);
+
+			return html;
 		},
 
 		/**
@@ -168,36 +188,44 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, ch, changeListenerAdded = true;
+		postRender: function () {
+			var self = this,
+				ch, changeListenerAdded = true;
 
-			t.rendered = true;
+			this.rendered = true;
 
 			function onChange(e) {
-				var v = t.items[e.target.selectedIndex - 1];
+				var value = self.items[e.target.selectedIndex - 1];
 
-				if (v && (v = v.value)) {
-					t.onChange.dispatch(t, v);
+				if (value && (value = value.value)) {
+					self.onChange.dispatch(self, value);
 
-					if (t.settings.onselect)
-						t.settings.onselect(v);
+					if (self.settings.onselect) {
+						self.settings.onselect(value);
+					}
 				}
-			};
+			}
 
-			Event.add(t.id, 'change', onChange);
+			Event.add(this.id, 'change', onChange);
 
 			// Accessibility keyhandler
-			Event.add(t.id, 'keydown', function(e) {
-				var bf, DOM_VK_LEFT = 37, DOM_VK_RIGHT = 39, DOM_VK_UP = 38, DOM_VK_DOWN = 40, DOM_VK_RETURN = 13, DOM_VK_SPACE = 32;
+			Event.add(this.id, 'keydown', function (e) {
+				var blur, DOM_VK_UP = 38,
+					DOM_VK_DOWN = 40,
+					DOM_VK_RETURN = 13,
+					DOM_VK_SPACE = 32;
 
-				Event.remove(t.id, 'change', ch);
+				Event.remove(self.id, 'change', ch);
 				changeListenerAdded = false;
 
-				bf = Event.add(t.id, 'blur', function() {
-					if (changeListenerAdded) return;
+				blur = Event.add(this.id, 'blur', function () {
+					if (changeListenerAdded) {
+						return;
+                    }
+
 					changeListenerAdded = true;
-					Event.add(t.id, 'change', onChange);
-					Event.remove(t.id, 'blur', bf);
+					Event.add(self.id, 'change', onChange);
+					Event.remove(self.id, 'blur', blur);
 				});
 
 				if (e.keyCode == DOM_VK_RETURN || e.keyCode == DOM_VK_SPACE) {
@@ -209,7 +237,7 @@
 				}
 			});
 
-			t.onPostRender.dispatch(t, DOM.get(t.id));
+			this.onPostRender.dispatch(this, DOM.get(this.id));
 		}
 	});
 })(tinymce);

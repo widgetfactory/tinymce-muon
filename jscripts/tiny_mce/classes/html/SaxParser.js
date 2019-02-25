@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * This class parses HTML code using pure JavaScript and executes various events for each item it finds. It will
 	 * always execute the events in the right order for tag soup code like <b><p></b></p>. It will also remove elements
@@ -50,7 +50,8 @@
 	 * @version 3.4
 	 */
 
-	var each = tinymce.each, Entities = tinymce.html.Entities;
+	var each = tinymce.each,
+		Entities = tinymce.html.Entities;
 
 	/**
 	 * Constructs a new SaxParser instance.
@@ -60,7 +61,7 @@
 	 * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
 	 * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
 	 */
-	tinymce.html.SaxParser = function(settings, schema) {
+	tinymce.html.SaxParser = function (settings, schema) {
 		var self = this;
 
 		function noop() {}
@@ -73,7 +74,7 @@
 		}
 
 		// Add handler functions from settings and setup default handlers
-		each('comment cdata text start end pi doctype'.split(' '), function(name) {
+		each('comment cdata text start end pi doctype'.split(' '), function (name) {
 			if (name) {
 				self[name] = settings[name] || noop;
 			}
@@ -90,7 +91,7 @@
 		 * @param {Number} startIndex Indext to start searching at should be after the start tag.
 		 * @return {Number} Index of the end tag.
 		 */
-		self.findEndTag = function(schema, html, startIndex) {
+		self.findEndTag = function (schema, html, startIndex) {
 			var count = 1,
 				index, matches, tokenRegExp, shortEndedElements;
 
@@ -127,7 +128,7 @@
 		 * @method parse
 		 * @param {String} html Html string to sax parse.
 		 */
-		self.parse = function(html) {
+		self.parse = function (html) {
 			var self = this,
 				matches, index = 0,
 				value, endRegExp, stack = [],
@@ -259,7 +260,7 @@
 			fixSelfClosing = settings.fix_self_closing;
 			specialElements = schema.getSpecialElements();
 
-			while ((matches = tokenRegExp.exec(html))) {				
+			while ((matches = tokenRegExp.exec(html))) {
 				// Text
 				if (index < matches.index) {
 					self.text(decode(html.substr(index, matches.index - index)));
@@ -480,5 +481,5 @@
 				}
 			}
 		};
-	}
+	};
 })(tinymce);

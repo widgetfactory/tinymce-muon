@@ -8,8 +8,12 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each, Dispatcher = tinymce.util.Dispatcher, undef;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event,
+		each = tinymce.each,
+		Dispatcher = tinymce.util.Dispatcher,
+		undef;
 
 	/**
 	 * This class is used to create list boxes/select list. This one will generate
@@ -29,23 +33,23 @@
 	 *                          tinyMCE.activeEditor.windowManager.alert('Value selected:' + v);
 	 *                      }
 	 *                 });
-	 * 
+	 *
 	 *                 // Add some values to the list box
 	 *                 mlb.add('Some item 1', 'val1');
 	 *                 mlb.add('some item 2', 'val2');
 	 *                 mlb.add('some item 3', 'val3');
-	 * 
+	 *
 	 *                 // Return the new listbox instance
 	 *                 return mlb;
 	 *         }
-	 * 
+	 *
 	 *         return null;
 	 *     }
 	 * });
-	 * 
+	 *
 	 * // Register plugin with a short name
 	 * tinymce.PluginManager.add('example', tinymce.plugins.ExamplePlugin);
-	 * 
+	 *
 	 * // Initialize TinyMCE with the new plugin and button
 	 * tinyMCE.init({
 	 *    ...
@@ -63,10 +67,9 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		ListBox : function(id, s, ed) {
-			var t = this;
+		ListBox: function (id, s, ed) {
 
-			t.parent(id, s, ed);
+			this.parent(id, s, ed);
 
 			/**
 			 * Array of ListBox items.
@@ -74,38 +77,38 @@
 			 * @property items
 			 * @type Array
 			 */
-			t.items = [];
+			this.items = [];
 
 			/**
 			 * Fires when the selection has been changed.
 			 *
 			 * @event onChange
 			 */
-			t.onChange = new Dispatcher(t);
+			this.onChange = new Dispatcher(this);
 
 			/**
 			 * Fires after the element has been rendered to DOM.
 			 *
 			 * @event onPostRender
 			 */
-			t.onPostRender = new Dispatcher(t);
+			this.onPostRender = new Dispatcher(this);
 
 			/**
 			 * Fires when a new item is added.
 			 *
 			 * @event onAdd
 			 */
-			t.onAdd = new Dispatcher(t);
+			this.onAdd = new Dispatcher(this);
 
 			/**
 			 * Fires when the menu gets rendered.
 			 *
 			 * @event onRenderMenu
 			 */
-			t.onRenderMenu = new tinymce.util.Dispatcher(this);
+			this.onRenderMenu = new Dispatcher(this);
 
-			t.classPrefix = 'mceListBox';
-			t.marked = {};
+			this.classPrefix = 'mceListBox';
+			this.marked = {};
 		},
 
 		/**
@@ -113,38 +116,41 @@
 		 * item and change the title of the control to the title of the option.
 		 *
 		 * @method select
-		 * @param {String/function} va Value to look for inside the list box or a function selector.
+		 * @param {String/function} value Value to look for inside the list box or a function selector.
 		 */
-		select : function(va) {
-			var t = this, fv, f;
+		select: function (value) {
+			var self = this,
+				fv, fn;
 
-			t.marked = {};
+			this.marked = {};
 
-			if (va == undef)
-				return t.selectByIndex(-1);
+			if (value == undef) {
+				return this.selectByIndex(-1);
+			}
 
 			// Is string or number make function selector
-			if (va && typeof(va)=="function")
-				f = va;
-			else {
-				f = function(v) {
-					return v == va;
+			if (value && typeof (value) == "function") {
+				fn = value;
+			} else {
+				fn = function (val) {
+					return val == value;
 				};
 			}
 
 			// Do we need to do something?
-			if (va != t.selectedValue) {
+			if (value != this.selectedValue) {
 				// Find item
-				each(t.items, function(o, i) {
-					if (f(o.value)) {
+				each(this.items, function (item, i) {
+					if (fn(item.value)) {
 						fv = 1;
-						t.selectByIndex(i);
+						self.selectByIndex(i);
 						return false;
 					}
 				});
 
-				if (!fv)
-					t.selectByIndex(-1);
+				if (!fv) {
+					this.selectByIndex(-1);
+				}
 			}
 		},
 
@@ -155,31 +161,32 @@
 		 * @method selectByIndex
 		 * @param {String} idx Index to select, pass -1 to select menu/title of select box.
 		 */
-		selectByIndex : function(idx) {
-			var t = this, e, o, label;
+		selectByIndex: function (idx) {
+			var elm, item, label;
 
-			t.marked = {};
+			this.marked = {};
 
-			if (idx != t.selectedIndex) {
-				e = DOM.get(t.id + '_text');
-				label = DOM.get(t.id + '_voiceDesc');
-				o = t.items[idx];
+			if (idx != this.selectedIndex) {
+				elm = DOM.get(this.id + '_text');
+				label = DOM.get(this.id + '_voiceDesc');
+				item = this.items[idx];
 
-				if (o) {
-					t.selectedValue = o.value;
-					t.selectedIndex = idx;
-					DOM.setHTML(e, DOM.encode(o.title));
-					DOM.setHTML(label, t.settings.title + " - " + o.title);
-					DOM.removeClass(e, 'mceTitle');
-					DOM.setAttrib(t.id, 'aria-valuenow', o.title);
+				if (item) {
+					this.selectedValue = item.value;
+					this.selectedIndex = idx;
+					DOM.setHTML(elm, DOM.encode(item.title));
+					DOM.setHTML(label, this.settings.title + " - " + item.title);
+					DOM.removeClass(elm, 'mceTitle');
+					DOM.setAttrib(this.id, 'aria-valuenow', item.title);
 				} else {
-					DOM.setHTML(e, DOM.encode(t.settings.title));
-					DOM.setHTML(label, DOM.encode(t.settings.title));
-					DOM.addClass(e, 'mceTitle');
-					t.selectedValue = t.selectedIndex = null;
-					DOM.setAttrib(t.id, 'aria-valuenow', t.settings.title);
+					DOM.setHTML(elm, DOM.encode(this.settings.title));
+					DOM.setHTML(label, DOM.encode(this.settings.title));
+					DOM.addClass(elm, 'mceTitle');
+					this.selectedValue = this.selectedIndex = null;
+					DOM.setAttrib(this.id, 'aria-valuenow', this.settings.title);
 				}
-				e = 0;
+
+				elm = 0;
 			}
 		},
 
@@ -188,7 +195,7 @@
 		 *
 		 * @param {String} value Value item to mark.
 		 */
-		mark : function(value) {
+		mark: function (value) {
 			this.marked[value] = true;
 		},
 
@@ -196,21 +203,20 @@
 		 * Adds a option item to the list box.
 		 *
 		 * @method add
-		 * @param {String} n Title for the new option.
-		 * @param {String} v Value for the new option.
-		 * @param {Object} o Optional object with settings like for example class.
+		 * @param {String} name Title for the new option.
+		 * @param {String} value Value for the new option.
+		 * @param {Object} settings Optional object with settings like for example class.
 		 */
-		add : function(n, v, o) {
-			var t = this;
+		add: function (name, value, settings) {
+			settings = settings || {};
 
-			o = o || {};
-			o = tinymce.extend(o, {
-				title : n,
-				value : v
+			settings = tinymce.extend(settings, {
+				title: name,
+				value: value
 			});
 
-			t.items.push(o);
-			t.onAdd.dispatch(t, o);
+			this.items.push(settings);
+			this.onAdd.dispatch(this, settings);
 		},
 
 		/**
@@ -219,7 +225,7 @@
 		 * @method getLength
 		 * @param {Number} Number of items inside the list box.
 		 */
-		getLength : function() {
+		getLength: function () {
 			return this.items.length;
 		},
 
@@ -230,16 +236,40 @@
 		 * @method renderHTML
 		 * @return {String} HTML for the list box control element.
 		 */
-		renderHTML : function() {
-			var h = '', t = this, s = t.settings, cp = t.classPrefix;
+		renderHTML: function () {
+			var html = '',
+				prefix = this.classPrefix;
 
-			h = '<div role="listbox" aria-haspopup="true" aria-labelledby="' + t.id +'_voiceDesc" aria-describedby="' + t.id + '_voiceDesc"><div role="presentation" tabindex="0" id="' + t.id + '" class="' + cp + ' ' + cp + 'Enabled' + (s['class'] ? (' ' + s['class']) : '') + '">';
-			h += '<div class="mceText">' + DOM.createHTML('span', {id: t.id + '_voiceDesc', 'class': 'voiceLabel', style:'display:none;'}, t.settings.title); 
-			h += DOM.createHTML('a', {id : t.id + '_text', tabindex : -1, href : 'javascript:;', 'class' : 'mceText', onclick : "return false;", onmousedown : 'return false;'}, DOM.encode(t.settings.title)) + '</div>';
-			h += '<div class="mceOpen">' + DOM.createHTML('a', {id : t.id + '_open', tabindex : -1, href : 'javascript:;', 'class' : 'mceOpen', onclick : "return false;", onmousedown : 'return false;'}, '<span><span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span></span>') + '</div>';
-			h += '</div></div>';
+			html += '<div role="listbox" aria-haspopup="true" aria-labelledby="' + this.id + '_voiceDesc" aria-describedby="' + this.id + '_voiceDesc">';
+			html += '<div role="presentation" tabindex="0" id="' + this.id + '" class="' + prefix + ' ' + prefix + 'Enabled' + (this.settings['class'] ? (' ' + this.settings['class']) : '') + '">';
 
-			return h;
+			html += '<div class="mceText">' + DOM.createHTML('span', {
+				id: this.id + '_voiceDesc',
+				class: 'voiceLabel',
+				style: 'display:none;'
+			}, this.settings.title);
+
+			html += DOM.createHTML('a', {
+				id: this.id + '_text',
+				tabindex: -1,
+				href: 'javascript:;',
+				class: 'mceText',
+				onclick: "return false;",
+				onmousedown: 'return false;'
+			}, DOM.encode(this.settings.title)) + '</div>';
+
+			html += '<div class="mceOpen">' + DOM.createHTML('a', {
+				id: this.id + '_open',
+				tabindex: -1,
+				href: 'javascript:;',
+				class: 'mceOpen',
+				onclick: "return false;",
+				onmousedown: 'return false;'
+			}, '<span><span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span></span>') + '</div>';
+
+			html += '</div></div>';
+
+			return html;
 		},
 
 		/**
@@ -247,50 +277,51 @@
 		 *
 		 * @method showMenu
 		 */
-		showMenu : function() {
-			var t = this, p2, e = DOM.get(this.id), m;
+		showMenu: function () {
+			var self = this,
+				pos, elm = DOM.get(this.id),
+				menu;
 
-			if (t.isDisabled() || t.items.length === 0)
+			if (this.isDisabled() || this.items.length === 0) {
 				return;
-
-			if (t.menu && t.menu.isMenuVisible)
-				return t.hideMenu();
-
-			if (!t.isMenuRendered) {
-				t.renderMenu();
-				t.isMenuRendered = true;
 			}
 
-			p2 = DOM.getPos(e);
+			if (this.menu && this.menu.isMenuVisible) {
+				return this.hideMenu();
+			}
 
-			m = t.menu;
-			m.settings.offset_x = p2.x;
-			m.settings.offset_y = p2.y;
-			m.settings.keyboard_focus = !tinymce.isOpera; // Opera is buggy when it comes to auto focus
+			if (!this.isMenuRendered) {
+				this.renderMenu();
+				this.isMenuRendered = true;
+			}
+
+			pos = DOM.getPos(elm);
+
+			menu = this.menu;
+			menu.settings.offset_x = pos.x;
+			menu.settings.offset_y = pos.y;
 
 			// Select in menu
-			each(t.items, function(o) {
-				if (m.items[o.id]) {
-					m.items[o.id].setSelected(0);
+			each(this.items, function (item) {
+				if (menu.items[item.id]) {
+					menu.items[item.id].setSelected(0);
 				}
 			});
 
-			each(t.items, function(o) {
-				if (m.items[o.id] && t.marked[o.value]) {
-					m.items[o.id].setSelected(1);
+			each(this.items, function (item) {
+				if (menu.items[item.id] && self.marked[item.value]) {
+					menu.items[item.id].setSelected(1);
 				}
 
-				if (o.value === t.selectedValue) {
-					m.items[o.id].setSelected(1);
+				if (item.value === self.selectedValue) {
+					menu.items[item.id].setSelected(1);
 				}
 			});
 
-			m.showMenu(0, e.clientHeight);
+			menu.showMenu(0, elm.clientHeight);
 
-			Event.add(DOM.doc, 'mousedown', t.hideMenu, t);
-			DOM.addClass(t.id, t.classPrefix + 'Selected');
-
-			//DOM.get(t.id + '_text').focus();
+			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
+			DOM.addClass(this.id, this.classPrefix + 'Selected');
 		},
 
 		/**
@@ -298,21 +329,19 @@
 		 *
 		 * @method hideMenu
 		 */
-		hideMenu : function(e) {
-			var t = this;
-
-			if (t.menu && t.menu.isMenuVisible) {
-				DOM.removeClass(t.id, t.classPrefix + 'Selected');
+		hideMenu: function (e) {
+			if (this.menu && this.menu.isMenuVisible) {
+				DOM.removeClass(this.id, this.classPrefix + 'Selected');
 
 				// Prevent double toogles by canceling the mouse click event to the button
-				if (e && e.type == "mousedown" && (e.target.id == t.id + '_text' || e.target.id == t.id + '_open')) {
+				if (e && e.type == "mousedown" && (e.target.id == this.id + '_text' || e.target.id == this.id + '_open')) {
 					return;
 				}
 
 				if (!e || !DOM.getParent(e.target, '.mceMenu')) {
-					DOM.removeClass(t.id, t.classPrefix + 'Selected');
-					Event.remove(DOM.doc, 'mousedown', t.hideMenu, t);
-					t.menu.hideMenu();
+					DOM.removeClass(this.id, this.classPrefix + 'Selected');
+					Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
+					this.menu.hideMenu();
 				}
 			}
 		},
@@ -322,62 +351,65 @@
 		 *
 		 * @method renderMenu
 		 */
-		renderMenu : function() {
-			var t = this, m, count = 0;
+		renderMenu: function () {
+			var self = this,
+				menu;
 
-			m = t.settings.control_manager.createDropMenu(t.id + '_menu', {
-				menu_line : 1,
-				'class' : t.classPrefix + 'Menu mceNoIcons',
-				max_width : 250,
-				max_height : t.settings.max_height || 150,
-				filter: !!t.settings.filter,
-				onselect: function(value) {					
-					if (t.settings.onselect(value) !== false) {
-						t.select(value);
+			menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
+				menu_line: 1,
+				class: this.classPrefix + 'Menu mceNoIcons',
+				max_width: 250,
+				max_height: this.settings.max_height || 150,
+				filter: !!this.settings.filter,
+				onselect: function (value) {
+					if (self.settings.onselect(value) !== false) {
+						self.select(value);
 					}
 				}
- 			});
-
-			m.onHideMenu.add(function() {
-				t.hideMenu();
-				t.focus();
 			});
-			
-			m.add({
-				title : t.settings.title,
-				'class' : 'mceMenuItemTitle',
-				onclick : function() {
-					if (t.settings.onselect('') !== false)
-						t.select(''); // Must be runned after
+
+			menu.onHideMenu.add(function () {
+				this.hideMenu();
+				this.focus();
+			});
+
+			menu.add({
+				title: this.settings.title,
+				class: 'mceMenuItemTitle',
+				onclick: function () {
+					if (self.settings.onselect('') !== false) {
+						self.select('');
+					} // Must be run after
 				}
 			});
 
-			each(t.items, function(o) {
+			each(this.items, function (item) {
 				// No value then treat it as a title
-				if (o.value === undef) {
-					m.add({
-						title : o.title,
-						role : "option",
-						//'class' : 'mceMenuItemTitle',
-						onclick : function() {
-							if (t.settings.onselect('') !== false)
-								t.select(''); // Must be runned after
+				if (item.value === undef) {
+					menu.add({
+						title: item.title,
+						role: "option",
+						onclick: function () {
+							if (self.settings.onselect('') !== false) {
+								self.select('');
+							} // Must be run after
 						}
 					});
 				} else {
-					o.id = DOM.uniqueId();
-					o.role= "option";
-					o.onclick = function() {
-						if (t.settings.onselect(o.value) !== false)
-							t.select(o.value); // Must be runned after
+					item.id = DOM.uniqueId();
+					item.role = "option";
+					item.onclick = function () {
+						if (self.settings.onselect(item.value) !== false) {
+							self.select(item.value);
+						} // Must be runned after
 					};
 
-					m.add(o);
+					menu.add(item);
 				}
 			});
 
-			t.onRenderMenu.dispatch(t, m);
-			t.menu = m;
+			this.onRenderMenu.dispatch(this, menu);
+			this.menu = menu;
 		},
 
 		/**
@@ -386,48 +418,48 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, cp = t.classPrefix;
+		postRender: function () {
+			var self = this;
 
-			Event.add(t.id, 'click', t.showMenu, t);
-			
-			Event.add(t.id, 'keydown', function(evt) {				
+			Event.add(this.id, 'click', this.showMenu, this);
+
+			Event.add(this.id, 'keydown', function (evt) {
 				if (evt.keyCode == 32) { // Space
-					t.showMenu(evt);
+					self.showMenu(evt);
 					Event.cancel(evt);
 				}
 			});
-			
-			Event.add(t.id, 'focus', function() {
-				if (!t._focused) {
-					t.keyDownHandler = Event.add(t.id, 'keydown', function(e) {
+
+			Event.add(this.id, 'focus', function () {
+				if (!this._focused) {
+					this.keyDownHandler = Event.add(this.id, 'keydown', function (e) {
 						if (e.keyCode == 40) {
-							t.showMenu();
+							self.showMenu();
 							Event.cancel(e);
 						}
 					});
-					t.keyPressHandler = Event.add(t.id, 'keypress', function(e) {
-						var v;
+					this.keyPressHandler = Event.add(this.id, 'keypress', function (e) {
+						var value;
 						if (e.keyCode == 13) {
 							// Fake select on enter
-							v = t.selectedValue;
-							t.selectedValue = null; // Needs to be null to fake change
+							value = self.selectedValue;
+							self.selectedValue = null; // Needs to be null to fake change
 							Event.cancel(e);
-							t.settings.onselect(v);
+							self.settings.onselect(value);
 						}
 					});
 				}
 
-				t._focused = 1;
-			});
-			
-			Event.add(t.id, 'blur', function() {
-				Event.remove(t.id, 'keydown', t.keyDownHandler);
-				Event.remove(t.id, 'keypress', t.keyPressHandler);
-				t._focused = 0;
+				this._focused = 1;
 			});
 
-			t.onPostRender.dispatch(t, DOM.get(t.id));
+			Event.add(this.id, 'blur', function () {
+				Event.remove(this.id, 'keydown', this.keyDownHandler);
+				Event.remove(this.id, 'keypress', this.keyPressHandler);
+				this._focused = 0;
+			});
+
+			this.onPostRender.dispatch(this, DOM.get(this.id));
 		},
 
 		/**
@@ -435,7 +467,7 @@
 		 *
 		 * @method destroy
 		 */
-		destroy : function() {
+		destroy: function () {
 			this.parent();
 
 			Event.clear(this.id + '_text');

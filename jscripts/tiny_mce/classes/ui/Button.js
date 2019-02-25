@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	var DOM = tinymce.DOM;
 
 	/**
@@ -25,11 +25,11 @@
 		 * @constructor
 		 * @method Button
 		 * @param {String} id Control id for the button.
-		 * @param {Object} s Optional name/value settings object.
-		 * @param {Editor} ed Optional the editor instance this button is for.
+		 * @param {Object} settings Optional name/value settings object.
+		 * @param {Editor} editor Optional the editor instance this button is for.
 		 */
-		Button : function(id, s, ed) {
-			this.parent(id, s, ed);
+		Button: function (id, settings, editor) {
+			this.parent(id, settings, editor);
 			this.classPrefix = 'mceButton';
 		},
 
@@ -40,21 +40,25 @@
 		 * @method renderHTML
 		 * @return {String} HTML for the button control element.
 		 */
-		renderHTML : function() {
-			var cp = this.classPrefix, s = this.settings, h, l;
+		renderHTML: function () {
+			var prefix = this.classPrefix,
+				settings = this.settings,
+				html, label;
 
-			l = DOM.encode(s.label || '');
-			h = '<button type="button" role="presentation" id="' + this.id + '" class="' + cp + ' ' + cp + 'Enabled ' + s['class'] + (l ? ' ' + cp + 'Labeled' : '') +'" onmousedown="return false;" onclick="return false;" title="' + DOM.encode(s.title) + '">';
+			label = DOM.encode(settings.label || '');
 
-			if (s.image && !(this.editor  &&this.editor.forcedHighContrastMode)) {
-				h += '<span class="mceIcon ' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+			html = '<button type="button" role="presentation" id="' + this.id + '" class="' + prefix + ' ' + prefix + 'Enabled ' + settings['class'] + (label ? ' ' + prefix + 'Labeled' : '') + '" onmousedown="return false;" onclick="return false;" title="' + DOM.encode(settings.title) + '">';
+
+			if (settings.image && !(this.editor && this.editor.forcedHighContrastMode)) {
+                html += '<span class="mceIcon ' + settings['class'] + '"><img class="mceIcon" src="' + settings.image + '" alt="' + DOM.encode(settings.title) + '" /></span>';
+                html += (label ? '<span class="' + prefix + 'Label">' + label + '</span>' : '');
 			} else {
-				h += '<span class="mceIcon ' + s['class'] + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+				html += '<span class="mceIcon ' + settings['class'] + '"></span>' + (label ? '<span class="' + prefix + 'Label">' + label + '</span>' : '');
 			}
 
-			h += '</button>';
+			html += '</button>';
 
-			return h;
+			return html;
 		},
 
 		/**
@@ -63,30 +67,34 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, s = t.settings, imgBookmark;
+		postRender: function () {
+			var self = this,
+				settings = this.settings,
+				imgBookmark;
 
 			// In IE a large image that occupies the entire editor area will be deselected when a button is clicked, so
 			// need to keep the selection in case the selection is lost
-			if (tinymce.isIE && t.editor) {
-				tinymce.dom.Event.add(t.id, 'mousedown', function(e) {
-					var nodeName = t.editor.selection.getNode().nodeName;
-					imgBookmark = nodeName === 'IMG' ? t.editor.selection.getBookmark() : null;
+			if (tinymce.isIE && this.editor) {
+				tinymce.dom.Event.add(this.id, 'mousedown', function () {
+					var nodeName = self.editor.selection.getNode().nodeName;
+					imgBookmark = nodeName === 'IMG' ? self.editor.selection.getBookmark() : null;
 				});
 			}
-			tinymce.dom.Event.add(t.id, 'click', function(e) {
-				if (!t.isDisabled()) {
+
+			tinymce.dom.Event.add(this.id, 'click', function (e) {
+				if (!self.isDisabled()) {
 					// restore the selection in case the selection is lost in IE
-					if (tinymce.isIE && t.editor && imgBookmark !== null) {
-						t.editor.selection.moveToBookmark(imgBookmark);
+					if (tinymce.isIE && self.editor && imgBookmark !== null) {
+						self.editor.selection.moveToBookmark(imgBookmark);
 					}
-					return s.onclick.call(s.scope, e);
+					return settings.onclick.call(settings.scope, e);
 				}
 			});
-			tinymce.dom.Event.add(t.id, 'keydown', function(e) {
-				if (!t.isDisabled() && e.keyCode==tinymce.VK.SPACEBAR) {
+
+			tinymce.dom.Event.add(this.id, 'keydown', function (e) {
+				if (!self.isDisabled() && e.keyCode == tinymce.VK.SPACEBAR) {
 					tinymce.dom.Event.cancel(e);
-					return s.onclick.call(s.scope, e);
+					return settings.onclick.call(settings.scope, e);
 				}
 			});
 		}

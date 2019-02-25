@@ -1,7 +1,7 @@
 /*eslint-env node */
 
 
-module.exports = function(grunt) {
+module.exports = function (grunt) {
 	var packageData = grunt.file.readJSON("package.json");
 	var changelogLine = grunt.file.read("changelog.txt").toString().split("\n")[0];
 	var BUILD_VERSION = packageData.version + '-' + (process.env.BUILD_NUMBER ? process.env.BUILD_NUMBER : '0');
@@ -15,7 +15,7 @@ module.exports = function(grunt) {
 				config: ".eslintrc"
 			},
 
-			core: ["jscripts/tinymce/classes/**/*.js"],
+			core: ["jscripts/tiny_mce/classes/**/*.js"],
 
 			plugins: [],
 
@@ -123,8 +123,7 @@ module.exports = function(grunt) {
 			}
 		},
 
-		uglify: {
-		},
+		uglify: {},
 
 		nugetpack: {
 			main: {
@@ -161,45 +160,38 @@ module.exports = function(grunt) {
 					outputDir: "tmp"
 				},
 
-				files: [
-					{src: "js/tinymce/langs", dest: "/content/scripts/tinymce/langs"},
-					{src: "js/tinymce/plugins", dest: "/content/scripts/tinymce/plugins"},
-					{src: "js/tinymce/themes", dest: "/content/scripts/tinymce/themes"},
-					{src: "js/tinymce/skins", dest: "/content/scripts/tinymce/skins"},
-					{src: "js/tinymce/tinymce.js", dest: "/content/scripts/tinymce/tinymce.js"},
-					{src: "js/tinymce/tinymce.min.js", dest: "/content/scripts/tinymce/tinymce.min.js"},
-					{src: "js/tinymce/jquery.tinymce.min.js", dest: "/content/scripts/tinymce/jquery.tinymce.min.js"},
-					{src: "js/tinymce/license.txt", dest: "/content/scripts/tinymce/license.txt"}
-				]
-			}
-		},
-
-		bundle: {
-			minified: {
-				options: {
-					themesDir: "js/tinymce/themes",
-					pluginsDir: "js/tinymce/plugins",
-					pluginFileName: "plugin.min.js",
-					themeFileName: "theme.min.js",
-					outputPath: "js/tinymce/tinymce.full.min.js"
-				},
-
-				src: [
-					"js/tinymce/tinymce.min.js"
-				]
-			},
-
-			source: {
-				options: {
-					themesDir: "js/tinymce/themes",
-					pluginsDir: "js/tinymce/plugins",
-					pluginFileName: "plugin.js",
-					themeFileName: "theme.js",
-					outputPath: "js/tinymce/tinymce.full.js"
-				},
-
-				src: [
-					"js/tinymce/tinymce.js"
+				files: [{
+						src: "js/tinymce/langs",
+						dest: "/content/scripts/tinymce/langs"
+					},
+					{
+						src: "js/tinymce/plugins",
+						dest: "/content/scripts/tinymce/plugins"
+					},
+					{
+						src: "js/tinymce/themes",
+						dest: "/content/scripts/tinymce/themes"
+					},
+					{
+						src: "js/tinymce/skins",
+						dest: "/content/scripts/tinymce/skins"
+					},
+					{
+						src: "js/tinymce/tinymce.js",
+						dest: "/content/scripts/tinymce/tinymce.js"
+					},
+					{
+						src: "js/tinymce/tinymce.min.js",
+						dest: "/content/scripts/tinymce/tinymce.min.js"
+					},
+					{
+						src: "js/tinymce/jquery.tinymce.min.js",
+						dest: "/content/scripts/tinymce/jquery.tinymce.min.js"
+					},
+					{
+						src: "js/tinymce/license.txt",
+						dest: "/content/scripts/tinymce/license.txt"
+					}
 				]
 			}
 		},
@@ -230,6 +222,13 @@ module.exports = function(grunt) {
 				"node_modules",
 				"npm-debug.log"
 			]
+		},
+
+		jsbeautify: {
+			files: ["jscripts/tiny_mce/classes/**/*.js"],
+			options: {
+				jslintHappy: true
+			}
 		}
 	});
 
@@ -240,4 +239,6 @@ module.exports = function(grunt) {
 	grunt.registerTask("minify", ["amdlc", "uglify", "skin", "less"]);
 	grunt.registerTask("test", ["qunit"]);
 	grunt.registerTask("default", ["lint", "minify", "validateVersion", "clean:release", "nugetpack"]);
+
+	grunt.registerTask("jsbeautify", ["jsbeautify"]);
 };

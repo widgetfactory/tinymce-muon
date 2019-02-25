@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	/**
 	 * This class is used to serialize down the DOM tree into a string using a Writer instance.
 	 *
@@ -27,8 +27,9 @@
 	 * @param {Object} settings Name/value settings object.
 	 * @param {tinymce.html.Schema} schema Schema instance to use.
 	 */
-	tinymce.html.Serializer = function(settings, schema) {
-		var self = this, writer = new tinymce.html.Writer(settings);
+	tinymce.html.Serializer = function (settings, schema) {
+		var self = this,
+			writer = new tinymce.html.Writer(settings);
 
 		settings = settings || {};
 		settings.validate = "validate" in settings ? settings.validate : true;
@@ -45,39 +46,39 @@
 		 * @param {tinymce.html.Node} node Node instance to serialize.
 		 * @return {String} String with HTML based on DOM tree.
 		 */
-		self.serialize = function(node) {
+		self.serialize = function (node) {
 			var handlers, validate;
 
 			validate = settings.validate;
 
 			handlers = {
 				// #text
-				3: function(node) {
+				3: function (node) {
 					writer.text(node.value, node.raw);
 				},
 
 				// #comment
-				8: function(node) {
+				8: function (node) {
 					writer.comment(node.value);
 				},
 
 				// Processing instruction
-				7: function(node) {
+				7: function (node) {
 					writer.pi(node.name, node.value);
 				},
 
 				// Doctype
-				10: function(node) {
+				10: function (node) {
 					writer.doctype(node.value);
 				},
 
 				// CDATA
-				4: function(node) {
+				4: function (node) {
 					writer.cdata(node.value);
 				},
 
 				// Document fragment
-				11: function(node) {
+				11: function (node) {
 					if ((node = node.firstChild)) {
 						do {
 							walk(node);
@@ -89,7 +90,8 @@
 			writer.reset();
 
 			function walk(node) {
-				var handler = handlers[node.type], name, isEmpty, attrs, attrName, attrValue, sortedAttrs, i, l, elementRule;
+				var handler = handlers[node.type],
+					name, isEmpty, attrs, attrName, attrValue, sortedAttrs, i, l, elementRule;
 
 				if (!handler) {
 					name = node.name;
@@ -108,7 +110,10 @@
 							if (attrName in attrs.map) {
 								attrValue = attrs.map[attrName];
 								sortedAttrs.map[attrName] = attrValue;
-								sortedAttrs.push({name: attrName, value: attrValue});
+								sortedAttrs.push({
+									name: attrName,
+									value: attrValue
+								});
 							}
 						}
 
@@ -118,7 +123,10 @@
 							if (!(attrName in sortedAttrs.map)) {
 								attrValue = attrs.map[attrName];
 								sortedAttrs.map[attrName] = attrValue;
-								sortedAttrs.push({name: attrName, value: attrValue});
+								sortedAttrs.push({
+									name: attrName,
+									value: attrValue
+								});
 							}
 						}
 
@@ -150,5 +158,5 @@
 
 			return writer.getContent();
 		};
-	}
+	};
 })(tinymce);

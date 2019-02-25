@@ -8,8 +8,9 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, each = tinymce.each;
+(function (tinymce) {
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event;
 
 	/**
 	 * This class is used to create a split button. A button with a menu attached to it.
@@ -29,23 +30,23 @@
 	 *                         alert('Button was clicked.');
 	 *                     }
 	 *                 });
-	 * 
+	 *
 	 *                 c.onRenderMenu.add(function(c, m) {
 	 *                     m.add({title : 'Some title', 'class' : 'mceMenuItemTitle'}).setDisabled(1);
-	 * 
+	 *
 	 *                     m.add({title : 'Some item 1', onclick : function() {
 	 *                         alert('Some item 1 was clicked.');
 	 *                     }});
-	 * 
+	 *
 	 *                     m.add({title : 'Some item 2', onclick : function() {
 	 *                         alert('Some item 2 was clicked.');
 	 *                     }});
 	 *                 });
-	 * 
+	 *
 	 *               // Return the new splitbutton instance
 	 *               return c;
 	 *         }
-	 * 
+	 *
 	 *         return null;
 	 *     }
 	 * });
@@ -60,8 +61,8 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		SplitButton : function(id, s, ed) {
-			this.parent(id, s, ed);
+		SplitButton: function (id, settings, editor) {
+			this.parent(id, settings, editor);
 			this.classPrefix = 'mceSplitButton';
 		},
 
@@ -72,25 +73,69 @@
 		 * @method renderHTML
 		 * @return {String} HTML for the split button control element.
 		 */
-		renderHTML : function() {
-			var h = '', t = this, s = t.settings, h1;
+		renderHTML: function () {
+			var html = '',
+				settings = this.settings,
+				heading;
 
-			//h = '<tbody><tr>';
+			if (settings.image) {
+				heading = DOM.createHTML('img ', {
+					src: settings.image,
+					role: 'presentation',
+					'class': 'mceAction ' + settings['class']
+				});
+			} else {
+				heading = DOM.createHTML('span', {
+					'class': 'mceAction ' + settings['class']
+				}, '');
+			}
 
-			if (s.image)
-				h1 = DOM.createHTML('img ', {src : s.image, role: 'presentation', 'class' : 'mceAction ' + s['class']});
-			else
-				h1 = DOM.createHTML('span', {'class' : 'mceAction ' + s['class']}, '');
+			heading += DOM.createHTML('span', {
+				'class': 'mceVoiceLabel mceIconOnly',
+				id: this.id + '_voice',
+				style: 'display:none;'
+			}, settings.title);
 
-			h1 += DOM.createHTML('span', {'class': 'mceVoiceLabel mceIconOnly', id: t.id + '_voice', style: 'display:none;'}, s.title);
-			h += '<div class="mceText">' + DOM.createHTML('a', {role: 'button', id : t.id + '_action', tabindex: '-1', href : 'javascript:;', 'class' : s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</div>';
-	
-			h1 = DOM.createHTML('span', {'class' : 'mceOpen ' + s['class']}, '<span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span>');
-			h += '<div class="mceOpen">' + DOM.createHTML('a', {role: 'button', id : t.id + '_open', tabindex: '-1', href : 'javascript:;', 'class' : s['class'], onclick : "return false;", onmousedown : 'return false;', title : s.title}, h1) + '</div>';
+			html += '<div class="mceText">' + DOM.createHTML('a', {
+				role: 'button',
+				id: this.id + '_action',
+				tabindex: '-1',
+				href: 'javascript:;',
+				'class': settings['class'],
+				onclick: "return false;",
+				onmousedown: 'return false;',
+				title: settings.title
+			}, heading) + '</div>';
 
-			//h += '</tr></tbody>';
-			h = DOM.createHTML('div', { role: 'presentation',   'class' : 'mceSplitButton mceSplitButtonEnabled ' + s['class'], title : s.title}, h);
-			return DOM.createHTML('div', {id : t.id, role: 'button', tabindex: '0', 'aria-labelledby': t.id + '_voice', 'aria-haspopup': 'true'}, h);
+			heading = DOM.createHTML('span', {
+				'class': 'mceOpen ' + settings['class']
+			}, '<span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span>');
+
+			html += '<div class="mceOpen">' + DOM.createHTML('a', {
+				role: 'button',
+				id: this.id + '_open',
+				tabindex: '-1',
+				href: 'javascript:;',
+				'class': settings['class'],
+				onclick: "return false;",
+				onmousedown: 'return false;',
+				title: settings.title
+			}, heading) + '</div>';
+
+			//html += '</tr></tbody>';
+			html = DOM.createHTML('div', {
+				role: 'presentation',
+				'class': 'mceSplitButton mceSplitButtonEnabled ' + settings['class'],
+				title: settings.title
+			}, html);
+
+			return DOM.createHTML('div', {
+				id: this.id,
+				role: 'button',
+				tabindex: '0',
+				'aria-labelledby': this.id + '_voice',
+				'aria-haspopup': 'true'
+			}, html);
 		},
 
 		/**
@@ -99,38 +144,48 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, s = t.settings, activate;
+		postRender: function () {
+			var self = this,
+				settings = this.settings,
+				activate;
 
-			if (s.onclick) {
-				activate = function(evt) {
-					if (!t.isDisabled()) {
-						s.onclick(t.value);
+			if (this.settings.onclick) {
+				activate = function (evt) {
+					if (!self.isDisabled()) {
+						settings.onclick(self.value);
 						Event.cancel(evt);
 					}
 				};
-				Event.add(t.id + '_action', 'click', activate);
-				Event.add(t.id, ['click', 'keydown'], function(evt) {
-					var DOM_VK_SPACE = 32, DOM_VK_ENTER = 14, DOM_VK_RETURN = 13, DOM_VK_UP = 38, DOM_VK_DOWN = 40;
+
+				Event.add(this.id + '_action', 'click', activate);
+				Event.add(this.id, ['click', 'keydown'], function (evt) {
+					var DOM_VK_DOWN = 40;
+
 					if ((evt.keyCode === 32 || evt.keyCode === 13 || evt.keyCode === 14) && !evt.altKey && !evt.ctrlKey && !evt.metaKey) {
 						activate();
 						Event.cancel(evt);
 					} else if (evt.type === 'click' || evt.keyCode === DOM_VK_DOWN) {
-						t.showMenu();
+						self.showMenu();
 						Event.cancel(evt);
 					}
 				});
 			}
 
-			Event.add(t.id + '_open', 'click', function (evt) {
-				t.showMenu();
+			Event.add(this.id + '_open', 'click', function (evt) {
+				self.showMenu();
 				Event.cancel(evt);
 			});
-			Event.add([t.id, t.id + '_open'], 'focus', function() {t._focused = 1;});
-			Event.add([t.id, t.id + '_open'], 'blur', function() {t._focused = 0;});
+
+			Event.add([this.id, this.id + '_open'], 'focus', function () {
+				self._focused = 1;
+			});
+
+			Event.add([this.id, this.id + '_open'], 'blur', function () {
+				self._focused = 0;
+			});
 		},
 
-		destroy : function() {
+		destroy: function () {
 			this.parent();
 
 			Event.clear(this.id + '_action');

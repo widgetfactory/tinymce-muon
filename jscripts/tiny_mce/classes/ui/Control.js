@@ -8,9 +8,9 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	// Shorten class names
-	var DOM = tinymce.DOM, is = tinymce.is;
+	var DOM = tinymce.DOM;
 
 	/**
 	 * This class is the base class for all controls like buttons, toolbars, containers. This class should not
@@ -25,28 +25,29 @@
 		 * @constructor
 		 * @method Control
 		 * @param {String} id Control id.
-		 * @param {Object} s Optional name/value settings object.
+		 * @param {Object} settings Optional name/value settings object.
 		 */
-		Control : function(id, s, editor) {
+		Control: function (id, settings, editor) {
 			this.id = id;
-			this.settings = s = s || {};
+			this.settings = settings || {};
 			this.rendered = false;
 			this.onRender = new tinymce.util.Dispatcher(this);
 			this.classPrefix = '';
-			this.scope = s.scope || this;
+			this.scope = this.settings.scope || this;
 			this.disabled = 0;
 			this.active = 0;
 			this.editor = editor;
 		},
-		
-		setAriaProperty : function(property, value) {
+
+		setAriaProperty: function (property, value) {
 			var element = DOM.get(this.id + '_aria') || DOM.get(this.id);
+
 			if (element) {
 				DOM.setAttrib(element, 'aria-' + property, !!value);
 			}
 		},
-		
-		focus : function() {
+
+		focus: function () {
 			DOM.get(this.id).focus();
 		},
 
@@ -55,15 +56,15 @@
 		 * element that contains the control. So that it can be disabled visually.
 		 *
 		 * @method setDisabled
-		 * @param {Boolean} s Boolean state if the control should be disabled or not.
+		 * @param {Boolean} state Boolean state if the control should be disabled or not.
 		 */
-		setDisabled : function(s) {
-			if (s != this.disabled) {
-				this.setAriaProperty('disabled', s);
+		setDisabled: function (state) {
+			if (state != this.disabled) {
+				this.setAriaProperty('disabled', state);
 
-				this.setState('Disabled', s);
-				this.setState('Enabled', !s);
-				this.disabled = s;
+				this.setState('Disabled', state);
+				this.setState('Enabled', !state);
+				this.disabled = state;
 			}
 		},
 
@@ -74,7 +75,7 @@
 		 * @method isDisabled
 		 * @return {Boolean} true/false if the control is disabled or not.
 		 */
-		isDisabled : function() {
+		isDisabled: function () {
 			return this.disabled;
 		},
 
@@ -85,7 +86,7 @@
 		 * @method setActive
 		 * @param {Boolean} s Boolean state if the control should be activated or not.
 		 */
-		setActive : function(s) {
+		setActive: function (s) {
 			if (s != this.active) {
 				this.setState('Active', s);
 				this.active = s;
@@ -100,7 +101,7 @@
 		 * @method isActive
 		 * @return {Boolean} true/false if the control is disabled or not.
 		 */
-		isActive : function() {
+		isActive: function () {
 			return this.active;
 		},
 
@@ -111,15 +112,16 @@
 		 * @param {String} c Class name to add/remove depending on state.
 		 * @param {Boolean} s True/false state if the class should be removed or added.
 		 */
-		setState : function(c, s) {
+		setState: function (c, s) {
 			var n = DOM.get(this.id);
 
 			c = this.classPrefix + c;
 
-			if (s)
+			if (s) {
 				DOM.addClass(n, c);
-			else
+			} else {
 				DOM.removeClass(n, c);
+			}
 		},
 
 		/**
@@ -128,7 +130,7 @@
 		 * @method isRendered
 		 * @return {Boolean} State if the control has been rendered or not.
 		 */
-		isRendered : function() {
+		isRendered: function () {
 			return this.rendered;
 		},
 
@@ -139,8 +141,7 @@
 		 * @method renderHTML
 		 * @return {String} HTML for the button control element.
 		 */
-		renderHTML : function() {
-		},
+		renderHTML: function () {},
 
 		/**
 		 * Renders the control to the specified container element.
@@ -148,7 +149,7 @@
 		 * @method renderTo
 		 * @param {Element} n HTML DOM element to add control to.
 		 */
-		renderTo : function(n) {
+		renderTo: function (n) {
 			DOM.setHTML(n, this.renderHTML());
 		},
 
@@ -158,20 +159,20 @@
 		 *
 		 * @method postRender
 		 */
-		postRender : function() {
-			var t = this, b;
+		postRender: function () {
+			var state;
 
 			// Set pending states
-			if (is(t.disabled)) {
-				b = t.disabled;
-				t.disabled = -1;
-				t.setDisabled(b);
+			if (tinymce.is(this.disabled)) {
+				state = this.disabled;
+				this.disabled = -1;
+				this.setDisabled(state);
 			}
 
-			if (is(t.active)) {
-				b = t.active;
-				t.active = -1;
-				t.setActive(b);
+			if (tinymce.is(this.active)) {
+				state = this.active;
+				this.active = -1;
+				this.setActive(state);
 			}
 		},
 
@@ -181,7 +182,7 @@
 		 *
 		 * @method remove
 		 */
-		remove : function() {
+		remove: function () {
 			DOM.remove(this.id);
 			this.destroy();
 		},
@@ -191,7 +192,7 @@
 		 *
 		 * @method destroy
 		 */
-		destroy : function() {
+		destroy: function () {
 			tinymce.dom.Event.clear(this.id);
 		}
 	});

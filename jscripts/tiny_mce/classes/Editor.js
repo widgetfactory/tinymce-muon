@@ -8,12 +8,17 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function(tinymce) {
+(function (tinymce) {
 	// Shorten these names
-	var DOM = tinymce.DOM, Event = tinymce.dom.Event, extend = tinymce.extend,
-		each = tinymce.each, isGecko = tinymce.isGecko,
-		isIE = tinymce.isIE, isWebKit = tinymce.isWebKit, is = tinymce.is,
-		ThemeManager = tinymce.ThemeManager, PluginManager = tinymce.PluginManager,
+	var DOM = tinymce.DOM,
+		Event = tinymce.dom.Event,
+		extend = tinymce.extend,
+		each = tinymce.each,
+		isGecko = tinymce.isGecko,
+		isIE = tinymce.isIE,
+		is = tinymce.is,
+		ThemeManager = tinymce.ThemeManager,
+		PluginManager = tinymce.PluginManager,
 		explode = tinymce.explode;
 
 	/**
@@ -23,20 +28,20 @@
 	 * @example
 	 * // Add a class to all paragraphs in the editor.
 	 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
-	 * 
+	 *
 	 * // Gets the current editors selection as text
 	 * tinyMCE.activeEditor.selection.getContent({format : 'text'});
-	 * 
+	 *
 	 * // Creates a new editor instance
 	 * var ed = new tinymce.Editor('textareaid', {
 	 *     some_setting : 1
 	 * });
-	 * 
+	 *
 	 * // Select each item the user clicks on
 	 * ed.onClick.add(function(ed, e) {
 	 *     ed.selection.select(e.target);
 	 * });
-	 * 
+	 *
 	 * ed.render();
 	 */
 	tinymce.create('tinymce.Editor', {
@@ -49,8 +54,9 @@
 		 * @param {Object} settings Optional settings string for the editor.
 		 * @author Moxiecode
 		 */
-		Editor : function(id, settings) {
-			var self = this, TRUE = true;
+		Editor: function (id, settings) {
+			var self = this,
+				TRUE = true;
 
 			/**
 			 * Name/value collection with editor settings.
@@ -62,50 +68,50 @@
 			 * tinyMCE.activeEditor.windowManager.alert("You are using the " + tinyMCE.activeEditor.settings.theme + " theme");
 			 */
 			self.settings = settings = extend({
-				id : id,
-				language : 'en',
-				theme : 'advanced',
-				skin : 'default',
-				delta_width : 0,
-				delta_height : 0,
-				popup_css : '',
-				plugins : '',
-				document_base_url : tinymce.documentBaseURL,
-				add_form_submit_trigger : TRUE,
-				submit_patch : TRUE,
-				add_unload_trigger : TRUE,
-				convert_urls : TRUE,
-				relative_urls : TRUE,
-				remove_script_host : TRUE,
-				table_inline_editing : false,
-				object_resizing : TRUE,
-				accessibility_focus : TRUE,
-				doctype : '<!DOCTYPE html>',
-				visual : TRUE,
-				font_size_style_values : 'xx-small,x-small,small,medium,large,x-large,xx-large',
-				font_size_legacy_values : 'xx-small,small,medium,large,x-large,xx-large,300%', // See: http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size
-				apply_source_formatting : TRUE,
-				directionality : 'ltr',
-				forced_root_block : 'p',
-				hidden_input : TRUE,
-				padd_empty_editor : TRUE,
-				render_ui : TRUE,
-				indentation : '30px',
-				fix_table_elements : TRUE,
-				inline_styles : TRUE,
-				convert_fonts_to_spans : TRUE,
-				indent : 'simple',
-				indent_before : 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
-				indent_after : 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
-				validate : TRUE,
-				entity_encoding : 'named',
-				url_converter : self.convertURL,
-				url_converter_scope : self,
-				ie7_compat : TRUE
+				id: id,
+				language: 'en',
+				theme: 'advanced',
+				skin: 'default',
+				delta_width: 0,
+				delta_height: 0,
+				popup_css: '',
+				plugins: '',
+				document_base_url: tinymce.documentBaseURL,
+				add_form_submit_trigger: TRUE,
+				submit_patch: TRUE,
+				add_unload_trigger: TRUE,
+				convert_urls: TRUE,
+				relative_urls: TRUE,
+				remove_script_host: TRUE,
+				table_inline_editing: false,
+				object_resizing: TRUE,
+				accessibility_focus: TRUE,
+				doctype: '<!DOCTYPE html>',
+				visual: TRUE,
+				font_size_style_values: 'xx-small,x-small,small,medium,large,x-large,xx-large',
+				font_size_legacy_values: 'xx-small,small,medium,large,x-large,xx-large,300%', // See: http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size
+				apply_source_formatting: TRUE,
+				directionality: 'ltr',
+				forced_root_block: 'p',
+				hidden_input: TRUE,
+				padd_empty_editor: TRUE,
+				render_ui: TRUE,
+				indentation: '30px',
+				fix_table_elements: TRUE,
+				inline_styles: TRUE,
+				convert_fonts_to_spans: TRUE,
+				indent: 'simple',
+				indent_before: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
+				indent_after: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
+				validate: TRUE,
+				entity_encoding: 'named',
+				url_converter: self.convertURL,
+				url_converter_scope: self,
+				ie7_compat: TRUE
 			}, settings);
 
 			/**
-			 * Editor instance id, normally the same as the div/textarea that was replaced. 
+			 * Editor instance id, normally the same as the div/textarea that was replaced.
 			 *
 			 * @property id
 			 * @type String
@@ -113,7 +119,7 @@
 			self.id = self.editorId = id;
 
 			/**
-			 * State to force the editor to return false on a isDirty call. 
+			 * State to force the editor to return false on a isDirty call.
 			 *
 			 * @property isNotDirty
 			 * @type Boolean
@@ -148,12 +154,12 @@
 			 * @example
 			 * // Get relative URL from the location of document_base_url
 			 * tinyMCE.activeEditor.documentBaseURI.toRelative('/somedir/somefile.htm');
-			 * 
-			 * // Get absolute URL from the location of document_base_url
+			 *
+			 * // Get absolute URL from the location of document_base_ur\
 			 * tinyMCE.activeEditor.documentBaseURI.toAbsolute('somefile.htm');
 			 */
 			self.documentBaseURI = new tinymce.util.URI(settings.document_base_url || tinymce.documentBaseURL, {
-				base_uri : tinyMCE.baseURI
+				base_uri: tinyMCE.baseURI
 			});
 
 			/**
@@ -164,7 +170,7 @@
 			 * @example
 			 * // Get relative URL from the location of the API
 			 * tinyMCE.activeEditor.baseURI.toRelative('/somedir/somefile.htm');
-			 * 
+			 *
 			 * // Get absolute URL from the location of the API
 			 * tinyMCE.activeEditor.baseURI.toAbsolute('somefile.htm');
 			 */
@@ -175,7 +181,7 @@
 			 *
 			 * @property contentCSS
 			 * @type Array
-			 */			
+			 */
 			self.contentCSS = [];
 
 			/**
@@ -203,13 +209,16 @@
 		 *
 		 * @method render
 		 */
-		render : function(nst) {
-			var t = this, s = t.settings, id = t.id, sl = tinymce.ScriptLoader;
+		render: function () {
+			var self = this,
+				s = self.settings,
+				id = self.id,
+				sl = tinymce.ScriptLoader;
 
 			// Page is not loaded yet, wait for it
 			if (!Event.domLoaded) {
-				Event.add(window, 'ready', function() {
-					t.render();
+				Event.add(window, 'ready', function () {
+					self.render();
 				});
 				return;
 			}
@@ -217,25 +226,28 @@
 			tinyMCE.settings = s;
 
 			// Element not found, then skip initialization
-			if (!t.getElement()) {
+			if (!self.getElement()) {
 				return;
 			}
 
-			// Is a iPad/iPhone and not on iOS5, then skip initialization. We need to sniff 
+			// Is a iPad/iPhone and not on iOS5, then skip initialization. We need to sniff
 			// here since the browser says it has contentEditable support but there is no visible caret.
 			if (tinymce.isIDevice && !tinymce.isIOS5) {
 				return;
 			}
 
 			// Add hidden input for non input elements inside form elements
-			if (!/TEXTAREA|INPUT/i.test(t.getElement().nodeName) && s.hidden_input && DOM.getParent(id, 'form')) {
-				DOM.insertAfter(DOM.create('input', {type : 'hidden', name : id}), id);
+			if (!/TEXTAREA|INPUT/i.test(self.getElement().nodeName) && s.hidden_input && DOM.getParent(id, 'form')) {
+				DOM.insertAfter(DOM.create('input', {
+					type: 'hidden',
+					name: id
+				}), id);
 			}
 
 			// Hide target element early to prevent content flashing
 			if (!s.content_editable) {
-				t.orgVisibility = t.getElement().style.visibility;
-				t.getElement().style.visibility = 'hidden';
+				self.orgVisibility = self.getElement().style.visibility;
+				self.getElement().style.visibility = 'hidden';
 			}
 
 			/**
@@ -246,7 +258,7 @@
 			 * @example
 			 * // Shows an alert message
 			 * tinyMCE.activeEditor.windowManager.alert('Hello world!');
-			 * 
+			 *
 			 * // Opens a new dialog with the file.htm file and the size 320x240
 			 * // It also adds a custom parameter this can be retrieved by using tinyMCEPopup.getWindowArg inside the dialog.
 			 * tinyMCE.activeEditor.windowManager.open({
@@ -258,11 +270,11 @@
 			 * });
 			 */
 			if (tinymce.WindowManager) {
-				t.windowManager = new tinymce.WindowManager(t);
+				self.windowManager = new tinymce.WindowManager(self);
 			}
 
 			if (s.encoding == 'xml') {
-				t.onGetContent.add(function(ed, o) {
+				self.onGetContent.add(function (ed, o) {
 					if (o.save) {
 						o.content = DOM.encode(o.content);
 					}
@@ -270,27 +282,30 @@
 			}
 
 			if (s.add_form_submit_trigger) {
-				t.onSubmit.addToTop(function() {
-					if (t.initialized) {
-						t.save();
-						t.isNotDirty = 1;
+				self.onSubmit.addToTop(function () {
+					if (self.initialized) {
+						self.save();
+						self.isNotDirty = 1;
 					}
 				});
 			}
 
 			if (s.add_unload_trigger) {
-				t._beforeUnload = tinyMCE.onBeforeUnload.add(function() {
-					if (t.initialized && !t.destroyed && !t.isHidden()) {
-						t.save({format : 'raw', no_events : true});
+				self._beforeUnload = tinyMCE.onBeforeUnload.add(function () {
+					if (self.initialized && !self.destroyed && !self.isHidden()) {
+						self.save({
+							format: 'raw',
+							no_events: true
+						});
 					}
 				});
 			}
 
-			tinymce.addUnload(t.destroy, t);
+			tinymce.addUnload(self.destroy, self);
 
 			if (s.submit_patch) {
-				t.onBeforeRenderUI.add(function() {
-					var n = t.getElement().form;
+				self.onBeforeRenderUI.add(function () {
+					var n = self.getElement().form;
 
 					if (!n) {
 						return;
@@ -303,14 +318,14 @@
 
 					// Check page uses id="submit" or name="submit" for it's submit button
 					if (!n.submit.nodeType && !n.submit.length) {
-						t.formElement = n;
+						self.formElement = n;
 						n._mceOldSubmit = n.submit;
-						n.submit = function() {
+						n.submit = function () {
 							// Save all instances
 							tinymce.triggerSave();
-							t.isNotDirty = 1;
+							self.isNotDirty = 1;
 
-							return t.formElement._mceOldSubmit(t.formElement);
+							return self.formElement._mceOldSubmit(self.formElement);
 						};
 					}
 
@@ -328,31 +343,39 @@
 					ThemeManager.load(s.theme, 'themes/' + s.theme + '/editor_template' + tinymce.suffix + '.js');
 				}
 
-				each(explode(s.plugins), function(p) {
-					if (p &&!PluginManager.urls[p]) {
+				each(explode(s.plugins), function (p) {
+					if (p && !PluginManager.urls[p]) {
 						if (p.charAt(0) == '-') {
 							p = p.substr(1, p.length);
 							var dependencies = PluginManager.dependencies(p);
-							each(dependencies, function(dep) {
-								var defaultSettings = {prefix:'plugins/', resource: dep, suffix:'/editor_plugin' + tinymce.suffix + '.js'};
+							each(dependencies, function (dep) {
+								var defaultSettings = {
+									prefix: 'plugins/',
+									resource: dep,
+									suffix: '/editor_plugin' + tinymce.suffix + '.js'
+								};
 								dep = PluginManager.createUrl(defaultSettings, dep);
 								PluginManager.load(dep.resource, dep);
 							});
 						} else {
-							PluginManager.load(p, {prefix:'plugins/', resource: p, suffix:'/editor_plugin' + tinymce.suffix + '.js'});
+							PluginManager.load(p, {
+								prefix: 'plugins/',
+								resource: p,
+								suffix: '/editor_plugin' + tinymce.suffix + '.js'
+							});
 						}
 					}
 				});
-				
-				each(s.external_plugins, function(url, name) {
+
+				each(s.external_plugins, function (url, name) {
 					PluginManager.load(name, url);
 					s.plugins += ',' + name;
 				});
 
 				// Init when que is loaded
-				sl.loadQueue(function() {
-					if (!t.removed) {
-						t.init();
+				sl.loadQueue(function () {
+					if (!self.removed) {
+						self.init();
 					}
 				});
 			}
@@ -367,15 +390,18 @@
 		 *
 		 * @method init
 		 */
-		init : function() {
-			var n, t = this, s = t.settings, w, h, mh, e = t.getElement(), o, ti, u, bi, bc, re, i, initializedPlugins = [];
+		init: function () {
+			var self = this,
+				s = self.settings,
+				w, h, mh, e = self.getElement(),
+				o, url, bi, bc, re, i, initializedPlugins = [];
 
-			tinymce.add(t);
+			tinymce.add(self);
 
-			s.aria_label = s.aria_label || DOM.getAttrib(e, 'aria-label', t.getLang('aria.rich_text_area'));
+			s.aria_label = s.aria_label || DOM.getAttrib(e, 'aria-label', self.getLang('aria.rich_text_area'));
 
 			/**
-			 * Reference to the theme instance that was used to generate the UI. 
+			 * Reference to the theme instance that was used to generate the UI.
 			 *
 			 * @property theme
 			 * @type tinymce.Theme
@@ -387,48 +413,50 @@
 				if (typeof s.theme != "function") {
 					s.theme = s.theme.replace(/-/, '');
 					o = ThemeManager.get(s.theme);
-					t.theme = new o();
+					self.theme = new o();
 
-					if (t.theme.init) {
-						t.theme.init(t, ThemeManager.urls[s.theme] || tinymce.documentBaseURL.replace(/\/$/, ''));
+					if (self.theme.init) {
+						self.theme.init(self, ThemeManager.urls[s.theme] || tinymce.documentBaseURL.replace(/\/$/, ''));
 					}
 				} else {
-					t.theme = s.theme;
+					self.theme = s.theme;
 				}
 			}
 
 			function initPlugin(p) {
-				var c = PluginManager.get(p), u = PluginManager.urls[p] || tinymce.documentBaseURL.replace(/\/$/, ''), po;
+				var c = PluginManager.get(p),
+					u = PluginManager.urls[p] || tinymce.documentBaseURL.replace(/\/$/, ''),
+					po;
 
-				if (c && tinymce.inArray(initializedPlugins,p) === -1) {
-					each(PluginManager.dependencies(p), function(dep){
+				if (c && tinymce.inArray(initializedPlugins, p) === -1) {
+					each(PluginManager.dependencies(p), function (dep) {
 						initPlugin(dep);
 					});
-					po = new c(t, u);
+					po = new c(self, u);
 
-					t.plugins[p] = po;
+					self.plugins[p] = po;
 
 					if (po.init) {
-						po.init(t, u);
+						po.init(self, u);
 						initializedPlugins.push(p);
 					}
 				}
 			}
-			
+
 			// Create all plugins
 			each(explode(s.plugins.replace(/\-/g, '')), initPlugin);
 
 			// Setup popup CSS path(s)
 			if (s.popup_css !== false) {
 				if (s.popup_css) {
-					s.popup_css = t.documentBaseURI.toAbsolute(s.popup_css);
+					s.popup_css = self.documentBaseURI.toAbsolute(s.popup_css);
 				} else {
-					s.popup_css = t.baseURI.toAbsolute("themes/" + s.theme + "/skins/" + s.skin + "/dialog.css");
+					s.popup_css = self.baseURI.toAbsolute("themes/" + s.theme + "/skins/" + s.skin + "/dialog.css");
 				}
 			}
 
 			if (s.popup_css_add) {
-				s.popup_css += ',' + t.documentBaseURI.toAbsolute(s.popup_css_add);
+				s.popup_css += ',' + self.documentBaseURI.toAbsolute(s.popup_css_add);
 			}
 
 			/**
@@ -440,17 +468,17 @@
 			 * // Disables the bold button
 			 * tinyMCE.activeEditor.controlManager.setDisabled('bold', true);
 			 */
-			t.controlManager = new tinymce.ControlManager(t);
+			self.controlManager = new tinymce.ControlManager(self);
 
 			// Enables users to override the control factory
-			t.onBeforeRenderUI.dispatch(t, t.controlManager);
+			self.onBeforeRenderUI.dispatch(self, self.controlManager);
 
 			// Measure box
-			if (s.render_ui && t.theme) {
-				t.orgDisplay = e.style.display;
+			if (s.render_ui && self.theme) {
+				self.orgDisplay = e.style.display;
 
 				if (typeof s.theme != "function") {
-					w = s.width;// || e.style.width || e.offsetWidth;
+					w = s.width; // || e.style.width || e.offsetWidth;
 					h = s.height || e.style.height || e.offsetHeight;
 
 					mh = s.min_height || 100;
@@ -465,37 +493,37 @@
 					}
 
 					// Render UI
-					o = t.theme.renderUI({
-						targetNode : e,
-						width : w,
-						height : h,
-						deltaWidth : s.delta_width,
-						deltaHeight : s.delta_height
+					o = self.theme.renderUI({
+						targetNode: e,
+						width: w,
+						height: h,
+						deltaWidth: s.delta_width,
+						deltaHeight: s.delta_height
 					});
 
 					if (w) {
 						// Resize editor
 						DOM.setStyles(o.sizeContainer || o.editorContainer, {
-							width : w
+							width: w
 						});
 					}
 
-					h = (o.iframeHeight || h) + (typeof(h) == 'number' ? (o.deltaHeight || 0) : '');
+					h = (o.iframeHeight || h) + (typeof (h) == 'number' ? (o.deltaHeight || 0) : '');
 
 					if (h < mh) {
 						h = mh;
 					}
 				} else {
-					o = s.theme(t, e);
+					o = s.theme(self, e);
 
 					// Convert element type to id:s
 					if (o.editorContainer.nodeType) {
-						o.editorContainer = o.editorContainer.id = o.editorContainer.id || t.id + "_parent";
+						o.editorContainer = o.editorContainer.id = o.editorContainer.id || self.id + "_parent";
 					}
 
 					// Convert element type to id:s
 					if (o.iframeContainer.nodeType) {
-						o.iframeContainer = o.iframeContainer.id = o.iframeContainer.id || t.id + "_iframecontainer";
+						o.iframeContainer = o.iframeContainer.id = o.iframeContainer.id || self.id + "_iframecontainer";
 					}
 
 					// Use specified iframe height or the targets offsetHeight
@@ -503,13 +531,13 @@
 
 					// Store away the selection when it's changed to it can be restored later with a editor.focus() call
 					if (isIE) {
-						t.onInit.add(function(ed) {
-							ed.dom.bind(ed.getBody(), 'beforedeactivate keydown keyup', function() {
+						self.onInit.add(function (ed) {
+							ed.dom.bind(ed.getBody(), 'beforedeactivate keydown keyup', function () {
 								ed.bookmark = ed.selection.getBookmark(1);
 							});
 						});
 
-						t.onNodeChange.add(function(ed) {
+						self.onNodeChange.add(function (ed) {
 							if (document.activeElement.id == ed.id + "_ifr") {
 								ed.bookmark = ed.selection.getBookmark(1);
 							}
@@ -517,25 +545,25 @@
 					}
 				}
 
-				t.editorContainer = o.editorContainer;
+				self.editorContainer = o.editorContainer;
 			}
 
 			// Load specified content CSS last
 			if (s.content_css) {
-				each(explode(s.content_css), function(u) {
-					t.contentCSS.push(t.documentBaseURI.toAbsolute(u));
+				each(explode(s.content_css), function (u) {
+					self.contentCSS.push(self.documentBaseURI.toAbsolute(u));
 				});
 			}
 
 			// Load specified content CSS last
 			if (s.content_style) {
-				t.contentStyles.push(s.content_style);
+				self.contentStyles.push(s.content_style);
 			}
 
 			// Content editable mode ends here
 			if (s.content_editable) {
-				e = n = o = null; // Fix IE leak
-				return t.initContentBody();
+				e = o = null; // Fix IE leak
+				return self.initContentBody();
 			}
 
 			// User specified a document.domain value
@@ -543,73 +571,76 @@
 				tinymce.relaxedDomain = document.domain;
 			}
 
-			t.iframeHTML = s.doctype + '<html><head xmlns="http://www.w3.org/1999/xhtml">';
+			self.iframeHTML = s.doctype + '<html><head xmlns="http://www.w3.org/1999/xhtml">';
 
 			// We only need to override paths if we have to
 			// IE has a bug where it remove site absolute urls to relative ones if this is specified
 			if (s.document_base_url != tinymce.documentBaseURL) {
-				t.iframeHTML += '<base href="' + t.documentBaseURI.getURI() + '" />';
+				self.iframeHTML += '<base href="' + self.documentBaseURI.getURI() + '" />';
 			}
 
-			t.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
+			self.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 
 			// Load the CSS by injecting them into the HTML this will reduce "flicker"
-			for (i = 0; i < t.contentCSS.length; i++) {
-				t.iframeHTML += '<link type="text/css" rel="stylesheet" href="' + t.contentCSS[i] + '" />';
+			for (i = 0; i < self.contentCSS.length; i++) {
+				self.iframeHTML += '<link type="text/css" rel="stylesheet" href="' + self.contentCSS[i] + '" />';
 			}
 
-			t.contentCSS = [];
+			self.contentCSS = [];
 
-			bi = s.body_id || 'tinymce';
+            bi = s.body_id || 'tinymce';
+
 			if (bi.indexOf('=') != -1) {
-				bi = t.getParam('body_id', '', 'hash');
-				bi = bi[t.id] || bi;
+				bi = self.getParam('body_id', '', 'hash');
+				bi = bi[self.id] || bi;
 			}
 
-			bc = s.body_class || '';
+            bc = s.body_class || '';
+
 			if (bc.indexOf('=') != -1) {
-				bc = t.getParam('body_class', '', 'hash');
-				bc = bc[t.id] || '';
+				bc = self.getParam('body_class', '', 'hash');
+				bc = bc[self.id] || '';
 			}
 
-			t.iframeHTML += '</head><body id="' + bi + '" class="mceContentBody ' + bc + '" onload="window.parent.tinyMCE.get(\'' + t.id + '\').onLoad.dispatch();"><br></body></html>';
+			self.iframeHTML += '</head><body id="' + bi + '" class="mceContentBody ' + bc + '" onload="window.parent.tinyMCE.get(\'' + self.id + '\').onLoad.dispatch();"><br></body></html>';
 
 			// Domain relaxing enabled, then set document domain
 			if (tinymce.relaxedDomain && (isIE || (tinymce.isOpera && parseFloat(opera.version()) < 11))) {
 				// We need to write the contents here in IE since multiple writes messes up refresh button and back button
-				u = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinyMCE.get("' + t.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody();})()';
+				url = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinyMCE.get("' + self.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody();})()';
 			}
 
 			// Create iframe
 			// TODO: ACC add the appropriate description on this.
-			n = DOM.add(o.iframeContainer, 'iframe', { 
-				id : t.id + "_ifr",
-				src : u || 'javascript:""', // Workaround for HTTPS warning in IE6/7
-				frameBorder : '0',
-				allowTransparency : "true",
-				title : s.aria_label,
-				style : {
-					height : h
+			var ifr = DOM.add(o.iframeContainer, 'iframe', {
+				id: self.id + "_ifr",
+				frameBorder: '0',
+				allowTransparency: "true",
+				title: s.aria_label,
+				style: {
+					height: h
 				}
-			});
+            });
 
-			t.contentAreaContainer = o.iframeContainer;
+            DOM.setAttrib(ifr, "src", url || 'javascript:""');
+
+			self.contentAreaContainer = o.iframeContainer;
 
 			if (o.editorContainer) {
-				DOM.get(o.editorContainer).style.display = t.orgDisplay;
+				DOM.get(o.editorContainer).style.display = self.orgDisplay;
 			}
 
 			// Restore visibility on target element
-			e.style.visibility = t.orgVisibility;
+			e.style.visibility = self.orgVisibility;
 
-			DOM.get(t.id).style.display = 'none';
-			DOM.setAttrib(t.id, 'aria-hidden', true);
+			DOM.get(self.id).style.display = 'none';
+			DOM.setAttrib(self.id, 'aria-hidden', true);
 
-			if (!tinymce.relaxedDomain || !u) {
-				t.initContentBody();
+			if (!tinymce.relaxedDomain || !url) {
+				self.initContentBody();
 			}
 
-			e = n = o = null; // Cleanup
+			e = o = null; // Cleanup
 		},
 
 		/**
@@ -619,8 +650,12 @@
 		 *
 		 * @method initContentBody
 		 */
-		initContentBody : function() {
-			var self = this, settings = self.settings, targetElm = DOM.get(self.id), doc = self.getDoc(), html, body, contentCssText;
+		initContentBody: function () {
+			var self = this,
+				settings = self.settings,
+				targetElm = DOM.get(self.id),
+				doc = self.getDoc(),
+				body, contentCssText;
 
 			// Setup iframe body
 			if ((!isIE || !tinymce.relaxedDomain) && !settings.content_editable) {
@@ -671,14 +706,14 @@
 			 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
 			 */
 			self.dom = new tinymce.dom.DOMUtils(doc, {
-				keep_values : true,
-				url_converter : self.convertURL,
-				url_converter_scope : self,
-				hex_colors : settings.force_hex_style_colors,
-				class_filter : settings.class_filter,
-				update_styles : true,
-				root_element : settings.content_editable ? self.id : null,
-				schema : self.schema
+				keep_values: true,
+				url_converter: self.convertURL,
+				url_converter_scope: self,
+				hex_colors: settings.force_hex_style_colors,
+				class_filter: settings.class_filter,
+				update_styles: true,
+				root_element: settings.content_editable ? self.id : null,
+				schema: self.schema
 			});
 
 			/**
@@ -690,8 +725,10 @@
 			self.parser = new tinymce.html.DomParser(settings, self.schema);
 
 			// Convert src and href into data-mce-src, data-mce-href and data-mce-style
-			self.parser.addAttributeFilter('src,href,style', function(nodes, name) {
-				var i = nodes.length, node, dom = self.dom, value, internalName;
+			self.parser.addAttributeFilter('src,href,style', function (nodes, name) {
+				var i = nodes.length,
+					node, dom = self.dom,
+					value, internalName;
 
 				while (i--) {
 					node = nodes[i];
@@ -699,7 +736,7 @@
 					internalName = 'data-mce-' + name;
 
 					// Add internal attribute if we need to we don't on a refresh of the document
-					if (!node.attributes.map[internalName]) {	
+					if (!node.attributes.map[internalName]) {
 						if (name === "style") {
 							node.attr(internalName, dom.serializeStyle(dom.parseStyle(value), node.name));
 						} else {
@@ -710,8 +747,9 @@
 			});
 
 			// Keep scripts from executing
-			self.parser.addNodeFilter('script', function(nodes, name) {
-				var i = nodes.length, node;
+			self.parser.addNodeFilter('script', function (nodes) {
+				var i = nodes.length,
+					node;
 
 				while (i--) {
 					node = nodes[i];
@@ -719,8 +757,9 @@
 				}
 			});
 
-			self.parser.addNodeFilter('#cdata', function(nodes, name) {
-				var i = nodes.length, node;
+			self.parser.addNodeFilter('#cdata', function (nodes) {
+				var i = nodes.length,
+					node;
 
 				while (i--) {
 					node = nodes[i];
@@ -730,8 +769,9 @@
 				}
 			});
 
-			self.parser.addNodeFilter('p,h1,h2,h3,h4,h5,h6,div', function(nodes, name) {
-				var i = nodes.length, node, nonEmptyElements = self.schema.getNonEmptyElements();
+			self.parser.addNodeFilter('p,h1,h2,h3,h4,h5,h6,div', function (nodes) {
+				var i = nodes.length,
+					node, nonEmptyElements = self.schema.getNonEmptyElements();
 
 				while (i--) {
 					node = nodes[i];
@@ -779,8 +819,8 @@
 			self.formatter = new tinymce.Formatter(self);
 
 			/**
-			 * Undo manager instance, responsible for handling undo levels. 
-			 *
+			 * Undo manager instance, responsible for handling undo levels.
+			 /
 			 * @property undoManager
 			 * @type tinymce.UndoManager
 			 * @example
@@ -793,7 +833,7 @@
 			self.enterKey = new tinymce.EnterKey(self);
 			self.editorCommands = new tinymce.EditorCommands(self);
 
-			self.onExecCommand.add(function(editor, command) {
+			self.onExecCommand.add(function (editor, command) {
 				// Don't refresh the select lists until caret move
 				if (!/^(FontName|FontSize)$/.test(command)) {
 					self.nodeChanged();
@@ -801,11 +841,11 @@
 			});
 
 			// Pass through
-			self.serializer.onPreProcess.add(function(se, o) {
+			self.serializer.onPreProcess.add(function (se, o) {
 				return self.onPreProcess.dispatch(self, o, se);
 			});
 
-			self.serializer.onPostProcess.add(function(se, o) {
+			self.serializer.onPostProcess.add(function (se, o) {
 				return self.onPostProcess.dispatch(self, o, se);
 			});
 
@@ -835,9 +875,9 @@
 			}
 
 			if (settings.protect) {
-				self.onBeforeSetContent.add(function(ed, o) {
-					each(settings.protect, function(pattern) {
-						o.content = o.content.replace(pattern, function(str) {
+				self.onBeforeSetContent.add(function (ed, o) {
+					each(settings.protect, function (pattern) {
+						o.content = o.content.replace(pattern, function (str) {
 							return '<!--mce:protected ' + escape(str) + '-->';
 						});
 					});
@@ -845,19 +885,24 @@
 			}
 
 			// Add visual aids when new contents is added
-			self.onSetContent.add(function() {
+			self.onSetContent.add(function () {
 				self.addVisual(self.getBody());
 			});
 
 			// Remove empty contents
 			if (settings.padd_empty_editor) {
-				self.onPostProcess.add(function(ed, o) {
+				self.onPostProcess.add(function (ed, o) {
 					o.content = o.content.replace(/^(<p[^>]*>(&nbsp;|&#160;|\s|\u00a0|)<\/p>[\r\n]*|<br \/>[\r\n]*)$/, '');
 				});
 			}
 
-			self.load({initial : true, format : 'html'});
-			self.startContent = self.getContent({format : 'raw'});
+			self.load({
+				initial: true,
+				format: 'html'
+			});
+			self.startContent = self.getContent({
+				format: 'raw'
+			});
 
 			/**
 			 * Is set to true after the editor instance has been initialized
@@ -875,13 +920,15 @@
 			self.execCallback('setupcontent_callback', self.id, body, doc);
 			self.execCallback('init_instance_callback', self);
 			self.focus(true);
-			self.nodeChanged({initial : true});
+			self.nodeChanged({
+				initial: true
+			});
 
 			// Add editor specific CSS styles
 			if (self.contentStyles.length > 0) {
 				contentCssText = '';
 
-				each(self.contentStyles, function(style) {
+				each(self.contentStyles, function (style) {
 					contentCssText += style + "\r\n";
 				});
 
@@ -889,7 +936,7 @@
 			}
 
 			// Load specified content CSS last
-			each(self.contentCSS, function(url) {
+			each(self.contentCSS, function (url) {
 				self.dom.loadCSS(url);
 			});
 
@@ -916,8 +963,12 @@
 		 * @method focus
 		 * @param {Boolean} skip_focus Skip DOM focus. Just set is as the active editor.
 		 */
-		focus : function(skip_focus) {
-			var oed, self = this, selection = self.selection, contentEditable = self.settings.content_editable, ieRng, controlElm, doc = self.getDoc(), body;
+		focus: function (skip_focus) {
+			var oed, self = this,
+				selection = self.selection,
+				contentEditable = self.settings.content_editable,
+				ieRng, controlElm, doc = self.getDoc(),
+				body;
 
 			if (!skip_focus) {
 				if (self.bookmark) {
@@ -943,7 +994,7 @@
 					body = self.getBody();
 
 					// Check for setActive since it doesn't scroll to the element
-					if (body.setActive && ! tinymce.isIE11) {
+					if (body.setActive && !tinymce.isIE11) {
 						body.setActive();
 					} else {
 						body.focus();
@@ -983,15 +1034,17 @@
 		 * @param {String} n Name of the callback to execute.
 		 * @return {Object} Return value passed from callback function.
 		 */
-		execCallback : function(n) {
-			var t = this, f = t.settings[n], s;
+		execCallback: function (n) {
+			var self = this,
+				f = self.settings[n],
+				s;
 
 			if (!f) {
 				return;
 			}
 
 			// Look through lookup
-			if (t.callbackLookup && (s = t.callbackLookup[n])) {
+			if (self.callbackLookup && (s = self.callbackLookup[n])) {
 				f = s.func;
 				s = s.scope;
 			}
@@ -1000,11 +1053,14 @@
 				s = f.replace(/\.\w+$/, '');
 				s = s ? tinymce.resolve(s) : 0;
 				f = tinymce.resolve(f);
-				t.callbackLookup = t.callbackLookup || {};
-				t.callbackLookup[n] = {func : f, scope : s};
+				self.callbackLookup = self.callbackLookup || {};
+				self.callbackLookup[n] = {
+					func: f,
+					scope: s
+				};
 			}
 
-			return f.apply(s || t, Array.prototype.slice.call(arguments, 1));
+			return f.apply(s || self, Array.prototype.slice.call(arguments, 1));
 		},
 
 		/**
@@ -1015,14 +1071,15 @@
 		 * @param {String} s String to translate by the language pack data.
 		 * @return {String} Translated string.
 		 */
-		translate : function(s) {
-			var c = this.settings.language || 'en', i18n = tinymce.i18n;
+		translate: function (s) {
+			var c = this.settings.language || 'en',
+				i18n = tinymce.i18n;
 
 			if (!s) {
 				return '';
 			}
 
-			return i18n[c + '.' + s] || s.replace(/\{\#([^\}]+)\}/g, function(a, b) {
+			return i18n[c + '.' + s] || s.replace(/\{\#([^\}]+)\}/g, function (a, b) {
 				return i18n[c + '.' + b] || '{#' + b + '}';
 			});
 		},
@@ -1034,7 +1091,7 @@
 		 * @param {String} n Name/key to get from the language pack.
 		 * @param {String} dv Optional default value to retrive.
 		 */
-		getLang : function(n, dv) {
+		getLang: function (n, dv) {
 			return tinymce.i18n[(this.settings.language || 'en') + '.' + n] || (is(dv) ? dv : '{#' + n + '}');
 		},
 
@@ -1049,18 +1106,20 @@
 		 * @example
 		 * // Returns a specific config value from the currently active editor
 		 * var someval = tinyMCE.activeEditor.getParam('myvalue');
-		 * 
+		 *
 		 * // Returns a specific config value from a specific editor instance by id
 		 * var someval2 = tinyMCE.get('my_editor').getParam('myvalue');
 		 */
-		getParam : function(n, dv, ty) {
-			var tr = tinymce.trim, v = is(this.settings[n]) ? this.settings[n] : dv, o;
+		getParam: function (n, dv, ty) {
+			var tr = tinymce.trim,
+				v = is(this.settings[n]) ? this.settings[n] : dv,
+				o;
 
 			if (ty === 'hash') {
 				o = {};
 
 				if (is(v, 'string')) {
-					each(v.indexOf('=') > 0 ? v.split(/[;,](?![^=;,]*(?:[;,]|$))/) : v.split(','), function(v) {
+					each(v.indexOf('=') > 0 ? v.split(/[;,](?![^=;,]*(?:[;,]|$))/) : v.split(','), function (v) {
 						v = v.split('=');
 
 						if (v.length > 1) {
@@ -1086,8 +1145,10 @@
 		 * @method nodeChanged
 		 * @param {Object} o Optional object to pass along for the node changed event.
 		 */
-		nodeChanged : function(o) {
-			var self = this, selection = self.selection, node;
+		nodeChanged: function (o) {
+			var self = this,
+				selection = self.selection,
+				node;
 
 			// Fix for bug #1896577 it seems that this can not be fired while the editor is loading
 			if (self.initialized) {
@@ -1096,7 +1157,7 @@
 				// Get start node
 				node = selection.getStart() || self.getBody();
 				node = isIE && node.ownerDocument != self.getDoc() ? self.getBody() : node; // Fix for IE initial state
-				
+
 				// Edge case for <p>|<img></p>
 				if (node.nodeName == 'IMG' && selection.isCollapsed()) {
 					node = node.parentNode;
@@ -1104,8 +1165,8 @@
 
 				// Get parents and add them to object
 				o.parents = [];
-				
-				self.dom.getParent(node, function(node) {
+
+				self.dom.getParent(node, function (node) {
 					if (node.nodeName == 'BODY') {
 						return true;
 					}
@@ -1136,9 +1197,9 @@
 		 * // an alert box with the selected contents as plain text.
 		 * tinyMCE.init({
 		 *    ...
-		 * 
+		 *
 		 *    theme_advanced_buttons1 : 'example,..'
-		 * 
+		 *
 		 *    setup : function(ed) {
 		 *       // Register example button
 		 *       ed.addButton('example', {
@@ -1151,7 +1212,7 @@
 		 *    }
 		 * });
 		 */
-		addButton : function(name, settings) {
+		addButton: function (name, settings) {
 			var self = this;
 
 			self.buttons = self.buttons || {};
@@ -1170,7 +1231,7 @@
 		 * // Adds a custom command that later can be executed using execCommand
 		 * tinyMCE.init({
 		 *    ...
-		 * 
+		 *
 		 *    setup : function(ed) {
 		 *       // Register example command
 		 *       ed.addCommand('mycommand', function(ui, v) {
@@ -1179,7 +1240,7 @@
 		 *    }
 		 * });
 		 */
-		addCommand : function(name, callback, scope) {
+		addCommand: function (name, callback, scope) {
 			/**
 			 * Callback function that gets called when a command is executed.
 			 *
@@ -1188,7 +1249,10 @@
 			 * @param {Object} value Optional value for command.
 			 * @return {Boolean} True/false state if the command was handled or not.
 			 */
-			this.execCommands[name] = {func : callback, scope : scope || this};
+			this.execCommands[name] = {
+				func: callback,
+				scope: scope || this
+			};
 		},
 
 		/**
@@ -1200,14 +1264,17 @@
 		 * @param {addQueryStateHandlerCallback} callback Function to execute when the command state retrival occurs.
 		 * @param {Object} scope Optional scope to execute the function in.
 		 */
-		addQueryStateHandler : function(name, callback, scope) {
+		addQueryStateHandler: function (name, callback, scope) {
 			/**
 			 * Callback function that gets called when a queryCommandState is executed.
 			 *
 			 * @callback addQueryStateHandlerCallback
 			 * @return {Boolean} True/false state if the command is enabled or not like is it bold.
 			 */
-			this.queryStateCommands[name] = {func : callback, scope : scope || this};
+			this.queryStateCommands[name] = {
+				func: callback,
+				scope: scope || this
+			};
 		},
 
 		/**
@@ -1219,14 +1286,17 @@
 		 * @param {addQueryValueHandlerCallback} callback Function to execute when the command value retrival occurs.
 		 * @param {Object} scope Optional scope to execute the function in.
 		 */
-		addQueryValueHandler : function(name, callback, scope) {
+		addQueryValueHandler: function (name, callback, scope) {
 			/**
 			 * Callback function that gets called when a queryCommandValue is executed.
 			 *
 			 * @callback addQueryValueHandlerCallback
 			 * @return {Object} Value of the command or undefined.
 			 */
-			this.queryValueCommands[name] = {func : callback, scope : scope || this};
+			this.queryValueCommands[name] = {
+				func: callback,
+				scope: scope || this
+			};
 		},
 
 		/**
@@ -1239,42 +1309,43 @@
 		 * @param {Object} sc Optional scope to execute the function in.
 		 * @return {Boolean} true/false state if the shortcut was added or not.
 		 */
-		addShortcut : function(pa, desc, cmd_func, sc) {
-			var t = this, c;
+		addShortcut: function (pa, desc, cmd_func, sc) {
+			var self = this,
+				c;
 
-			if (t.settings.custom_shortcuts === false) {
+			if (self.settings.custom_shortcuts === false) {
 				return false;
 			}
 
-			t.shortcuts = t.shortcuts || {};
+			self.shortcuts = self.shortcuts || {};
 
 			if (is(cmd_func, 'string')) {
 				c = cmd_func;
 
-				cmd_func = function() {
-					t.execCommand(c, false, null);
+				cmd_func = function () {
+					self.execCommand(c, false, null);
 				};
 			}
 
 			if (is(cmd_func, 'object')) {
 				c = cmd_func;
 
-				cmd_func = function() {
-					t.execCommand(c[0], c[1], c[2]);
+				cmd_func = function () {
+					self.execCommand(c[0], c[1], c[2]);
 				};
 			}
 
-			each(explode(pa), function(pa) {
+			each(explode(pa), function (pa) {
 				var o = {
-					func : cmd_func,
-					scope : sc || this,
-					desc : t.translate(desc),
-					alt : false,
-					ctrl : false,
-					shift : false
+					func: cmd_func,
+					scope: sc || this,
+					desc: self.translate(desc),
+					alt: false,
+					ctrl: false,
+					shift: false
 				};
 
-				each(explode(pa, '+'), function(v) {
+				each(explode(pa, '+'), function (v) {
 					switch (v) {
 						case 'alt':
 						case 'ctrl':
@@ -1288,7 +1359,7 @@
 					}
 				});
 
-				t.shortcuts[(o.ctrl ? 'ctrl' : '') + ',' + (o.alt ? 'alt' : '') + ',' + (o.shift ? 'shift' : '') + ',' + o.keyCode] = o;
+				self.shortcuts[(o.ctrl ? 'ctrl' : '') + ',' + (o.alt ? 'alt' : '') + ',' + (o.shift ? 'shift' : '') + ',' + o.keyCode] = o;
 			});
 
 			return true;
@@ -1307,40 +1378,45 @@
 		 * @param {Object} a Optional arguments object.
 		 * @return {Boolean} True/false if the command was executed or not.
 		 */
-		execCommand : function(cmd, ui, val, a) {
-			var t = this, s = 0, o, st;
+		execCommand: function (cmd, ui, val, a) {
+			var self = this,
+				s = 0,
+				o, st;
 
 			if (!/^(mceAddUndoLevel|mceEndUndoLevel|mceBeginUndoLevel|mceRepaint|SelectAll)$/.test(cmd) && (!a || !a.skip_focus)) {
-				t.focus();
+				self.focus();
 			}
 
 			a = extend({}, a);
-			t.onBeforeExecCommand.dispatch(t, cmd, ui, val, a);
+			self.onBeforeExecCommand.dispatch(self, cmd, ui, val, a);
+
 			if (a.terminate) {
 				return false;
 			}
 
 			// Command callback
-			if (t.execCallback('execcommand_callback', t.id, t.selection.getNode(), cmd, ui, val)) {
-				t.onExecCommand.dispatch(t, cmd, ui, val, a);
+			if (self.execCallback('execcommand_callback', self.id, self.selection.getNode(), cmd, ui, val)) {
+				self.onExecCommand.dispatch(self, cmd, ui, val, a);
 				return true;
 			}
 
 			// Registred commands
-			if (o = t.execCommands[cmd]) {
+			o = self.execCommands[cmd];
+
+			if (o) {
 				st = o.func.call(o.scope, ui, val);
 
 				// Fall through on true
 				if (st !== true) {
-					t.onExecCommand.dispatch(t, cmd, ui, val, a);
+					self.onExecCommand.dispatch(self, cmd, ui, val, a);
 					return st;
 				}
 			}
 
 			// Plugin commands
-			each(t.plugins, function(p) {
+			each(self.plugins, function (p) {
 				if (p.execCommand && p.execCommand(cmd, ui, val)) {
-					t.onExecCommand.dispatch(t, cmd, ui, val, a);
+					self.onExecCommand.dispatch(self, cmd, ui, val, a);
 					s = 1;
 					return false;
 				}
@@ -1351,20 +1427,20 @@
 			}
 
 			// Theme commands
-			if (t.theme && t.theme.execCommand && t.theme.execCommand(cmd, ui, val)) {
-				t.onExecCommand.dispatch(t, cmd, ui, val, a);
+			if (self.theme && self.theme.execCommand && self.theme.execCommand(cmd, ui, val)) {
+				self.onExecCommand.dispatch(self, cmd, ui, val, a);
 				return true;
 			}
 
 			// Editor commands
-			if (t.editorCommands.execCommand(cmd, ui, val)) {
-				t.onExecCommand.dispatch(t, cmd, ui, val, a);
+			if (self.editorCommands.execCommand(cmd, ui, val)) {
+				self.onExecCommand.dispatch(self, cmd, ui, val, a);
 				return true;
 			}
 
 			// Browser commands
-			t.getDoc().execCommand(cmd, ui, val);
-			t.onExecCommand.dispatch(t, cmd, ui, val, a);
+			self.getDoc().execCommand(cmd, ui, val);
+			self.onExecCommand.dispatch(self, cmd, ui, val, a);
 		},
 
 		/**
@@ -1374,16 +1450,19 @@
 		 * @param {string} cmd Command to query state from.
 		 * @return {Boolean} Command specific state, for example if bold is enabled or not.
 		 */
-		queryCommandState : function(cmd) {
-			var t = this, o, s;
+		queryCommandState: function (cmd) {
+			var self = this,
+				o, s;
 
 			// Is hidden then return undefined
-			if (t._isHidden()) {
+			if (self._isHidden()) {
 				return;
 			}
 
 			// Registred commands
-			if (o = t.queryStateCommands[cmd]) {
+			o = self.queryStateCommands[cmd];
+
+			if (o) {
 				s = o.func.call(o.scope);
 
 				// Fall though on true
@@ -1393,7 +1472,8 @@
 			}
 
 			// Registred commands
-			o = t.editorCommands.queryCommandState(cmd);
+			o = self.editorCommands.queryCommandState(cmd);
+
 			if (o !== -1) {
 				return o;
 			}
@@ -1413,16 +1493,19 @@
 		 * @param {string} c Command to query value from.
 		 * @return {Object} Command specific value, for example the current font size.
 		 */
-		queryCommandValue : function(c) {
-			var t = this, o, s;
+		queryCommandValue: function (c) {
+			var self = this,
+				o, s;
 
 			// Is hidden then return undefined
-			if (t._isHidden()) {
+			if (self._isHidden()) {
 				return;
 			}
 
 			// Registred commands
-			if (o = t.queryValueCommands[c]) {
+			o = self.queryValueCommands[c];
+
+			if (o) {
 				s = o.func.call(o.scope);
 
 				// Fall though on true
@@ -1432,7 +1515,8 @@
 			}
 
 			// Registred commands
-			o = t.editorCommands.queryCommandValue(c);
+			o = self.editorCommands.queryCommandValue(c);
+
 			if (is(o)) {
 				return o;
 			}
@@ -1450,7 +1534,7 @@
 		 *
 		 * @method show
 		 */
-		show : function() {
+		show: function () {
 			var self = this;
 
 			DOM.show(self.getContainer());
@@ -1465,8 +1549,9 @@
 		 *
 		 * @method hide
 		 */
-		hide : function() {
-			var self = this, doc = self.getDoc();
+		hide: function () {
+			var self = this,
+				doc = self.getDoc();
 
 			// Fixed bug where IE has a blinking cursor left from the editor
 			if (isIE && doc) {
@@ -1489,7 +1574,7 @@
 		 * @method isHidden
 		 * @return {Boolean} True/false if the editor is hidden or not.
 		 */
-		isHidden : function() {
+		isHidden: function () {
 			return !DOM.isHidden(this.id);
 		},
 
@@ -1505,14 +1590,14 @@
 		 * @example
 		 * // Show progress for the active editor
 		 * tinyMCE.activeEditor.setProgressState(true);
-		 * 
+		 *
 		 * // Hide progress for the active editor
 		 * tinyMCE.activeEditor.setProgressState(false);
-		 * 
+		 *
 		 * // Show progress after 3 seconds
 		 * tinyMCE.activeEditor.setProgressState(true, 3000);
 		 */
-		setProgressState : function(b, ti, o) {
+		setProgressState: function (b, ti, o) {
 			this.onSetProgressState.dispatch(this, b, ti, o);
 
 			return b;
@@ -1527,19 +1612,21 @@
 		 * @param {Object} o Optional content object, this gets passed around through the whole load process.
 		 * @return {String} HTML string that got set into the editor.
 		 */
-		load : function(o) {
-			var t = this, e = t.getElement(), h;
+		load: function (o) {
+			var self = this,
+				e = self.getElement(),
+				h;
 
 			if (e) {
 				o = o || {};
 				o.load = true;
 
 				// Double encode existing entities in the value
-				h = t.setContent(is(e.value) ? e.value : e.innerHTML, o);
+				h = self.setContent(is(e.value) ? e.value : e.innerHTML, o);
 				o.element = e;
 
 				if (!o.no_events) {
-					t.onLoadContent.dispatch(t, o);
+					self.onLoadContent.dispatch(self, o);
 				}
 
 				o.element = e = null;
@@ -1557,10 +1644,12 @@
 		 * @param {Object} o Optional content object, this gets passed around through the whole save process.
 		 * @return {String} HTML string that got set into the textarea/div.
 		 */
-		save : function(o) {
-			var t = this, e = t.getElement(), h, f;
+		save: function (o) {
+			var self = this,
+				e = self.getElement(),
+				h, f;
 
-			if (!e || !t.initialized) {
+			if (!e || !self.initialized) {
 				return;
 			}
 
@@ -1568,10 +1657,10 @@
 			o.save = true;
 
 			o.element = e;
-			h = o.content = t.getContent(o);
+			h = o.content = self.getContent(o);
 
 			if (!o.no_events) {
-				t.onSaveContent.dispatch(t, o);
+				self.onSaveContent.dispatch(self, o);
 			}
 
 			h = o.content;
@@ -1580,9 +1669,11 @@
 				e.innerHTML = h;
 
 				// Update hidden form element
-				if (f = DOM.getParent(t.id, 'form')) {
-					each(f.elements, function(e) {
-						if (e.name == t.id) {
+				f = DOM.getParent(self.id, 'form');
+
+				if (f) {
+					each(f.elements, function (e) {
+						if (e.name == self.id) {
 							e.value = h;
 							return false;
 						}
@@ -1608,18 +1699,20 @@
 		 * @example
 		 * // Sets the HTML contents of the activeEditor editor
 		 * tinyMCE.activeEditor.setContent('<span>some</span> html');
-		 * 
+		 *
 		 * // Sets the raw contents of the activeEditor editor
 		 * tinyMCE.activeEditor.setContent('<span>some</span> html', {format : 'raw'});
-		 * 
+		 *
 		 * // Sets the content of a specific editor (my_editor in this example)
 		 * tinyMCE.get('my_editor').setContent(data);
-		 * 
+		 *
 		 * // Sets the bbcode contents of the activeEditor editor if the bbcode plugin was added
 		 * tinyMCE.activeEditor.setContent('[b]some[/b] html', {format : 'bbcode'});
 		 */
-		setContent : function(content, args) {
-			var self = this, body = self.getBody(), forcedRootBlockName;
+		setContent: function (content, args) {
+			var self = this,
+				body = self.getBody(),
+				forcedRootBlockName;
 
 			// Setup args object
 			args = args || {};
@@ -1679,8 +1772,8 @@
 
 			return args.content;
 		},
-		
-		getSelection: function() {
+
+		getSelection: function () {
 			return this.selection.getContent();
 		},
 
@@ -1694,15 +1787,16 @@
 		 * @example
 		 * // Get the HTML contents of the currently active editor
 		 * console.debug(tinyMCE.activeEditor.getContent());
-		 * 
+		 *
 		 * // Get the raw contents of the currently active editor
 		 * tinyMCE.activeEditor.getContent({format : 'raw'});
-		 * 
+		 *
 		 * // Get content of a specific editor:
 		 * tinyMCE.get('content id').getContent()
 		 */
-		getContent : function(args) {
-			var self = this, content, body = self.getBody();
+		getContent: function (args) {
+			var self = this,
+				content, body = self.getBody();
 
 			// Setup args object
 			args = args || {};
@@ -1748,10 +1842,12 @@
 		 * if (tinyMCE.activeEditor.isDirty())
 		 *     alert("You must save your contents.");
 		 */
-		isDirty : function() {
+		isDirty: function () {
 			var self = this;
 
-			return tinymce.trim(self.startContent) !== tinymce.trim(self.getContent({format : 'raw'})) && !self.isNotDirty;
+			return tinymce.trim(self.startContent) !== tinymce.trim(self.getContent({
+				format: 'raw'
+			})) && !self.isNotDirty;
 		},
 
 		/**
@@ -1761,7 +1857,7 @@
 		 * @method getContainer
 		 * @return {Element} HTML DOM element for the editor container.
 		 */
-		getContainer : function() {
+		getContainer: function () {
 			var self = this;
 
 			if (!self.container) {
@@ -1778,7 +1874,7 @@
 		 * @method getContentAreaContainer
 		 * @return {Element} HTML DOM element for the editor area container.
 		 */
-		getContentAreaContainer : function() {
+		getContentAreaContainer: function () {
 			return this.contentAreaContainer;
 		},
 
@@ -1788,7 +1884,7 @@
 		 * @method getElement
 		 * @return {Element} HTML DOM element for the replaced element.
 		 */
-		getElement : function() {
+		getElement: function () {
 			return DOM.get(this.settings.content_element || this.id);
 		},
 
@@ -1798,8 +1894,9 @@
 		 * @method getWin
 		 * @return {Window} Iframe DOM window object.
 		 */
-		getWin : function() {
-			var self = this, elm;
+		getWin: function () {
+			var self = this,
+				elm;
 
 			if (!self.contentWindow) {
 				elm = DOM.get(self.id + "_ifr");
@@ -1818,8 +1915,9 @@
 		 * @method getDoc
 		 * @return {Document} Iframe DOM document object.
 		 */
-		getDoc : function() {
-			var self = this, win;
+		getDoc: function () {
+			var self = this,
+				win;
 
 			if (!self.contentDocument) {
 				win = self.getWin();
@@ -1838,7 +1936,7 @@
 		 * @method getBody
 		 * @return {Element} Iframe body element.
 		 */
-		getBody : function() {
+		getBody: function () {
 			return this.bodyElement || this.getDoc().body;
 		},
 
@@ -1853,14 +1951,15 @@
 		 * @param {string/HTMLElement} elm Tag name or HTML DOM element depending on HTML or DOM insert.
 		 * @return {string} Converted URL string.
 		 */
-		convertURL : function(url, name, elm) {
-			var self = this, settings = self.settings;
+		convertURL: function (url, name, elm) {
+			var self = this,
+				settings = self.settings;
 
 			// Use callback instead
 			if (settings.urlconverter_callback) {
 				return self.execCallback('urlconverter_callback', url, elm, true, name);
 			}
-			
+
 			// Don't convert link href since thats the CSS files that gets loaded into the editor also skip local file URLs
 			if (!settings.convert_urls || (elm && elm.nodeName == 'LINK') || url.indexOf('file:') === 0) {
 				return url;
@@ -1883,15 +1982,19 @@
 		 * @method addVisual
 		 * @param {Element} elm Optional root element to loop though to find tables etc that needs the visual aid.
 		 */
-		addVisual : function(elm) {
-			var self = this, settings = self.settings, dom = self.dom, cls;
+		addVisual: function (elm) {
+			var self = this,
+				settings = self.settings,
+				dom = self.dom,
+				cls;
 
 			elm = elm || self.getBody();
 
-			if (!is(self.hasVisual))
+			if (!is(self.hasVisual)) {
 				self.hasVisual = settings.visual;
+			}
 
-			each(dom.select('table,a', elm), function(elm) {
+			each(dom.select('table,a', elm), function (elm) {
 				var value;
 
 				switch (elm.nodeName) {
@@ -1935,8 +2038,10 @@
 		 *
 		 * @method remove
 		 */
-		remove : function() {
-			var self = this, elm = self.getContainer(), doc = self.getDoc();
+		remove: function () {
+			var self = this,
+				elm = self.getContainer(),
+				doc = self.getDoc();
 
 			if (!self.removed) {
 				self.removed = 1; // Cancels post remove event execution
@@ -1980,54 +2085,55 @@
 		 * @method destroy
 		 * @param {Boolean} s Optional state if the destroy is an automatic destroy or user called one.
 		 */
-		destroy : function(s) {
-			var t = this;
+		destroy: function (s) {
+			var self = this;
 
 			// One time is enough
-			if (t.destroyed) {
+			if (self.destroyed) {
 				return;
 			}
 
 			// We must unbind on Gecko since it would otherwise produce the pesky "attempt to run compile-and-go script on a cleared scope" message
 			if (isGecko) {
-				Event.unbind(t.getDoc());
-				Event.unbind(t.getWin());
-				Event.unbind(t.getBody());
+				Event.unbind(self.getDoc());
+				Event.unbind(self.getWin());
+				Event.unbind(self.getBody());
 			}
 
 			if (!s) {
-				tinymce.removeUnload(t.destroy);
-				tinyMCE.onBeforeUnload.remove(t._beforeUnload);
+				tinymce.removeUnload(self.destroy);
+				tinyMCE.onBeforeUnload.remove(self._beforeUnload);
 
 				// Manual destroy
-				if (t.theme && t.theme.destroy) {
-					t.theme.destroy();
+				if (self.theme && self.theme.destroy) {
+					self.theme.destroy();
 				}
 
 				// Destroy controls, selection and dom
-				t.controlManager.destroy();
-				t.selection.destroy();
-				t.dom.destroy();
+				self.controlManager.destroy();
+				self.selection.destroy();
+				self.dom.destroy();
 			}
 
-			if (t.formElement) {
-				t.formElement.submit = t.formElement._mceOldSubmit;
-				t.formElement._mceOldSubmit = null;
+			if (self.formElement) {
+				self.formElement.submit = self.formElement._mceOldSubmit;
+				self.formElement._mceOldSubmit = null;
 			}
 
-			t.contentAreaContainer = t.formElement = t.container = t.settings.content_element = t.bodyElement = t.contentDocument = t.contentWindow = null;
+			self.contentAreaContainer = self.formElement = self.container = self.settings.content_element = self.bodyElement = self.contentDocument = self.contentWindow = null;
 
-			if (t.selection) {
-				t.selection = t.selection.win = t.selection.dom = t.selection.dom.doc = null;
+			if (self.selection) {
+				self.selection = self.selection.win = self.selection.dom = self.selection.dom.doc = null;
 			}
 
-			t.destroyed = 1;
+			self.destroyed = 1;
 		},
 
 		// Internal functions
 
-		_refreshContentEditable : function() {
-			var self = this, body, parent;
+		_refreshContentEditable: function () {
+			var self = this,
+				body, parent;
 
 			// Check if the editor was hidden and the re-initalize contentEditable mode by removing and adding the body again
 			if (self._isHidden()) {
@@ -2041,7 +2147,7 @@
 			}
 		},
 
-		_isHidden : function() {
+		_isHidden: function () {
 			var s;
 
 			if (!isGecko) {
