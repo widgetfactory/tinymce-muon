@@ -120,7 +120,7 @@ test('setContent', function() {
 		equal(rng.endContainer, editor.getBody(), 'Selection end container');
 		equal(rng.endOffset, 0, 'Selection end offset');
 	}
-	
+
 	// Set selected contents, onSetContent event
 	eventObj = {};
 
@@ -805,7 +805,7 @@ test('custom elements', function() {
 test('selectorChanged', function() {
 	var newState, newArgs;
 
-	editor.selection.selectorChanged('a[@href]', function(state, args) {
+	editor.selection.selectorChanged('a[href]', function(state, args) {
 		newState = state;
 		newArgs = args;
 	});
@@ -815,14 +815,14 @@ test('selectorChanged', function() {
 	editor.nodeChanged();
 
 	ok(newState);
-	equal(newArgs.selector, 'a[@href]');
+	equal(newArgs.selector, 'a[href]');
 	equal(newArgs.node, editor.getBody().firstChild.firstChild);
 	equal(newArgs.parents.length, 2);
 
 	editor.getBody().innerHTML = '<p>text</p>';
 	Utils.setSelection('p', 0, 'p', 4);
 	editor.nodeChanged();
-	equal(newArgs.selector, 'a[@href]');
+	equal(newArgs.selector, 'a[href]');
 	equal(newArgs.node, editor.getBody().firstChild);
 	equal(newArgs.parents.length, 1);
 });

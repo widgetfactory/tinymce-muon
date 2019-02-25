@@ -17,12 +17,7 @@ QUnit.config.reorder = false;
 asyncTest("Successful request - send method", function() {
 	expect(1);
 
-	if (tinymce.isIE6) {
-		// IE6 doesn't support GET
-		ok(true);
-		start();
-	} else {
-		new tinymce.util.JSONRequest({}).send({
+	new tinymce.util.JSONRequest({}).send({
 			type : 'GET',
 			url : 'json_rpc_ok.js',
 			success: function(data) {
@@ -30,18 +25,12 @@ asyncTest("Successful request - send method", function() {
 				start();
 			}
 		});
-	}
 });
 
 asyncTest("Successful request - sendRPC static method", function() {
 	expect(1);
 
-	if (tinymce.isIE6) {
-		// IE6 doesn't support GET
-		ok(true);
-		start();
-	} else {
-		tinymce.util.JSONRequest.sendRPC({
+	tinymce.util.JSONRequest.sendRPC({
 			type : 'GET',
 			url : 'json_rpc_ok.js',
 			success: function(data) {
@@ -49,18 +38,12 @@ asyncTest("Successful request - sendRPC static method", function() {
 				start();
 			}
 		});
-	}
 });
 
 asyncTest("Error request - send method", function() {
 	expect(1);
 
-	if (tinymce.isIE6) {
-		// IE6 doesn't support GET
-		ok(true);
-		start();
-	} else {
-		new tinymce.util.JSONRequest({}).send({
+	new tinymce.util.JSONRequest({}).send({
 			type : 'GET',
 			url : 'json_rpc_error.js',
 			error: function(error) {
@@ -68,18 +51,12 @@ asyncTest("Error request - send method", function() {
 				start();
 			}
 		});
-	}
 });
 
 asyncTest("Error request - sendRPC static method", function() {
 	expect(1);
 
-	if (tinymce.isIE6) {
-		// IE6 doesn't support GET
-		ok(true);
-		start();
-	} else {
-		tinymce.util.JSONRequest.sendRPC({
+	tinymce.util.JSONRequest.sendRPC({
 			type : 'GET',
 			url : 'json_rpc_error.js',
 			error: function(error) {
@@ -87,7 +64,6 @@ asyncTest("Error request - sendRPC static method", function() {
 				start();
 			}
 		});
-	}
 });
 </script>
 </head>
