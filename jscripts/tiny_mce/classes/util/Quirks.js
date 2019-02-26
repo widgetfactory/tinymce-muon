@@ -84,7 +84,8 @@ tinymce.util.Quirks = function (editor) {
 		var doc = editor.getDoc(),
 			dom = editor.dom,
 			selection = editor.selection;
-		var MutationObserver = window.MutationObserver, dragStartRng;
+		var MutationObserver = window.MutationObserver,
+			dragStartRng;
 
 		function isTrailingBr(node) {
 			var blockElements = dom.schema.getBlockElements(),
@@ -107,7 +108,7 @@ tinymce.util.Quirks = function (editor) {
 			var node;
 
 			for (node = node1.nextSibling; node && node != node2; node = node.nextSibling) {
-				if (node.nodeType == 3 && $.trim(node.data).length === 0) {
+				if (node.nodeType == 3 && tinymce.trim(node.data).length === 0) {
 					continue;
 				}
 
@@ -175,7 +176,7 @@ tinymce.util.Quirks = function (editor) {
 			caretNodeAfter = findCaretNode(endBlock, true);
 
 			// remove block elment only if it is empty
-			each([startBlock, endBlock], function(node) {
+			each([startBlock, endBlock], function (node) {
 				if (dom.isEmpty(node)) {
 					dom.remove(node);
 				}
@@ -190,7 +191,7 @@ tinymce.util.Quirks = function (editor) {
 						}
 					});
 				}
-	
+
 				dom.remove(endBlock);
 			}
 
@@ -326,7 +327,7 @@ tinymce.util.Quirks = function (editor) {
 				container, offset, br, currentFormatNodes;
 
 			function cloneTextBlockWithFormats(blockElm, node) {
-				currentFormatNodes = dom.getParents(node, function(n) {
+				currentFormatNodes = dom.getParents(node, function (n) {
 					return !!editor.schema.getTextInlineElements()[n.nodeName];
 				});
 
@@ -368,27 +369,27 @@ tinymce.util.Quirks = function (editor) {
 
 			function NodePathCreate(rootNode, targetNode, normalized) {
 				var path = [];
-		
+
 				for (; targetNode && targetNode != rootNode; targetNode = targetNode.parentNode) {
 					path.push(tinymce.DOM.nodeIndex(targetNode, normalized));
 				}
-		
+
 				return path;
 			}
-		
+
 			function NodePathResolve(rootNode, path) {
 				var i, node, children;
-		
+
 				for (node = rootNode, i = path.length - 1; i >= 0; i--) {
 					children = node.childNodes;
-		
+
 					if (path[i] > children.length - 1) {
 						return null;
 					}
-		
+
 					node = children[path[i]];
 				}
-		
+
 				return node;
 			}
 
@@ -584,7 +585,7 @@ tinymce.util.Quirks = function (editor) {
 				e.preventDefault();
 
 				// Keep track of current format nodes
-				currentFormatNodes = dom.getParents(rng.startContainer, function(node) {
+				currentFormatNodes = dom.getParents(rng.startContainer, function (node) {
 					return !!editor.schema.getTextInlineElements()[node.nodeName];
 				});
 
@@ -657,7 +658,7 @@ tinymce.util.Quirks = function (editor) {
 					// produces a green plus icon. When this happens the caretRangeFromPoint
 					// will return "null" even though the x, y coordinate is correct.
 					// But if we detach the insert from the drop event we will get a proper range
-					Delay.setEditorTimeout(editor, function () {
+					setTimeout(editor, function () {
 						var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
 
 						if (dragStartRng) {
@@ -668,7 +669,7 @@ tinymce.util.Quirks = function (editor) {
 
 						selection.setRng(pointRng);
 						insertClipboardContents(internalContent.html);
-					});
+					}, 0);
 				}
 			}
 		});
