@@ -1046,68 +1046,6 @@ tinymce.util.Quirks = function (editor) {
 	}
 
 	/**
-	 * Backspace or delete on WebKit will combine all visual styles in a span if the last character is deleted.
-	 *
-	 * For example backspace on:
-	 * <p><b>x|</b></p>
-	 *
-	 * Will produce:
-	 * <p><span style="font-weight: bold">|<br></span></p>
-	 *
-	 * When it should produce:
-	 * <p><b>|<br></b></p>
-	 *
-	 * See: https://bugs.webkit.org/show_bug.cgi?id=81656
-	 */
-	function keepInlineElementOnDeleteBackspace() {
-		editor.onKeyDown.add(function (editor, e) {
-			var isDelete, rng, container, offset, brElm, sibling, collapsed;
-
-			isDelete = e.keyCode == DELETE;
-			if (!isDefaultPrevented(e) && (isDelete || e.keyCode == BACKSPACE) && !VK.modifierPressed(e)) {
-				rng = selection.getRng();
-				container = rng.startContainer;
-				offset = rng.startOffset;
-				collapsed = rng.collapsed;
-
-				// Override delete if the start container is a text node and is at the beginning of text or
-				// just before/after the last character to be deleted in collapsed mode
-				if (container.nodeType == 3 && container.nodeValue.length > 0 && ((offset === 0 && !collapsed) || (collapsed && offset === (isDelete ? 0 : 1)))) {
-					// Edge case when deleting <p><b><img> |x</b></p>
-					sibling = container.previousSibling;
-					if (sibling && sibling.nodeName == "IMG") {
-						return;
-					}
-
-					nonEmptyElements = editor.schema.getNonEmptyElements();
-
-					// Prevent default logic since it's broken
-					e.preventDefault();
-
-					// Insert a BR before the text node this will prevent the containing element from being deleted/converted
-					brElm = dom.create('br', {
-						id: '__tmp'
-					});
-					container.parentNode.insertBefore(brElm, container);
-
-					// Do the browser delete
-					editor.getDoc().execCommand(isDelete ? 'ForwardDelete' : 'Delete', false, null);
-
-					// Check if the previous sibling is empty after deleting for example: <p><b></b>|</p>
-					container = selection.getRng().startContainer;
-					sibling = container.previousSibling;
-					if (sibling && sibling.nodeType == 1 && !dom.isBlock(sibling) && dom.isEmpty(sibling) && !nonEmptyElements[sibling.nodeName.toLowerCase()]) {
-						dom.remove(sibling);
-					}
-
-					// Remove the temp element we inserted
-					dom.remove('__tmp');
-				}
-			}
-		});
-	}
-
-	/**
 	 * Removes a blockquote when backspace is pressed at the beginning of it.
 	 *
 	 * For example:
@@ -1850,7 +1788,6 @@ tinymce.util.Quirks = function (editor) {
 
 	// WebKit
 	if (tinymce.isWebKit) {
-		keepInlineElementOnDeleteBackspace();
 		cleanupStylesWhenDeleting();
 		inputMethodFocus();
 		selectControlElements();
