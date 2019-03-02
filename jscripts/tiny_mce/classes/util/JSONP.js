@@ -9,27 +9,27 @@
  */
 
 tinymce.create('static tinymce.util.JSONP', {
-    callbacks: {},
-    count: 0,
+	callbacks: {},
+	count: 0,
 
-    send: function (o) {
-        var self = this,
-            dom = tinymce.DOM,
-            count = o.count !== undefined ? o.count : this.count,
-            id = 'tinymce_jsonp_' + count;
+	send: function (o) {
+		var self = this,
+			dom = tinymce.DOM,
+			count = o.count !== undefined ? o.count : this.count,
+			id = 'tinymce_jsonp_' + count;
 
-        this.callbacks[count] = function (json) {
-            dom.remove(id);
-            delete self.callbacks[count];
-            o.callback(json);
-        };
+		this.callbacks[count] = function (json) {
+			dom.remove(id);
+			delete self.callbacks[count];
+			o.callback(json);
+		};
 
-        dom.add(dom.doc.body, 'script', {
-            id: id,
-            src: o.url,
-            type: 'text/javascript'
-        });
+		dom.add(dom.doc.body, 'script', {
+			id: id,
+			src: o.url,
+			type: 'text/javascript'
+		});
 
-        this.count++;
-    }
+		this.count++;
+	}
 });
