@@ -272,7 +272,7 @@
 				}, settings.more_colors_title);
 
 				Event.add(node, 'click', function (e) {
-					settings.more_colors_func.call(settings.more_colors_scope || this);
+					settings.more_colors_func.call(settings.more_colors_scope || self);
 					return Event.cancel(e); // Cancel to fix onbeforeunload problem
 				});
 			}
@@ -290,7 +290,7 @@
 				var color = elm.getAttribute('data-mce-color');
 
 				if (elm && elm.nodeName.toLowerCase() == 'a' && typeof color !== "undefined") {
-					this.setColor(color);
+					self.setColor(color);
 				}
 
 				return false; // Prevent IE auto save warning
