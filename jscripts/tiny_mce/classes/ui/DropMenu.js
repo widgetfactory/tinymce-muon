@@ -81,19 +81,19 @@
 		 * @param {String} id Button control id for the button.
 		 * @param {Object} s Optional name/value settings object.
 		 */
-		DropMenu: function (id, settings) {
-			settings = settings || {};
-			settings.container = settings.container || DOM.doc.body;
-			settings.offset_x = settings.offset_x || 0;
-			settings.offset_y = settings.offset_y || 0;
-			settings.vp_offset_x = settings.vp_offset_x || 0;
-			settings.vp_offset_y = settings.vp_offset_y || 0;
+		DropMenu: function (id, s) {
+			s = s || {};
+			s.container = s.container || DOM.doc.body;
+			s.offset_x = s.offset_x || 0;
+			s.offset_y = s.offset_y || 0;
+			s.vp_offset_x = s.vp_offset_x || 0;
+			s.vp_offset_y = s.vp_offset_y || 0;
 
-			if (is(settings.icons) && !settings.icons) {
-				settings['class'] += ' mceNoIcons';
+			if (is(s.icons) && !s.icons) {
+				s['class'] += ' mceNoIcons';
 			}
 
-			this.parent(id, settings);
+			this.parent(id, s);
 			this.onShowMenu = new tinymce.util.Dispatcher(this);
 			this.onHideMenu = new tinymce.util.Dispatcher(this);
 			this.classPrefix = 'mceMenu';
@@ -106,22 +106,29 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @return {tinymce.ui.DropMenu} New drop menu instance.
 		 */
-		createMenu: function (settings) {
-			var menu;
+		createMenu: function (s) {
+			var self = this,
+				cs = self.settings,
+				m;
 
-			settings = tinymce.extend(this.settings, settings || {});
-			settings.parent = this;
+			s.container = s.container || cs.container;
+			s.parent = self;
+			s.constrain = s.constrain || cs.constrain;
+			s['class'] = s['class'] || cs['class'];
+			s.vp_offset_x = s.vp_offset_x || cs.vp_offset_x;
+			s.vp_offset_y = s.vp_offset_y || cs.vp_offset_y;
+			s.keyboard_focus = cs.keyboard_focus;
+			m = new tinymce.ui.DropMenu(s.id || DOM.uniqueId(), s);
 
-			menu = new tinymce.ui.DropMenu(settings.id || DOM.uniqueId(), settings);
+			m.onAddItem.add(self.onAddItem.dispatch, self.onAddItem);
 
-			menu.onAddItem.add(this.onAddItem.dispatch, this.onAddItem);
-
-			return menu;
+			return m;
 		},
 
 		focus: function () {
-			if (this.keyboardNav) {
-				this.keyboardNav.focus();
+			var self = this;
+			if (self.keyboardNav) {
+				self.keyboardNav.focus();
 			}
 		},
 
@@ -131,34 +138,43 @@
 		 * @method update
 		 */
 		update: function () {
-			var settings = this.settings,
-				tb = DOM.get('menu_' + this.id + '_tbl'),
-				co = DOM.get('menu_' + this.id + '_co'),
+			var self = this,
+				s = self.settings,
+				tb = DOM.get('menu_' + self.id + '_tbl'),
+				co = DOM.get('menu_' + self.id + '_co'),
 				tw, th;
 
-			tw = settings.max_width ? Math.min(co.offsetWidth, settings.max_width) : co.offsetWidth;
-			th = settings.max_height ? Math.min(co.offsetHeight, settings.max_height) : co.offsetHeight;
+			tw = s.max_width ? Math.min(co.offsetWidth, s.max_width) : co.offsetWidth;
+			th = s.max_height ? Math.min(co.offsetHeight, s.max_height) : co.offsetHeight;
 
-			this.element.setStyles({
-				width: tw + 2,
-				height: th + 2
-			});
+			if (!DOM.boxModel) {
+				self.element.setStyles({
+					width: tw + 2,
+					height: th + 2
+				});
+			} else {
+				self.element.setStyles({
+					width: tw,
+					height: th
+				});
+			}
 
-			if (settings.max_width) {
+			if (s.max_width) {
 				DOM.setStyle(co, 'width', tw);
 			}
 
-			if (settings.max_height) {
+			if (s.max_height) {
 				DOM.setStyle(co, 'height', th);
 
-				if (tb.clientHeight < settings.max_height) {
+				if (tb.clientHeight < s.max_height) {
 					DOM.setStyle(co, 'overflow', 'hidden');
 				}
 			}
 		},
 
 		scrollTo: function (el) {
-			el.parentNode.scrollTop = el.offsetTop;
+			var p = el.parentNode;
+			p.scrollTop = el.offsetTop;
 		},
 
 		/**
@@ -171,59 +187,53 @@
 		 */
 		showMenu: function (x, y, px) {
 			var self = this,
-				settings = this.settings,
+				s = self.settings,
 				co, vp = DOM.getViewPort(),
-				w, h, mx, my, ot = 2,
-				dm, prefix = this.classPrefix;
+				w, h, mx, my, ot = 0,
+				dm, cp = self.classPrefix;
 
-			this.collapse(1);
+			self.collapse(1);
 
-			if (this.isMenuVisible) {
+			if (self.isMenuVisible) {
 				return;
 			}
 
-			if (!this.rendered) {
-				co = DOM.add(this.settings.container, this.renderNode());
+			if (!self.rendered) {
+				co = DOM.add(self.settings.container, self.renderNode());
 
-				each(this.items, function (item) {
-					item.postRender();
+				each(self.items, function (o) {
+					o.postRender();
 				});
 
-				this.element = new Element('menu_' + this.id, {
+				self.element = new Element('menu_' + self.id, {
 					blocker: 1,
-					container: settings.container
+					container: s.container
 				});
 			} else {
-				co = DOM.get('menu_' + this.id);
+				co = DOM.get('menu_' + self.id);
 			}
 
-			// Move layer out of sight
-			DOM.setStyles(co, {
-				left: -0xFFFF,
-				top: -0xFFFF
-			});
-
 			DOM.show(co);
-			this.update();
+			self.update();
 
-			x += settings.offset_x || 0;
-			y += settings.offset_y || 0;
+			x += s.offset_x || 0;
+			y += s.offset_y || 0;
 			vp.w -= 4;
 			vp.h -= 4;
 
 			// Move inside viewport if not submenu
-			if (settings.constrain) {
+			if (s.constrain) {
 				w = co.clientWidth - ot;
 				h = co.clientHeight - ot;
 				mx = vp.x + vp.w;
 				my = vp.y + vp.h;
 
-				if ((x + settings.vp_offset_x + w) > mx) {
-					x = px ? px - w : Math.max(0, (mx - settings.vp_offset_x) - w);
+				if ((x + s.vp_offset_x + w) > mx) {
+					x = px ? px - w : Math.max(0, (mx - s.vp_offset_x) - w);
 				}
 
-				if ((y + settings.vp_offset_y + h) > my) {
-					y = Math.max(0, (my - settings.vp_offset_y) - h);
+				if ((y + s.vp_offset_y + h) > my) {
+					y = Math.max(0, (my - s.vp_offset_y) - h);
 				}
 			}
 
@@ -231,26 +241,26 @@
 				left: x,
 				top: y
 			});
+			
+			self.element.update();
 
-			this.element.update();
+			self.isMenuVisible = 1;
+			self.mouseClickFunc = Event.add(co, 'click', function (e) {
+				var m, n;
 
-			this.isMenuVisible = 1;
-			this.mouseClickFunc = Event.add(co, 'click', function (e) {
-				var menu, node;
-
-				node = e.target;
+				n = e.target;
 
 				// cancel on input click
-				if (node.nodeName === "INPUT") {
+				if (n.nodeName === "INPUT") {
 					return;
 				}
 
-				if (node && (node = DOM.getParent(node, 'div.mceMenuItem')) && !DOM.hasClass(node, prefix + 'ItemSub')) {
-					menu = self.items[node.id];
+				if (n && (n = DOM.getParent(n, 'div.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
+					m = self.items[n.id];
 
-					self.selected = node;
+					self.selected = n;
 
-					if (menu.isDisabled()) {
+					if (m.isDisabled()) {
 						return;
 					}
 
@@ -264,53 +274,53 @@
 						dm = dm.settings.parent;
 					}
 
-					if (menu.settings.onclick) {
-						menu.settings.onclick(e);
+					if (m.settings.onclick) {
+						m.settings.onclick(e);
 					}
 
 					return false; // Cancel to fix onbeforeunload problem
 				}
 			});
 
-			this.mouseOverFunc = Event.add(co, 'mouseover', function (e) {
-				var menu, r, node;
+			self.mouseOverFunc = Event.add(co, 'mouseover', function (e) {
+				var m, r, n;
 
-				node = e.target;
+				n = e.target;
 
-				if (node && (node = DOM.getParent(node, 'div.mceMenuItem'))) {
-					menu = self.items[node.id];
+				if (n && (n = DOM.getParent(n, 'div.mceMenuItem'))) {
+					m = self.items[n.id];
 
 					if (self.hasMenus()) {
 						if (self.lastMenu) {
 							self.lastMenu.collapse(1);
 						}
 
-						if (menu.isDisabled()) {
+						if (m.isDisabled()) {
 							return;
 						}
 
-						if (node && DOM.hasClass(node, prefix + 'ItemSub')) {
-							r = DOM.getRect(node);
-							menu.showMenu((r.x + r.w - ot), r.y - ot, r.x);
-							self.lastMenu = menu;
-							DOM.addClass(DOM.get(menu.id).firstChild, prefix + 'ItemActive');
+						if (n && DOM.hasClass(n, cp + 'ItemSub')) {
+							r = DOM.getRect(n);
+							m.showMenu((r.x + r.w - ot), r.y - ot, r.x);
+							self.lastMenu = m;
+							DOM.addClass(DOM.get(m.id).firstChild, cp + 'ItemActive');
 						}
 					}
 
-					if (menu.settings.onmouseover) {
-						menu.settings.onmouseover(e);
+					if (m.settings.onmouseover) {
+						m.settings.onmouseover(e);
 					}
 				}
 			});
 
-			Event.add(co, 'keydown', this._keyHandler, this);
+			Event.add(co, 'keydown', self._keyHandler, self);
 
-			this.onShowMenu.dispatch(this);
+			self.onShowMenu.dispatch(self);
 
 			// scroll to selected item
-			each(this.items, function (item) {
-				if (item.selected) {
-					var el = DOM.get(item.id);
+			each(self.items, function (o) {
+				if (o.selected) {
+					var el = DOM.get(o.id);
 
 					if (el) {
 						self.selected = el;
@@ -320,15 +330,15 @@
 				}
 			});
 
-			if (this.selected) {
-				this.scrollTo(this.selected);
+			if (self.selected) {
+				self.scrollTo(self.selected);
 			} else {
 				// reset scroll position
-				DOM.get('menu_' + this.id + '_tbl').scrollTop = 0;
+				DOM.get('menu_' + self.id + '_tbl').scrollTop = 0;
 			}
 
-			if (settings.keyboard_focus) {
-				this._setupKeyboardNav();
+			if (s.keyboard_focus) {
+				self._setupKeyboardNav();
 			}
 		},
 
@@ -337,40 +347,39 @@
 		 *
 		 * @method hideMenu
 		 */
-		hideMenu: function (collapse) {
-			var co = DOM.get('menu_' + this.id),
-				elm;
+		hideMenu: function (c) {
+			var self = this,
+				co = DOM.get('menu_' + self.id),
+				e;
 
-			if (!this.isMenuVisible) {
+			if (!self.isMenuVisible) {
 				return;
 			}
 
-			if (this.keyboardNav) {
-				this.keyboardNav.destroy();
+			if (self.keyboardNav) {
+				self.keyboardNav.destroy();
 			}
-
-			Event.remove(co, 'mouseover', this.mouseOverFunc);
-			Event.remove(co, 'click', this.mouseClickFunc);
-			Event.remove(co, 'keydown', this._keyHandler);
+			Event.remove(co, 'mouseover', self.mouseOverFunc);
+			Event.remove(co, 'click', self.mouseClickFunc);
+			Event.remove(co, 'keydown', self._keyHandler);
 			DOM.hide(co);
+			self.isMenuVisible = 0;
 
-			this.isMenuVisible = 0;
-
-			if (!collapse) {
-				this.collapse(1);
+			if (!c) {
+				self.collapse(1);
 			}
 
-			if (this.element) {
-				this.element.hide();
+			if (self.element) {
+				self.element.hide();
 			}
 
-			elm = DOM.get(this.id);
+			e = DOM.get(self.id);
 
-			if (elm) {
-				DOM.removeClass(elm.firstChild, this.classPrefix + 'ItemActive');
+			if (e) {
+				DOM.removeClass(e.firstChild, self.classPrefix + 'ItemActive');
 			}
 
-			this.onHideMenu.dispatch(this);
+			self.onHideMenu.dispatch(self);
 		},
 
 		/**
@@ -380,26 +389,27 @@
 		 * @param {tinymce.ui.Control} o Menu or menu item to add to the drop menu.
 		 * @return {tinymce.ui.Control} Same as the input control, the menu or menu item.
 		 */
-		add: function (menu) {
-			var item;
+		add: function (o) {
+			var self = this,
+				co;
 
-			menu = this.parent(menu);
+			o = self.parent(o);
 
-			if (this.isRendered && (item = DOM.get('menu_' + this.id))) {
-				this._add(item, menu);
+			if (self.isRendered && (co = DOM.get('menu_' + self.id))) {
+				self._add(co, o);
 			}
 
-			return menu;
+			return o;
 		},
 
 		/**
 		 * Collapses the menu, this will hide the menu and all menu items.
 		 *
 		 * @method collapse
-		 * @param {Boolean} state Optional deep state. If this is set to true all children will be collapsed as well.
+		 * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
 		 */
-		collapse: function (state) {
-			this.parent(state);
+		collapse: function (d) {
+			this.parent(d);
 			this.hideMenu(1);
 		},
 
@@ -407,14 +417,14 @@
 		 * Removes a specific sub menu or menu item from the drop menu.
 		 *
 		 * @method remove
-		 * @param {tinymce.ui.Control} menu Menu item or menu to remove from drop menu.
+		 * @param {tinymce.ui.Control} o Menu item or menu to remove from drop menu.
 		 * @return {tinymce.ui.Control} Control instance or null if it wasn't found.
 		 */
-		remove: function (menu) {
-			DOM.remove(menu.id);
+		remove: function (o) {
+			DOM.remove(o.id);
 			this.destroy();
 
-			return this.parent(menu);
+			return this.parent(o);
 		},
 
 		/**
@@ -423,22 +433,22 @@
 		 * @method destroy
 		 */
 		destroy: function () {
-			var menu = DOM.get('menu_' + this.id);
+			var self = this,
+				co = DOM.get('menu_' + self.id);
 
-			if (this.keyboardNav) {
-				this.keyboardNav.destroy();
+			if (self.keyboardNav) {
+				self.keyboardNav.destroy();
+			}
+			Event.remove(co, 'mouseover', self.mouseOverFunc);
+			Event.remove(DOM.select('a', co), 'focus', self.mouseOverFunc);
+			Event.remove(co, 'click', self.mouseClickFunc);
+			Event.remove(co, 'keydown', self._keyHandler);
+
+			if (self.element) {
+				self.element.remove();
 			}
 
-			Event.remove(menu, 'mouseover', this.mouseOverFunc);
-			Event.remove(DOM.select('a', menu), 'focus', this.mouseOverFunc);
-			Event.remove(menu, 'click', this.mouseClickFunc);
-			Event.remove(menu, 'keydown', this._keyHandler);
-
-			if (this.element) {
-				this.element.remove();
-			}
-
-			DOM.remove(menu);
+			DOM.remove(co);
 		},
 
 		/**
@@ -449,105 +459,100 @@
 		 */
 		renderNode: function () {
 			var self = this,
-				settings = this.settings,
-				node, item, menu;
+				s = self.settings,
+				n, co, w;
 
-			if (settings['class'].indexOf('defaultSkin') === -1) {
-				settings['class'] = 'defaultSkin ' + settings['class'];
+			if (s['class'].indexOf('defaultSkin') === -1) {
+				s['class'] = 'defaultSkin ' + s['class'];
 			}
 
-			menu = DOM.create('div', {
+			w = DOM.create('div', {
 				role: 'listbox',
-				id: 'menu_' + this.id,
-				'class': settings['class'],
+				id: 'menu_' + self.id,
+				'class': s['class'],
 				'style': 'position:absolute;left:0;top:0;z-index:200000;outline:0'
 			});
 
-			if (this.settings.parent) {
-				DOM.setAttrib(menu, 'aria-parent', 'menu_' + this.settings.parent.id);
+			if (self.settings.parent) {
+				DOM.setAttrib(w, 'aria-parent', 'menu_' + self.settings.parent.id);
 			}
 
-			item = DOM.add(menu, 'div', {
+			co = DOM.add(w, 'div', {
 				role: 'presentation',
-				id: 'menu_' + this.id + '_co',
-				'class': this.classPrefix + (settings['class'] ? ' ' + settings['class'] : '')
+				id: 'menu_' + self.id + '_co',
+				'class': self.classPrefix + (s['class'] ? ' ' + s['class'] : '')
 			});
-
-			this.element = new Element('menu_' + this.id, {
+			self.element = new Element('menu_' + self.id, {
 				blocker: 1,
-				container: settings.container
+				container: s.container
 			});
 
-			if (settings.menu_line) {
-				DOM.add(item, 'div', {
-					'class': this.classPrefix + 'Line'
+			if (s.menu_line) {
+				DOM.add(co, 'div', {
+					'class': self.classPrefix + 'Line'
 				});
 			}
 
-			if (settings.filter) {
-				var filter = DOM.add(item, 'div', {
-					'class': this.classPrefix + 'Filter'
+			if (s.filter) {
+				var filter = DOM.add(co, 'div', {
+					'class': self.classPrefix + 'Filter'
 				}, '<input type="text" />');
 
-				this.onHideMenu.add(function () {
+				self.onHideMenu.add(function () {
 					filter.firstChild.value = "";
 
-					each(this.items, function (item, id) {
+					each(self.items, function (o, id) {
 						DOM.removeClass(id, 'mceMenuItemHidden');
 					});
 				});
 			}
 
-			node = DOM.add(item, 'div', {
+			n = DOM.add(co, 'div', {
 				role: 'presentation',
-				id: 'menu_' + this.id + '_tbl',
-				'class': this.classPrefix + 'Items'
+				id: 'menu_' + self.id + '_tbl',
+				'class': self.classPrefix + 'Items'
 			});
 
-			each(this.items, function (o) {
-				self._add(node, o);
+			each(self.items, function (o) {
+				self._add(n, o);
 			});
 
-			this.rendered = true;
+			self.rendered = true;
 
-			return menu;
+			return w;
 		},
 
 		// Internal functions
 		_setupKeyboardNav: function () {
-			var self = this,
-				contextMenu, menuItems;
-
-			contextMenu = DOM.get('menu_' + this.id);
-			menuItems = DOM.select('a[role=option]', 'menu_' + this.id);
-
+			var contextMenu, menuItems, self = this;
+			contextMenu = DOM.get('menu_' + self.id);
+			menuItems = DOM.select('a[role=option]', 'menu_' + self.id);
 			menuItems.splice(0, 0, contextMenu);
-
-			this.keyboardNav = new tinymce.ui.KeyboardNavigation({
-				root: 'menu_' + this.id,
+			self.keyboardNav = new tinymce.ui.KeyboardNavigation({
+				root: 'menu_' + self.id,
 				items: menuItems,
 				onCancel: function () {
 					self.hideMenu();
 				},
 				enableUpDown: true
 			});
-
 			contextMenu.focus();
 		},
 
 		_filter: function (evt) {
-			var node = evt.target;
+			var self = this,
+				n = evt.target;
 
-			var matcher = new RegExp('^' + escapeRegExChars(node.value), "i");
+			var matcher = new RegExp('^' + escapeRegExChars(n.value), "i");
 
-			each(this.items, function (item, id) {
-				var settings = item.settings,
+			each(self.items, function (o, id) {
+				var s = o.settings,
 					state;
 
-				if (!node.value || settings.value === undef) {
+				if (!n.value || s.value === undef) {
 					state = true;
 				} else {
-					state = matcher.test(settings.title);
+					state = matcher.test(s.title);
 				}
 
 				if (state) {
@@ -604,93 +609,93 @@
 		},
 
 		_add: function (tb, o) {
-			var node, settings = o.settings,
-				a, ro, it, prefix = this.classPrefix,
+			var n, s = o.settings,
+				a, ro, it, cp = this.classPrefix,
 				ic;
 
-			if (settings.separator) {
+			if (s.separator) {
 				ro = DOM.add(tb, 'div', {
-					'class': prefix + 'ItemSeparator'
+					'class': cp + 'ItemSeparator'
 				});
 
-				node = ro.previousSibling;
+				n = ro.previousSibling;
 
-				if (node) {
-					DOM.addClass(node, 'mceLast');
+				if (n) {
+					DOM.addClass(n, 'mceLast');
 				}
 
 				return;
 			}
 
-			node = it = DOM.add(tb, 'div', {
+			n = it = DOM.add(tb, 'div', {
 				id: o.id,
-				'class': prefix + 'Item ' + prefix + 'ItemEnabled'
+				'class': cp + 'Item ' + cp + 'ItemEnabled'
 			});
 
-			if (settings.html) {
-				node = DOM.add(node, 'div', {
+			if (s.html) {
+				n = DOM.add(n, 'div', {
 					'class': 'mceMenuHtml'
-				}, settings.html);
+				}, s.html);
 			} else {
-				node = a = DOM.add(node, 'a', {
+				n = a = DOM.add(n, 'a', {
 					id: o.id + '_aria',
-					role: settings.titleItem ? 'presentation' : 'option',
+					role: s.titleItem ? 'presentation' : 'option',
 					href: 'javascript:;',
 					onclick: "return false;",
 					onmousedown: 'return false;'
 				});
 
-				ic = DOM.add(node, 'span', {
-					'class': 'mceIcon' + (settings.icon ? ' mce_' + settings.icon : '')
+				ic = DOM.add(n, 'span', {
+					'class': 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')
 				});
 
-				if (settings.icon_src) {
+				if (s.icon_src) {
 					DOM.add(ic, 'img', {
-						src: settings.icon_src
+						src: s.icon_src
 					});
 				}
 
-				node = DOM.add(node, settings.element || 'span', {
+				n = DOM.add(n, s.element || 'span', {
 					'class': 'mceText',
 					title: o.settings.title
 				}, o.settings.title);
 
-				if (settings.parent) {
+				if (s.parent) {
 					DOM.setAttrib(a, 'aria-haspopup', 'true');
 					DOM.setAttrib(a, 'aria-owns', 'menu_' + o.id);
 				}
 			}
 
-			DOM.addClass(it, settings['class']);
+			DOM.addClass(it, s['class']);
 
 			if (o.settings.style) {
 				if (typeof o.settings.style == "function") {
 					o.settings.style = o.settings.style();
 				}
 
-				DOM.setAttrib(node, 'style', o.settings.style);
+				DOM.setAttrib(n, 'style', o.settings.style);
 			}
 
 			if (o.onmouseover) {
-				Event.add(node, 'mouseover', o.onmouseover);
+				Event.add(n, 'mouseover', o.onmouseover);
 			}
 
 			if (tb.childNodes.length == 1) {
 				DOM.addClass(it, 'mceFirst');
 			}
 
-			node = it.previousSibling;
+			n = it.previousSibling;
 
-			if (node && DOM.hasClass(node, prefix + 'ItemSeparator')) {
+			if (n && DOM.hasClass(n, cp + 'ItemSeparator')) {
 				DOM.addClass(ro, 'mceFirst');
 			}
 
 			if (o.collapse) {
-				DOM.addClass(it, prefix + 'ItemSub');
+				DOM.addClass(it, cp + 'ItemSub');
 			}
 
-			if (node) {
-				DOM.removeClass(node, 'mceLast');
+			if (n) {
+				DOM.removeClass(n, 'mceLast');
 			}
 
 			DOM.addClass(it, 'mceLast');
