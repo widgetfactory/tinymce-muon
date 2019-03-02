@@ -522,7 +522,8 @@
 		 * });
 		 */
 		create: function (s, p, root) {
-			var self = this, sp, ns, cn, scn, c, de = 0;
+			var self = this,
+				sp, ns, cn, scn, c, de = 0;
 
 			// Parse : <prefix> <class>:<super class>
 			s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
@@ -600,13 +601,11 @@
 			}
 
 			// Add static methods
+			/*jshint sub:true*/
+			/*eslint dot-notation:0*/
 			self.each(p['static'], function (f, n) {
 				ns[cn][n] = f;
 			});
-
-			if (this.onCreate) {
-				this.onCreate(s[2], s[3], ns[cn].prototype);
-			}
 		},
 
 		/**
