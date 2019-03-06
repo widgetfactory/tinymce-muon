@@ -9,7 +9,8 @@
  */
 
 (function (tinymce) {
-	var DOM = tinymce.DOM;
+	var DOM = tinymce.DOM,
+	Event = tinymce.dom.Event;
 
 	/**
 	 * This class is used to create a UI button. A button is basically a link
@@ -25,11 +26,11 @@
 		 * @constructor
 		 * @method Button
 		 * @param {String} id Control id for the button.
-		 * @param {Object} settings Optional name/value settings object.
-		 * @param {Editor} editor Optional the editor instance this button is for.
+		 * @param {Object} s Optional name/value settings object.
+		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		Button: function (id, settings, editor) {
-			this.parent(id, settings, editor);
+		Button: function (id, s, ed) {
+			this.parent(id, s, ed);
 			this.classPrefix = 'mceButton';
 		},
 
@@ -41,24 +42,22 @@
 		 * @return {String} HTML for the button control element.
 		 */
 		renderHTML: function () {
-			var prefix = this.classPrefix,
-				settings = this.settings,
-				html, label;
+			var cp = this.classPrefix,
+				s = this.settings,
+				h, l;
 
-			label = DOM.encode(settings.label || '');
+			l = DOM.encode(s.label || '');
+			h = '<button type="button" role="presentation" id="' + this.id + '" class="' + cp + ' ' + cp + 'Enabled ' + s['class'] + (l ? ' ' + cp + 'Labeled' : '') + '" title="' + DOM.encode(s.title) + '">';
 
-			html = '<button type="button" role="presentation" id="' + this.id + '" class="' + prefix + ' ' + prefix + 'Enabled ' + settings['class'] + (label ? ' ' + prefix + 'Labeled' : '') + '" onmousedown="return false;" onclick="return false;" title="' + DOM.encode(settings.title) + '">';
-
-			if (settings.image && !(this.editor && this.editor.forcedHighContrastMode)) {
-                html += '<span class="mceIcon ' + settings['class'] + '"><img class="mceIcon" src="' + settings.image + '" alt="' + DOM.encode(settings.title) + '" /></span>';
-                html += (label ? '<span class="' + prefix + 'Label">' + label + '</span>' : '');
+			if (s.image && !(this.editor && this.editor.forcedHighContrastMode)) {
+				h += '<span class="mceIcon ' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			} else {
-				html += '<span class="mceIcon ' + settings['class'] + '"></span>' + (label ? '<span class="' + prefix + 'Label">' + label + '</span>' : '');
+				h += '<span class="mceIcon ' + s['class'] + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			}
 
-			html += '</button>';
+			h += '</button>';
 
-			return html;
+			return h;
 		},
 
 		/**
@@ -69,32 +68,35 @@
 		 */
 		postRender: function () {
 			var self = this,
-				settings = this.settings,
+				s = self.settings,
 				imgBookmark;
 
 			// In IE a large image that occupies the entire editor area will be deselected when a button is clicked, so
 			// need to keep the selection in case the selection is lost
-			if (tinymce.isIE && this.editor) {
-				tinymce.dom.Event.add(this.id, 'mousedown', function () {
+			if (tinymce.isIE && self.editor) {
+				Event.add(self.id, 'mousedown', function (e) {
 					var nodeName = self.editor.selection.getNode().nodeName;
 					imgBookmark = nodeName === 'IMG' ? self.editor.selection.getBookmark() : null;
 				});
 			}
 
-			tinymce.dom.Event.add(this.id, 'click', function (e) {
+			Event.add(self.id, 'click', function (e) {
+				Event.cancel(e);
+				
 				if (!self.isDisabled()) {
 					// restore the selection in case the selection is lost in IE
 					if (tinymce.isIE && self.editor && imgBookmark !== null) {
 						self.editor.selection.moveToBookmark(imgBookmark);
 					}
-					return settings.onclick.call(settings.scope, e);
+
+					return s.onclick.call(s.scope, e);
 				}
 			});
 
-			tinymce.dom.Event.add(this.id, 'keydown', function (e) {
+			Event.add(self.id, 'keydown', function (e) {
 				if (!self.isDisabled() && e.keyCode == tinymce.VK.SPACEBAR) {
-					tinymce.dom.Event.cancel(e);
-					return settings.onclick.call(settings.scope, e);
+					Event.cancel(e);
+					return s.onclick.call(s.scope, e);
 				}
 			});
 		}

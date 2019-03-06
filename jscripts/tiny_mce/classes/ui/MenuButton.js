@@ -59,8 +59,8 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		MenuButton: function (id, settings, editor) {
-			this.parent(id, settings, editor);
+		MenuButton: function (id, s, ed) {
+			this.parent(id, s, ed);
 
 			/**
 			 * Fires when the menu is rendered.
@@ -69,7 +69,7 @@
 			 */
 			this.onRenderMenu = new tinymce.util.Dispatcher(this);
 
-			settings.menu_container = settings.menu_container || DOM.doc.body;
+			s.menu_container = s.menu_container || DOM.doc.body;
 		},
 
 		/**
@@ -78,36 +78,38 @@
 		 * @method showMenu
 		 */
 		showMenu: function () {
-			var pos, elm = DOM.get(this.id),
-				menu;
+			var self = this,
+				p1, p2, e = DOM.get(self.id),
+				m;
 
-			if (this.isDisabled()) {
+			if (self.isDisabled()) {
 				return;
 			}
 
-			if (!this.isMenuRendered) {
-				this.renderMenu();
-				this.isMenuRendered = true;
+			if (!self.isMenuRendered) {
+				self.renderMenu();
+				self.isMenuRendered = true;
 			}
 
-			if (this.isMenuVisible) {
-				return this.hideMenu();
+			if (self.isMenuVisible) {
+				return self.hideMenu();
 			}
 
-			pos = DOM.getPos(elm);
+			p1 = DOM.getPos(self.settings.menu_container);
+			p2 = DOM.getPos(e);
 
-			menu = this.menu;
-			menu.settings.offset_x = pos.x;
-			menu.settings.offset_y = pos.y;
-			menu.settings.vp_offset_x = pos.x;
-			menu.settings.vp_offset_y = pos.y;
-			menu.settings.keyboard_focus = this._focused;
-			menu.showMenu(0, elm.firstChild.clientHeight);
+			m = self.menu;
+			m.settings.offset_x = p2.x;
+			m.settings.offset_y = p2.y;
+			m.settings.vp_offset_x = p2.x;
+			m.settings.vp_offset_y = p2.y;
+			m.settings.keyboard_focus = self._focused;
+			m.showMenu(0, e.firstChild.clientHeight);
 
-			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
-			this.setState('Selected', 1);
+			Event.add(DOM.doc, 'mousedown', self.hideMenu, self);
+			self.setState('Selected', 1);
 
-			this.isMenuVisible = 1;
+			self.isMenuVisible = 1;
 		},
 
 		/**
@@ -116,26 +118,27 @@
 		 * @method renderMenu
 		 */
 		renderMenu: function () {
-			var menu;
+			var self = this,
+				m;
 
-			menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
+			m = self.settings.control_manager.createDropMenu(self.id + '_menu', {
 				menu_line: 1,
 				'class': this.classPrefix + 'Menu',
-				icons: this.settings.icons
+				icons: self.settings.icons
 			});
 
-			menu.onHideMenu.add(function () {
-				this.hideMenu();
-				this.focus();
+			m.onHideMenu.add(function () {
+				self.hideMenu();
+				self.focus();
 			});
 
-			this.onRenderMenu.dispatch(this, menu);
-			this.menu = menu;
+			self.onRenderMenu.dispatch(self, m);
+			self.menu = m;
 		},
 
 		/**
 		 * Hides the menu. The optional event parameter is used to check where the event occurred so it
-		 * doesn't close them menu if it was a event inside the menu.
+		 * doesn'self close them menu if it was a event inside the menu.
 		 *
 		 * @method hideMenu
 		 * @param {Event} e Optional event object.
@@ -144,25 +147,21 @@
 			var self = this;
 
 			// Prevent double toogles by canceling the mouse click event to the button
-			var parent = DOM.getParent(e.target, function (e) {
-				return e.id === self.id || e.id === self.id + '_open';
-			});
-
-			if (e && e.type == "mousedown" && parent) {
+			if (e && e.type == "mousedown" && DOM.getParent(e.target, function (e) {
+					return e.id === self.id || e.id === self.id + '_open';
+				})) {
 				return;
 			}
 
 			if (!e || !DOM.getParent(e.target, '.mceMenu')) {
-				this.setState('Selected', 0);
-
-				Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
-
-				if (this.menu) {
-					this.menu.hideMenu();
+				self.setState('Selected', 0);
+				Event.remove(DOM.doc, 'mousedown', self.hideMenu, self);
+				if (self.menu) {
+					self.menu.hideMenu();
 				}
 			}
 
-			this.isMenuVisible = 0;
+			self.isMenuVisible = 0;
 		},
 
 		/**
@@ -173,12 +172,12 @@
 		 */
 		postRender: function () {
 			var self = this,
-				settings = this.settings;
+				s = self.settings;
 
-			Event.add(this.id, 'click', function () {
-				if (!this.isDisabled()) {
-					if (settings.onclick) {
-						settings.onclick(self.value);
+			Event.add(self.id, 'click', function () {
+				if (!self.isDisabled()) {
+					if (s.onclick) {
+						s.onclick(self.value);
 					}
 
 					self.showMenu();

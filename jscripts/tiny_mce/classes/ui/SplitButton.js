@@ -61,8 +61,8 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		SplitButton: function (id, settings, editor) {
-			this.parent(id, settings, editor);
+		SplitButton: function (id, s, ed) {
+			this.parent(id, s, ed);
 			this.classPrefix = 'mceSplitButton';
 		},
 
@@ -74,68 +74,62 @@
 		 * @return {String} HTML for the split button control element.
 		 */
 		renderHTML: function () {
-			var html = '',
-				settings = this.settings,
-				heading;
+			var h = '',
+				self = this,
+				s = self.settings,
+				h1;
 
-			if (settings.image) {
-				heading = DOM.createHTML('img ', {
-					src: settings.image,
+			if (s.image) {
+				h1 = DOM.createHTML('img ', {
+					src: s.image,
 					role: 'presentation',
-					'class': 'mceAction ' + settings['class']
+					'class': 'mceAction ' + s['class']
 				});
 			} else {
-				heading = DOM.createHTML('span', {
-					'class': 'mceAction ' + settings['class']
+				h1 = DOM.createHTML('span', {
+					'class': 'mceAction ' + s['class']
 				}, '');
 			}
 
-			heading += DOM.createHTML('span', {
+			h1 += DOM.createHTML('span', {
 				'class': 'mceVoiceLabel mceIconOnly',
-				id: this.id + '_voice',
+				id: self.id + '_voice',
 				style: 'display:none;'
-			}, settings.title);
+			}, s.title);
 
-			html += '<div class="mceText">' + DOM.createHTML('a', {
+			h += '<div class="mceText">' + DOM.createHTML('button', {
 				role: 'button',
-				id: this.id + '_action',
+				id: self.id + '_action',
 				tabindex: '-1',
-				href: 'javascript:;',
-				'class': settings['class'],
-				onclick: "return false;",
-				onmousedown: 'return false;',
-				title: settings.title
-			}, heading) + '</div>';
+				'class': s['class'],
+				title: s.title
+			}, h1) + '</div>';
 
-			heading = DOM.createHTML('span', {
-				'class': 'mceOpen ' + settings['class']
+			h1 = DOM.createHTML('span', {
+				'class': 'mceOpen ' + s['class']
 			}, '<span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span>');
 
-			html += '<div class="mceOpen">' + DOM.createHTML('a', {
+			h += '<div class="mceOpen">' + DOM.createHTML('button', {
 				role: 'button',
-				id: this.id + '_open',
+				id: self.id + '_open',
 				tabindex: '-1',
-				href: 'javascript:;',
-				'class': settings['class'],
-				onclick: "return false;",
-				onmousedown: 'return false;',
-				title: settings.title
-			}, heading) + '</div>';
+				'class': s['class'],
+				title: s.title
+			}, h1) + '</div>';
 
-			//html += '</tr></tbody>';
-			html = DOM.createHTML('div', {
+			h = DOM.createHTML('div', {
 				role: 'presentation',
-				'class': 'mceSplitButton mceSplitButtonEnabled ' + settings['class'],
-				title: settings.title
-			}, html);
+				'class': 'mceSplitButton mceSplitButtonEnabled ' + s['class'],
+				title: s.title
+			}, h);
 
 			return DOM.createHTML('div', {
-				id: this.id,
+				id: self.id,
 				role: 'button',
 				tabindex: '0',
-				'aria-labelledby': this.id + '_voice',
+				'aria-labelledby': self.id + '_voice',
 				'aria-haspopup': 'true'
-			}, html);
+			}, h);
 		},
 
 		/**
@@ -146,19 +140,20 @@
 		 */
 		postRender: function () {
 			var self = this,
-				settings = this.settings,
+				s = self.settings,
 				activate;
 
-			if (this.settings.onclick) {
+			if (s.onclick) {
 				activate = function (evt) {
 					if (!self.isDisabled()) {
-						settings.onclick(self.value);
+						s.onclick(self.value);
 						Event.cancel(evt);
 					}
 				};
 
-				Event.add(this.id + '_action', 'click', activate);
-				Event.add(this.id, ['click', 'keydown'], function (evt) {
+				Event.add(self.id + '_action', 'click', activate);
+
+				Event.add(self.id, ['click', 'keydown'], function (evt) {
 					var DOM_VK_DOWN = 40;
 
 					if ((evt.keyCode === 32 || evt.keyCode === 13 || evt.keyCode === 14) && !evt.altKey && !evt.ctrlKey && !evt.metaKey) {
@@ -171,16 +166,16 @@
 				});
 			}
 
-			Event.add(this.id + '_open', 'click', function (evt) {
+			Event.add(self.id + '_open', 'click', function (evt) {
 				self.showMenu();
 				Event.cancel(evt);
 			});
 
-			Event.add([this.id, this.id + '_open'], 'focus', function () {
+			Event.add([self.id, self.id + '_open'], 'focus', function () {
 				self._focused = 1;
 			});
 
-			Event.add([this.id, this.id + '_open'], 'blur', function () {
+			Event.add([self.id, self.id + '_open'], 'blur', function () {
 				self._focused = 0;
 			});
 		},

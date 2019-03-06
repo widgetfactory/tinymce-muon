@@ -32,6 +32,8 @@
 		 * @param {Editor} editor The editor instance this button is for.
 		 */
 		ColorSplitButton: function (id, settings, editor) {
+			var self = this;
+			
 			this.parent(id, settings, editor);
 
 			/**
@@ -116,12 +118,12 @@
 					}
 				});
 
-				DOM.select('a', this.id + '_menu')[0].focus(); // Select first link
+				DOM.select('button', this.id + '_menu')[0].focus(); // Select first link
 			}
 
 			this.keyboardNav = new tinymce.ui.KeyboardNavigation({
 				root: this.id + '_menu',
-				items: DOM.select('a', this.id + '_menu'),
+				items: DOM.select('button', this.id + '_menu'),
 				onCancel: function () {
 					self.hideMenu();
 					self.focus();
@@ -216,7 +218,6 @@
 				node = DOM.add(tr, 'td');
 
 				var args = {
-					href: 'javascript:;',
 					style: {
 						backgroundColor: '#' + color
 					},
@@ -227,7 +228,7 @@
 				// adding a proper ARIA role = button causes JAWS to read things incorrectly on IE.
 				args.role = 'option';
 
-				node = DOM.add(node, 'a', args);
+				node = DOM.add(node, 'button', args);
 
 				if (self.editor.forcedHighContrastMode) {
 					node = DOM.add(node, 'canvas', {
@@ -249,8 +250,7 @@
 				'class': 'mceRemoveColor'
 			});
 
-			node = DOM.add(node, 'a', {
-				href: 'javascript:;',
+			node = DOM.add(node, 'button', {
 				'title': this.editor.getLang('advanced.no_color', 'No Colour'),
 				'data-mce-color': '',
 				role: 'option'
@@ -263,11 +263,9 @@
 					'class': 'mceMoreColors'
 				});
 
-				node = DOM.add(node, 'a', {
+				node = DOM.add(node, 'button', {
 					role: 'option',
 					id: this.id + '_more',
-					href: 'javascript:;',
-					onclick: 'return false;',
 					'class': 'mceMoreColors'
 				}, settings.more_colors_title);
 
@@ -285,11 +283,11 @@
 			});
 
 			Event.add(this.id + '_menu', 'click', function (e) {
-				var elm = DOM.getParent(e.target, 'a', tb);
+				var elm = DOM.getParent(e.target, 'button', tb);
 
 				var color = elm.getAttribute('data-mce-color');
 
-				if (elm && elm.nodeName.toLowerCase() == 'a' && typeof color !== "undefined") {
+				if (elm && elm.nodeName.toLowerCase() == 'button' && typeof color !== "undefined") {
 					self.setColor(color);
 				}
 
