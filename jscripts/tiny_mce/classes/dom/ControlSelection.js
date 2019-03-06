@@ -668,15 +668,19 @@
 				}
 			}
 
-			var throttledUpdateResizeRect = debounce(function (editor, e) {
+			var throttledUpdateResizeRect = debounce(function (e) {
 				updateResizeRect(e);
 			});
 
 			// Toogle resize when image is selected
-			editor.onNodeChange.add(throttledUpdateResizeRect);
+			editor.onNodeChange.add(function() {
+				throttledUpdateResizeRect({type: ''});
+			});
 
 			// Toogle resize when image is dropped
-			editor.onDrop.add(throttledUpdateResizeRect);
+			editor.onDrop.add(function(editor, e) {
+				throttledUpdateResizeRect(e);
+			});
 
 			// Remove resize rect when getting content from the editor
 			editor.onBeforeGetContent.add(hideResizeRect);
