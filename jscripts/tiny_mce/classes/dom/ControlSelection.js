@@ -100,57 +100,11 @@
 
 		// Details about each resize handle how to scale etc
 		resizeHandles = {
-			// Name: x multiplier, y multiplier, delta size x, delta size y
-			/*n: [0.5, 0, 0, -1],
-			e: [1, 0.5, 1, 0],
-			s: [0.5, 1, 0, 1],
-			w: [0, 0.5, -1, 0],*/
 			nw: [0, 0, -1, -1],
 			ne: [1, 0, 1, -1],
 			se: [1, 1, 1, 1],
 			sw: [0, 1, -1, 1]
 		};
-
-		// Add CSS for resize handles, cloned element and selected
-		var rootClass = '.mceContentBody';
-		editor.contentStyles.push(rootClass + ' div.mce-resizehandle {' +
-			'position: absolute;' +
-			'box-sizing: border-box;' +
-			'background: #4099ff;' +
-			'width: 10px;' +
-			'height: 10px;' +
-			'z-index: 10000' +
-			'}' +
-			rootClass + ' .mce-resizehandle:hover {' +
-			'background: #4099ff' +
-			'}' +
-			rootClass + ' img[data-mce-selected],' + rootClass + ' hr[data-mce-selected] {' +
-			'outline: 3px solid #b4d7ff;' +
-			'resize: none' + // Have been talks about implementing this in browsers
-			'}' +
-			rootClass + ' .mce-clonedresizable {' +
-			'position: absolute;' +
-			(tinymce.isGecko ? '' : 'outline: 1px dashed black;') + // Gecko produces trails while resizing
-			'opacity: .5;' +
-			'filter: alpha(opacity=50);' +
-			'z-index: 10000' +
-			'}' +
-			rootClass + ' .mce-resize-helper {' +
-			'background: #555;' +
-			'background: rgba(0,0,0,0.75);' +
-			'border-radius: 3px;' +
-			'border: 1px;' +
-			'color: white;' +
-			'display: none;' +
-			'font-family: sans-serif;' +
-			'font-size: 12px;' +
-			'white-space: nowrap;' +
-			'line-height: 14px;' +
-			'margin: 5px 10px;' +
-			'padding: 5px;' +
-			'position: absolute;' +
-			'z-index: 10001' +
-			'}');
 
 		function isResizable(elm) {
 			var selector = editor.settings.object_resizing;
@@ -344,6 +298,7 @@
 						dom.setAttrib(selectedElmGhost, 'data-mce-bogus', 'all');
 						selectedElmGhost.contentEditable = false; // Hides IE move layer cursor
 						selectedElmGhost.unSelectabe = true;
+
 						dom.setStyles(selectedElmGhost, {
 							left: selectedElmX,
 							top: selectedElmY,
@@ -672,12 +627,16 @@
 			});
 
 			// Toogle resize when image is selected
-			editor.onNodeChange.add(function() {
-				throttledUpdateResizeRect({type: ''});
+			editor.onNodeChange.add(function () {
+				setTimeout(function () {
+					throttledUpdateResizeRect({
+						type: ''
+					});
+				}, 20);
 			});
 
 			// Toogle resize when image is dropped
-			editor.onDrop.add(function(editor, e) {
+			editor.onDrop.add(function (editor, e) {
 				throttledUpdateResizeRect(e);
 			});
 
