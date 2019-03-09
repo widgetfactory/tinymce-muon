@@ -32,8 +32,6 @@
 		 * @param {Editor} editor The editor instance this button is for.
 		 */
 		ColorSplitButton: function (id, settings, editor) {
-			var self = this;
-			
 			this.parent(id, settings, editor);
 
 			/**

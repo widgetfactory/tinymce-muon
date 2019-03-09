@@ -241,7 +241,7 @@
 				left: x,
 				top: y
 			});
-			
+
 			self.element.update();
 
 			self.isMenuVisible = 1;

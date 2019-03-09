@@ -10,7 +10,7 @@
 
 (function (tinymce) {
 	var DOM = tinymce.DOM,
-	Event = tinymce.dom.Event;
+		Event = tinymce.dom.Event;
 
 	/**
 	 * This class is used to create a UI button. A button is basically a link
@@ -74,7 +74,7 @@
 			// In IE a large image that occupies the entire editor area will be deselected when a button is clicked, so
 			// need to keep the selection in case the selection is lost
 			if (tinymce.isIE && self.editor) {
-				Event.add(self.id, 'mousedown', function (e) {
+				Event.add(self.id, 'mousedown', function () {
 					var nodeName = self.editor.selection.getNode().nodeName;
 					imgBookmark = nodeName === 'IMG' ? self.editor.selection.getBookmark() : null;
 				});
@@ -82,7 +82,7 @@
 
 			Event.add(self.id, 'click', function (e) {
 				Event.cancel(e);
-				
+
 				if (!self.isDisabled()) {
 					// restore the selection in case the selection is lost in IE
 					if (tinymce.isIE && self.editor && imgBookmark !== null) {

@@ -79,7 +79,7 @@
 		 */
 		showMenu: function () {
 			var self = this,
-				p1, p2, e = DOM.get(self.id),
+				pos, e = DOM.get(self.id),
 				m;
 
 			if (self.isDisabled()) {
@@ -95,14 +95,13 @@
 				return self.hideMenu();
 			}
 
-			p1 = DOM.getPos(self.settings.menu_container);
-			p2 = DOM.getPos(e);
+			pos = DOM.getPos(e);
 
 			m = self.menu;
-			m.settings.offset_x = p2.x;
-			m.settings.offset_y = p2.y;
-			m.settings.vp_offset_x = p2.x;
-			m.settings.vp_offset_y = p2.y;
+			m.settings.offset_x = pos.x;
+			m.settings.offset_y = pos.y;
+			m.settings.vp_offset_x = pos.x;
+			m.settings.vp_offset_y = pos.y;
 			m.settings.keyboard_focus = self._focused;
 			m.showMenu(0, e.firstChild.clientHeight);
 
