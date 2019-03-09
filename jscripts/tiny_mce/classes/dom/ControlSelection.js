@@ -115,18 +115,17 @@
 		var rootClass = '.mceContentBody';
 		editor.contentStyles.push(rootClass + ' div.mce-resizehandle {' +
 			'position: absolute;' +
-			'border: 1px solid black;' +
-			'box-sizing: content-box;' +
-			'background: #FFF;' +
-			'width: 7px;' +
-			'height: 7px;' +
+			'box-sizing: border-box;' +
+			'background: #4099ff;' +
+			'width: 10px;' +
+			'height: 10px;' +
 			'z-index: 10000' +
 			'}' +
 			rootClass + ' .mce-resizehandle:hover {' +
-			'background: #000' +
+			'background: #4099ff' +
 			'}' +
 			rootClass + ' img[data-mce-selected],' + rootClass + ' hr[data-mce-selected] {' +
-			'outline: 1px solid black;' +
+			'outline: 3px solid #b4d7ff;' +
 			'resize: none' + // Have been talks about implementing this in browsers
 			'}' +
 			rootClass + ' .mce-clonedresizable {' +
