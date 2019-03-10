@@ -707,12 +707,12 @@ tinymce.util.Quirks = function (editor) {
 			customDelete(true);
 		});
 
-		editor.onDragStart.add(function (editor, e) {
+		editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
 			dragStartRng = selection.getRng();
 			setMceInternalContent(e);
 		});
 
-		editor.onDrop.add(function (editor, e) {
+		editor.dom.bind(editor.getBody(), 'drop', function (e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 

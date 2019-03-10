@@ -636,7 +636,7 @@
 			});
 
 			// Toogle resize when image is dropped
-			editor.onDrop.add(function (editor, e) {
+			editor.dom.bind(editor.getBody(), 'drop', function (e) {
 				throttledUpdateResizeRect(e);
 			});
 
