@@ -113,12 +113,37 @@
 			});
 		}
 
+		/**
+		 * Returns true/false if the command is supported or not.
+		 *
+		 * @method queryCommandSupported
+		 * @param {String} command Command that we check support for.
+		 * @return {Boolean} true/false if the command is supported or not.
+		 */
+		function queryCommandSupported(command) {
+			command = command.toLowerCase();
+
+			if (commands.exec[command]) {
+				return true;
+			}
+
+			// Browser commands
+			try {
+				return editor.getDoc().queryCommandSupported(command);
+			} catch (ex) {
+				// Fails sometimes see bug: 1896577
+			}
+
+			return false;
+		}
+
 		// Expose public methods
 		tinymce.extend(this, {
 			execCommand: execCommand,
 			queryCommandState: queryCommandState,
 			queryCommandValue: queryCommandValue,
-			addCommands: addCommands
+			addCommands: addCommands,
+			queryCommandSupported: queryCommandSupported
 		});
 
 		// Private methods

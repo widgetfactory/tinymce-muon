@@ -591,9 +591,8 @@ tinymce.util.Quirks = function (editor) {
 		}
 
 		function transactCustomDelete(isForward) {
-			editor.undoManager.transact(function () {
-				customDelete(isForward);
-			});
+			customDelete(isForward);
+			editor.undoManager.add();
 		}
 
 		editor.onKeyDown.add(function (editor, e) {
@@ -707,12 +706,12 @@ tinymce.util.Quirks = function (editor) {
 			customDelete(true);
 		});
 
-		editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+		editor.dom.bind(editor.getBody(), 'dragstart', function(e) {
 			dragStartRng = selection.getRng();
 			setMceInternalContent(e);
 		});
 
-		editor.dom.bind(editor.getBody(), 'drop', function (e) {
+		editor.dom.bind(editor.getBody(), 'drop', function(e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 
@@ -723,7 +722,7 @@ tinymce.util.Quirks = function (editor) {
 					// produces a green plus icon. When this happens the caretRangeFromPoint
 					// will return "null" even though the x, y coordinate is correct.
 					// But if we detach the insert from the drop event we will get a proper range
-					setTimeout(editor, function () {
+					setTimeout(function () {
 						var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
 
 						if (dragStartRng) {

@@ -588,14 +588,14 @@
 
 			self.contentCSS = [];
 
-            bi = s.body_id || 'tinymce';
+			bi = s.body_id || 'tinymce';
 
 			if (bi.indexOf('=') != -1) {
 				bi = self.getParam('body_id', '', 'hash');
 				bi = bi[self.id] || bi;
 			}
 
-            bc = s.body_class || '';
+			bc = s.body_class || '';
 
 			if (bc.indexOf('=') != -1) {
 				bc = self.getParam('body_class', '', 'hash');
@@ -620,9 +620,9 @@
 				style: {
 					height: h
 				}
-            });
+			});
 
-            DOM.setAttrib(ifr, "src", url || 'javascript:""');
+			DOM.setAttrib(ifr, "src", url || 'javascript:""');
 
 			self.contentAreaContainer = o.iframeContainer;
 
@@ -1297,6 +1297,17 @@
 				func: callback,
 				scope: scope || this
 			};
+		},
+
+		/**
+		 * Returns true/false if the command is supported or not.
+		 *
+		 * @method queryCommandSupported
+		 * @param {String} cmd Command that we check support for.
+		 * @return {Boolean} true/false if the command is supported or not.
+		 */
+		queryCommandSupported: function (cmd) {
+			return this.editorCommands.queryCommandSupported(cmd);
 		},
 
 		/**
