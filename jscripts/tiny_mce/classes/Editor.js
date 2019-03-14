@@ -1237,6 +1237,17 @@
 		},
 
 		/**
+		 * Returns true/false if the command is supported or not.
+		 *
+		 * @method queryCommandSupported
+		 * @param {String} cmd Command that we check support for.
+		 * @return {Boolean} true/false if the command is supported or not.
+		 */
+		queryCommandSupported: function (cmd) {
+			return this.editorCommands.queryCommandSupported(cmd);
+		},
+
+		/**
 		 * Adds a keyboard shortcut for some command or function.
 		 *
 		 * @method addShortcut

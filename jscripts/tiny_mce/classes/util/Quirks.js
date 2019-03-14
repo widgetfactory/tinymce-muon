@@ -23,6 +23,10 @@ tinymce.util.Quirks = function (editor) {
 		each = tinymce.each,
 		RangeUtils = tinymce.dom.RangeUtils,
 		TreeWalker = tinymce.dom.TreeWalker;
+
+	var mceInternalUrlPrefix = 'data:text/mce-internal,';
+	var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
+
 	/**
 	 * Executes a command with a specific state this can be to enable/disable browser editing features.
 	 */
@@ -41,7 +45,7 @@ tinymce.util.Quirks = function (editor) {
 		var documentMode = editor.getDoc().documentMode;
 
 		return documentMode ? documentMode : 6;
-	};
+	}
 
 	/**
 	 * Returns true/false if the event is prevented or not.
@@ -51,7 +55,78 @@ tinymce.util.Quirks = function (editor) {
 	 */
 	function isDefaultPrevented(e) {
 		return e.isDefaultPrevented();
-	};
+	}
+
+	/**
+	 * Sets Text/URL data on the event's dataTransfer object to a special data:text/mce-internal url.
+	 * This is to workaround the inability to set custom contentType on IE and Safari.
+	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
+	 *
+	 * @private
+	 * @param {DragEvent} e Event object
+	 */
+	function setMceInternalContent(e) {
+		var selectionHtml, internalContent;
+
+		if (e.dataTransfer) {
+			if (editor.selection.isCollapsed() && e.target.tagName == 'IMG') {
+				selection.select(e.target);
+			}
+
+			selectionHtml = editor.selection.getContent();
+
+			// Safari/IE doesn't support custom dataTransfer items so we can only use URL and Text
+			if (selectionHtml.length > 0) {
+				internalContent = mceInternalUrlPrefix + escape(editor.id) + ',' + escape(selectionHtml);
+				e.dataTransfer.setData(mceInternalDataType, internalContent);
+			}
+		}
+	}
+
+	/**
+	 * Gets content of special data:text/mce-internal url on the event's dataTransfer object.
+	 * This is to workaround the inability to set custom contentType on IE and Safari.
+	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
+	 *
+	 * @private
+	 * @param {DragEvent} e Event object
+	 * @returns {String} mce-internal content
+	 */
+	function getMceInternalContent(e) {
+		var internalContent;
+
+		if (e.dataTransfer) {
+			internalContent = e.dataTransfer.getData(mceInternalDataType);
+
+			if (internalContent && internalContent.indexOf(mceInternalUrlPrefix) >= 0) {
+				internalContent = internalContent.substr(mceInternalUrlPrefix.length).split(',');
+
+				return {
+					id: unescape(internalContent[0]),
+					html: unescape(internalContent[1])
+				};
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Inserts contents using the paste clipboard command if it's available if it isn't it will fallback
+	 * to the core command.
+	 *
+	 * @private
+	 * @param {String} content Content to insert at selection.
+	 */
+	function insertClipboardContents(content) {
+		if (editor.queryCommandSupported('mceInsertClipboardContent')) {
+			editor.execCommand('mceInsertClipboardContent', false, {
+				content: content
+			});
+		} else {
+			editor.execCommand('mceInsertContent', false, content);
+		}
+	}
 
 	/**
 	 * Fixes a WebKit bug when deleting contents using backspace or delete key.
@@ -526,9 +601,8 @@ tinymce.util.Quirks = function (editor) {
 		}
 
 		function transactCustomDelete(isForward) {
-			editor.undoManager.transact(function () {
-				customDelete(isForward);
-			});
+			customDelete(isForward);
+			editor.undoManager.add();
 		}
 
 		editor.onKeyDown.add(function (editor, e) {
@@ -642,12 +716,12 @@ tinymce.util.Quirks = function (editor) {
 			customDelete(true);
 		});
 
-		editor.onDragStart.add(function (editor, e) {
+		editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
 			dragStartRng = selection.getRng();
 			setMceInternalContent(e);
 		});
 
-		editor.onDrop.add(function (editor, e) {
+		editor.dom.bind(editor.getBody(), 'drop', function (e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 
@@ -658,7 +732,7 @@ tinymce.util.Quirks = function (editor) {
 					// produces a green plus icon. When this happens the caretRangeFromPoint
 					// will return "null" even though the x, y coordinate is correct.
 					// But if we detach the insert from the drop event we will get a proper range
-					setTimeout(editor, function () {
+					setTimeout(function () {
 						var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
 
 						if (dragStartRng) {
@@ -799,7 +873,7 @@ tinymce.util.Quirks = function (editor) {
 					}
 				}
 			}
-		})
+		});
 	}
 
 	/**
@@ -962,7 +1036,7 @@ tinymce.util.Quirks = function (editor) {
 					}
 				}
 			}
-		})
+		});
 	}
 
 	/**
