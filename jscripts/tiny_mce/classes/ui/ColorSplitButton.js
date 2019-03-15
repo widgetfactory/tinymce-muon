@@ -343,7 +343,7 @@
 		 * @method destroy
 		 */
 		destroy: function () {
-			self.parent();
+			this.parent();
 
 			Event.clear(this.id + '_menu');
 			Event.clear(this.id + '_more');
