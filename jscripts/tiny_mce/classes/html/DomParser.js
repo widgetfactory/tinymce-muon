@@ -738,7 +738,7 @@
 
 							// Is the parent to be considered empty after we removed the BR
 							if (parent.isEmpty(nonEmptyElements)) {
-								/*elementRule = schema.getElementRule(parent.name);
+								elementRule = schema.getElementRule(parent.name);
 
 								// Remove or padd the element depending on schema rule
 								if (elementRule) {
@@ -747,7 +747,7 @@
 									} else if (elementRule.paddEmpty) {
 										parent.empty().append(new Node('#text', 3)).value = '\u00a0';
 									}
-								}*/
+								}
 							}
 						}
 					} else {
