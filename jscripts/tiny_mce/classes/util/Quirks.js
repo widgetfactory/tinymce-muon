@@ -1388,11 +1388,11 @@ tinymce.util.Quirks = function (editor) {
 	 * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
 	 */
 	function ieInternalDragAndDrop() {
-		editor.onDragStart.add(function (editor, e) {
+		editor.dom.bind('dragstart', function(e) {
 			setMceInternalContent(e);
 		});
 
-		editor.onDrop.add(function (editor, e) {
+		editor.dom.bind('dragstart', function(e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 
