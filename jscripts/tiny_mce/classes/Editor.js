@@ -107,7 +107,8 @@
 				entity_encoding: 'named',
 				url_converter: self.convertURL,
 				url_converter_scope: self,
-				ie7_compat: TRUE
+				ie7_compat: TRUE,
+				validate_styles: TRUE
 			}, settings);
 
 			/**
@@ -738,7 +739,13 @@
 					// Add internal attribute if we need to we don't on a refresh of the document
 					if (!node.attributes.map[internalName]) {
 						if (name === "style") {
-							node.attr(internalName, dom.serializeStyle(dom.parseStyle(value), node.name));
+
+							// validate style value by parsing and serializing
+							if (settings.validate_styles) {
+								value = dom.serializeStyle(dom.parseStyle(value), node.name);
+							}
+							
+							node.attr(internalName, value);
 						} else {
 							node.attr(internalName, self.convertURL(value, name, node.name));
 						}

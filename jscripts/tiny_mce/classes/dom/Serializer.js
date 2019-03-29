@@ -134,7 +134,9 @@
 					value = node.attributes.map[name];
 
 					if (name === "style") {
-						value = dom.serializeStyle(dom.parseStyle(value), node.name);
+						if (settings.validate_styles) {
+							value = dom.serializeStyle(dom.parseStyle(value), node.name);
+						}
 					} else if (urlConverter) {
 						value = urlConverter.call(urlConverterScope, value, name, node.name);
 					}
