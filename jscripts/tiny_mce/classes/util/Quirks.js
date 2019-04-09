@@ -240,18 +240,13 @@ tinymce.util.Quirks = function (editor) {
 			caretNodeBefore = findCaretNode(startBlock, false);
 			caretNodeAfter = findCaretNode(endBlock, true);
 
-			// remove block elment only if it is empty
-			each([startBlock, endBlock], function (node) {
-				if (dom.isEmpty(node)) {
-					dom.remove(node);
-				}
-			});
-
 			// backspace from the beginning of one block element into the previous block element...
 			if (caretNodeBefore && caretNodeAfter) {
 				if (!dom.isEmpty(endBlock)) {
-					tinymce.each(endBlock.childNodes, function (node) {
-						if (node) {
+					var nodes = tinymce.toArray(endBlock.childNodes);
+					
+					each(nodes, function(node) {
+						if (node && node.nodeType) {
 							startBlock.appendChild(node);
 						}
 					});
@@ -259,6 +254,13 @@ tinymce.util.Quirks = function (editor) {
 
 				dom.remove(endBlock);
 			}
+
+			// remove block elment only if it is empty
+			each([startBlock, endBlock], function (node) {
+				if (dom.isEmpty(node)) {
+					dom.remove(node);
+				}
+			});
 
 			if (caretNodeBefore) {
 				if (caretNodeBefore.nodeType == 1) {
