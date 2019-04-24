@@ -30,6 +30,10 @@ tinymce.ForceBlocks = function (editor) {
             return;
         }
 
+        if (node.getAttribute('data-mce-type')) {
+            return;
+        }
+
         // Check if node is wrapped in block
         while (node && node != rootNode) {
             if (blockElements[node.nodeName]) {
