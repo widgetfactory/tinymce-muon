@@ -244,8 +244,8 @@ tinymce.util.Quirks = function (editor) {
 			if (caretNodeBefore && caretNodeAfter) {
 				if (!dom.isEmpty(endBlock)) {
 					var nodes = tinymce.toArray(endBlock.childNodes);
-					
-					each(nodes, function(node) {
+
+					each(nodes, function (node) {
 						if (node && node.nodeType) {
 							startBlock.appendChild(node);
 						}
@@ -534,7 +534,7 @@ tinymce.util.Quirks = function (editor) {
 			});
 
 			// Observe added nodes and style attribute changes
-			mutationObserver = new MutationObserver(function () {});
+			mutationObserver = new MutationObserver(function () { });
 			mutationObserver.observe(editor.getDoc(), {
 				childList: true,
 				attributes: true,
@@ -708,12 +708,12 @@ tinymce.util.Quirks = function (editor) {
 			customDelete(true);
 		});
 
-		editor.dom.bind(editor.getBody(), 'dragstart', function(e) {
+		editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
 			dragStartRng = selection.getRng();
 			setMceInternalContent(e);
 		});
 
-		editor.dom.bind(editor.getBody(), 'drop', function(e) {
+		editor.dom.bind(editor.getBody(), 'drop', function (e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 
@@ -737,6 +737,41 @@ tinymce.util.Quirks = function (editor) {
 						insertClipboardContents(internalContent.html);
 					}, 0);
 				}
+			}
+		});
+	}
+
+	/**
+	 * Remove runtime styles from Chrome, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
+	 */
+	function cleanupRuntimeStyles() {
+		function removeStyleSpan(node) {
+			var style = node.attr('style');
+
+			if (style) {
+				style = style.replace(/\s/g, '');
+
+				if (style === 'color:inherit;font-family:inherit;font-size:1rem;') {
+					node.unwrap();
+				}
+			}
+		}
+
+		editor.parser.addNodeFilter('span', function (nodes, name) {
+			var i = nodes.length,
+				node;
+			while (i--) {
+				node = nodes[i];
+				removeStyleSpan(node);
+			}
+		});
+
+		editor.serializer.addNodeFilter('span', function (nodes, name) {
+			var i = nodes.length,
+				node;
+			while (i--) {
+				node = nodes[i];
+				removeStyleSpan(node);
 			}
 		});
 	}
@@ -1390,11 +1425,11 @@ tinymce.util.Quirks = function (editor) {
 	 * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
 	 */
 	function ieInternalDragAndDrop() {
-		editor.dom.bind('dragstart', function(e) {
+		editor.dom.bind('dragstart', function (e) {
 			setMceInternalContent(e);
 		});
 
-		editor.dom.bind('dragstart', function(e) {
+		editor.dom.bind('dragstart', function (e) {
 			if (!isDefaultPrevented(e)) {
 				var internalContent = getMceInternalContent(e);
 
@@ -1498,6 +1533,8 @@ tinymce.util.Quirks = function (editor) {
 		imageFloatLinkBug();
 		selectControlElements();
 		//touchClickEvent();
+
+		cleanupRuntimeStyles();
 
 		// iOS
 		if (tinymce.isIOS) {
