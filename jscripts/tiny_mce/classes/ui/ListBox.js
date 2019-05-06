@@ -241,7 +241,7 @@
 				prefix = this.classPrefix;
 
 			html += '<div role="listbox" aria-haspopup="true" aria-labelledby="' + this.id + '_voiceDesc" aria-describedby="' + this.id + '_voiceDesc">';
-			html += '<div role="presentation" tabindex="0" id="' + this.id + '" class="' + prefix + ' ' + prefix + 'Enabled' + (this.settings['class'] ? (' ' + this.settings['class']) : '') + '">';
+			html += '<div role="presentation" tabindex="0" id="' + this.id + '" class="' + prefix + ' ' + (this.settings['class'] ? (' ' + this.settings['class']) : '') + '">';
 
 			html += '<div class="mceText">' + DOM.createHTML('span', {
 				id: this.id + '_voiceDesc',
@@ -249,19 +249,17 @@
 				style: 'display:none;'
 			}, this.settings.title);
 
-			html += DOM.createHTML('a', {
+			html += DOM.createHTML('button', {
 				id: this.id + '_text',
 				tabindex: -1,
-				href: 'javascript:;',
 				class: 'mceText',
 				onclick: "return false;",
 				onmousedown: 'return false;'
 			}, DOM.encode(this.settings.title)) + '</div>';
 
-			html += '<div class="mceOpen">' + DOM.createHTML('a', {
+			html += '<div class="mceOpen">' + DOM.createHTML('button', {
 				id: this.id + '_open',
 				tabindex: -1,
-				href: 'javascript:;',
 				class: 'mceOpen',
 				onclick: "return false;",
 				onmousedown: 'return false;'

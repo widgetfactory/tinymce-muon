@@ -119,7 +119,7 @@
 
 			h = DOM.createHTML('div', {
 				role: 'presentation',
-				'class': 'mceSplitButton mceSplitButtonEnabled ' + s['class'],
+				'class': 'mceSplitButton ' + s['class'],
 				title: s.title
 			}, h);
 
