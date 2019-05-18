@@ -76,7 +76,7 @@ var tinyMCEPopup = {
 			}
 		};
 
-		this.isWindow = !this.getWindowArg('mce_inline');
+		this.isWindow = false;
 		this.id = this.getWindowArg('mce_window_id');
 		this.editor.windowManager.onOpen.dispatch(this.editor.windowManager, window);
 	},
