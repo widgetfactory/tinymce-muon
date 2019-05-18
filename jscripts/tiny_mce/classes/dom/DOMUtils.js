@@ -1055,6 +1055,22 @@
 			return (v !== undef && v !== null && v !== '') ? '' + v : dv;
 		},
 
+		getValue: function(n) {
+			if (n.nodeType !== 1) {
+				return null;
+			}
+
+			if (n.nodeName === "SELECT") {
+				if (n.options == null || n.selectedIndex === -1) {
+					return "";
+				}
+				
+				return n.options[n.selectedIndex].value;
+			}
+
+			return n.value;
+		},	
+
 		/**
 		 * Returns the absolute x, y position of a node. The position will be returned in a object with x, y fields.
 		 *
