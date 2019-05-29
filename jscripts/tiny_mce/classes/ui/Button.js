@@ -10,8 +10,7 @@
 
 (function (tinymce) {
 	var DOM = tinymce.DOM,
-		Event = tinymce.dom.Event,
-		Dispatcher = tinymce.util.Dispatcher;
+		Event = tinymce.dom.Event;
 
 	/**
 	 * This class is used to create a UI button. A button is basically a link
@@ -33,13 +32,6 @@
 		Button: function (id, s, ed) {
 			this.parent(id, s, ed);
 			this.classPrefix = 'mceButton';
-
-			/**
-			 * Fires after the element has been rendered to DOM.
-			 *
-			 * @event onPostRender
-			 */
-			this.onPostRender = new Dispatcher(this);
 		},
 
 		/**
@@ -107,8 +99,6 @@
 					return s.onclick.call(s.scope, e);
 				}
 			});
-
-			this.onPostRender.dispatch(this, DOM.get(this.id));
 		}
 	});
 })(tinymce);

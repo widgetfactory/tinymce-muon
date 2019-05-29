@@ -166,9 +166,9 @@
 			if (s.max_height) {
 				DOM.setStyle(co, 'height', th);
 
-				/*if (tb.clientHeight < s.max_height) {
+				if (tb.clientHeight < s.max_height) {
 					DOM.setStyle(co, 'overflow', 'hidden');
-				}*/
+				}
 			}
 		},
 
@@ -461,6 +461,10 @@
 			var self = this,
 				s = self.settings,
 				n, co, w;
+
+			if (s['class'].indexOf('defaultSkin') === -1) {
+				s['class'] = 'defaultSkin ' + s['class'];
+			}
 
 			w = DOM.create('div', {
 				role: 'listbox',

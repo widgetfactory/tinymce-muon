@@ -177,16 +177,12 @@
 				constrain: ed.settings.constrain_menus
 			}, s);
 
-			s['class'] += ' defaultSkin';
-			
-			if (ed.getParam('skin') !== 'default') {
-				s['class'] += ' ' + ed.getParam('skin') + 'Skin';
+			s['class'] = s['class'] + ' ' + ed.getParam('skin') + 'Skin';
 
-				variant = ed.getParam('skin_variant');
+			v = ed.getParam('skin_variant');
 
-				if (variant) {
-					s['class'] += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
-				}
+			if (v) {
+				s['class'] += ' ' + ed.getParam('skin') + 'Skin' + v.substring(0, 1).toUpperCase() + v.substring(1);
 			}
 
 			s['class'] += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
@@ -416,63 +412,7 @@
 			c = self.add(new cls(id, s, ed));
 			ed.onMouseDown.add(c.hideMenu, c);
 
-			return self.add(c);
-		},
-
-		/**
-		 * Creates a panel button control instance by id.
-		 *
-		 * @method createSplitButton
-		 * @param {String} id Unique id for the new split button instance. For example "spellchecker".
-		 * @param {Object} s Optional settings object for the control.
-		 * @param {Object} cc Optional control class to use instead of the default one.
-		 * @return {tinymce.ui.Control} Control instance that got created and added.
-		 */
-		createPanelButton: function (id, s, cc) {
-			var self = this,
-				ed = self.editor,
-				c, cls, variant;
-
-			if (self.get(id)) {
-				return null;
-			}
-
-			s.panelClass = 'defaultSkin';
-			
-			if (ed.getParam('skin') !== 'default') {
-				s.panelClass += ' ' + ed.getParam('skin') + 'Skin';
-
-				variant = ed.getParam('skin_variant');
-
-				if (variant) {
-					s.panelClass += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
-				}
-			}
-
-			s.panelClass += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
-
-			s.title = ed.translate(s.title);
-			s.scope = s.scope || ed;
-
-			if (!s.onclick && s.cmd) {
-				s.onclick = function (v) {
-					ed.execCommand(s.cmd, s.ui || false, v || s.value);
-				};
-			}
-
-			s = extend({
-				title: s.title,
-				'class': 'mce_' + id,
-				scope: s.scope,
-				control_manager: self
-			}, s);
-
-			id = self.prefix + id;
-			cls = cc || self._cls.panelbutton || tinymce.ui.PanelButton;
-			c = self.add(new cls(id, s, ed));
-			ed.onMouseDown.add(c.hidePanel, c);
-
-			return self.add(c);
+			return c;
 		},
 
 		/**
@@ -545,35 +485,6 @@
 					}
 				});
 			}
-
-			return self.add(c);
-		},
-
-		createTextBox: function (id, s, cc) {
-			var self = this,
-				ed = self.editor,
-				c, cls;
-
-			if (self.get(id)) {
-				return null;
-			}
-
-			s.title = ed.translate(s.title);
-			s.label = ed.translate(s.label);
-			s.scope = s.scope || ed;
-
-			s = extend({
-				title: s.title,
-				'class': 'mce_' + id,
-				unavailable_prefix: ed.getLang('unavailable', ''),
-				scope: s.scope,
-				control_manager: self
-			}, s);
-
-			id = self.prefix + id;
-
-			cls = tinymce.ui.TextBox;
-			c = new cls(id, s, ed);
 
 			return self.add(c);
 		},
