@@ -68,6 +68,7 @@
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
 		ListBox: function (id, s, ed) {
+			var self = this;
 
 			this.parent(id, s, ed);
 
@@ -77,7 +78,7 @@
 			 * @property items
 			 * @type Array
 			 */
-			this.items = [];
+			this.items = s.items || [];
 
 			/**
 			 * Fires when the selection has been changed.
@@ -319,6 +320,7 @@
 			menu.showMenu(0, elm.clientHeight);
 
 			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
+
 			DOM.addClass(this.id, this.classPrefix + 'Selected');
 		},
 
@@ -329,7 +331,7 @@
 		 */
 		hideMenu: function (e) {
 			if (this.menu && this.menu.isMenuVisible) {
-				DOM.removeClass(this.id, this.classPrefix + 'Selected');
+				//DOM.removeClass(this.id, this.classPrefix + 'Selected');
 
 				// Prevent double toogles by canceling the mouse click event to the button
 				if (e && e.type == "mousedown" && (e.target.id == this.id + '_text' || e.target.id == this.id + '_open')) {
@@ -371,7 +373,7 @@
 				this.focus();
 			});
 
-			menu.add({
+			/*menu.add({
 				title: this.settings.title,
 				class: 'mceMenuItemTitle',
 				onclick: function () {
@@ -379,7 +381,7 @@
 						self.select('');
 					} // Must be run after
 				}
-			});
+			});*/
 
 			each(this.items, function (item) {
 				// No value then treat it as a title

@@ -64,6 +64,7 @@
 
 				this.setState('Disabled', state);
 				this.setState('Enabled', !state);
+
 				this.disabled = state;
 			}
 		},

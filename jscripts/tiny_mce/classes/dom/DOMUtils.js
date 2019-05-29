@@ -122,8 +122,8 @@
 					'header hgroup mark menu meter nav ' +
 					'output progress section summary ' +
 					'time video').replace(/\w+/g, function (name) {
-					doc.createElement(name);
-				});
+						doc.createElement(name);
+					});
 
 				// Create all custom elements
 				for (name in settings.schema.getCustomElements()) {
@@ -519,6 +519,23 @@
 		 */
 		create: function (n, a, h) {
 			return this.add(this.doc.createElement(n), n, a, h, 1);
+		},
+
+		wrap: function (elements, wrapper, all) {
+			var lastParent, newWrapper;
+
+			wrapper = this.get(wrapper);
+
+			return this.run(elements, function (elm) {
+				if (!all || lastParent != elm.parentNode) {
+					lastParent = elm.parentNode;
+					newWrapper = wrapper.cloneNode(false);
+					elm.parentNode.insertBefore(newWrapper, elm);
+					newWrapper.appendChild(elm);
+				} else {
+					newWrapper.appendChild(elm);
+				}
+			});
 		},
 
 		/**
@@ -1055,8 +1072,26 @@
 			return (v !== undef && v !== null && v !== '') ? '' + v : dv;
 		},
 
-		getValue: function(n) {
-			if (n.nodeType !== 1) {
+		setValue: function (n, value) {
+			n = this.get(n);
+
+			if (!n || n.nodeType !== 1) {
+				return null;
+			}
+
+			if (n.nodeName === "SELECT") {
+				each(this.select('option[value="' + value + '"]', n), function (elm) {
+					elm.selected = true;
+				});
+			} else {
+				n.value = value;
+			}
+		},
+
+		getValue: function (n) {
+			n = this.get(n);
+
+			if (!n || n.nodeType !== 1) {
 				return null;
 			}
 
@@ -1064,12 +1099,12 @@
 				if (n.options == null || n.selectedIndex === -1) {
 					return "";
 				}
-				
+
 				return n.options[n.selectedIndex].value;
 			}
 
 			return n.value;
-		},	
+		},
 
 		/**
 		 * Returns the absolute x, y position of a node. The position will be returned in a object with x, y fields.
@@ -1261,6 +1296,8 @@
 		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
 		 */
 		addClass: function (e, c) {
+			var self = this;
+			
 			return this.run(e, function (e) {
 				var o;
 
@@ -1268,13 +1305,19 @@
 					return 0;
 				}
 
-				if (this.hasClass(e, c)) {
-					return e.className;
+				if (c.indexOf(' ') !== -1) {
+					each(c.split(' '), function (cls) {
+						self.addClass(e, cls);
+					});
+				} else {
+					if (this.hasClass(e, c)) {
+						return e.className;
+					}
+
+					o = this.removeClass(e, c);
+
+					return e.className = (o != '' ? (o + ' ') : '') + c;
 				}
-
-				o = this.removeClass(e, c);
-
-				return e.className = (o != '' ? (o + ' ') : '') + c;
 			});
 		},
 
@@ -1742,7 +1785,7 @@
 							}
 							break;
 
-							// Import
+						// Import
 						case 3:
 							try {
 								addClasses(r.styleSheet);

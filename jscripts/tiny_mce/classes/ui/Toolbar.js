@@ -39,30 +39,32 @@
 				prev = controls[i - 1];
 				next = controls[i + 1];
 
-				cls = ' mceToolBarItem';
+				cls = 'mceToolbarItem';
 
 				if (ctrl.Button) {
-					cls += 'Button';
+					cls += ' mceToolbarItemButton';
 				} else if (ctrl.SplitButton) {
-					cls += 'SplitButton';
+					cls += ' mceToolbarItemSplitButton';
 				} else if (ctrl.ListBox) {
-					cls += 'ListBox';
+					cls += ' mceToolbarItemListBox';
+				} else if (ctrl.TextBox) {
+					cls += ' mceToolbarItemTextBox';
 				}
 
 				// Add toolbar start after list box and before the next button
 				// This is to fix the o2k7 editor skins
 				if (next && next.ListBox && (ctrl.Button || ctrl.SplitButton)) {
-					cls += ' mceToolBarItemEnd';
+					cls += ' mceToolbarItemEnd';
 				}
 
 				// Add toolbar end before list box and after the previous button
 				// This is to fix the o2k7 editor skins
 				if (prev && prev.ListBox && (ctrl.Button || ctrl.SplitButton)) {
-					cls += ' mceToolBarItemStart';
+					cls += ' mceToolbarItemStart';
 				}
 
 				// Render control HTML
-				html += '<div class="mceToolBarItem' + cls + '">' + ctrl.renderHTML() + '</div>';
+				html += '<div class="' + cls + '">' + ctrl.renderHTML() + '</div>';
 
 				cls = '';
 			}
