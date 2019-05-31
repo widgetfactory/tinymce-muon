@@ -572,7 +572,7 @@
 				tinymce.relaxedDomain = document.domain;
 			}
 
-			self.iframeHTML = s.doctype + '<html><head xmlns="http://www.w3.org/1999/xhtml">';
+			self.iframeHTML = s.doctype + '<html><head>';
 
 			// We only need to override paths if we have to
 			// IE has a bug where it remove site absolute urls to relative ones if this is specified
