@@ -672,15 +672,15 @@
 				}
 
 				if (na == 'float') {
-					na = tinymce.isIE && tinymce.isIE < 12 ? 'styleFloat' : 'cssFloat';
+					na = 'cssFloat';
 				}
 
 				s[na] = v || '';
 
 				// Force update of the style data
 				if (self.settings.update_styles) {
-					v = self.serializeStyle(self.parseStyle(e.style.cssText), e.nodeName);
-					self.setAttrib(e, 'data-mce-style', v);
+					v = self.serializeStyle(self.parseStyle(s.cssText), e.nodeName);
+					e.setAttribute('data-mce-style', v);
 				}
 			});
 		},
@@ -760,10 +760,10 @@
 
 			s.update_styles = ol;
 
-			if (ol) {
+			if (s.update_styles) {
 				// Force update of the style data
 				v = self.serializeStyle(self.parseStyle(e.style.cssText), e.nodeName);
-				self.setAttrib(e, 'data-mce-style', v);
+				e.setAttribute('data-mce-style', v);
 			}
 		},
 
