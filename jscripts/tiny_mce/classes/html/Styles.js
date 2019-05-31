@@ -33,7 +33,7 @@ tinymce.html.Styles = function (settings, schema) {
         urlOrStrRegExp = /(?:url(?:(?:\(\s*\"([^\"]+)\"\s*\))|(?:\(\s*\'([^\']+)\'\s*\))|(?:\(\s*([^)\s]+)\s*\))))|(?:\'([^\']+)\')|(?:\"([^\"]+)\")/gi,
         styleRegExp = /\s*([^:]+):\s*([^;]+);?/g,
         trimRightRegExp = /\s+$/,
-        undef, i, encodingLookup = {},
+        i, encodingLookup = {},
         encodingItems, validStyles, invalidStyles, invisibleChar = '\uFEFF';
 
     settings = settings || {};
@@ -60,13 +60,13 @@ tinymce.html.Styles = function (settings, schema) {
     }
 
     return {
-        /**
-         * Parses the specified RGB color value and returns a hex version of that color.
-         *
-         * @method toHex
-         * @param {String} color RGB string value like rgb(1,2,3)
-         * @return {String} Hex version of that RGB value like #FF00FF.
-         */
+      /**
+       * Parses the specified RGB color value and returns a hex version of that color.
+       *
+       * @method toHex
+       * @param {String} color RGB string value like rgb(1,2,3)
+       * @return {String} Hex version of that RGB value like #FF00FF.
+       */
         toHex: function (color) {
             return color.replace(rgbRegExp, toHex);
         },
@@ -94,6 +94,7 @@ tinymce.html.Styles = function (settings, schema) {
                 }
 
                 right = styles[prefix + '-right' + suffix];
+
                 if (!right) {
                     return;
                 }
@@ -197,6 +198,14 @@ tinymce.html.Styles = function (settings, schema) {
                 return str;
             }
 
+            function decodeSingleHexSequence(escSeq) {
+                return String.fromCharCode(parseInt(escSeq.slice(1), 16));
+            }
+
+            function decodeHexSequences(value) {
+                return value.replace(/\\[0-9a-f]+/gi, decodeSingleHexSequence);
+            }
+
             function processUrl(match, url, url2, url3, str, str2) {
                 str = str || str2;
 
@@ -210,7 +219,7 @@ tinymce.html.Styles = function (settings, schema) {
                 url = decode(url || url2 || url3);
 
                 if (!settings.allow_script_urls) {
-                    var scriptUrl = url.replace(/[\s\r\n]+/, '');
+                    var scriptUrl = url.replace(/[\s\r\n]+/g, '');
 
                     if (/(java|vb)script:/i.test(scriptUrl)) {
                         return "";
@@ -240,17 +249,22 @@ tinymce.html.Styles = function (settings, schema) {
 
                 // Parse styles
                 while ((matches = styleRegExp.exec(css))) {
+                    styleRegExp.lastIndex = matches.index + matches[0].length;
                     name = matches[1].replace(trimRightRegExp, '').toLowerCase();
                     value = matches[2].replace(trimRightRegExp, '');
 
-                    // Decode escaped sequences like \65 -> e
-                    /*jshint loopfunc:true*/
-                    /*eslint no-loop-func:0 */
-                    value = value.replace(/\\[0-9a-f]+/g, function (e) {
-                        return String.fromCharCode(parseInt(e.substr(1), 16));
-                    });
+                    if (name && value) {
+                        // Decode escaped sequences like \65 -> e
+                        name = decodeHexSequences(name);
+                        value = decodeHexSequences(value);
 
-                    if (name && value.length > 0) {
+                        // Skip properties with double quotes and sequences like \" \' in their names
+                        // See 'mXSS Attacks: Attacking well-secured Web-Applications by using innerHTML Mutations'
+                        // https://cure53.de/fp170.pdf
+                        if (name.indexOf(invisibleChar) !== -1 || name.indexOf('"') !== -1) {
+                            continue;
+                        }
+
                         // Don't allow behavior name or expression/comments within the values
                         if (!settings.allow_script_urls && (name == "behavior" || /expression\s*\(|\/\*|\*\//.test(value))) {
                             continue;
@@ -270,9 +284,8 @@ tinymce.html.Styles = function (settings, schema) {
                         value = value.replace(urlOrStrRegExp, processUrl);
                         styles[name] = isEncoded ? decode(value, true) : value;
                     }
-
-                    styleRegExp.lastIndex = matches.index + matches[0].length;
                 }
+
                 // Compress the styles to reduce it's size for example IE will expand styles
                 compress("border", "", true);
                 compress("border", "-width");
@@ -288,7 +301,7 @@ tinymce.html.Styles = function (settings, schema) {
                 }
 
                 // IE 11 will produce a border-image: none when getting the style attribute from <p style="border: 1px solid red"></p>
-                // So lets asume it shouldn't be there
+                // So let us assume it shouldn't be there
                 if (styles['border-image'] === 'none') {
                     delete styles['border-image'];
                 }
@@ -318,7 +331,7 @@ tinymce.html.Styles = function (settings, schema) {
                         name = styleList[i];
                         value = styles[name];
 
-                        if (value !== undef && value.length > 0) {
+                        if (value) {
                             css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
                         }
                     }
@@ -351,10 +364,8 @@ tinymce.html.Styles = function (settings, schema) {
                 for (name in styles) {
                     value = styles[name];
 
-                    if (value !== undef && value.length > 0) {
-                        if (!invalidStyles || isValid(name, elementName)) {
-                            css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
-                        }
+                    if (value && (!invalidStyles || isValid(name, elementName))) {
+                        css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
                     }
                 }
             }
