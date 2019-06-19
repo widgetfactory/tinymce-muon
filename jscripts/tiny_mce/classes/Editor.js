@@ -744,7 +744,7 @@
 							if (settings.validate_styles) {
 								value = dom.serializeStyle(dom.parseStyle(value), node.name);
 							}
-							
+
 							node.attr(internalName, value);
 						} else {
 							node.attr(internalName, self.convertURL(value, name, node.name));
@@ -1150,43 +1150,45 @@
 		 * need to update the UI states or element path etc.
 		 *
 		 * @method nodeChanged
-		 * @param {Object} o Optional object to pass along for the node changed event.
+		 * @param {Object} args Optional object to pass along for the node changed event.
 		 */
-		nodeChanged: function (o) {
+		nodeChanged: function (args) {
 			var self = this,
 				selection = self.selection,
 				node;
 
 			// Fix for bug #1896577 it seems that this can not be fired while the editor is loading
-			if (self.initialized) {
-				o = o || {};
-
+			if (self.initialized && selection && !self.settings.disable_nodechange && !self.readonly) {
 				// Get start node
-				node = selection.getStart() || self.getBody();
-				node = isIE && node.ownerDocument != self.getDoc() ? self.getBody() : node; // Fix for IE initial state
+				root = self.getBody();
+				node = selection.getStart(true) || root;
 
-				// Edge case for <p>|<img></p>
-				if (node.nodeName == 'IMG' && selection.isCollapsed()) {
-					node = node.parentNode;
+				// Make sure the node is within the editor root or is the editor root
+				if (node.ownerDocument != self.getDoc() || !self.dom.isChildOf(node, root)) {
+					node = root;
 				}
 
 				// Get parents and add them to object
-				o.parents = [];
+				parents = [];
 
 				self.dom.getParent(node, function (node) {
-					if (node.nodeName == 'BODY') {
+					if (node === root) {
 						return true;
 					}
 
-					o.parents.push(node);
+					parents.push(node);
 				});
+
+				args = args || {};
+				args.element = node;
+				args.parents = parents;
 
 				self.onNodeChange.dispatch(
 					self,
-					o ? o.controlManager || self.controlManager : self.controlManager,
+					args ? args.controlManager || self.controlManager : self.controlManager,
 					node,
 					selection.isCollapsed(),
-					o
+					args
 				);
 			}
 		},
