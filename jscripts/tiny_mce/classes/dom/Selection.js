@@ -344,13 +344,14 @@
 		},
 
 		/**
-		 * Returns the start element of a selection range. If the start is in a text
-		 * node the parent element will be returned.
-		 *
-		 * @method getStart
-		 * @return {Element} Start element of selection range.
-		 */
-		getStart: function () {
+       * Returns the start element of a selection range. If the start is in a text
+       * node the parent element will be returned.
+       *
+       * @method getStart
+       * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
+       * @return {Element} Start element of selection range.
+       */
+		getStart: function (real) {
 			var self = this,
 				rng = self.getRng(),
 				startElement, parentElement, checkRng, node;
@@ -372,8 +373,7 @@
 				// Check if range parent is inside the start element, then return the inner parent element
 				// This will fix issues when a single element is selected, IE would otherwise return the wrong start element
 				parentElement = node = rng.parentElement();
-
-				while (node = node.parentNode) {
+				while ((node = node.parentNode)) {
 					if (node == startElement) {
 						startElement = parentElement;
 						break;
@@ -381,19 +381,21 @@
 				}
 
 				return startElement;
-			} else {
-				startElement = rng.startContainer;
+			}
 
-				if (startElement.nodeType == 1 && startElement.hasChildNodes()) {
+			startElement = rng.startContainer;
+
+			if (startElement.nodeType == 1 && startElement.hasChildNodes()) {
+				if (!real || !rng.collapsed) {
 					startElement = startElement.childNodes[Math.min(startElement.childNodes.length - 1, rng.startOffset)];
 				}
-
-				if (startElement && startElement.nodeType == 3) {
-					return startElement.parentNode;
-				}
-
-				return startElement;
 			}
+
+			if (startElement && startElement.nodeType == 3) {
+				return startElement.parentNode;
+			}
+
+			return startElement;
 		},
 
 		/**
@@ -401,9 +403,10 @@
 		 * node the parent element will be returned.
 		 *
 		 * @method getEnd
+		 * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
 		 * @return {Element} End element of selection range.
 		 */
-		getEnd: function () {
+		getEnd: function (real) {
 			var self = this,
 				rng = self.getRng(),
 				endElement, endOffset;
@@ -425,20 +428,22 @@
 				}
 
 				return endElement;
-			} else {
-				endElement = rng.endContainer;
-				endOffset = rng.endOffset;
+			}
 
-				if (endElement.nodeType == 1 && endElement.hasChildNodes()) {
+			endElement = rng.endContainer;
+			endOffset = rng.endOffset;
+
+			if (endElement.nodeType == 1 && endElement.hasChildNodes()) {
+				if (!real || !rng.collapsed) {
 					endElement = endElement.childNodes[endOffset > 0 ? endOffset - 1 : endOffset];
 				}
-
-				if (endElement && endElement.nodeType == 3) {
-					return endElement.parentNode;
-				}
-
-				return endElement;
 			}
+
+			if (endElement && endElement.nodeType == 3) {
+				return endElement.parentNode;
+			}
+
+			return endElement;
 		},
 
 		/**
@@ -945,35 +950,93 @@
 		},
 
 		/**
-		 * Returns the browsers internal range object.
-		 *
-		 * @method getRng
-		 * @return {Range} Internal browser range object.
-		 * @see http://www.quirksmode.org/dom/range_intro.html
-		 * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
-		 */
-		getRng: function () {
+       * Returns the browsers internal range object.
+       *
+       * @method getRng
+       * @param {Boolean} w3c Forces a compatible W3C range on IE.
+       * @return {Range} Internal browser range object.
+       * @see http://www.quirksmode.org/dom/range_intro.html
+       * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+       */
+		getRng: function (w3c) {
 			var self = this,
-				selection, rng, elm, doc = self.win.document;
+				selection, rng, elm, doc, ieRng, evt;
 
-			// Workaround for IE 11 not being able to select images properly see #6613 see quirk fix
-			if (self.fakeRng) {
-				return self.fakeRng;
+			function tryCompareBoundaryPoints(how, sourceRange, destinationRange) {
+				try {
+					return sourceRange.compareBoundaryPoints(how, destinationRange);
+				} catch (ex) {
+					// Gecko throws wrong document exception if the range points
+					// to nodes that where removed from the dom #6690
+					// Browsers should mutate existing DOMRange instances so that they always point
+					// to something in the document this is not the case in Gecko works fine in IE/WebKit/Blink
+					// For performance reasons just return -1
+					return -1;
+				}
+			}
+
+			if (!self.win) {
+				return null;
+			}
+
+			doc = self.win.document;
+
+			if (typeof doc === 'undefined' || doc === null) {
+				return null;
+			}
+
+			// Use last rng passed from FocusManager if it's available this enables
+			// calls to editor.selection.getStart() to work when caret focus is lost on IE
+			if (!w3c && self.lastFocusBookmark) {
+				var bookmark = self.lastFocusBookmark;
+
+				// Convert bookmark to range IE 11 fix
+				if (bookmark.startContainer) {
+					rng = doc.createRange();
+					rng.setStart(bookmark.startContainer, bookmark.startOffset);
+					rng.setEnd(bookmark.endContainer, bookmark.endOffset);
+				} else {
+					rng = bookmark;
+				}
+
+				return rng;
 			}
 
 			try {
-				if (selection = self.getSel()) {
-					rng = selection.rangeCount > 0 ? selection.getRangeAt(0) : (selection.createRange ? selection.createRange() : doc.createRange());
+				if ((selection = self.getSel())) {
+					if (selection.rangeCount > 0) {
+						rng = selection.getRangeAt(0);
+					} else {
+						rng = selection.createRange ? selection.createRange() : doc.createRange();
+					}
 				}
 			} catch (ex) {
 				// IE throws unspecified error here if TinyMCE is placed in a frame/iframe
+			}
+
+			// We have W3C ranges and it's IE then fake control selection since IE9 doesn't handle that correctly yet
+			// IE 11 doesn't support the selection object so we check for that as well
+			if (isIE && rng && rng.setStart && doc.selection) {
+				try {
+					// IE will sometimes throw an exception here
+					ieRng = doc.selection.createRange();
+				} catch (ex) {
+					// Ignore
+				}
+
+				if (ieRng && ieRng.item) {
+					elm = ieRng.item(0);
+					rng = doc.createRange();
+					rng.setStartBefore(elm);
+					rng.setEndAfter(elm);
+				}
 			}
 
 			// No range found then create an empty one
 			// This can occur when the editor is placed in a hidden container element on Gecko
 			// Or on IE when there was an exception
 			if (!rng) {
-				rng = doc.createRange();
+				rng = doc.createRange ? doc.createRange() : doc.body.createTextRange();
 			}
 
 			// If range is at start of document then move it to start of body
@@ -984,7 +1047,8 @@
 			}
 
 			if (self.selectedRange && self.explicitRange) {
-				if (rng.compareBoundaryPoints(rng.START_TO_START, self.selectedRange) === 0 && rng.compareBoundaryPoints(rng.END_TO_END, self.selectedRange) === 0) {
+				if (tryCompareBoundaryPoints(rng.START_TO_START, rng, self.selectedRange) === 0 &&
+					tryCompareBoundaryPoints(rng.END_TO_END, rng, self.selectedRange) === 0) {
 					// Safari, Opera and Chrome only ever select text which causes the range to change.
 					// This lets us use the originally set range if the selection hasn't been changed by the user.
 					rng = self.explicitRange;
@@ -998,22 +1062,26 @@
 		},
 
 		/**
-		 * Changes the selection to the specified DOM range.
-		 *
-		 * @method setRng
-		 * @param {Range} r Range to select.
-		 */
-		setRng: function (r, forward) {
-			var s, self = this;
+       * Changes the selection to the specified DOM range.
+       *
+       * @method setRng
+       * @param {Range} rng Range to select.
+       * @param {Boolean} forward Optional boolean if the selection is forwards or backwards.
+       */
+		setRng: function (rng, forward) {
+			var self = this,
+				sel, node;
 
-			if (!r) {
+			if (!rng) {
 				return;
 			}
 
 			// Is IE specific range
-			if (r.select) {
+			if (rng.select) {
+				self.explicitRange = null;
+
 				try {
-					r.select();
+					rng.select();
 				} catch (ex) {
 					// Needed for some odd IE bug #1843306
 				}
@@ -1021,26 +1089,51 @@
 				return;
 			}
 
-			s = self.getSel();
+			sel = self.getSel();
 
-			if (s) {
-				self.explicitRange = r;
+			if (sel) {
+				self.explicitRange = rng;
 
 				try {
-					s.removeAllRanges();
-					s.addRange(r);
+					sel.removeAllRanges();
+					sel.addRange(rng);
 				} catch (ex) {
 					// IE might throw errors here if the editor is within a hidden container and selection is changed
 				}
 
 				// Forward is set to false and we have an extend function
-				if (forward === false && s.extend) {
-					s.collapse(r.endContainer, r.endOffset);
-					s.extend(r.startContainer, r.startOffset);
+				if (forward === false && sel.extend) {
+					sel.collapse(rng.endContainer, rng.endOffset);
+					sel.extend(rng.startContainer, rng.startOffset);
 				}
 
 				// adding range isn't always successful so we need to check range count otherwise an exception can occur
-				self.selectedRange = s.rangeCount > 0 ? s.getRangeAt(0) : null;
+				self.selectedRange = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+			}
+
+			// WebKit egde case selecting images works better using setBaseAndExtent when the image is floated
+			if (!rng.collapsed && rng.startContainer === rng.endContainer && sel.setBaseAndExtent && !tinymce.isIE) {
+				if (rng.endOffset - rng.startOffset < 2) {
+					if (rng.startContainer.hasChildNodes()) {
+						node = rng.startContainer.childNodes[rng.startOffset];
+						if (node && node.tagName === 'IMG') {
+							sel.setBaseAndExtent(
+								rng.startContainer,
+								rng.startOffset,
+								rng.endContainer,
+								rng.endOffset
+							);
+
+							// Since the setBaseAndExtent is fixed in more recent Blink versions we
+							// need to detect if it's doing the wrong thing and falling back to the
+							// crazy incorrect behavior api call since that seems to be the only way
+							// to get it to work on Safari WebKit as of 2017-02-23
+							if (sel.anchorNode !== rng.startContainer || sel.focusNode !== rng.endContainer) {
+								sel.setBaseAndExtent(node, 0, node, 1);
+							}
+						}
+					}
+				}
 			}
 		},
 
