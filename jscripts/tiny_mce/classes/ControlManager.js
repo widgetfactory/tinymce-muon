@@ -178,7 +178,7 @@
 			}, s);
 
 			s['class'] += ' defaultSkin';
-			
+
 			if (ed.getParam('skin') !== 'default') {
 				s['class'] += ' ' + ed.getParam('skin') + 'Skin';
 
@@ -437,20 +437,6 @@
 				return null;
 			}
 
-			s.panelClass = 'defaultSkin';
-			
-			if (ed.getParam('skin') !== 'default') {
-				s.panelClass += ' ' + ed.getParam('skin') + 'Skin';
-
-				variant = ed.getParam('skin_variant');
-
-				if (variant) {
-					s.panelClass += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
-				}
-			}
-
-			s.panelClass += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
-
 			s.title = ed.translate(s.title);
 			s.scope = s.scope || ed;
 
@@ -470,9 +456,18 @@
 			id = self.prefix + id;
 			cls = cc || self._cls.panelbutton || tinymce.ui.PanelButton;
 			c = self.add(new cls(id, s, ed));
+
+			c.panel = this.createPanel(id + '_panel', s);
+
 			ed.onMouseDown.add(c.hidePanel, c);
 
 			return self.add(c);
+		},
+
+		createPanelSplitButton: function(id, s, cc) {
+			var cc = tinymce.ui.PanelSplitButton;
+
+			return this.createPanelButton(id, s, cc);
 		},
 
 		/**
@@ -576,6 +571,49 @@
 			c = new cls(id, s, ed);
 
 			return self.add(c);
+		},
+
+		/**
+		 * Creates a panel container control instance by id.
+		 *
+		 * @method createPanel
+		 * @param {String} id Unique id for the new panel container control instance. For example "panel1".
+		 * @param {Object} s Optional settings object for the control.
+		 * @param {Object} cc Optional control class to use instead of the default one.
+		 * @return {tinymce.ui.Control} Control instance that got created and added.
+		 */
+		createPanel: function (id, s, cc) {
+			var c, self = this, ed = self.editor,
+				cls;
+
+			s.class = 'defaultSkin';
+
+			if (ed.getParam('skin') !== 'default') {
+				s.class += ' ' + ed.getParam('skin') + 'Skin';
+
+				variant = ed.getParam('skin_variant');
+
+				if (variant) {
+					s.class += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
+				}
+			}
+
+			s.class += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
+
+			//id = self.prefix + id;
+			cls = cc || self._cls.panel || tinymce.ui.Panel;
+			c = new cls(id, s, self.editor);
+
+			if (self.get(id)) {
+				return null;
+			}
+
+			return self.add(c);
+		},
+
+		createContextPanel: function (id, s, cc) {
+			var cc = tinymce.ui.ContextPanel;
+			return this.createPanel(id, s, cc);
 		},
 
 		/**
