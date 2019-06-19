@@ -1239,6 +1239,7 @@
 				self.files[u] = true;
 				link = self.create('link', {
 					rel: 'stylesheet',
+					'data-cfasync': 'false',
 					href: tinymce._addVer(u)
 				});
 

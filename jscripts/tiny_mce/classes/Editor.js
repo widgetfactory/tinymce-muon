@@ -584,7 +584,7 @@
 
 			// Load the CSS by injecting them into the HTML this will reduce "flicker"
 			for (i = 0; i < self.contentCSS.length; i++) {
-				self.iframeHTML += '<link type="text/css" rel="stylesheet" href="' + self.contentCSS[i] + '" />';
+				self.iframeHTML += '<link type="text/css" data-cfasync="false" rel="stylesheet" href="' + self.contentCSS[i] + '" />';
 			}
 
 			self.contentCSS = [];
