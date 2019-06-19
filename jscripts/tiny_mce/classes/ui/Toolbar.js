@@ -31,7 +31,7 @@
 				settings = this.settings,
 				i, ctrl, prev, next;
 
-			var controls = this.controls;
+			var controls = settings.controls || this.controls;
 
 			for (i = 0; i < controls.length; i++) {
 				// Get current control, prev control, next control and if the control is a list box or not
@@ -68,6 +68,8 @@
 
 				cls = '';
 			}
+
+			this.controls = controls;
 
 			return dom.createHTML('div', {
 				id: this.id,
