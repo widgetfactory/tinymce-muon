@@ -796,7 +796,25 @@
 			 *    }
 			 * });
 			 */
-			'onSetAttrib'
+			'onSetAttrib',
+
+			/**
+			 * Fires when  when the current text selection in the editor is changed.
+			 *
+			 * @event onSelectionChange
+			 * @param {tinymce.Editor} sender Editor instance.
+			 * @example
+			 * // Adds an observer to the onSelectionChange event using tinyMCE.init
+			 * tinyMCE.init({
+			 *    ...
+			 *    setup : function(ed) {
+			 *       ed.onSelectionChange.add(function(ed, e) {
+			 *          console.debug('Editor contents was modified. Contents: ' + e.content);
+			 *       });
+			 *    }
+			 * });
+			 */
+			'onSelectionChange'
 
 		], function (name) {
 			self[name] = new tinymce.util.Dispatcher(self);
@@ -828,50 +846,6 @@
 				}
 			});
 		}
-
-		// Handle legacy save_callback option
-		if (settings.save_callback) {
-			self.onGetContent.add(function (ed, o) {
-				if (o.save) {
-					o.content = ed.execCallback('save_callback', ed.id, o.content, ed.getBody());
-				}
-			});
-		}
-
-		// Handle legacy handle_event_callback option
-		if (settings.handle_event_callback) {
-			self.onEvent.add(function (ed, e, o) {
-				if (self.execCallback('handle_event_callback', e, ed, o) === false) {
-					e.preventDefault();
-					e.stopPropagation();
-				}
-			});
-		}
-
-		// Handle legacy handle_node_change_callback option
-		if (settings.handle_node_change_callback) {
-			self.onNodeChange.add(function (ed, cm, n) {
-				ed.execCallback('handle_node_change_callback', ed.id, n, -1, -1, true, ed.selection.isCollapsed());
-			});
-		}
-
-		// Handle legacy save_callback option
-		if (settings.save_callback) {
-			self.onSaveContent.add(function (ed, o) {
-				var h = ed.execCallback('save_callback', ed.id, o.content, ed.getBody());
-
-				if (h) {
-					o.content = h;
-				}
-			});
-		}
-
-		// Handle legacy onchange_callback option
-		if (settings.onchange_callback) {
-			self.onChange.add(function (ed, l) {
-				ed.execCallback('onchange_callback', ed, l);
-			});
-		}
 	};
 
 	/**
@@ -897,7 +871,8 @@
 			dblclick: 'onDblClick',
 			paste: 'onPaste', // Doesn't work in all browsers yet,
 			cut: 'onCut',
-			copy: 'onCopy'
+			copy: 'onCopy',
+			selectionchange: 'onSelectionChange'
 		};
 
 		// Handler that takes a native event and sends it out to a dispatcher like onKeyDown
@@ -918,13 +893,51 @@
 			self.focus(true);
 		}
 
+		var timer;
+
 		function nodeChanged(ed, e) {
+			if (timer) {
+				clearTimeout(timer);
+			}
+			
 			// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
 			if (e.keyCode != 65 || !tinymce.VK.metaKeyPressed(e)) {
 				self.selection.normalize();
 			}
 
 			self.nodeChanged();
+		}
+
+		var lastPath = [];
+
+		/**
+		 * Returns true/false if the current element path has been changed or not.
+		 *
+		 * @private
+		 * @return {Boolean} True if the element path is the same false if it's not.
+		 */
+		function isSameElementPath(ed, startElm) {
+			var i, currentPath;
+
+			currentPath = ed.dom.getParents(startElm, '*', ed.getBody());
+			currentPath.push(startElm);
+
+			if (currentPath.length === lastPath.length) {
+				for (i = currentPath.length; i >= 0; i--) {
+					if (currentPath[i] !== lastPath[i]) {
+						break;
+					}
+				}
+
+				if (i === -1) {
+					lastPath = currentPath;
+					return true;
+				}
+			}
+
+			lastPath = currentPath;
+
+			return false;
 		}
 
 		// Add DOM events
@@ -974,16 +987,40 @@
 			dom.bind(self.getBody(), 'keydown', doOperaFocus);
 		}
 
-		// Add node change handler
-		self.onMouseUp.add(nodeChanged);
+		// Selection change is delayed ~200ms on IE when you click inside the current range
+		self.onSelectionChange.add(function (ed, e) {
+			var startElm = ed.selection.getStart(true);
 
-		self.onKeyUp.add(function (ed, e) {
+			if (!isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
+				nodeChanged(ed, e);
+			}
+		});
+
+		// Fire an extra nodeChange on mouseup for compatibility reasons
+		self.onMouseUp.add(function (ed, e) {
+			if (!e.isDefaultPrevented()) {
+				// Delay nodeChanged call for WebKit edge case issue where the range
+				// isn't updated until after you click outside a selected image
+				if (ed.selection.getNode().nodeName == 'IMG') {
+					timer = setTimeout(function () {
+						nodeChanged(ed, e);
+					}, 0);
+				} else {
+					nodeChanged(ed, e);
+				}
+			}
+		});
+
+		// Add node change handler
+		//self.onMouseUp.add(nodeChanged);
+
+		/*self.onKeyUp.add(function (ed, e) {
 			var keyCode = e.keyCode;
 
 			if ((keyCode >= 33 && keyCode <= 36) || (keyCode >= 37 && keyCode <= 40) || keyCode == 13 || keyCode == 45 || keyCode == 46 || keyCode == 8 || (tinymce.isMac && (keyCode == 91 || keyCode == 93)) || e.ctrlKey) {
 				nodeChanged(ed, e);
 			}
-		});
+		});*/
 
 		// Add reset handler
 		self.onReset.add(function () {
