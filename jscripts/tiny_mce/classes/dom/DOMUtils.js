@@ -81,7 +81,6 @@
 				url_converter_scope: s.url_converter_scope
 			}, s.schema);
 
-			self.fixDoc(d);
 			self.events = s.ownEvents ? new tinymce.dom.EventUtils(s.proxy) : tinymce.dom.Event;
 			tinymce.addUnload(self.destroy, this);
 			blockElementsMap = s.schema ? s.schema.getBlockElements() : {};
@@ -109,27 +108,6 @@
 
 				return !!blockElementsMap[node];
 			};
-		},
-
-		fixDoc: function (doc) {
-			var settings = this.settings,
-				name;
-
-			if (isIE < 11 && settings.schema) {
-				// Add missing HTML 4/5 elements to IE
-				('abbr article aside audio canvas ' +
-					'details figcaption figure footer ' +
-					'header hgroup mark menu meter nav ' +
-					'output progress section summary ' +
-					'time video').replace(/\w+/g, function (name) {
-						doc.createElement(name);
-					});
-
-				// Create all custom elements
-				for (name in settings.schema.getCustomElements()) {
-					doc.createElement(name);
-				}
-			}
 		},
 
 		clone: function (node, deep) {
@@ -1297,7 +1275,7 @@
 		 */
 		addClass: function (e, c) {
 			var self = this;
-			
+
 			return this.run(e, function (e) {
 				var o;
 
@@ -1611,6 +1589,15 @@
 					parent.appendChild(node);
 				}
 
+				return node;
+			});
+		},
+
+		insertBefore: function (node, reference_node) {
+			reference_node = this.get(reference_node);
+
+			return this.run(node, function (node) {
+				reference_node.parentNode.insertBefore(node, reference_node);
 				return node;
 			});
 		},
@@ -2192,6 +2179,21 @@
 
 			// Check for real content editable
 			return node.contentEditable !== "inherit" ? node.contentEditable : null;
+		},
+
+		getContentEditableParent: function (node) {
+			var root = this.getRoot(),
+				state = null;
+
+			for (; node && node !== root; node = node.parentNode) {
+				state = this.getContentEditable(node);
+
+				if (state !== null) {
+					break;
+				}
+			}
+
+			return state;
 		},
 
 		isChildOf: function (node, parent) {
