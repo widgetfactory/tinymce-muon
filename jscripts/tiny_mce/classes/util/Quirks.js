@@ -638,7 +638,7 @@ tinymce.util.Quirks = function (editor) {
 		});
 
 		// Handle case where text is deleted by typing over
-		editor.onKeyPress.add(function (editor, e) {
+		/*editor.onKeyPress.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && !selection.isCollapsed() && e.charCode > 31 && !VK.metaKeyPressed(e)) {
 				var rng, currentFormatNodes, fragmentNode, blockParent, caretNode, charText;
 
@@ -698,7 +698,7 @@ tinymce.util.Quirks = function (editor) {
 					editor.selection.setContent(charText);
 				}
 			}
-		});
+		});*/
 
 		editor.addCommand('Delete', function () {
 			customDelete();
