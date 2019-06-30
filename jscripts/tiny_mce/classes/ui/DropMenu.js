@@ -174,6 +174,11 @@
 
 		scrollTo: function (el) {
 			var p = el.parentNode;
+
+			if (!p) {
+				return;
+			}
+
 			p.scrollTop = el.offsetTop;
 		},
 
@@ -395,7 +400,7 @@
 
 			o = self.parent(o);
 
-			if (self.isRendered && (co = DOM.get('menu_' + self.id))) {
+			if (self.isRendered && (co = DOM.get('menu_' + self.id + '_tbl'))) {
 				self._add(co, o);
 			}
 
