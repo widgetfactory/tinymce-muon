@@ -212,10 +212,11 @@
 		function endGhostResize() {
 			resizeStarted = false;
 
-			function setSizeProp(name, value) {
+			function setSizeProp(name, value) {				
 				if (value) {
 					// Resize by using style or attribute
-					if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
+					//if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
+					if (selectedElm.nodeName !== 'IMG') {	
 						dom.setStyle(selectedElm, name, value);
 					} else {
 						dom.setAttrib(selectedElm, name, value);
