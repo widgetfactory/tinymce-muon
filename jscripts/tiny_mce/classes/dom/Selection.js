@@ -244,17 +244,17 @@
 		},
 
 		/**
-		 * Sets the current selection to the specified content. If any contents is selected it will be replaced
-		 * with the contents passed in to this function. If there is no selection the contents will be inserted
-		 * where the caret is placed in the editor/page.
-		 *
-		 * @method setContent
-		 * @param {String} content HTML contents to set could also be other formats depending on settings.
-		 * @param {Object} args Optional settings object with for example data format.
-		 * @example
-		 * // Inserts some HTML contents at the current selection
-		 * tinyMCE.activeEditor.selection.setContent('<strong>Some contents</strong>');
-		 */
+       * Sets the current selection to the specified content. If any contents is selected it will be replaced
+       * with the contents passed in to this function. If there is no selection the contents will be inserted
+       * where the caret is placed in the editor/page.
+       *
+       * @method setContent
+       * @param {String} content HTML contents to set could also be other formats depending on settings.
+       * @param {Object} args Optional settings object with for example data format.
+       * @example
+       * // Inserts some HTML contents at the current selection
+       * tinyMCE.activeEditor.selection.setContent('<strong>Some contents</strong>');
+       */
 		setContent: function (content, args) {
 			var self = this,
 				rng = self.getRng(),
@@ -265,7 +265,8 @@
 				format: 'html'
 			};
 			args.set = true;
-			content = args.content = content;
+			args.selection = true;
+			args.content = content;
 
 			// Dispatch before set content event
 			if (!args.no_events) {
