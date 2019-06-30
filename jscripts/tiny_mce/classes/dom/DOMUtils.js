@@ -122,8 +122,8 @@
 					'header hgroup mark menu meter nav ' +
 					'output progress section summary ' +
 					'time video').replace(/\w+/g, function (name) {
-					doc.createElement(name);
-				});
+						doc.createElement(name);
+					});
 
 				// Create all custom elements
 				for (name in settings.schema.getCustomElements()) {
@@ -678,7 +678,7 @@
 				s[na] = v || '';
 
 				// Force update of the style data
-				if (self.settings.update_styles) {
+				if (self.settings.update_styles) {					
 					v = self.serializeStyle(self.parseStyle(s.cssText), e.nodeName);
 					e.setAttribute('data-mce-style', v);
 				}
@@ -1055,7 +1055,7 @@
 			return (v !== undef && v !== null && v !== '') ? '' + v : dv;
 		},
 
-		getValue: function(n) {
+		getValue: function (n) {
 			if (n.nodeType !== 1) {
 				return null;
 			}
@@ -1064,12 +1064,12 @@
 				if (n.options == null || n.selectedIndex === -1) {
 					return "";
 				}
-				
+
 				return n.options[n.selectedIndex].value;
 			}
 
 			return n.value;
-		},	
+		},
 
 		/**
 		 * Returns the absolute x, y position of a node. The position will be returned in a object with x, y fields.
@@ -1742,7 +1742,7 @@
 							}
 							break;
 
-							// Import
+						// Import
 						case 3:
 							try {
 								addClasses(r.styleSheet);
