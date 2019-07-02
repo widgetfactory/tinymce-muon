@@ -109,7 +109,8 @@
             });
 
             if (!self.panel) {
-                self.panel = new tinymce.ui.Panel(self.id + '_panel', self.settings, self.editor);
+                self.panel = self.editor.controlManager.createPanel(self.id + '_panel', self.settings);
+                self.editor.onMouseDown.add(self.hidePanel, self);
             }
 
             self.panel.onRenderPanel.add(function () {
