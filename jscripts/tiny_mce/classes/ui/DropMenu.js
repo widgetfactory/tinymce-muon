@@ -13,7 +13,6 @@
 		DOM = tinymce.DOM,
 		each = tinymce.each,
 		Event = tinymce.dom.Event,
-		Element = tinymce.dom.Element,
 		undef;
 
 	// http://stackoverflow.com/a/6969486
@@ -140,24 +139,16 @@
 		update: function () {
 			var self = this,
 				s = self.settings,
-				tb = DOM.get('menu_' + self.id + '_tbl'),
 				co = DOM.get('menu_' + self.id + '_co'),
 				tw, th;
 
 			tw = s.max_width ? Math.min(co.offsetWidth, s.max_width) : co.offsetWidth;
 			th = s.max_height ? Math.min(co.offsetHeight, s.max_height) : co.offsetHeight;
 
-			if (!DOM.boxModel) {
-				self.element.setStyles({
-					width: tw + 2,
-					height: th + 2
-				});
-			} else {
-				self.element.setStyles({
-					width: tw,
-					height: th
-				});
-			}
+			DOM.setStyles('menu_' + self.id, {
+				width: tw,
+				height: th
+			});
 
 			if (s.max_width) {
 				DOM.setStyle(co, 'width', tw);
@@ -165,10 +156,6 @@
 
 			if (s.max_height) {
 				DOM.setStyle(co, 'height', th);
-
-				/*if (tb.clientHeight < s.max_height) {
-					DOM.setStyle(co, 'overflow', 'hidden');
-				}*/
 			}
 		},
 
@@ -204,11 +191,6 @@
 				each(self.items, function (o) {
 					o.postRender();
 				});
-
-				self.element = new Element('menu_' + self.id, {
-					blocker: 1,
-					container: s.container
-				});
 			} else {
 				co = DOM.get('menu_' + self.id);
 			}
@@ -241,8 +223,6 @@
 				left: x,
 				top: y
 			});
-
-			self.element.update();
 
 			self.isMenuVisible = 1;
 			self.mouseClickFunc = Event.add(co, 'click', function (e) {
@@ -359,18 +339,20 @@
 			if (self.keyboardNav) {
 				self.keyboardNav.destroy();
 			}
+			
 			Event.remove(co, 'mouseover', self.mouseOverFunc);
 			Event.remove(co, 'click', self.mouseClickFunc);
 			Event.remove(co, 'keydown', self._keyHandler);
 			DOM.hide(co);
+			
 			self.isMenuVisible = 0;
 
 			if (!c) {
 				self.collapse(1);
 			}
 
-			if (self.element) {
-				self.element.hide();
+			if (co) {
+				DOM.hide(co);
 			}
 
 			e = DOM.get(self.id);
@@ -444,10 +426,6 @@
 			Event.remove(co, 'click', self.mouseClickFunc);
 			Event.remove(co, 'keydown', self._keyHandler);
 
-			if (self.element) {
-				self.element.remove();
-			}
-
 			DOM.remove(co);
 		},
 
@@ -478,16 +456,6 @@
 				id: 'menu_' + self.id + '_co',
 				'class': self.classPrefix + (s['class'] ? ' ' + s['class'] : '')
 			});
-			self.element = new Element('menu_' + self.id, {
-				blocker: 1,
-				container: s.container
-			});
-
-			if (s.menu_line) {
-				DOM.add(co, 'div', {
-					'class': self.classPrefix + 'Line'
-				});
-			}
 
 			if (s.filter) {
 				var filter = DOM.add(co, 'div', {
