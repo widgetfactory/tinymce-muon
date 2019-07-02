@@ -430,7 +430,7 @@
             'meta param embed source wbr track');
         boolAttrMap = createLookupTable('boolean_attributes', 'checked compact declare defer disabled ismap multiple nohref noresize ' +
             'noshade nowrap readonly selected autoplay loop controls itemscope playsinline');
-        nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script', shortEndedElementsMap);
+        nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script div', shortEndedElementsMap);
         moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
         textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
             'blockquote center dir fieldset header footer article section hgroup aside nav figure');
@@ -753,8 +753,8 @@
                 }
             });
 
-            // Padd these by default (div is removed as it is a wrapper element) 
-            each(split('p h1 h2 h3 h4 h5 h6 th td pre address caption'), function (name) {
+            // Padd these by default 
+            each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
                 elements[name].paddEmpty = true;
             });
 
