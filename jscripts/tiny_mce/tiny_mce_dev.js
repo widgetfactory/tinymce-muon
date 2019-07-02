@@ -98,7 +98,6 @@
 	include('dom/TreeWalker.js');
 	include('dom/DOMUtils.js');
 	include('dom/Sizzle.js');
-	include('dom/Element.js');
 	include('dom/Selection.js');
 	include('dom/Serializer.js');
 	include('dom/ScriptLoader.js');
