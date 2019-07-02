@@ -1237,24 +1237,12 @@
 				}
 
 				self.files[u] = true;
+				
 				link = self.create('link', {
 					rel: 'stylesheet',
 					'data-cfasync': 'false',
 					href: tinymce._addVer(u)
 				});
-
-				// IE 8 has a bug where dynamically loading stylesheets would produce a 1 item remaining bug
-				// This fix seems to resolve that issue by realcing the document ones a stylesheet finishes loading
-				// It's ugly but it seems to work fine.
-				if (isIE && !tinymce.isIE11 && d.documentMode && d.recalc) {
-					link.onload = function () {
-						if (d.recalc) {
-							d.recalc();
-						}
-
-						link.onload = null;
-					};
-				}
 
 				head.appendChild(link);
 			});
