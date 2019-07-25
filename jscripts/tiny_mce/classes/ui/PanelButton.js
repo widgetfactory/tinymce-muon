@@ -118,6 +118,12 @@
             });
         },
 
+        restoreSelection: function() {
+            if (self.panel) {
+                self.panel.restoreSelection();
+            }
+        },  
+
         destroy: function () {
             this.parent();
 
