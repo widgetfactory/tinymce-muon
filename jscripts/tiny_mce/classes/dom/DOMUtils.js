@@ -1335,7 +1335,7 @@
 			if (!n || !c) {
 				return false;
 			}
-			
+
 			return n.classList.contains(c);
 		},
 
@@ -1897,6 +1897,7 @@
 
 						// Keep empty elements like <img />
 						name = node.nodeName.toLowerCase();
+
 						if (elements && elements[name]) {
 							// Ignore single BR elements in blocks like <p><br /></p> or <p><span><br /></span></p>
 							if (name === 'br') {
@@ -1911,6 +1912,7 @@
 						// Keep elements with data-bookmark attributes or name attribute like <a name="1"></a>
 						attributes = self.getAttribs(node);
 						i = attributes.length;
+						
 						while (i--) {
 							name = attributes[i].nodeName;
 							if (name === "name" || name === 'data-mce-bookmark') {
