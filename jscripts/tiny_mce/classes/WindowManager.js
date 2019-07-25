@@ -116,6 +116,8 @@
             f.width = parseInt(f.width || 0);
             f.height = parseInt(f.height || 0) + (tinymce.isIE ? 8 : 0);
 
+            f.popup_css = false;
+
             p.mce_window_id = id;
 
             self.features = f;
