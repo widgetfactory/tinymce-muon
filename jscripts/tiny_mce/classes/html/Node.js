@@ -174,6 +174,51 @@
 			}
 		},
 
+		addClass: function(str) {
+			var o, cls = this.attr('class') || '';
+			
+			if (!str) {
+				return cls;
+			}
+
+			if (this.hasClass(str)) {
+				return cls;
+			}
+
+			o = this.removeClass(str);
+
+			cls = (o != '' ? (o + ' ') : '') + str;
+
+			this.attr('class', cls);
+
+			return cls;
+		},
+
+		hasClass: function(str) {
+			var cls = this.attr('class') || '';
+			return (' ' + cls + ' ').indexOf(' ' + str + ' ') !== -1;
+		},
+
+		removeClass: function(str) {
+			var cls = this.attr('class') || '';
+
+			if (this.hasClass(str)) {
+				var re = new RegExp("(^|\\s+)" + str + "(\\s+|$)", "g");
+
+				cls = cls.replace(re, ' ');
+				cls = tinymce.trim(cls != ' ' ? cls : '');
+
+				this.attr('class', cls);
+
+				// Empty class attr
+				if (!cls) {
+					this.attr('class', null);
+				}
+			}
+
+			return cls;
+		},
+
 		/**
 		 * Does a shallow clones the node into a new node. It will also exclude id attributes since
 		 * there should only be one id per document.
