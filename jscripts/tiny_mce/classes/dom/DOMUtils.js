@@ -1277,13 +1277,16 @@
 						self.addClass(e, cls);
 					});
 				} else {
-					if (this.hasClass(e, c)) {
+					/*if (this.hasClass(e, c)) {
 						return e.className;
 					}
 
 					o = this.removeClass(e, c);
 
-					return e.className = (o != '' ? (o + ' ') : '') + c;
+					return e.className = (o != '' ? (o + ' ') : '') + c;*/
+					e.classList.add(c);
+
+					return e.className;
 				}
 			});
 		},
@@ -1303,28 +1306,15 @@
 		 * tinyMCE.DOM.removeClass('mydiv', 'myclass');
 		 */
 		removeClass: function (e, c) {
-			var self = this,
-				re;
+			var self = this;
 
 			return self.run(e, function (e) {
-				var v;
+				e.classList.remove(c);
 
-				if (self.hasClass(e, c)) {
-					if (!re) {
-						re = new RegExp("(^|\\s+)" + c + "(\\s+|$)", "g");
-					}
-					v = e.className.replace(re, ' ');
-					v = tinymce.trim(v != ' ' ? v : '');
-
-					e.className = v;
-
-					// Empty class attr
-					if (!v) {
-						e.removeAttribute('class');
-						e.removeAttribute('className');
-					}
-
-					return v;
+				// Empty class attr
+				if (!e.className) {
+					e.removeAttribute('class');
+					e.removeAttribute('className');
 				}
 
 				return e.className;
@@ -1345,8 +1335,8 @@
 			if (!n || !c) {
 				return false;
 			}
-
-			return (' ' + n.className + ' ').indexOf(' ' + c + ' ') !== -1;
+			
+			return n.classList.contains(c);
 		},
 
 		/**

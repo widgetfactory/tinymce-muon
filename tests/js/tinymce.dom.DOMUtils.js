@@ -1,6 +1,6 @@
 (function() {
 	var DOM = new tinymce.dom.DOMUtils(document, {keep_values : true, schema : new tinymce.html.Schema()});
-	
+
 	var cleanHtml = Utils.cleanHtml;
 
 	test('parseStyle', 11, function() {
@@ -31,7 +31,7 @@
 			dom.serializeStyle(dom.parseStyle('border-width: 1pt 1pt 1pt 1pt; border-style: none none none none; border-color: black black black black;')),
 			'border: 1pt none black;'
 		);
-		
+
 		equal(
 			dom.serializeStyle(dom.parseStyle('border-width: 1pt 4pt 2pt 3pt; border-style: solid dashed dotted none; border-color: black red green blue;')),
 			'border-width: 1pt 4pt 2pt 3pt; border-style: solid dashed dotted none; border-color: black red green blue;'
@@ -103,7 +103,7 @@
 		DOM.get('test').innerHTML = '<span id="test2" class="test1"></span><span id="test3" class="test test1 test"></span><span id="test4" class="test1 test"></span>';
 		DOM.removeClass(DOM.select('span', 'test'), 'test1');
 		equal(DOM.get('test2').className, '');
-		equal(DOM.get('test3').className, 'test test');
+		equal(DOM.get('test3').className, 'test');
 		equal(DOM.get('test4').className, 'test');
 		DOM.get('test').innerHTML = '';
 
@@ -653,7 +653,7 @@
 		var elm = DOM.create('p', null, '<em><br></em>');
 		ok(DOM.isEmpty(elm, 'No children'));
 	});
-	
+
 	test('isEmpty on P with two BR in EM', function() {
 		var elm = DOM.create('p', null, '<em><br><br></em>');
 		equal(false, DOM.isEmpty(elm));
