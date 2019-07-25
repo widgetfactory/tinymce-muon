@@ -31,22 +31,14 @@ tinymce.dom = {};
      * Binds a native event to a callback on the speified target.
      */
     function addEvent(target, name, callback, capture) {
-        if (target.addEventListener) {
-            target.addEventListener(name, callback, capture || false);
-        } else if (target.attachEvent) {
-            target.attachEvent('on' + name, callback);
-        }
+        target.addEventListener(name, callback, capture || false);
     }
 
     /**
      * Unbinds a native event callback on the specified target.
      */
     function removeEvent(target, name, callback, capture) {
-        if (target.removeEventListener) {
-            target.removeEventListener(name, callback, capture || false);
-        } else if (target.detachEvent) {
-            target.detachEvent('on' + name, callback);
-        }
+        target.removeEventListener(name, callback, capture || false);
     }
 
     /**
@@ -98,11 +90,7 @@ tinymce.dom = {};
 
             // Execute preventDefault on the original event object
             if (originalEvent) {
-                if (originalEvent.preventDefault) {
-                    originalEvent.preventDefault();
-                } else {
-                    originalEvent.returnValue = false; // IE
-                }
+                originalEvent.preventDefault();
             }
         };
 
@@ -112,11 +100,7 @@ tinymce.dom = {};
 
             // Execute stopPropagation on the original event object
             if (originalEvent) {
-                if (originalEvent.stopPropagation) {
-                    originalEvent.stopPropagation();
-                } else {
-                    originalEvent.cancelBubble = true; // IE
-                }
+                originalEvent.stopPropagation();
             }
         };
 
@@ -131,11 +115,6 @@ tinymce.dom = {};
             event.isDefaultPrevented = returnFalse;
             event.isPropagationStopped = returnFalse;
             event.isImmediatePropagationStopped = returnFalse;
-        }
-
-        // Add missing metaKey for IE 8
-        if (typeof event.metaKey == 'undefined') {
-            event.metaKey = false;
         }
 
         return event;
@@ -164,43 +143,11 @@ tinymce.dom = {};
             }
         }
 
-        function waitForDomLoaded() {
-            // Check complete or interactive state if there is a body
-            // element on some iframes IE 8 will produce a null body
-            if (doc.readyState === "complete" || (doc.readyState === "interactive" && doc.body)) {
-                removeEvent(doc, "readystatechange", waitForDomLoaded);
-                readyHandler();
-            }
-        }
-
-        function tryScroll() {
-            try {
-                // If IE is used, use the trick by Diego Perini licensed under MIT by request to the author.
-                // http://javascript.nwbox.com/IEContentLoaded/
-                doc.documentElement.doScroll("left");
-            } catch (ex) {
-                setTimeout(tryScroll, 0);
-                return;
-            }
-
-            readyHandler();
-        }
-
         // Use W3C method
-        if (doc.addEventListener) {
-            if (doc.readyState === "complete") {
-                readyHandler();
-            } else {
-                addEvent(win, 'DOMContentLoaded', readyHandler);
-            }
+        if (doc.readyState === "complete") {
+            readyHandler();
         } else {
-            // Use IE method
-            addEvent(doc, "readystatechange", waitForDomLoaded);
-
-            // Wait until we can scroll, when we can the DOM is initialized
-            if (doc.documentElement.doScroll && win.self === win.top) {
-                tryScroll();
-            }
+            addEvent(win, 'DOMContentLoaded', readyHandler);
         }
 
         // Fallback if any of the above methods should fail for some odd reason
@@ -652,7 +599,7 @@ tinymce.dom = {};
     });
 
     // Bind ready event when tinymce script is loaded
-    namespace.Event.bind(window, 'ready', function () {});
+    namespace.Event.bind(window, 'ready', function () { });
 
     namespace = 0;
 })(tinymce.dom); // Namespace and expando
