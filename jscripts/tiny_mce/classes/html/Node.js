@@ -175,23 +175,31 @@
 		},
 
 		addClass: function(str) {
-			var o, cls = this.attr('class') || '';
+			var self = this;
 			
+			var cls = self.attr('class') || '';
+
 			if (!str) {
 				return cls;
 			}
 
-			if (this.hasClass(str)) {
+			if (str.indexOf(' ') !== -1) {
+
+				tinymce.each(str.split(' '), function(val) {
+					self.addClass(val);
+				});
+
+			} else {
+				if (self.hasClass(str)) {
+					return cls;
+				}
+
+				cls =  tinymce.trim(cls + ' ' + str);
+
+				self.attr('class', cls);
+	
 				return cls;
 			}
-
-			o = this.removeClass(str);
-
-			cls = (o != '' ? (o + ' ') : '') + str;
-
-			this.attr('class', cls);
-
-			return cls;
 		},
 
 		hasClass: function(str) {
@@ -200,23 +208,30 @@
 		},
 
 		removeClass: function(str) {
-			var cls = this.attr('class') || '';
+			var self = this, cls = self.attr('class') || '';
 
-			if (this.hasClass(str)) {
-				var re = new RegExp("(^|\\s+)" + str + "(\\s+|$)", "g");
-
-				cls = cls.replace(re, ' ');
-				cls = tinymce.trim(cls != ' ' ? cls : '');
-
-				this.attr('class', cls);
-
-				// Empty class attr
-				if (!cls) {
-					this.attr('class', null);
-				}
+			if (!str) {
+				return cls;
 			}
 
-			return cls;
+			if (str.indexOf(' ') !== -1) {
+				tinymce.each(str.split(' '), function(val) {
+					self.removeClass(val);
+				});
+			} else {
+				if (self.hasClass(str)) {
+					cls = tinymce.trim((" " + cls + " ").replace(' ' + str + ' ', ' '));
+
+					// remove the attribute if the value is empty
+					if (!cls) {
+						self.attr('class', null);
+					} else {
+						self.attr('class', cls);
+					}
+				}
+	
+				return cls;
+			}
 		},
 
 		/**
