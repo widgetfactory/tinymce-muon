@@ -36,7 +36,7 @@
 		 * Note for both up/down and left/right explicitly set both enableLeftRight and enableUpDown to true.
 		 */
 		KeyboardNavigation: function (settings, dom) {
-			var root = settings.root,
+			var self = this, root = settings.root,
 				items = settings.items,
 				enableUpDown = settings.enableUpDown,
 				enableLeftRight = settings.enableLeftRight || !settings.enableUpDown,
@@ -134,28 +134,28 @@
 				switch (evt.keyCode) {
 					case DOM_VK_LEFT:
 						if (enableLeftRight) {
-							this.moveFocus(-1);
+							self.moveFocus(-1);
 							Event.cancel(evt);
 						}
 						break;
 
-					case DOM_VK_RIGHT:
+					case DOM_VK_RIGHT:					
 						if (enableLeftRight) {
-							this.moveFocus(1);
+							self.moveFocus(1);
 							Event.cancel(evt);
 						}
 						break;
 
 					case DOM_VK_UP:
 						if (enableUpDown) {
-							this.moveFocus(-1);
+							self.moveFocus(-1);
 							Event.cancel(evt);
 						}
 						break;
 
 					case DOM_VK_DOWN:
 						if (enableUpDown) {
-							this.moveFocus(1);
+							self.moveFocus(1);
 							Event.cancel(evt);
 						}
 						break;

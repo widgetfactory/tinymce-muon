@@ -75,6 +75,23 @@
         },
 
         /**
+         * Creates a instance of a class. This method was needed since IE can't create instances
+         * of classes from a parent window due to some reference problem. Any arguments passed after the class name
+         * will be passed as arguments to the constructor.
+         *
+         * @method createInstance
+         * @param {String} cl Class name to create an instance of.
+         * @return {Object} Instance of the specified class.
+         * @example
+         * var uri = tinyMCEPopup.editor.windowManager.createInstance('tinymce.util.URI', 'http://www.somesite.com');
+         * alert(uri.getURI());
+         */
+        createInstance: function (cl, a, b, c, d, e) {
+            var fn = tinymce.resolve(cl);
+            return new fn(a, b, c, d, e);
+        },
+
+        /**
          * Opens a new window.
          *
          * @method open
@@ -95,11 +112,11 @@
          */
         open: function (f, p) {
             var self = this,
-                id, opt = '',
+                id,
                 ed = self.editor,
                 dw = 0,
                 dh = 0,
-                vp, po, mdf, clf, rsf, we, w, url;
+                win, url;
 
             f = f || {};
             p = p || {};
@@ -111,12 +128,8 @@
 
             id = DOM.uniqueId("mce_window_"); // Use a prefix so this can't conflict with other ids
 
-            vp = DOM.getViewPort();
-
             f.width = parseInt(f.width || 0);
-            f.height = parseInt(f.height || 0) + (tinymce.isIE ? 8 : 0);
-
-            f.popup_css = false;
+            f.height = parseInt(f.height || 0);
 
             p.mce_window_id = id;
 
@@ -126,23 +139,23 @@
             self.onOpen.dispatch(self, f, p);
 
             // modal html
-            var html = '' + 
-            '<div class="mceModalBody" id="' + id + '">' +
-            '   <div class="mceModalContainer">' +
-            '       <div class="mceModalHeader" id="' + id + '_header">' +
-            '           <button class="mceModalClose" type="button"></button>' +
-            '           <h3 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h3>' +
-            '       </div>' +
-            '       <div class="mceModalContent" id="' + id + '_content"></div>' +
-            '   </div>' +
-            '</div>';
+            var html = '' +
+                '<div class="mceModalBody" id="' + id + '">' +
+                '   <div class="mceModalContainer">' +
+                '       <div class="mceModalHeader" id="' + id + '_header">' +
+                '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
+                '           <button class="mceModalClose" type="button" title="' + ed.getLang('common.close', 'Close') + '"></button>' +
+                '       </div>' +
+                '       <div class="mceModalContent" id="' + id + '_content"></div>' +
+                '   </div>' +
+                '</div>';
 
             // find modal
             var modal = DOM.select('.mceModal');
 
             // create modal
             if (!modal.length) {
-                modal = DOM.add(DOM.doc.body, 'div', { 'class': 'mceModal', role: 'dialog' }, '');
+                modal = DOM.add(DOM.doc.body, 'div', { 'class': 'defaultSkin mceModal', role: 'dialog', 'aria-labelledby' : id + '_title'}, '');
 
                 if (f.overlay !== false) {
                     DOM.add(modal, 'div', { 'class': 'mceModalOverlay' });
@@ -156,7 +169,7 @@
             } else {
                 DOM.addClass(modal, 'mceModalFixed');
 
-                Event.add(id, 'blur', function() {
+                Event.add(id, 'blur', function () {
                     self.close(null, id);
                 });
             }
@@ -165,11 +178,13 @@
 
             if (url) {
                 url = tinymce._addVer(url);
-                
+
                 // add loader
                 DOM.addClass(id, 'mceLoading');
 
-                var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0 });
+                DOM.addClass(id + '_content', 'mceModalContentIframe');
+
+                var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label' : 'Dialog Content Iframe' });
                 DOM.setAttrib(iframe, 'src', url);
 
                 Event.add(iframe, 'load', function () {
@@ -180,14 +195,16 @@
                     DOM.addClass(id, 'mceModal' + ucfirst(f.type));
                 }
 
-                f.buttons = f.buttons || [{
-                    id: 'cancel',
-                    title: self.editor.getLang('cancel', 'Cancel'),
-                    onclick: function (e) {
-                        Event.cancel(e);
-                        self.close();
+                f.buttons = f.buttons || [
+                    {
+                        id: 'cancel',
+                        title: self.editor.getLang('cancel', 'Cancel'),
+                        onclick: function (e) {
+                            Event.cancel(e);
+                            self.close(null, id);
+                        }
                     }
-                }];
+                ];
 
                 if (f.buttons.length) {
                     // add footer
@@ -195,82 +212,130 @@
 
                     // add buttons
                     each(f.buttons, function (button) {
-                        var btn = DOM.add(id + '_footer', 'button', {
-                            id: id + '_' +  button.id,
+
+                        // patch in close function for cancel button
+                        if (button.id === 'cancel') {
+                            button.onclick = function (e) {
+                                self.close(null, id);
+                            }
+                        }
+
+                        var attribs = {
+                            id: id + '_' + button.id,
                             'class': 'mceButton',
                             type: 'button'
-                        }, button.title || 'Ok');
+                        };
 
-                        each(tinymce.explode(button.classes), function(cls) {
+                        if (button.autofocus) {
+                            attribs.autofocus = true;
+                        }
+
+                        button.title = button.title || 'OK';
+
+                        var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
+
+                        if (button.icon) {
+                            DOM.add(btn, 'span', {'class' : 'mceIcon mce_' + button.icon, 'role' : 'presentation'});
+                        }
+
+                        each(tinymce.explode(button.classes), function (cls) {
                             DOM.addClass(btn, 'mceButton' + ucfirst(cls));
                         });
 
+                        // process passed in onclick
                         if (button.onclick) {
-                            Event.add(btn, 'click', button.onclick);
+                            Event.add(btn, 'click', function (e) {
+                                Event.cancel(e);
+                                button.onclick.call(self, e);
+                            });
+                        }
+
+                        // a submit is simply an onclick with a built in close
+                        if (button.onsubmit) {
+                            Event.add(btn, 'click', function (e) {
+                                Event.cancel(e);
+                                button.onsubmit.call(self, e);
+                                self.close(null, id);
+                            });
                         }
                     });
                 }
 
                 if (typeof f.content === "string") {
-                    DOM.setHTML(id + '_content', '<div>' + f.content.replace('\n', '<br />') + '</div>');
+                    DOM.setHTML(id + '_content', '<form>' + f.content.replace('\n', '') + '</form>');
                 } else {
-                    DOM.add(id + '_content', f.content);
+                    DOM.add(id + '_content', DOM.create('form', {}, f.content));
                 }
 
-                // Close on escape
-                Event.add(id, 'keyup', function (evt) {
-                    if (evt.keyCode === 27) {
-                        self.close(false);
-                        return Event.cancel(evt);
+                function nodeIndex(nodes, node) {
+                    for (var i = 0; i < nodes.length; i++) {
+                        if (nodes[i] === node) {
+                            return i;
+                        }
                     }
-                });
 
-                Event.add(id, 'keydown', function (evt) {
+                    return -1;
+                }
+
+                // restrict tabbing to within the form elements of the dialog
+                Event.add(id, 'keydown', function (e) {
                     var tabIndex = 0;
-                    
-                    if (evt.keyCode === 9) {
-                        Event.cancel(evt);
 
+                    if (e.keyCode === 9) {
                         var nodes = DOM.select('input, button, select, textarea', DOM.get(id));
 
-                        nodes = tinymce.grep(nodes, function(node) {
-                            return node.getAttribute('tabindex') >= 0;
-                        });
-                        
-                        tinymce.each(nodes, function(node, i) {
-                            if (DOM.hasClass(node, 'mceFocus')) {
-                                tabIndex = i;
-                            }
+                        nodes = tinymce.grep(nodes, function (node) {
+                            return !node.disabled && !DOM.isHidden(node) && node.getAttribute('tabindex') >= 0;
                         });
 
-                        // must be >= 0
-                        tabIndex = Math.max(tabIndex, 0);
-
-                        // reverse on SHIFT+TAB
-                        if (evt.shiftKey) {
-                            tabIndex--;
-                        } else {
-                            tabIndex++;
+                        if (!nodes.length) {
+                            return;
                         }
 
-                        // must be >= 0
+                        if (e.shiftKey) {
+                            nodes.reverse();
+                        }
+
+                        var endIndex = Math.max(0, nodes.length - 1), tabIndex = nodeIndex(nodes, e.target);
+
+                        tabIndex++;
+
                         tabIndex = Math.max(tabIndex, 0);
 
-                        // if greater than the last item, then go back to 0
-                        if (tabIndex === nodes.length) {
+                        if (tabIndex > endIndex) {
                             tabIndex = 0;
                         }
 
-                        DOM.removeClass(nodes, 'mceFocus');
+                        nodes[tabIndex].focus();
 
-                        // focus the nth item
-                        if (nodes[tabIndex]) {
-                            nodes[tabIndex].focus();
-                            DOM.addClass(nodes[tabIndex], 'mceFocus');
-                        }
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
                     }
                 });
             }
+
+            Event.add(id, 'keyup', function (evt) {
+                // Close on escape
+                if (evt.keyCode === 27) {
+                    self.close(null, id);
+                    return Event.cancel(evt);
+                }
+
+                // enter triggers focused button
+                if (evt.keyCode === 13) {
+                    if (evt.target && evt.target.nodeName === "BUTTON") {
+                        Event.fire(evt.target, 'click');
+                    }
+                    // or cancel
+                    evt.preventDefault();
+                    evt.stopImmediatePropagation();
+                }
+            });
+
+            Event.add(DOM.select('button.mceModalClose', DOM.get(id)), 'click', function (e) {
+                self.close(null, id);
+                return Event.cancel(e);
+            });
 
             // Measure borders
             if (!f.type) {
@@ -300,49 +365,54 @@
 
             // Register events
             Event.add(id, 'mousedown', function (e) {
-                var n = e.target,
-                    w, vp;
+                var n = e.target
 
-                w = self.windows[id];
                 self.focus(id);
 
-                if (DOM.is(n, 'button.mceModalClose')) {
-                    self.close(null, id);
-                    return Event.cancel(e);
+                // ignore if the target is the close button, as this has it's own onclick event
+                if (DOM.hasClass(n, '.mceModalClose')) {
+                    return;
                 }
 
                 if (f.fixed) {
                     return;
                 }
-                
+
                 if (DOM.hasClass(n, 'mceModalMove') || DOM.hasClass(n.parentNode, 'mceModalMove')) {
                     return self._startDrag(id, e, 'Move');
                 }
             });
 
             // Add window
-            w = self.windows[id] = {
+            self.windows[id] = win = {
                 id: id,
                 features: f,
-                moveTo: function(x, y) {
+                moveTo: function (x, y) {
                     return self.moveTo(id, x, y);
                 },
-                close: function() {
+                close: function () {
                     return self.close(null, id);
+                },
+                focus: function() {
+                    return self.focus(id);
                 }
             };
+
+            if (f.open && typeof f.open === "function") {
+                f.open.call(win || self, win);
+            }
 
             DOM.setAttrib(id, 'aria-hidden', 'false');
 
             // position modal
             self.position(id);
 
-            // focus
+            // focus modal
             self.focus(id);
 
             self.count++;
 
-            return w;
+            return win;
         },
 
         /**
@@ -357,68 +427,63 @@
 
             id = self._findId(id || win);
 
+            win = self.windows[id];
+
             // Probably not inline
-            if (!self.windows[id]) {
+            if (!win) {
                 return;
             }
 
             self.count--;
 
+            // only 1 window open, so remove modal structure
             if (self.count === 0) {
                 DOM.remove(DOM.select('.mceModal'));
                 DOM.setAttrib(DOM.doc.body, 'aria-hidden', 'false');
                 self.editor.focus();
             }
 
-            if (w = self.windows[id]) {
-                self.onClose.dispatch(self);
+            self.onClose.dispatch(self);
 
-                Event.clear(id);
-                Event.clear(id + '_ifr');
+            var f = win.features || {};
 
-                DOM.setAttrib(id + '_ifr', 'src', 'javascript:""'); // Prevent leak
-
-                // remove frame
-                DOM.remove(id + '_frame');
-                DOM.remove(id);
-
-                delete self.windows[id];
+            if (f.close && typeof f.close === "function") {
+                f.close.call(win || self, win);
             }
-        },
 
-        /**
-         * Creates a instance of a class. This method was needed since IE can't create instances
-         * of classes from a parent window due to some reference problem. Any arguments passed after the class name
-         * will be passed as arguments to the constructor.
-         *
-         * @method createInstance
-         * @param {String} cl Class name to create an instance of.
-         * @return {Object} Instance of the specified class.
-         * @example
-         * var uri = tinyMCEPopup.editor.windowManager.createInstance('tinymce.util.URI', 'http://www.somesite.com');
-         * alert(uri.getURI());
-         */
-        createInstance: function (cl, a, b, c, d, e) {
-            var fn = tinymce.resolve(cl);
+            Event.clear(id);
+            Event.clear(id + '_ifr');
+            DOM.setAttrib(id + '_ifr', 'src', 'javascript:""'); // Prevent leak
 
-            return new fn(a, b, c, d, e);
-        },
+            // remove frame
+            DOM.remove(id + '_frame');
+            DOM.remove(id);
 
-        setTitle: function (w, ti) {
-            var e;
+            delete this.windows[id];
 
-            w = this._findId(w);
+            if (self.count > 0) {
+                var fw = this._frontWindow();
 
-            if (e = DOM.get(w + '_title')) {
-                if (!e.innerHTML) {
-                    e.innerHTML = DOM.encode(ti);
+                if (fw) {
+                    fw.focus();
                 }
             }
         },
 
+        setTitle: function (win, title) {
+            var elm, id;
+
+            id = this._findId(win);
+
+            elm = DOM.get(id + '_title');
+
+            if (elm && !elm.innerHTML) {
+                elm.innerHTML = DOM.encode(title);
+            }
+        },
+
         /**
-         * Creates a confirm dialog. Please don't use the blocking behavior of this
-         * native version use the callback method instead then it can be extended.
+         * Creates a confirm dialog
          *
          * @method confirm
          * @param {String} t Title for the new confirm dialog.
@@ -434,10 +499,9 @@
          * });
          */
         confirm: function (txt, cb, s) {
-            var self = this,
-                w;
+            var self = this;
 
-            w = self.open({
+            self.open({
                 title: '',
                 type: 'confirm',
                 buttons: [
@@ -445,28 +509,24 @@
                         title: self.editor.getLang('yes', 'Yes'),
                         id: 'ok',
                         classes: 'primary',
-                        onclick: function (s) {
+                        autofocus: true,
+                        onsubmit: function (s) {
                             if (cb) {
                                 cb.call(s || self, s);
                             }
-                            self.close(null, w.id);
                         }
                     },
                     {
                         title: self.editor.getLang('no', 'No'),
-                        id: 'cancel',
-                        onclick: function () {
-                            self.close(null, w.id);
-                        }
+                        id: 'cancel'
                     }
                 ],
-                content: DOM.encode(self.editor.getLang(txt, txt))
+                content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
             });
         },
 
         /**
-         * Creates a alert dialog. Please don't use the blocking behavior of this
-         * native version use the callback method instead then it can be extended.
+         * Creates a alert dialog
          *
          * @method alert
          * @param {String} t Title for the new alert dialog.
@@ -477,10 +537,9 @@
          * tinyMCE.activeEditor.windowManager.alert('Hello world!');
          */
         alert: function (txt, cb, s) {
-            var self = this,
-                w;
+            var self = this;
 
-            w = self.open({
+            self.open({
                 title: '',
                 type: 'alert',
                 buttons: [
@@ -488,22 +547,19 @@
                         title: self.editor.getLang('ok', 'Ok'),
                         id: 'ok',
                         classes: 'primary',
-                        onclick: function (s) {
+                        autofocus: true,
+                        onsubmit: function (s) {
                             if (cb) {
                                 cb.call(s || self, s);
                             }
-                            self.close(null, w.id);
                         }
                     },
                     {
                         title: self.editor.getLang('cancel', 'Cancel'),
-                        id: 'cancel',
-                        onclick: function () {
-                            self.close(null, w.id);
-                        }
+                        id: 'cancel'
                     }
                 ],
-                content: DOM.encode(self.editor.getLang(txt, txt))
+                content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
             });
         },
 
@@ -515,10 +571,9 @@
          * @param {window/id} win Window if the dialog isn't inline. Id if the dialog is inline.
          */
         resizeBy: function (dw, dh, id) {
-            var w = this.windows[id];
         },
 
-        moveTo: function(id, x, y) {
+        moveTo: function (id, x, y) {
             DOM.setStyles(id, { 'left': x, 'top': y });
         },
 
@@ -533,37 +588,43 @@
         },
 
         focus: function (id) {
-            var self = this, w;
+            var win = this.windows[id];
 
-            if (w = self.windows[id]) {
-                w.zIndex = this.zIndex++;
-                DOM.setStyle(id, 'zIndex', w.zIndex);
+            if (!win) {
+                return;
+            }
 
-                DOM.removeClass(self.lastId, 'mceFocus');
-                DOM.addClass(id + '_frame', 'mceFocus');
+            win.zIndex = this.zIndex++;
+            DOM.setStyle(id, 'zIndex', win.zIndex);
 
-                self.lastId = id + '_frame';
+            DOM.removeClass(this.lastId, 'mceFocus');
+            DOM.addClass(id + '_frame', 'mceFocus');
 
-                DOM.get(id).focus();
+            this.lastId = id + '_frame';
 
-                if (DOM.get(id + '_ifr')) {
-                    DOM.get(id + '_ifr').focus();
-                } else {
-                    var nodes = DOM.select('input, select, button, textarea', DOM.get(id));
+            DOM.get(id).focus();
 
-                    nodes = tinymce.grep(nodes, function(node) {
-                        return node.getAttribute('tabindex') >= 0;
-                    });
+            if (DOM.get(id + '_ifr')) {
+                DOM.get(id + '_ifr').focus();
+            } else {
+                var nodes = DOM.select('input, select, button, textarea', DOM.get(id));
 
-                    if (nodes.length) {
-                        nodes[0].focus();
+                nodes[0].focus();
+
+                for (var i = 0; i < nodes.length; i++) {
+                    var node = nodes[i];
+
+                    if (node.getAttribute('tabindex') >= 0) {
+                        if (node.getAttribute('autofocus')) {
+                            node.focus();
+                            break;
+                        }
                     }
                 }
             }
         },
 
         // Internal functions
-
         _startDrag: function (id, se, ac) {
             var self = this,
                 mu, mm, d = DOM.doc,
@@ -579,8 +640,6 @@
 
             p = DOM.getRect(id);
             vp = DOM.getViewPort();
-
-            //DOM.setStyles(id, { 'left': p.x - vp.x, 'top': p.y - vp.y });
 
             // Get positons and sizes
             cp = { x: 0, y: 0 };
@@ -633,13 +692,23 @@
         // Find front most window
         _frontWindow: function () {
             var fw, ix = 0;
-            // Find front most window and focus that
-            each(this.windows, function (w) {
-                if (w.zIndex > ix) {
-                    fw = w;
-                    ix = w.zIndex;
+
+            /*for (var i = 0; i < this.windows.length; i++) {
+                var win = this.windows[i];
+
+                if (win.zIndex > ix) {
+                    fw = win;
+                    ix = win.zIndex;
+                }
+            }*/
+
+            tinymce.each(this.windows, function(win) {
+                if (win.zIndex > ix) {
+                    fw = win;
+                    ix = win.zIndex;
                 }
             });
+
             return fw;
         },
 

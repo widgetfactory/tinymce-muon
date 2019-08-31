@@ -193,10 +193,6 @@
 				'class': settings['class'] + ' mceSplitButtonMenu'
 			});
 
-			DOM.add(menu, 'span', {
-				'class': 'mceMenuLine'
-			});
-
 			node = DOM.add(menu, 'table', {
 				role: 'presentation',
 				'class': 'mceColorSplitMenu'
@@ -328,8 +324,9 @@
 		postRender: function () {
 			this.parent();
 
-			DOM.add(this.id + '_action', 'div', {
+			DOM.add(this.id + '_action', 'span', {
 				id: this.id + '_preview',
+				role: 'presentation',
 				'class': 'mceColorPreview'
 			});
 

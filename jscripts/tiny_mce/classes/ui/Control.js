@@ -32,7 +32,7 @@
 			this.settings = settings || {};
 			this.rendered = false;
 			this.onRender = new tinymce.util.Dispatcher(this);
-			this.classPrefix = '';
+			this.classPrefix = 'mce';
 			this.scope = this.settings.scope || this;
 			this.disabled = 0;
 			this.active = 0;

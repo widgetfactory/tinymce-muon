@@ -32,7 +32,6 @@
 		 */
 		NativeListBox: function (id, settings) {
 			this.parent(id, settings);
-			this.classPrefix = 'mceNativeListBox';
 		},
 
 		/**

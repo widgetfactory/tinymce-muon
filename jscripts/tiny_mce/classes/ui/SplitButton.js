@@ -74,62 +74,47 @@
 		 * @return {String} HTML for the split button control element.
 		 */
 		renderHTML: function () {
-			var h = '',
+			var html = '',
 				self = this,
 				s = self.settings,
-				h1;
+				icon;
 
 			if (s.image) {
-				h1 = DOM.createHTML('img ', {
+				icon = DOM.createHTML('img ', {
 					src: s.image,
 					role: 'presentation',
 					'class': 'mceAction ' + s['class']
 				});
 			} else {
-				h1 = DOM.createHTML('span', {
-					'class': 'mceAction ' + s['class']
-				}, '');
+				icon = DOM.createHTML('span', {
+					'class': 'mceAction ' + s['class'],
+					role: 'presentation'
+				});
 			}
 
-			h1 += DOM.createHTML('span', {
-				'class': 'mceVoiceLabel mceIconOnly',
-				id: self.id + '_voice',
-				style: 'display:none;'
-			}, s.title);
-
-			h += '<div class="mceText">' + DOM.createHTML('button', {
-				role: 'button',
+			html += DOM.createHTML('button', {
 				id: self.id + '_action',
 				tabindex: '-1',
-				'class': s['class'],
+				'class': 'mceText ' + s['class'],
 				title: s.title
-			}, h1) + '</div>';
+			}, icon);
 
-			h1 = DOM.createHTML('span', {
-				'class': 'mceOpen ' + s['class']
-			}, '<span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span>');
-
-			h += '<div class="mceOpen">' + DOM.createHTML('button', {
-				role: 'button',
+			html += DOM.createHTML('button', {
 				id: self.id + '_open',
 				tabindex: '-1',
-				'class': s['class'],
+				'class': 'mceOpen ' + s['class'],
 				title: s.title
-			}, h1) + '</div>';
-
-			h = DOM.createHTML('div', {
-				role: 'presentation',
-				'class': 'mceSplitButton ' + s['class'],
-				title: s.title
-			}, h);
+			});
 
 			return DOM.createHTML('div', {
 				id: self.id,
 				role: 'button',
-				tabindex: '0',
-				'aria-labelledby': self.id + '_voice',
+				tabindex: 0,
+				'class': 'mceSplitButton ' + s['class'],
+				title: s.title,
+				'aria-label': s.title,
 				'aria-haspopup': 'true'
-			}, h);
+			}, html);
 		},
 
 		/**

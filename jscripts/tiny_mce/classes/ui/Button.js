@@ -55,12 +55,12 @@
 				h, l;
 
 			l = DOM.encode(s.label || '');
-			h = '<button type="button" role="presentation" id="' + this.id + '" class="' + cp + ' ' + s['class'] + (l ? ' ' + cp + 'Labeled' : '') + '" title="' + DOM.encode(s.title) + '">';
+			h = '<button type="button" id="' + this.id + '" class="' + cp + ' ' + s['class'] + (l ? ' ' + cp + 'Labeled' : '') + '" title="' + DOM.encode(s.title) + '" aria-label="' + DOM.encode(s.title) + '">';
 
-			if (s.image && !(this.editor && this.editor.forcedHighContrastMode)) {
-				h += '<span class="mceIcon mceIconImage ' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+			if (s.image) {
+				h += '<span role="presentation" class="mceIcon mceIconImage ' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			} else {
-				h += '<span class="mceIcon ' + s['class'] + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+				h += '<span role="presentation" class="mceIcon ' + s['class'] + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			}
 
 			h += '</button>';

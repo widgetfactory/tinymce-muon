@@ -31,15 +31,17 @@
 				controls = this.controls,
 				each = tinymce.each;
 
-			html.push('<div id="' + this.id + '" role="group">');
+				each(controls, function (toolbar) {
+					html.push(toolbar.renderHTML());
+				});
 
-			each(controls, function (toolbar) {
-				html.push(toolbar.renderHTML());
-			});
+				var group = dom.create('div', {
+					id: this.id,
+					role: 'group',
+					class : this.settings.class ? (this.classPrefix + this.settings.class) : ''
+				}, html.join(''));
 
-			html.push('</div>');
-
-			return html.join('');
+			return dom.getOuterHTML(group);
 		},
 
 		focus: function () {

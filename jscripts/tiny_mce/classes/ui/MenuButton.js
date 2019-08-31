@@ -121,7 +121,6 @@
 				m;
 
 			m = self.settings.control_manager.createDropMenu(self.id + '_menu', {
-				//menu_line: 1,
 				'class': this.classPrefix + 'Menu',
 				icons: self.settings.icons
 			});

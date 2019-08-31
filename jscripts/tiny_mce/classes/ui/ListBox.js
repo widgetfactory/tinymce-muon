@@ -169,19 +169,16 @@
 
 			if (idx != this.selectedIndex) {
 				elm = DOM.get(this.id + '_text');
-				label = DOM.get(this.id + '_voiceDesc');
 				item = this.items[idx];
 
 				if (item) {
 					this.selectedValue = item.value;
 					this.selectedIndex = idx;
 					DOM.setHTML(elm, DOM.encode(item.title));
-					DOM.setHTML(label, this.settings.title + " - " + item.title);
 					DOM.removeClass(elm, 'mceTitle');
 					DOM.setAttrib(this.id, 'aria-valuenow', item.title);
 				} else {
 					DOM.setHTML(elm, DOM.encode(this.settings.title));
-					DOM.setHTML(label, DOM.encode(this.settings.title));
 					DOM.addClass(elm, 'mceTitle');
 					this.selectedValue = this.selectedIndex = null;
 					DOM.setAttrib(this.id, 'aria-valuenow', this.settings.title);
@@ -240,35 +237,28 @@
 		renderHTML: function () {
 			var html = '',
 				prefix = this.classPrefix;
-
-			html += '<div role="listbox" aria-haspopup="true" aria-labelledby="' + this.id + '_voiceDesc" aria-describedby="' + this.id + '_voiceDesc">';
-			html += '<div role="presentation" tabindex="0" id="' + this.id + '" class="' + prefix + ' ' + (this.settings['class'] ? (' ' + this.settings['class']) : '') + '">';
-
-			html += '<div class="mceText">' + DOM.createHTML('span', {
-				id: this.id + '_voiceDesc',
-				class: 'voiceLabel',
-				style: 'display:none;'
-			}, this.settings.title);
-
+				
 			html += DOM.createHTML('button', {
 				id: this.id + '_text',
 				tabindex: -1,
-				class: 'mceText',
-				onclick: "return false;",
-				onmousedown: 'return false;'
-			}, DOM.encode(this.settings.title)) + '</div>';
+				class: 'mceText'
+			}, DOM.encode(this.settings.title));
 
-			html += '<div class="mceOpen">' + DOM.createHTML('button', {
+			html += DOM.createHTML('button', {
 				id: this.id + '_open',
 				tabindex: -1,
-				class: 'mceOpen',
-				onclick: "return false;",
-				onmousedown: 'return false;'
-			}, '<span><span style="display:none;" class="mceIconOnly" aria-hidden="true">\u25BC</span></span>') + '</div>';
+				class: 'mceOpen'
+			});
 
-			html += '</div></div>';
-
-			return html;
+			return DOM.createHTML('div', {
+				id: this.id,
+				role: 'listbox',
+				tabindex: 0,
+				'class': prefix + ' ' + this.settings['class'],
+				title: this.settings.title,
+				'aria-label': this.settings.title,
+				'aria-haspopup': 'true'
+			}, html);
 		},
 
 		/**
@@ -356,11 +346,11 @@
 				menu;
 
 			menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
-				menu_line: 1,
 				class: this.classPrefix + 'Menu mceNoIcons',
 				max_width: 250,
 				max_height: this.settings.max_height || 150,
 				filter: !!this.settings.filter,
+				keyboard_focus: true,
 				onselect: function (value) {
 					if (self.settings.onselect(value) !== false) {
 						self.select(value);
@@ -369,8 +359,8 @@
 			});
 
 			menu.onHideMenu.add(function () {
-				this.hideMenu();
-				this.focus();
+				self.hideMenu();
+				self.focus();
 			});
 
 			/*menu.add({
@@ -421,7 +411,10 @@
 		postRender: function () {
 			var self = this;
 
-			Event.add(this.id, 'click', this.showMenu, this);
+			Event.add(this.id, 'click', function(evt) {
+				self.showMenu(evt);
+				Event.cancel(evt);
+			});
 
 			Event.add(this.id, 'keydown', function (evt) {
 				if (evt.keyCode == 32) { // Space
