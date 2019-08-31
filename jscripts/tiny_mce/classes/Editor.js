@@ -71,7 +71,7 @@
 				id: id,
 				language: 'en',
 				theme: 'advanced',
-				skin: 'default',
+				skin: 'modern',
 				delta_width: 0,
 				delta_height: 0,
 				popup_css: '',
