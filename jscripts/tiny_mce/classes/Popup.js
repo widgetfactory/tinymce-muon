@@ -45,11 +45,6 @@ var tinyMCEPopup = {
 
 		this.dom.bind(window, 'ready', this._onDOMLoaded, this);
 
-		// Enables you to skip loading the default css
-		if (this.features.popup_css !== false) {
-			this.dom.loadCSS(this.features.popup_css || this.editor.settings.popup_css);
-		}
-
 		// Setup on init listeners
 		this.listeners = [];
 
@@ -152,23 +147,7 @@ var tinyMCEPopup = {
 	 *
 	 * @method resizeToInnerSize
 	 */
-	resizeToInnerSize: function () {
-		var self = this,
-			editor = this.editor,
-			dom = this.dom;
-
-		// Detach it to workaround a Chrome specific bug
-		// https://sourceforge.net/tracker/?func=detail&atid=635682&aid=2926339&group_id=103281
-		setTimeout(function () {
-			var vp = dom.getViewPort(window);
-
-			editor.windowManager.resizeBy(
-				self.getWindowArg('mce_width') - vp.win,
-				self.getWindowArg('mce_height') - vp.h,
-				self.id || window
-			);
-		}, 10);
-	},
+	resizeToInnerSize: function () {},
 
 	/**
 	 * Stores the current editor selection for later restoration. This can be useful since some browsers
@@ -260,7 +239,7 @@ var tinyMCEPopup = {
 	 *
 	 * @method close
 	 */
-	close: function () {
+	close: function () {	
 		this.editor.windowManager.close(window);
 		tinymce = tinyMCE = this.editor = this.params = this.dom = this.dom.doc = null; // Cleanup
 	},
@@ -279,10 +258,6 @@ var tinyMCEPopup = {
 		var editor = this.editor,
 			dom = this.dom,
 			title = document.title;
-
-		if (!editor.getParam('browser_preferred_colors', false) || !this.isWindow) {
-			dom.addClass(document.body, 'forceColors');
-		}
 
 		document.body.style.display = '';
 
@@ -307,9 +282,11 @@ var tinyMCEPopup = {
 			});
 		}
 
-		// Patch for accessibility
-		tinymce.each(dom.select('select'), function (e) {
-			e.onkeydown = tinyMCEPopup._accessHandler;
+		// bind close on esc
+		dom.bind(document, 'keyup', function (e) {
+			if (e.keyCode == 27) {
+				tinyMCEPopup.close();
+			}
 		});
 
 		// Call onInit
@@ -319,43 +296,9 @@ var tinyMCEPopup = {
 		});
 
 		// Move focus to window
-		if (this.getWindowArg('mce_auto_focus', true)) {
-			window.focus();
+		window.focus();
 
-			// Focus element with mceFocus class
-			tinymce.each(document.forms, function (f) {
-				tinymce.each(f.elements, function (e) {
-					if (dom.hasClass(e, 'mceFocus') && !e.disabled) {
-						e.focus();
-						return false; // Break loop
-					}
-				});
-			});
-		}
-
-		document.onkeyup = tinyMCEPopup._closeWinKeyHandler;
-	},
-
-	_accessHandler: function (e) {
-		e = e || window.event;
-
-		if (e.keyCode == 13 || e.keyCode == 32) {
-			var elm = e.target || e.srcElement;
-
-			if (elm.onchange) {
-				elm.onchange();
-			}
-
-			return tinymce.dom.Event.cancel(e);
-		}
-	},
-
-	_closeWinKeyHandler: function (e) {
-		e = e || window.event;
-
-		if (e.keyCode == 27) {
-			tinyMCEPopup.close();
-		}
+		
 	},
 
 	_eventProxy: function (id) {
