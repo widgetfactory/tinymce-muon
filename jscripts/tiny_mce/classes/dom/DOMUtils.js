@@ -1459,7 +1459,7 @@
 				return null;
 			}
 
-			if (elm.nodeType === 1 && self.hasOuterHTML) {
+			if (elm.nodeType === 1) {
 				return elm.outerHTML;
 			}
 
