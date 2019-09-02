@@ -255,6 +255,11 @@
                             Event.add(btn, 'click', function (e) {
                                 Event.cancel(e);
                                 button.onsubmit.call(self, e);
+                                
+                                if (e.cancelSubmit) {
+                                    return;
+                                }
+
                                 self.close(null, id);
                             });
                         }
