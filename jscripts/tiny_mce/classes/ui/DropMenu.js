@@ -603,12 +603,10 @@
 					'class': 'mceMenuHtml'
 				}, s.html);
 			} else {
-				n = a = DOM.add(n, 'a', {
+				n = a = DOM.add(n, 'div', {
 					id: o.id + '_aria',
-					role: s.titleItem ? 'presentation' : 'option',
-					href: 'javascript:;',
-					onclick: "return false;",
-					onmousedown: 'return false;'
+					role: 'option',
+					'class' : cp + 'ItemOption'
 				});
 
 				ic = DOM.add(n, 'span', {
