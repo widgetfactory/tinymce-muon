@@ -108,6 +108,14 @@
                 Event.cancel(evt);
             });
 
+            Event.add(self.id, 'focus', function () {
+                self._focused = 1;
+            });
+
+            Event.add(self.id, 'blur', function () {
+                self._focused = 0;
+            });
+
             if (!self.panel) {
                 self.panel = self.editor.controlManager.createPanel(self.id + '_panel', self.settings);
                 self.editor.onMouseDown.add(self.hidePanel, self);
