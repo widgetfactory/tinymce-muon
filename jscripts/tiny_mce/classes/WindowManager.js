@@ -140,7 +140,7 @@
 
             // modal html
             var html = '' +
-                '<div class="mceModalBody" id="' + id + '">' +
+                '<div class="mceModalBody" id="' + id + '" dir="' + ed.settings.directionality + '">' +
                 '   <div class="mceModalContainer">' +
                 '       <div class="mceModalHeader" id="' + id + '_header">' +
                 '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
@@ -266,10 +266,16 @@
                     });
                 }
 
-                if (typeof f.content === "string") {
-                    DOM.setHTML(id + '_content', '<form>' + f.content.replace('\n', '') + '</form>');
+                var data = f.content;
+
+                if (typeof data === "string") {
+                    DOM.setHTML(id + '_content', '<form>' + data.replace('\n', '') + '</form>');
                 } else {
-                    DOM.add(id + '_content', DOM.create('form', {}, f.content));
+                    if (data.nodeType) {
+                        DOM.add(id + '_content', DOM.create('form', {}, data));
+                    } else {
+                        DOM.add(id + '_content', DOM.create('form', {}, data.renderHTML()));
+                    }
                 }
 
                 function nodeIndex(nodes, node) {
@@ -297,6 +303,8 @@
                             return;
                         }
 
+                        DOM.setAttrib(nodes, 'tabindex', 0);
+
                         if (e.shiftKey) {
                             nodes.reverse();
                         }
@@ -312,6 +320,7 @@
                         }
 
                         nodes[tabIndex].focus();
+                        DOM.setAttrib(nodes[tabIndex], 'tabindex', 1);
 
                         e.preventDefault();
                         e.stopImmediatePropagation();
