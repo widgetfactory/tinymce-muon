@@ -104,6 +104,14 @@
             });
 
             self.isPanelVisible = 1;
+
+            Event.add(DOM.doc, 'mousedown', function(e) {
+                if (DOM.getParents(e.target, '.mcePanel').length) {
+                    return;
+                }
+
+                self.hidePanel();
+            });
         },
 
         storeSelection: function () {
