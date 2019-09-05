@@ -257,7 +257,8 @@
 				'class': prefix + ' ' + this.settings['class'],
 				title: this.settings.title,
 				'aria-label': this.settings.title,
-				'aria-haspopup': 'true'
+				'aria-haspopup': 'true',
+				'aria-expanded': false
 			}, html);
 		},
 
@@ -312,6 +313,8 @@
 			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
 
 			DOM.addClass(this.id, this.classPrefix + 'Selected');
+
+			this.setAriaProperty('expanded', true);
 		},
 
 		/**
@@ -333,6 +336,8 @@
 					Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
 					this.menu.hideMenu();
 				}
+
+				this.setAriaProperty('expanded', false);
 			}
 		},
 

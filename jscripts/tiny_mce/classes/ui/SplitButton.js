@@ -113,7 +113,8 @@
 				'class': 'mceSplitButton ' + s['class'],
 				title: s.title,
 				'aria-label': s.title,
-				'aria-haspopup': 'true'
+				'aria-haspopup': 'true',
+				'aria-expanded': false
 			}, html);
 		},
 

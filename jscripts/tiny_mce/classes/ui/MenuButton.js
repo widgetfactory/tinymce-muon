@@ -109,6 +109,8 @@
 			self.setState('Selected', 1);
 
 			self.isMenuVisible = 1;
+
+			self.setAriaProperty('expanded', true);
 		},
 
 		/**
@@ -160,6 +162,7 @@
 			}
 
 			self.isMenuVisible = 0;
+			self.setAriaProperty('expanded', false);
 		},
 
 		/**

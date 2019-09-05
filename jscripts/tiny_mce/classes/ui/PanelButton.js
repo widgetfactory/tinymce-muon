@@ -51,6 +51,7 @@
             self.onShowPanel.dispatch(self);
 
             self.setState('Selected', 1);
+            self.setAriaProperty('expanded', true);
         },
 
         /**
@@ -80,6 +81,8 @@
 
                 self.panel.hidePanel();
                 self.onHidePanel.dispatch(self);
+
+                self.setAriaProperty('expanded', false);
             }
         },
 
@@ -124,6 +127,8 @@
             self.panel.onRenderPanel.add(function () {
                 self.onRenderPanel.dispatch(self);
             });
+
+            self.setAriaProperty('expanded', false);
         },
 
         restoreSelection: function() {
