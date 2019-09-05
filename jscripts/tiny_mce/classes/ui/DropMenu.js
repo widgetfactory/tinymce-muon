@@ -502,7 +502,7 @@
 		_setupKeyboardNav: function () {
 			var contextMenu, menuItems, self = this;
 			contextMenu = DOM.get('menu_' + self.id);
-			menuItems = DOM.select('a[role=option]', 'menu_' + self.id);
+			menuItems = DOM.select('div[role=option]', 'menu_' + self.id);
 			menuItems.splice(0, 0, contextMenu);
 
 			self.keyboardNav = new tinymce.ui.KeyboardNavigation({
