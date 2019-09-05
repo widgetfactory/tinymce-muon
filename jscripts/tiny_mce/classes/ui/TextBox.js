@@ -85,6 +85,8 @@
 				html += '<label for="' + this.id + '">' + s.label + '</label>';
 			}
 
+			html += '<div class="mceFormControl">';
+
 			if (s.multiline) {
 				html += '<textarea id="' + this.id + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '">' + DOM.encode(this._value);
 			} else {
@@ -103,7 +105,17 @@
 				html += ' />';
 			}
 
+			html += '</div>';
+
 			return html;
+		},
+
+		value: function(val) {
+			if (!arguments.length) {
+				return DOM.getValue(this.id);
+			}
+
+			DOM.setValue(this.id, val);
 		},
 
 		/**
