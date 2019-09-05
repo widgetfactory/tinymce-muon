@@ -177,19 +177,7 @@
 				constrain: ed.settings.constrain_menus
 			}, s);
 
-			s['class'] += ' defaultSkin';
-
-			if (ed.getParam('skin') !== 'default') {
-				s['class'] += ' ' + ed.getParam('skin') + 'Skin';
-
-				variant = ed.getParam('skin_variant');
-
-				if (variant) {
-					s['class'] += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
-				}
-			}
-
-			s['class'] += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
+			s.class += ' ' + (ed.settings.skin_class || 'defaultSkin');
 
 			id = self.prefix + id;
 			cls = cc || self._cls.dropmenu || tinymce.ui.DropMenu;
@@ -212,23 +200,6 @@
 			ed.onRemove.add(function () {
 				c.destroy();
 			});
-
-			// Fix for bug #1897785, #1898007
-			if (tinymce.isIE) {
-				c.onShowMenu.add(function () {
-					// IE 8 needs focus in order to store away a range with the current collapsed caret location
-					ed.focus();
-
-					bm = ed.selection.getBookmark(1);
-				});
-
-				c.onHideMenu.add(function () {
-					if (bm) {
-						ed.selection.moveToBookmark(bm);
-						bm = 0;
-					}
-				});
-			}
 
 			return self.add(c);
 		},
@@ -431,7 +402,7 @@
 		createPanelButton: function (id, s, cc) {
 			var self = this,
 				ed = self.editor,
-				c, cls, variant;
+				c, cls;
 
 			if (self.get(id)) {
 				return null;
@@ -510,7 +481,7 @@
 			s = extend({
 				title: s.title,
 				'class': 'mce_' + id,
-				'menu_class': ed.getParam('skin') + 'Skin',
+				'menu_class': ed.settings.skin_class || 'defaultSkin',
 				scope: s.scope,
 				more_colors_title: ed.getLang('more_colors')
 			}, s);
@@ -586,19 +557,7 @@
 			var c, self = this, ed = self.editor,
 				cls;
 
-			s.class = 'defaultSkin';
-
-			if (ed.getParam('skin') !== 'default') {
-				s.class += ' ' + ed.getParam('skin') + 'Skin';
-
-				variant = ed.getParam('skin_variant');
-
-				if (variant) {
-					s.class += ' ' + ed.getParam('skin') + 'Skin' + variant.substring(0, 1).toUpperCase() + variant.substring(1);
-				}
-			}
-
-			s.class += ed.settings.directionality == "rtl" ? ' mceRtl' : '';
+			s.class += ' ' + (ed.settings.skin_class || 'defaultSkin');
 
 			//id = self.prefix + id;
 			cls = cc || self._cls.panel || tinymce.ui.Panel;
@@ -645,6 +604,30 @@
 				cls;
 			id = self.prefix + id;
 			cls = cc || this._cls.toolbarGroup || tinymce.ui.ToolbarGroup;
+			c = new cls(id, s, self.editor);
+
+			if (self.get(id)) {
+				return null;
+			}
+
+			return self.add(c);
+		},
+
+		/**
+		 * Creates a layout container control instance by id.
+		 *
+		 * @method createLayout
+		 * @param {String} id Unique id for the new toolbar container control instance. For example "toolbar1".
+		 * @param {Object} s Optional settings object for the control.
+		 * @param {Object} cc Optional control class to use instead of the default one.
+		 * @return {tinymce.ui.Control} Control instance that got created and added.
+		 */
+		createLayout: function (id, s, cc) {
+			var c, self = this,
+				cls;
+
+			id = self.prefix + id;
+			cls = cc || self._cls.layout || tinymce.ui.Layout;
 			c = new cls(id, s, self.editor);
 
 			if (self.get(id)) {
