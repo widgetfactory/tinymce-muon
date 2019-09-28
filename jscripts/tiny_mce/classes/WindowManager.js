@@ -520,6 +520,10 @@
                 type: 'confirm',
                 buttons: [
                     {
+                        title: self.editor.getLang('no', 'No'),
+                        id: 'cancel'
+                    },
+                    {
                         title: self.editor.getLang('yes', 'Yes'),
                         id: 'ok',
                         classes: 'primary',
@@ -529,10 +533,6 @@
                                 cb.call(s || self, s);
                             }
                         }
-                    },
-                    {
-                        title: self.editor.getLang('no', 'No'),
-                        id: 'cancel'
                     }
                 ],
                 content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
@@ -558,6 +558,10 @@
                 type: 'alert',
                 buttons: [
                     {
+                        title: self.editor.getLang('cancel', 'Cancel'),
+                        id: 'cancel'
+                    },
+                    {
                         title: self.editor.getLang('ok', 'Ok'),
                         id: 'ok',
                         classes: 'primary',
@@ -567,10 +571,6 @@
                                 cb.call(s || self, s);
                             }
                         }
-                    },
-                    {
-                        title: self.editor.getLang('cancel', 'Cancel'),
-                        id: 'cancel'
                     }
                 ],
                 content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
