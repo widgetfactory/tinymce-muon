@@ -606,9 +606,9 @@ tinymce.util.Quirks = function (editor) {
 					container = rng.startContainer,
 					offset = rng.startOffset;
 
-				if (editor.settings.forced_root_block === false) {
+				/*if (editor.settings.forced_root_block === false) {
 					return;
-				}
+				}*/
 
 				// Shift+Delete is cut
 				if (isForward && e.shiftKey) {
