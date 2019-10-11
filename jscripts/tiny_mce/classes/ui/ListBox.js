@@ -155,6 +155,14 @@
 			}
 		},
 
+		value: function (val) {
+			if (!arguments.length) {
+				return this.selectedValue;
+			}
+
+			this.select(val);
+		},
+
 		/**
 		 * Selects a item/option by index. This will both add a visual selection to the
 		 * item and change the title of the control to the title of the option.
@@ -237,14 +245,16 @@
 		renderHTML: function () {
 			var html = '',
 				prefix = this.classPrefix;
-				
+
 			html += DOM.createHTML('button', {
+				type: 'button',
 				id: this.id + '_text',
 				tabindex: -1,
 				class: 'mceText'
 			}, DOM.encode(this.settings.title));
 
 			html += DOM.createHTML('button', {
+				type: 'button',
 				id: this.id + '_open',
 				tabindex: -1,
 				class: 'mceOpen'
@@ -291,6 +301,10 @@
 			menu.settings.offset_x = pos.x;
 			menu.settings.offset_y = pos.y;
 
+			if (!this.settings.max_width) {
+				menu.settings.max_width = elm.offsetWidth;
+			}
+
 			// Select in menu
 			each(this.items, function (item) {
 				if (menu.items[item.id]) {
@@ -323,22 +337,22 @@
 		 * @method hideMenu
 		 */
 		hideMenu: function (e) {
-			if (this.menu && this.menu.isMenuVisible) {
-				//DOM.removeClass(this.id, this.classPrefix + 'Selected');
-
-				// Prevent double toogles by canceling the mouse click event to the button
-				if (e && e.type == "mousedown" && (e.target.id == this.id + '_text' || e.target.id == this.id + '_open')) {
-					return;
-				}
-
-				if (!e || !DOM.getParent(e.target, '.mceMenu')) {
-					DOM.removeClass(this.id, this.classPrefix + 'Selected');
-					Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
-					this.menu.hideMenu();
-				}
-
-				this.setAriaProperty('expanded', false);
+			if (!this.menu) {
+				return;
 			}
+			
+			// Prevent double toogles by canceling the mouse click event to the button
+			if (e && e.type == "mousedown" && (e.target.id == this.id + '_text' || e.target.id == this.id + '_open')) {
+				return;
+			}
+
+			if (!e || !DOM.getParent(e.target, '.mceMenu')) {
+				DOM.removeClass(this.id, this.classPrefix + 'Selected');
+				Event.remove(DOM.doc, 'mousedown', this.hideMenu, this);
+				this.menu.hideMenu();
+			}
+
+			this.setAriaProperty('expanded', false);
 		},
 
 		/**
@@ -351,9 +365,9 @@
 				menu;
 
 			menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
-				class: this.classPrefix + 'Menu mceNoIcons',
-				max_width: 250,
-				max_height: this.settings.max_height || 150,
+				class: this.classPrefix + 'Menu',
+				max_width: this.settings.max_width || 250,
+				max_height: this.settings.max_height || '',
 				filter: !!this.settings.filter,
 				keyboard_focus: true,
 				onselect: function (value) {
@@ -367,16 +381,6 @@
 				self.hideMenu();
 				self.focus();
 			});
-
-			/*menu.add({
-				title: this.settings.title,
-				class: 'mceMenuItemTitle',
-				onclick: function () {
-					if (self.settings.onselect('') !== false) {
-						self.select('');
-					} // Must be run after
-				}
-			});*/
 
 			each(this.items, function (item) {
 				// No value then treat it as a title
@@ -396,7 +400,7 @@
 					item.onclick = function () {
 						if (self.settings.onselect(item.value) !== false) {
 							self.select(item.value);
-						} // Must be runned after
+						} // Must be run after
 					};
 
 					menu.add(item);
@@ -416,7 +420,7 @@
 		postRender: function () {
 			var self = this;
 
-			Event.add(this.id, 'click', function(evt) {
+			Event.add(this.id, 'click', function (evt) {
 				self.showMenu(evt);
 				Event.cancel(evt);
 			});
@@ -470,6 +474,9 @@
 
 			Event.clear(this.id + '_text');
 			Event.clear(this.id + '_open');
+
+			this.selectedValue = null;
+			this.selectedIndex = null;
 		}
 	});
 })(tinymce);
