@@ -81,12 +81,6 @@
 
 			var type = s.subtype ? s.subtype : 'text';
 
-			if (s.label) {
-				html += '<label for="' + this.id + '">' + s.label + '</label>';
-			}
-
-			html += '<div class="mceFormControl">';
-
 			if (s.multiline) {
 				html += '<textarea id="' + this.id + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '">' + DOM.encode(this._value);
 			} else {
@@ -104,8 +98,6 @@
 			} else {
 				html += ' />';
 			}
-
-			html += '</div>';
 
 			return html;
 		},
@@ -126,6 +118,14 @@
 		 */
 		postRender: function () {
 			var self = this, s = this.settings;
+			
+			if (typeof s.value !== 'undefined') {
+				this.value(s.value);
+			}
+
+			if (s.onchange && typeof s.onchange === 'function') {
+				this.onChange.add(s.onchange);
+			}
 
 			Event.add(this.id, 'change', function(e) {
 				self.onChange.dispatch(this, DOM.get(self.id));
@@ -135,7 +135,19 @@
 		},
 
 		/**
-		 * Destroys the ListBox i.e. clear memory and events.
+		 * Sets the disabled state for the control. This will add CSS classes to the
+		 * element that contains the control. So that it can be disabled visually.
+		 *
+		 * @method setDisabled
+		 * @param {Boolean} state Boolean state if the control should be disabled or not.
+		 */
+		setDisabled: function (state) {
+			this.parent(state);
+			DOM.get(this.id).disabled = state;
+		},
+
+		/**
+		 * Destroys the TextBox i.e. clear memory and events.
 		 *
 		 * @method destroy
 		 */
