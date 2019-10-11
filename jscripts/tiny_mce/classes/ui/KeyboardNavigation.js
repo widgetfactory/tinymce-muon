@@ -63,6 +63,30 @@
 				dom.get(focussedId).focus();
 			};
 
+			this.update = function(value) {
+				items = value;
+				
+				each(items, function (item, idx) {
+					var tabindex, elm;
+	
+					if (!item.id) {
+						item.id = dom.uniqueId('_mce_item_');
+					}
+	
+					elm = dom.get(item.id);
+	
+					if (excludeFromTabOrder) {
+						dom.bind(elm, 'blur', itemBlurred);
+						tabindex = '-1';
+					} else {
+						tabindex = (idx === 0 ? '0' : '-1');
+					}
+	
+					elm.setAttribute('tabindex', tabindex);
+					dom.bind(elm, 'focus', itemFocussed);
+				});
+			};
+
 			/**
 			 * Destroys the KeyboardNavigation and unbinds any focus/blur event handles it might have added.
 			 *
@@ -171,33 +195,15 @@
 					case DOM_VK_RETURN:
 					case DOM_VK_SPACE:
 						if (settings.onAction) {
-							settings.onAction(focussedId);
 							Event.cancel(evt);
+							settings.onAction(evt, focussedId);
 						}
 						break;
 				}
 			};
 
 			// Set up state and listeners for each item.
-			each(items, function (item, idx) {
-				var tabindex, elm;
-
-				if (!item.id) {
-					item.id = dom.uniqueId('_mce_item_');
-				}
-
-				elm = dom.get(item.id);
-
-				if (excludeFromTabOrder) {
-					dom.bind(elm, 'blur', itemBlurred);
-					tabindex = '-1';
-				} else {
-					tabindex = (idx === 0 ? '0' : '-1');
-				}
-
-				elm.setAttribute('tabindex', tabindex);
-				dom.bind(elm, 'focus', itemFocussed);
-			});
+			this.update(items);
 
 			// Setup initial state for root element.
 			if (items[0]) {
