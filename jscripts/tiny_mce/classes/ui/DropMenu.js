@@ -20,6 +20,16 @@
 		return str.replace(/[\-\[\]\/\{\}\(\)\*\+\?\.\\\^\$\|]/g, '\\$&');
 	}
 
+	function nodeIndex(nodes, node) {
+		for (var i = 0; i < nodes.length; i++) {
+			if (nodes[i] === node) {
+				return i;
+			}
+		}
+
+		return -1;
+	}
+
 	var specialKeyCodeMap = {
 		9: 'tab',
 		17: 'ctrl',
@@ -29,7 +39,9 @@
 		37: 'left',
 		39: 'right',
 		13: 'enter',
-		91: 'cmd'
+		91: 'cmd',
+		38: 'up',
+		40: 'down'
 	};
 
 	/**
@@ -100,10 +112,6 @@
 			s.vp_offset_x = s.vp_offset_x || 0;
 			s.vp_offset_y = s.vp_offset_y || 0;
 
-			if (is(s.icons) && !s.icons) {
-				s['class'] += ' mceNoIcons';
-			}
-
 			this.parent(id, s);
 			this.onShowMenu = new tinymce.util.Dispatcher(this);
 			this.onHideMenu = new tinymce.util.Dispatcher(this);
@@ -151,29 +159,44 @@
 		update: function () {
 			var self = this,
 				s = self.settings,
-				co = DOM.get('menu_' + self.id + '_co'),
-				tw, th;
-
-			tw = s.max_width ? Math.min(co.offsetWidth, s.max_width) : co.offsetWidth;
-			th = s.max_height ? Math.min(co.offsetHeight, s.max_height) : co.offsetHeight;
-
-			DOM.setStyles('menu_' + self.id, {
-				width: tw,
-				height: th
-			});
+				m = DOM.get('menu_' + self.id);
 
 			if (s.max_width) {
-				DOM.setStyle(co, 'width', tw);
+				DOM.setStyle(m, 'width', s.max_width);
 			}
 
 			if (s.max_height) {
-				DOM.setStyle(co, 'height', th);
+				DOM.setStyle(m, 'height', s.max_height);
 			}
 		},
 
 		scrollTo: function (el) {
 			var p = el.parentNode;
 			p.scrollTop = el.offsetTop;
+		},
+
+		selectItem: function (e, node) {
+			var self = this, dm, item = self.items[node.id];
+
+			self.selected = node;
+
+			if (item.isDisabled()) {
+				return;
+			}
+
+			dm = self;
+
+			while (dm) {
+				if (dm.hideMenu) {
+					dm.hideMenu();
+				}
+
+				dm = dm.settings.parent;
+			}
+
+			if (item.settings.onclick) {
+				item.settings.onclick(e);
+			}
 		},
 
 		/**
@@ -246,28 +269,8 @@
 					return;
 				}
 
-				if (n && (n = DOM.getParent(n, 'div.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
-					m = self.items[n.id];
-
-					self.selected = n;
-
-					if (m.isDisabled()) {
-						return;
-					}
-
-					dm = self;
-
-					while (dm) {
-						if (dm.hideMenu) {
-							dm.hideMenu();
-						}
-
-						dm = dm.settings.parent;
-					}
-
-					if (m.settings.onclick) {
-						m.settings.onclick(e);
-					}
+				if (n && (n = DOM.getParent(n, '.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
+					self.selectItem(e, n);
 
 					return false; // Cancel to fix onbeforeunload problem
 				}
@@ -278,7 +281,7 @@
 
 				n = e.target;
 
-				if (n && (n = DOM.getParent(n, 'div.mceMenuItem'))) {
+				if (n && (n = DOM.getParent(n, '.mceMenuItem'))) {
 					m = self.items[n.id];
 
 					if (self.hasMenus()) {
@@ -325,7 +328,7 @@
 				self.scrollTo(self.selected);
 			} else {
 				// reset scroll position
-				DOM.get('menu_' + self.id + '_tbl').scrollTop = 0;
+				DOM.get('menu_' + self.id + '_items').scrollTop = 0;
 			}
 
 			if (s.keyboard_focus) {
@@ -351,7 +354,7 @@
 				self.keyboardNav.destroy();
 			}
 
-			Event.remove(co, 'mouseover', self.mouseOverFunc);
+			//Event.remove(co, 'mouseover', self.mouseOverFunc);
 			Event.remove(co, 'click', self.mouseClickFunc);
 			Event.remove(co, 'keydown', self._keyHandler);
 			DOM.hide(co);
@@ -449,28 +452,20 @@
 		 */
 		renderNode: function () {
 			var self = this,
-				s = self.settings,
-				n, co, w;
+				s = self.settings, menu, items;
 
-			w = DOM.create('div', {
-				role: 'listbox',
+			menu = DOM.create('div', {
+				role: 'menu',
 				id: 'menu_' + self.id,
-				'class': s['class'],
-				'style': 'position:absolute;left:0;top:0;z-index:200000;outline:0'
+				'class': s['class'] + ' ' + self.classPrefix
 			});
 
 			if (self.settings.parent) {
-				DOM.setAttrib(w, 'aria-parent', 'menu_' + self.settings.parent.id);
+				DOM.setAttrib(menu, 'aria-parent', 'menu_' + self.settings.parent.id);
 			}
 
-			co = DOM.add(w, 'div', {
-				role: 'presentation',
-				id: 'menu_' + self.id + '_co',
-				'class': self.classPrefix + (s['class'] ? ' ' + s['class'] : '')
-			});
-
 			if (s.filter) {
-				var filter = DOM.add(co, 'div', {
+				var filter = DOM.add(menu, 'div', {
 					'class': self.classPrefix + 'Filter'
 				}, '<input type="text" /><svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><title>Search</title><path d="M496.131 435.698l-121.276-103.147c-12.537-11.283-25.945-16.463-36.776-15.963 28.628-33.534 45.921-77.039 45.921-124.588 0-106.039-85.961-192-192-192s-192 85.961-192 192c0 106.039 85.961 192 192 192 47.549 0 91.054-17.293 124.588-45.922-0.5 10.831 4.68 24.239 15.963 36.776l103.147 121.276c17.661 19.623 46.511 21.277 64.11 3.678s15.946-46.449-3.677-64.11zM192 320c-70.692 0-128-57.308-128-128s57.308-128 128-128 128 57.308 128 128-57.307 128-128 128z"></path></svg>');
 
@@ -483,32 +478,44 @@
 				});
 			}
 
-			n = DOM.add(co, 'div', {
+			items = DOM.add(menu, 'div', {
 				role: 'presentation',
-				id: 'menu_' + self.id + '_tbl',
+				id: 'menu_' + self.id + '_items',
 				'class': self.classPrefix + 'Items'
 			});
 
 			each(self.items, function (o) {
-				self._add(n, o);
+				self._add(items, o);
 			});
 
 			self.rendered = true;
 
-			return w;
+			return menu;
 		},
 
 		// Internal functions
 		_setupKeyboardNav: function () {
 			var contextMenu, menuItems, self = this;
 			contextMenu = DOM.get('menu_' + self.id);
-			menuItems = DOM.select('div[role=option]', 'menu_' + self.id);
+			menuItems = DOM.select('div[role="option"]', 'menu_' + self.id);
 			menuItems.splice(0, 0, contextMenu);
 
 			self.keyboardNav = new tinymce.ui.KeyboardNavigation({
 				root: 'menu_' + self.id,
 				items: menuItems,
 				onCancel: function () {
+					self.hideMenu();
+				},
+				onAction: function (e, id) {
+					if (menuItems.length > 1) {
+						var n = DOM.get(id);
+						self.selectItem(e, n);
+					} else {
+						if (self.settings.onselect) {
+							self.settings.onselect(e.target);
+						}
+					}
+
 					self.hideMenu();
 				},
 				enableUpDown: true
@@ -539,6 +546,9 @@
 					DOM.addClass(id, 'mceMenuItemHidden');
 				}
 			});
+
+			var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', 'menu_' + self.id);
+			this.keyboardNav.update(items);
 		},
 
 		_keyHandler: function (evt) {
@@ -549,120 +559,110 @@
 					if (!specialKeyCodeMap[evt.keyCode]) {
 						self._filter(evt);
 					}
-
-					if (evt.keyCode === 13 && evt.target.value) {
-						if (self.settings.onselect) {
-							self.settings.onselect(evt.target.value);
-						}
-					}
 				}, 0);
 			}
 
-			switch (evt.keyCode) {
-				case 37: // Left
-					if (self.settings.parent) {
-						self.hideMenu();
-						self.settings.parent.focus();
-						Event.cancel(evt);
-					}
-					break;
-				case 39: // Right
-					if (self.mouseOverFunc) {
-						self.mouseOverFunc(evt);
-					}
-					break;
+			var tabIndex = 0;
+
+			if (evt.keyCode === 9) {
+				var nodes = DOM.select('input, button, select, textarea', DOM.get('menu_' + self.id));
+
+				nodes = tinymce.grep(nodes, function (node) {
+					return !node.disabled && !DOM.isHidden(node) && node.getAttribute('tabindex') >= 0;
+				});
+
+				if (!nodes.length) {
+					return;
+				}
+
+				DOM.setAttrib(nodes, 'tabindex', 0);
+
+				if (evt.shiftKey) {
+					nodes.reverse();
+				}
+
+				var endIndex = Math.max(0, nodes.length - 1), tabIndex = nodeIndex(nodes, evt.target);
+
+				tabIndex++;
+
+				tabIndex = Math.max(tabIndex, 0);
+
+				if (tabIndex > endIndex) {
+					tabIndex = 0;
+				}
+
+				nodes[tabIndex].focus();
+				DOM.setAttrib(nodes[tabIndex], 'tabindex', 1);
+
+				evt.preventDefault();
+				evt.stopImmediatePropagation();
 			}
 		},
 
-		_add: function (tb, o) {
-			var n, s = o.settings,
-				a, ro, it, cp = this.classPrefix,
-				ic;
+		_add: function (menu, o) {
+			var s = o.settings,
+				cp = this.classPrefix,
+				icon;
 
 			if (s.separator) {
-				ro = DOM.add(tb, 'div', {
+				DOM.add(menu, 'div', {
 					'class': cp + 'ItemSeparator'
 				});
-
-				n = ro.previousSibling;
-
-				if (n) {
-					DOM.addClass(n, 'mceLast');
-				}
 
 				return;
 			}
 
-			n = it = DOM.add(tb, 'div', {
+			item = DOM.add(menu, 'div', {
 				id: o.id,
 				'class': cp + 'Item ' + cp + 'ItemEnabled'
 			});
 
 			if (s.html) {
-				n = DOM.add(n, 'div', {
-					'class': 'mceMenuHtml'
-				}, s.html);
+				DOM.addClass(item, 'mceMenuHtml');
+				DOM.setHTML(item, s.html);
 			} else {
-				n = a = DOM.add(n, 'div', {
-					id: o.id + '_aria',
-					role: 'option',
-					'class' : cp + 'ItemOption'
-				});
+				DOM.setAttrib(item, 'role', 'option');
 
-				ic = DOM.add(n, 'span', {
-					'class': 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')
-				});
-
-				if (s.icon_src) {
-					DOM.add(ic, 'img', {
-						src: s.icon_src
+				if (s.icon || s.icon_src) {
+					icon = DOM.add(item, 'span', {
+						'class': 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')
 					});
+
+					if (s.icon_src) {
+						DOM.add(icon, 'img', {
+							src: s.icon_src
+						});
+					}
 				}
 
-				n = DOM.add(n, s.element || 'span', {
+				var txt = DOM.add(item, s.element || 'span', {
 					'class': 'mceText',
 					title: o.settings.title
 				}, o.settings.title);
 
+				if (o.settings.style) {
+					if (typeof o.settings.style == "function") {
+						o.settings.style = o.settings.style();
+					}
+
+					DOM.setAttrib(txt, 'style', o.settings.style);
+				}
+
 				if (s.parent) {
-					DOM.setAttrib(a, 'aria-haspopup', 'true');
-					DOM.setAttrib(a, 'aria-owns', 'menu_' + o.id);
+					DOM.setAttrib(txt, 'aria-haspopup', 'true');
+					DOM.setAttrib(txt, 'aria-owns', 'menu_' + o.id);
 				}
 			}
 
-			DOM.addClass(it, s['class']);
-
-			if (o.settings.style) {
-				if (typeof o.settings.style == "function") {
-					o.settings.style = o.settings.style();
-				}
-
-				DOM.setAttrib(n, 'style', o.settings.style);
-			}
+			DOM.addClass(item, s['class']);
 
 			if (o.onmouseover) {
-				Event.add(n, 'mouseover', o.onmouseover);
-			}
-
-			if (tb.childNodes.length == 1) {
-				DOM.addClass(it, 'mceFirst');
-			}
-
-			n = it.previousSibling;
-
-			if (n && DOM.hasClass(n, cp + 'ItemSeparator')) {
-				DOM.addClass(ro, 'mceFirst');
+				Event.add(item, 'mouseover', o.onmouseover);
 			}
 
 			if (o.collapse) {
-				DOM.addClass(it, cp + 'ItemSub');
+				DOM.addClass(item, cp + 'ItemSub');
 			}
-
-			if (n) {
-				DOM.removeClass(n, 'mceLast');
-			}
-
-			DOM.addClass(it, 'mceLast');
 		}
 	});
 })(tinymce);
