@@ -69,7 +69,7 @@
             this.params = {};
             this.features = {};
 
-            this.zIndex = 300002;
+            this.zIndex = 10002;
             this.count = 0;
             this.windows = {};
         },
@@ -155,7 +155,7 @@
 
             // create modal
             if (!modal.length) {
-                modal = DOM.add(DOM.doc.body, 'div', { 'class': 'defaultSkin mceModal', role: 'dialog', 'aria-labelledby' : id + '_title'}, '');
+                modal = DOM.add(DOM.doc.body, 'div', { 'class': ed.settings.skin_class + ' mceModal', role: 'dialog', 'aria-labelledby': id + '_title' }, '');
 
                 if (f.overlay !== false) {
                     DOM.add(modal, 'div', { 'class': 'mceModalOverlay' });
@@ -177,14 +177,16 @@
             url = f.url || f.file;
 
             if (url) {
-                url = tinymce._addVer(url);
+                if (f.addver !== false) {
+                    url = tinymce._addVer(url);
+                }
 
                 // add loader
                 DOM.addClass(id, 'mceLoading');
 
                 DOM.addClass(id + '_content', 'mceModalContentIframe');
 
-                var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label' : 'Dialog Content Iframe' });
+                var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label': 'Dialog Content Iframe' });
                 DOM.setAttrib(iframe, 'src', url);
 
                 Event.add(iframe, 'load', function () {
@@ -235,7 +237,7 @@
                         var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
 
                         if (button.icon) {
-                            DOM.add(btn, 'span', {'class' : 'mceIcon mce_' + button.icon, 'role' : 'presentation'});
+                            DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
                         }
 
                         each(tinymce.explode(button.classes), function (cls) {
@@ -255,7 +257,7 @@
                             Event.add(btn, 'click', function (e) {
                                 Event.cancel(e);
                                 button.onsubmit.call(self, e);
-                                
+
                                 if (e.cancelSubmit) {
                                     return;
                                 }
@@ -266,16 +268,33 @@
                     });
                 }
 
-                var data = f.content;
-
-                if (typeof data === "string") {
-                    DOM.setHTML(id + '_content', '<form>' + data.replace('\n', '') + '</form>');
-                } else {
-                    if (data.nodeType) {
-                        DOM.add(id + '_content', DOM.create('form', {}, data));
-                    } else {
-                        DOM.add(id + '_content', DOM.create('form', {}, data.renderHTML()));
+                if (f.content) {
+                    // HTML string
+                    if (typeof f.content === "string") {
+                        DOM.setHTML(id + '_content', '<form>' + f.content.replace('\n', '') + '</form>');
                     }
+
+                    // HTML node collection
+                    if (f.content.nodeType) {
+                        DOM.add(id + '_content', DOM.create('form', {}, f.content));
+                    }
+                }
+
+                // controlManager UI items
+                if (f.items) {
+                    if (!tinymce.is(f.items, 'array')) {
+                        f.items = [f.items];
+                    }
+
+                    each(f.items, function (ctrl) {
+                        DOM.add(id + '_content', 'form', {}, ctrl.renderHTML());
+                        ctrl.postRender();
+
+                        // add onClose event to destroy controls
+                        self.onClose.add(function () {
+                            ctrl.destroy();
+                        });
+                    });
                 }
 
                 function nodeIndex(nodes, node) {
@@ -293,7 +312,7 @@
                     var tabIndex = 0;
 
                     if (e.keyCode === 9) {
-                        var nodes = DOM.select('input, button, select, textarea', DOM.get(id));
+                        var nodes = DOM.select('input, button, select, textarea, .mceListBox', DOM.get(id));
 
                         nodes = tinymce.grep(nodes, function (node) {
                             return !node.disabled && !DOM.isHidden(node) && node.getAttribute('tabindex') >= 0;
@@ -328,27 +347,38 @@
                 });
             }
 
-            Event.add(id, 'keyup', function (evt) {
+            Event.add(id, 'keydown', function (evt) {
                 // Close on escape
                 if (evt.keyCode === 27) {
                     self.close(null, id);
-                    return Event.cancel(evt);
-                }
 
+                    evt.preventDefault();
+                    evt.stopImmediatePropagation();
+
+                    return;
+                }
+            });
+
+            Event.add(id, 'keyup', function (evt) {
                 // enter triggers focused button
                 if (evt.keyCode === 13) {
                     if (evt.target && evt.target.nodeName === "BUTTON") {
                         Event.fire(evt.target, 'click');
                     }
+
                     // or cancel
                     evt.preventDefault();
                     evt.stopImmediatePropagation();
                 }
             });
 
-            Event.add(DOM.select('button.mceModalClose', DOM.get(id)), 'click', function (e) {
+            Event.add(DOM.select('button.mceModalClose', DOM.get(id)), 'click', function (evt) {
                 self.close(null, id);
-                return Event.cancel(e);
+
+                evt.preventDefault();
+                evt.stopImmediatePropagation();
+
+                return;
             });
 
             // Measure borders
@@ -407,7 +437,7 @@
                 close: function () {
                     return self.close(null, id);
                 },
-                focus: function() {
+                focus: function () {
                     return self.focus(id);
                 }
             };
@@ -441,7 +471,7 @@
 
             id = self._findId(id || win);
 
-            win = self.windows[id];
+            win = self.windows[id] || self._frontWindow();
 
             // Probably not inline
             if (!win) {
@@ -647,7 +677,7 @@
 
             if (DOM.hasClass(id, 'dragging')) {
                 end();
-                return Event.cancel(se);
+                return;
             }
 
             updateWithTouchData(se);
@@ -699,8 +729,6 @@
 
                 return Event.cancel(e);
             });
-
-            return Event.cancel(se);
         },
 
         // Find front most window
@@ -716,7 +744,7 @@
                 }
             }*/
 
-            tinymce.each(this.windows, function(win) {
+            tinymce.each(this.windows, function (win) {
                 if (win.zIndex > ix) {
                     fw = win;
                     ix = win.zIndex;
