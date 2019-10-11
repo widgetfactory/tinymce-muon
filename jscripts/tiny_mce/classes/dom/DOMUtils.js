@@ -1262,32 +1262,39 @@
 		 * // Adds a class to a specific element in the current page
 		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
 		 */
-		addClass: function (e, c) {
-			var self = this;
+		addClass: function (e, c) {			
+			if (!c) {
+				return '';
+			}
+
+			function valueToArray(value) {
+				if (Array.isArray(value)) {
+					return value;
+				}
+				
+				if (typeof value === "string") {
+					return value.split(' ');
+				}
+
+				return [];
+			}
 
 			return this.run(e, function (e) {
-				var o;
+				var values = valueToArray(c);
 
-				if (!c) {
-					return 0;
-				}
+				each(values, function (cls) {
+					// remove whitespace
+					cls.trim();
 
-				if (c.indexOf(' ') !== -1) {
-					each(c.split(' '), function (cls) {
-						self.addClass(e, cls);
-					});
-				} else {
-					/*if (this.hasClass(e, c)) {
-						return e.className;
+					// skip empty value
+					if (!cls) {
+						return true;
 					}
+					
+					e.classList.add(cls);
+				});
 
-					o = this.removeClass(e, c);
-
-					return e.className = (o != '' ? (o + ' ') : '') + c;*/
-					e.classList.add(c);
-
-					return e.className;
-				}
+				return e.className;
 			});
 		},
 
