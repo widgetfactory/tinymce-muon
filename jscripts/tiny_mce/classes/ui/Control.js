@@ -37,6 +37,8 @@
 			this.disabled = 0;
 			this.active = 0;
 			this.editor = editor;
+
+			this.name = this.settings.name || id;
 		},
 
 		setAriaProperty: function (property, value) {
@@ -152,6 +154,8 @@
 		 */
 		renderTo: function (n) {
 			DOM.setHTML(n, this.renderHTML());
+
+			this.postRender();
 		},
 
 		/**
