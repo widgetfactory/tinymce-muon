@@ -1260,6 +1260,40 @@
 			return bl;
 		},
 
+		getSelectedNodes: function (start, end) {
+			var self = this,
+				startNode, endNode, node, nodes = [], rng = self.getRng();
+
+			startNode = start || rng.startContainer;
+			endNode = end || rng.endContainer;
+
+			if (startNode) {
+				nodes.push(startNode);
+			}
+
+			if (startNode && endNode && startNode != endNode) {
+				node = startNode;
+
+				var walker = new TreeWalker(startNode, self.dom.getRoot());
+
+				while ((node = walker.next()) && node != endNode) {
+					
+					// check for parent node that is an element...
+					if (node.parentNode !== self.dom.getRoot()) {
+						continue;
+					}
+
+					nodes.push(node);
+				}
+			}
+
+			if (endNode && startNode != endNode) {
+				nodes.push(endNode);
+			}
+
+			return nodes;
+		},
+
 		isForward: function () {
 			var dom = this.dom,
 				sel = this.getSel(),
