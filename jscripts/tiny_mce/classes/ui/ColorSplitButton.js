@@ -100,8 +100,7 @@
 
 			DOM.setStyles(this.id + '_menu', {
 				left: pos.x,
-				top: pos.y + elm.firstChild.clientHeight,
-				zIndex: 200000
+				top: pos.y + elm.firstChild.clientHeight
 			});
 
 			elm = 0;
@@ -178,29 +177,26 @@
 				settings = this.settings,
 				node, tb, tr, list, context;
 
-			if (settings.menu_class.indexOf('defaultSkin') === -1) {
-				settings.menu_class = 'defaultSkin ' + settings.menu_class;
-			}
-
 			list = DOM.add(settings.menu_container, 'div', {
 				role: 'listbox',
 				id: this.id + '_menu',
-				'class': settings.menu_class + ' ' + settings['class'],
-				style: 'position:absolute;left:0;top:-1000px;'
+				'class': 'mceMenu mceSplitButtonMenu ' + settings.menu_class,
 			});
 
 			menu = DOM.add(list, 'div', {
-				'class': settings['class'] + ' mceSplitButtonMenu'
+				'class': settings['class']
 			});
 
 			node = DOM.add(menu, 'table', {
 				role: 'presentation',
 				'class': 'mceColorSplitMenu'
 			});
+			
 			tb = DOM.add(node, 'tbody');
 
 			// Generate color grid
 			i = 0;
+
 			each(is(settings.colors, 'array') ? settings.colors : settings.colors.split(','), function (color) {
 				color = color.replace(/^#/, '');
 
@@ -265,6 +261,7 @@
 
 				Event.add(node, 'click', function (e) {
 					settings.more_colors_func.call(settings.more_colors_scope || self);
+					self.hideMenu();
 					return Event.cancel(e); // Cancel to fix onbeforeunload problem
 				});
 			}
