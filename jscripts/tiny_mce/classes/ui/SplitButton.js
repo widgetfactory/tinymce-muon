@@ -93,6 +93,7 @@
 			}
 
 			html += DOM.createHTML('button', {
+				type: 'button',
 				id: self.id + '_action',
 				tabindex: '-1',
 				'class': 'mceText ' + s['class'],
@@ -100,6 +101,7 @@
 			}, icon);
 
 			html += DOM.createHTML('button', {
+				type: 'button',
 				id: self.id + '_open',
 				tabindex: '-1',
 				'class': 'mceOpen ' + s['class'],
@@ -149,6 +151,11 @@
 						self.showMenu();
 						Event.cancel(evt);
 					}
+				});
+			} else {
+				Event.add(self.id + '_action', 'click', function (evt) {
+					self.showMenu();
+					Event.cancel(evt);
 				});
 			}
 
