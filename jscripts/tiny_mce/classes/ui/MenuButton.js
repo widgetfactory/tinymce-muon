@@ -123,8 +123,12 @@
 				m;
 
 			m = self.settings.control_manager.createDropMenu(self.id + '_menu', {
-				'class': this.classPrefix + 'Menu',
-				icons: self.settings.icons
+				class: this.classPrefix + 'Menu',
+				icons: self.settings.icons,
+				max_width: this.settings.max_width,
+				max_height: this.settings.max_height,
+				keyboard_focus: true,
+				onselect: this.settings.onselect
 			});
 
 			m.onHideMenu.add(function () {
