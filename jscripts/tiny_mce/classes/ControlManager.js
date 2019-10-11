@@ -170,14 +170,14 @@
 		createDropMenu: function (id, s, cc) {
 			var self = this,
 				ed = self.editor,
-				c, bm, v, cls;
+				c, bm, cls, bm;
 
 			s = extend({
 				'class': 'mceDropDown',
 				constrain: ed.settings.constrain_menus
 			}, s);
 
-			s.class += ' ' + (ed.settings.skin_class || 'defaultSkin');
+			s.class += ' ' + (ed.settings.skin_class || 'mceDefaultSkin');
 
 			id = self.prefix + id;
 			cls = cc || self._cls.dropmenu || tinymce.ui.DropMenu;
@@ -194,6 +194,17 @@
 							ed.execCommand(s.cmd, s.ui || false, s.value);
 						}
 					};
+				}
+			});
+
+			c.onShowMenu.add(function () {
+				bm = ed.selection.getBookmark(1);
+			});
+
+			c.onHideMenu.add(function () {
+				if (bm) {
+					ed.selection.moveToBookmark(bm);
+					bm = 0;
 				}
 			});
 
@@ -307,7 +318,6 @@
 			s = extend({
 				title: s.title,
 				'class': 'mce_' + id,
-				unavailable_prefix: ed.getLang('unavailable', ''),
 				scope: s.scope,
 				control_manager: self
 			}, s);
@@ -354,7 +364,7 @@
 		createSplitButton: function (id, s, cc) {
 			var self = this,
 				ed = self.editor,
-				c, cls;
+				c, cls, bm;
 
 			if (self.get(id)) {
 				return null;
@@ -363,13 +373,13 @@
 			s.title = ed.translate(s.title);
 			s.scope = s.scope || ed;
 
-			if (!s.onclick) {
+			if (!s.onclick && s.cmd) {
 				s.onclick = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
 
-			if (!s.onselect) {
+			if (!s.onselect && s.cmd) {
 				s.onselect = function (v) {
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
@@ -387,58 +397,14 @@
 			c = self.add(new cls(id, s, ed));
 			ed.onMouseDown.add(c.hideMenu, c);
 
-			return self.add(c);
-		},
-
-		/**
-		 * Creates a panel button control instance by id.
-		 *
-		 * @method createSplitButton
-		 * @param {String} id Unique id for the new split button instance. For example "spellchecker".
-		 * @param {Object} s Optional settings object for the control.
-		 * @param {Object} cc Optional control class to use instead of the default one.
-		 * @return {tinymce.ui.Control} Control instance that got created and added.
-		 */
-		createPanelButton: function (id, s, cc) {
-			var self = this,
-				ed = self.editor,
-				c, cls;
-
-			if (self.get(id)) {
-				return null;
-			}
-
-			s.title = ed.translate(s.title);
-			s.scope = s.scope || ed;
-
-			if (!s.onclick && s.cmd) {
-				s.onclick = function (v) {
-					ed.execCommand(s.cmd, s.ui || false, v || s.value);
-				};
-			}
-
-			s = extend({
-				title: s.title,
-				'class': 'mce_' + id,
-				scope: s.scope,
-				control_manager: self
-			}, s);
-
-			id = self.prefix + id;
-			cls = cc || self._cls.panelbutton || tinymce.ui.PanelButton;
-			c = self.add(new cls(id, s, ed));
-
-			c.panel = this.createPanel(id + '_panel', s);
-
-			ed.onMouseDown.add(c.hidePanel, c);
+			c.onRenderMenu.add(function(e, m) {
+				m.onHideMenu.add(function() {
+					ed.nodeChanged();
+					ed.focus();
+				});
+			});
 
 			return self.add(c);
-		},
-
-		createPanelSplitButton: function(id, s, cc) {
-			var cc = tinymce.ui.PanelSplitButton;
-
-			return this.createPanelButton(id, s, cc);
 		},
 
 		/**
@@ -481,7 +447,7 @@
 			s = extend({
 				title: s.title,
 				'class': 'mce_' + id,
-				'menu_class': ed.settings.skin_class || 'defaultSkin',
+				'menu_class': ed.settings.skin_class || 'mceDefaultSkin',
 				scope: s.scope,
 				more_colors_title: ed.getLang('more_colors')
 			}, s);
@@ -496,21 +462,16 @@
 				c.destroy();
 			});
 
-			// Fix for bug #1897785, #1898007
-			if (tinymce.isIE) {
-				c.onShowMenu.add(function () {
-					// IE 8 needs focus in order to store away a range with the current collapsed caret location
-					ed.focus();
-					bm = ed.selection.getBookmark(1);
-				});
+			c.onShowMenu.add(function () {
+				bm = ed.selection.getBookmark(1);
+			});
 
-				c.onHideMenu.add(function () {
-					if (bm) {
-						ed.selection.moveToBookmark(bm);
-						bm = 0;
-					}
-				});
-			}
+			c.onHideMenu.add(function () {
+				if (bm) {
+					ed.selection.moveToBookmark(bm);
+					bm = 0;
+				}
+			});
 
 			return self.add(c);
 		},
@@ -531,7 +492,6 @@
 			s = extend({
 				title: s.title,
 				'class': 'mce_' + id,
-				unavailable_prefix: ed.getLang('unavailable', ''),
 				scope: s.scope,
 				control_manager: self
 			}, s);
@@ -557,7 +517,7 @@
 			var c, self = this, ed = self.editor,
 				cls;
 
-			s.class += ' ' + (ed.settings.skin_class || 'defaultSkin');
+			s.class += ' ' + (ed.settings.skin_class || 'mceDefaultSkin');
 
 			//id = self.prefix + id;
 			cls = cc || self._cls.panel || tinymce.ui.Panel;
@@ -628,6 +588,30 @@
 
 			id = self.prefix + id;
 			cls = cc || self._cls.layout || tinymce.ui.Layout;
+			c = new cls(id, s, self.editor);
+
+			if (self.get(id)) {
+				return null;
+			}
+
+			return self.add(c);
+		},
+
+		/**
+		 * Creates a form container control instance by id.
+		 *
+		 * @method createLayout
+		 * @param {String} id Unique id for the new toolbar container control instance. For example "toolbar1".
+		 * @param {Object} s Optional settings object for the control.
+		 * @param {Object} cc Optional control class to use instead of the default one.
+		 * @return {tinymce.ui.Control} Control instance that got created and added.
+		 */
+		createForm: function (id, s, cc) {
+			var c, self = this,
+				cls;
+
+			id = self.prefix + id;
+			cls = cc || self._cls.layout || tinymce.ui.Form;
 			c = new cls(id, s, self.editor);
 
 			if (self.get(id)) {
