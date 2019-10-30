@@ -982,11 +982,6 @@
 			self.focus(true);
 		});
 
-		if (settings.content_editable && tinymce.isOpera) {
-			dom.bind(self.getBody(), 'click', doOperaFocus);
-			dom.bind(self.getBody(), 'keydown', doOperaFocus);
-		}
-
 		// Selection change is delayed ~200ms on IE when you click inside the current range
 		self.onSelectionChange.add(function (ed, e) {
 			var startElm = ed.selection.getStart(true);
@@ -1063,11 +1058,5 @@
 		self.onKeyDown.add(function (ed, e) {
 			handleShortcut(e, true);
 		});
-
-		if (tinymce.isOpera) {
-			self.onClick.add(function (ed, e) {
-				e.preventDefault();
-			});
-		}
 	};
 })(tinymce);
