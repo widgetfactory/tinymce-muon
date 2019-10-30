@@ -252,16 +252,8 @@
 
 			id = self.prefix + id;
 
-			function useNativeListForAccessibility(ed) {
-				return ed.settings.use_accessible_selects && !tinymce.isGecko;
-			}
-
-			if (ed.settings.use_native_selects || useNativeListForAccessibility(ed)) {
-				c = new tinymce.ui.NativeListBox(id, s);
-			} else {
-				cls = cc || self._cls.listbox || tinymce.ui.ListBox;
-				c = new cls(id, s, ed);
-			}
+			cls = cc || self._cls.listbox || tinymce.ui.ListBox;
+			c = new cls(id, s, ed);
 
 			self.controls[id] = c;
 
@@ -397,8 +389,8 @@
 			c = self.add(new cls(id, s, ed));
 			ed.onMouseDown.add(c.hideMenu, c);
 
-			c.onRenderMenu.add(function(e, m) {
-				m.onHideMenu.add(function() {
+			c.onRenderMenu.add(function (e, m) {
+				m.onHideMenu.add(function () {
 					ed.nodeChanged();
 					ed.focus();
 				});
@@ -611,7 +603,7 @@
 				cls;
 
 			id = self.prefix + id;
-			cls = cc || self._cls.layout || tinymce.ui.Form;
+			cls = cc || self._cls.form || tinymce.ui.Form;
 			c = new cls(id, s, self.editor);
 
 			if (self.get(id)) {
