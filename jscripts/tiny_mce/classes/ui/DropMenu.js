@@ -178,6 +178,10 @@
 		selectItem: function (e, node) {
 			var self = this, dm, item = self.items[node.id];
 
+			if (!item) {
+				return;
+			}
+
 			self.selected = node;
 
 			if (item.isDisabled()) {
@@ -207,12 +211,11 @@
 		 * @param {Number} y Vertical position of the menu.
 		 * @param {Numner} px Optional parent X position used when menus are cascading.
 		 */
-		showMenu: function (x, y, px) {
+		showMenu: function (x, y, px, py) {
 			var self = this,
 				s = self.settings,
 				co, vp = DOM.getViewPort(),
-				w, h, mx, my, ot = 0,
-				dm, cp = self.classPrefix;
+				w, h, mx, my, ot = 0, cp = self.classPrefix;
 
 			self.collapse(1);
 
@@ -248,7 +251,7 @@
 				}
 
 				if ((y + s.vp_offset_y + h) > my) {
-					y = Math.max(0, (my - s.vp_offset_y) - h);
+					y = py ? py - h - 8 : Math.max(0, (my - s.vp_offset_y) - h);
 				}
 			}
 
@@ -308,6 +311,10 @@
 			});
 
 			Event.add(co, 'keydown', self._keyHandler, self);
+
+			if (s.filter) {
+				Event.add(co, 'keyup', self._filterHandler, self);
+			}
 
 			self.onShowMenu.dispatch(self);
 
@@ -375,6 +382,10 @@
 				DOM.removeClass(e.firstChild, self.classPrefix + 'ItemActive');
 			}
 
+			each(self.items, function (o, id) {
+				DOM.removeClass(id, 'mceMenuItemHidden');
+			});
+
 			self.onHideMenu.dispatch(self);
 		},
 
@@ -391,7 +402,7 @@
 
 			o = self.parent(o);
 
-			if (self.isRendered && (co = DOM.get('menu_' + self.id))) {
+			if (self.isRendered && (co = DOM.get('menu_' + self.id + '_items'))) {
 				self._add(co, o);
 			}
 
@@ -439,6 +450,7 @@
 			Event.remove(co, 'mouseover', self.mouseOverFunc);
 			Event.remove(DOM.select('a', co), 'focus', self.mouseOverFunc);
 			Event.remove(co, 'click', self.mouseClickFunc);
+			Event.remove(co, 'keyup', self._filterHandler);
 			Event.remove(co, 'keydown', self._keyHandler);
 
 			DOM.remove(co);
@@ -467,14 +479,10 @@
 			if (s.filter) {
 				var filter = DOM.add(menu, 'div', {
 					'class': self.classPrefix + 'Filter'
-				}, '<input type="text" /><svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><title>Search</title><path d="M496.131 435.698l-121.276-103.147c-12.537-11.283-25.945-16.463-36.776-15.963 28.628-33.534 45.921-77.039 45.921-124.588 0-106.039-85.961-192-192-192s-192 85.961-192 192c0 106.039 85.961 192 192 192 47.549 0 91.054-17.293 124.588-45.922-0.5 10.831 4.68 24.239 15.963 36.776l103.147 121.276c17.661 19.623 46.511 21.277 64.11 3.678s15.946-46.449-3.677-64.11zM192 320c-70.692 0-128-57.308-128-128s57.308-128 128-128 128 57.308 128 128-57.307 128-128 128z"></path></svg>');
+				}, '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" /><svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><title>Search</title><path d="M496.131 435.698l-121.276-103.147c-12.537-11.283-25.945-16.463-36.776-15.963 28.628-33.534 45.921-77.039 45.921-124.588 0-106.039-85.961-192-192-192s-192 85.961-192 192c0 106.039 85.961 192 192 192 47.549 0 91.054-17.293 124.588-45.922-0.5 10.831 4.68 24.239 15.963 36.776l103.147 121.276c17.661 19.623 46.511 21.277 64.11 3.678s15.946-46.449-3.677-64.11zM192 320c-70.692 0-128-57.308-128-128s57.308-128 128-128 128 57.308 128 128-57.307 128-128 128z"></path></svg>');
 
 				self.onHideMenu.add(function () {
 					filter.firstChild.value = "";
-
-					each(self.items, function (o, id) {
-						DOM.removeClass(id, 'mceMenuItemHidden');
-					});
 				});
 			}
 
@@ -497,6 +505,7 @@
 		_setupKeyboardNav: function () {
 			var contextMenu, menuItems, self = this;
 			contextMenu = DOM.get('menu_' + self.id);
+			
 			menuItems = DOM.select('div[role="option"]', 'menu_' + self.id);
 			menuItems.splice(0, 0, contextMenu);
 
@@ -507,12 +516,21 @@
 					self.hideMenu();
 				},
 				onAction: function (e, id) {
-					if (menuItems.length > 1) {
-						var n = DOM.get(id);
-						self.selectItem(e, n);
+					// process filter value
+					if (e.target && e.target.nodeName === "INPUT") {						
+						self.settings.onselect(e.target.value);
 					} else {
-						if (self.settings.onselect) {
-							self.settings.onselect(e.target);
+						if (menuItems.length > 1) {
+							var n = DOM.get(id);
+	
+							if (n) {
+								self.selectItem(e, n);
+							}
+	
+						} else {
+							if (self.settings.onselect) {
+								self.settings.onselect(e.target);
+							}
 						}
 					}
 
@@ -524,17 +542,16 @@
 			contextMenu.focus();
 		},
 
-		_filter: function (evt) {
-			var self = this,
-				n = evt.target;
+		filter: function (value) {
+			var self = this;
 
-			var matcher = new RegExp('^' + escapeRegExChars(n.value), "i");
+			var matcher = new RegExp('^' + escapeRegExChars(value), "i");
 
 			each(self.items, function (o, id) {
 				var s = o.settings,
 					state;
 
-				if (!n.value || s.value === undef) {
+				if (!value || value === undef) {
 					state = true;
 				} else {
 					state = matcher.test(s.title);
@@ -548,19 +565,11 @@
 			});
 
 			var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', 'menu_' + self.id);
-			this.keyboardNav.update(items);
+			self.keyboardNav.update(items);
 		},
 
 		_keyHandler: function (evt) {
 			var self = this;
-
-			if (evt.target && evt.target.nodeName === "INPUT") {
-				setTimeout(function () {
-					if (!specialKeyCodeMap[evt.keyCode]) {
-						self._filter(evt);
-					}
-				}, 0);
-			}
 
 			var tabIndex = 0;
 
@@ -599,6 +608,18 @@
 			}
 		},
 
+		_filterHandler: function(evt) {
+			var self = this;
+			
+			if (evt.target && evt.target.nodeName === "INPUT") {
+				setTimeout(function () {
+					if (!specialKeyCodeMap[evt.keyCode]) {
+						self.filter(evt.target.value);
+					}
+				}, 0);
+			}
+		},
+
 		_add: function (menu, o) {
 			var s = o.settings,
 				cp = this.classPrefix,
@@ -606,7 +627,8 @@
 
 			if (s.separator) {
 				DOM.add(menu, 'div', {
-					'class': cp + 'ItemSeparator'
+					id: o.id,
+					'class': cp + 'Item ' + cp + 'ItemSeparator'
 				});
 
 				return;
