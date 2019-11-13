@@ -136,6 +136,8 @@
 					if (!self.isDisabled()) {
 						s.onclick(self.value);
 						Event.cancel(evt);
+
+						self.hideMenu();
 					}
 				};
 
