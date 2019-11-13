@@ -540,7 +540,7 @@
 				if (!format.selector) {
 					return false;
 				}
-
+				
 				// Look for matching formats
 				each(formatList, function (format) {
 					// Check collapsed state if it exists
@@ -548,7 +548,12 @@
 						return;
 					}
 
-					if (dom.is(node, format.selector) && !isCaretNode(node)) {
+					if (isCaretNode(node)) {
+						node = dom.getParent(node, dom.isBlock);
+					}
+
+					//if (dom.is(node, format.selector) && !isCaretNode(node)) {
+					if (dom.is(node, format.selector)) {
 						setElementFormat(node, format);
 						found = true;
 						return false;
@@ -836,7 +841,7 @@
 			if (format) {
 				if (node) {
 					if (node.nodeType) {
-						if (!applyNodeStyle(formatList, node)) {
+						if (!applyNodeStyle(formatList, node)) {														
 							rng = dom.createRng();
 							rng.setStartBefore(node);
 							rng.setEndAfter(node);
@@ -1638,7 +1643,7 @@
 
 					// Walk left/right
 					for (sibling = parent[siblingName]; sibling; sibling = sibling[siblingName]) {
-						if (!isBookmarkNode(sibling) && !isWhiteSpaceNode(sibling) && !isBogusBr(sibling)) {
+						if (!isBogusBr(sibling) && !isElementNode(sibling)) {
 							return parent;
 						}
 					}
