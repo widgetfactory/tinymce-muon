@@ -607,7 +607,7 @@
 			self.iframeHTML += '</head><body id="' + bi + '" class="mceContentBody ' + bc + '" onload="window.parent.tinyMCE.get(\'' + self.id + '\').onLoad.dispatch();"><br></body></html>';
 
 			// Domain relaxing enabled, then set document domain
-			if (tinymce.relaxedDomain && (isIE || (tinymce.isOpera && parseFloat(opera.version()) < 11))) {
+			if (tinymce.relaxedDomain) {
 				// We need to write the contents here in IE since multiple writes messes up refresh button and back button
 				url = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinyMCE.get("' + self.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody();})()';
 			}
@@ -1167,6 +1167,10 @@
 				// Make sure the node is within the editor root or is the editor root
 				if (node.ownerDocument != self.getDoc() || !self.dom.isChildOf(node, root)) {
 					node = root;
+				}
+
+				if (node.getAttribute('data-mce-bogus')) {
+					node = node.parentNode;
 				}
 
 				// Get parents and add them to object
