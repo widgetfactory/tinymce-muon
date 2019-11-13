@@ -283,11 +283,11 @@ var tinyMCEPopup = {
 		}
 
 		// bind close on esc
-		dom.bind(document, 'keyup', function (e) {
+		/*dom.bind(document, 'keyup', function (e) {
 			if (e.keyCode == 27) {
 				tinyMCEPopup.close();
 			}
-		});
+		});*/
 
 		// Call onInit
 		// Init must be called before focus so the selection won't get lost by the focus call
@@ -297,8 +297,6 @@ var tinyMCEPopup = {
 
 		// Move focus to window
 		window.focus();
-
-		
 	},
 
 	_eventProxy: function (id) {
