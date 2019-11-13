@@ -69,7 +69,7 @@
             this.params = {};
             this.features = {};
 
-            this.zIndex = 10002;
+            this.zIndex = 700002;
             this.count = 0;
             this.windows = {};
         },
@@ -357,9 +357,7 @@
 
                     return;
                 }
-            });
 
-            Event.add(id, 'keyup', function (evt) {
                 // enter triggers focused button
                 if (evt.keyCode === 13) {
                     if (evt.target && evt.target.nodeName === "BUTTON") {
@@ -431,6 +429,7 @@
             self.windows[id] = win = {
                 id: id,
                 features: f,
+                elm: DOM.get(id),
                 moveTo: function (x, y) {
                     return self.moveTo(id, x, y);
                 },
@@ -623,10 +622,11 @@
 
         position: function (id) {
             var p = DOM.getRect(id),
-                vp = DOM.getViewPort();
+                vp = DOM.getViewPort(),
+                ep = DOM.getRect(this.editor.id + '_parent');
 
             var top = Math.round(Math.max(vp.y + 10, vp.y + (vp.h / 2.0) - (p.h / 2.0)));
-            var left = Math.round(Math.max(vp.x + 10, vp.x + (vp.w / 2.0) - (p.w / 2.0)));
+            var left = Math.round(Math.max(ep.x + 10, ep.x + (ep.w / 2.0) - (p.w / 2.0)));
 
             DOM.setStyles(id, { 'left': left, 'top': top });
         },
