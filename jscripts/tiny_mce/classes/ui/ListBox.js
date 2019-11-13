@@ -57,6 +57,21 @@
 	 *    theme_advanced_buttons1 : 'mylistbox' // Add the new example listbox to the toolbar
 	 * });
 	 */
+
+	var specialKeyCodeMap = {
+		9: 'tab',
+		17: 'ctrl',
+		18: 'alt',
+		27: 'esc',
+		32: 'space',
+		37: 'left',
+		39: 'right',
+		13: 'enter',
+		91: 'cmd',
+		38: 'up',
+		40: 'down'
+	};
+
 	tinymce.create('tinymce.ui.ListBox:tinymce.ui.Control', {
 		/**
 		 * Constructs a new listbox control instance.
@@ -100,6 +115,13 @@
 			 * @event onAdd
 			 */
 			this.onAdd = new Dispatcher(this);
+
+			/**
+			 * Fires before the menu gets rendered.
+			 *
+			 * @event onBeforeRenderMenu
+			 */
+			this.onBeforeRenderMenu = new Dispatcher(this);
 
 			/**
 			 * Fires when the menu gets rendered.
@@ -246,12 +268,24 @@
 			var html = '',
 				prefix = this.classPrefix;
 
-			html += DOM.createHTML('button', {
-				type: 'button',
-				id: this.id + '_text',
-				tabindex: -1,
-				class: 'mceText'
-			}, DOM.encode(this.settings.title));
+			if (this.settings.combobox) {
+				html += DOM.createHTML('input', {
+					type: 'text',
+					id: this.id + '_input',
+					tabindex: -1,
+					autocomplete: 'off',
+					spellcheck: false,
+					autocapitalize: 'off',
+					class: 'mceText'
+				});
+			} else {
+				html += DOM.createHTML('button', {
+					type: 'button',
+					id: this.id + '_text',
+					tabindex: -1,
+					class: 'mceText'
+				}, DOM.encode(this.settings.title));
+			}
 
 			html += DOM.createHTML('button', {
 				type: 'button',
@@ -282,17 +316,21 @@
 				pos, elm = DOM.get(this.id),
 				menu;
 
-			if (this.isDisabled() || this.items.length === 0) {
+			if (this.isDisabled()) {
 				return;
 			}
 
-			if (this.menu && this.menu.isMenuVisible) {
+			/*if (this.menu && this.menu.isMenuVisible) {
 				return this.hideMenu();
-			}
+			}*/
 
 			if (!this.isMenuRendered) {
 				this.renderMenu();
 				this.isMenuRendered = true;
+			}
+
+			if (this.items.length === 0) {
+				return;
 			}
 
 			pos = DOM.getPos(elm);
@@ -322,7 +360,7 @@
 				}
 			});
 
-			menu.showMenu(0, elm.clientHeight);
+			menu.showMenu(0, elm.clientHeight, 0, pos.y);
 
 			Event.add(DOM.doc, 'mousedown', this.hideMenu, this);
 
@@ -340,7 +378,7 @@
 			if (!this.menu) {
 				return;
 			}
-			
+
 			// Prevent double toogles by canceling the mouse click event to the button
 			if (e && e.type == "mousedown" && (e.target.id == this.id + '_text' || e.target.id == this.id + '_open')) {
 				return;
@@ -370,9 +408,14 @@
 				max_height: this.settings.max_height || '',
 				filter: !!this.settings.filter,
 				keyboard_focus: true,
+				constrain: true,
 				onselect: function (value) {
 					if (self.settings.onselect(value) !== false) {
 						self.select(value);
+					}
+
+					if (self.settings.combobox) {
+						DOM.setValue(self.id + '_input', '');
 					}
 				}
 			});
@@ -381,6 +424,9 @@
 				self.hideMenu();
 				self.focus();
 			});
+
+			// fire onBeforeRenderMenu, which allows list items to be added before display
+			this.onBeforeRenderMenu.dispatch(this, menu);
 
 			each(this.items, function (item) {
 				// No value then treat it as a title
@@ -421,25 +467,105 @@
 			var self = this;
 
 			Event.add(this.id, 'click', function (evt) {
+				if (evt.target.nodeName === "INPUT") {
+					return;
+				}
+
 				self.showMenu(evt);
 				Event.cancel(evt);
 			});
 
 			Event.add(this.id, 'keydown', function (evt) {
+				if (evt.target.nodeName === "INPUT") {
+					return;
+				}
+
 				if (evt.keyCode == 32) { // Space
 					self.showMenu(evt);
 					Event.cancel(evt);
 				}
 			});
 
+			Event.add(this.id + '_input', 'keyup', function (evt) {
+
+				if (!self.menu || !self.menu.isMenuVisible) {
+					self.showMenu();
+				}
+
+				setTimeout(function () {
+					var value = evt.target.value;
+
+					evt.target.focus();
+
+					if (!value) {
+						Event.cancel(evt);
+						self.hideMenu();
+						return;
+					}
+
+					if (!specialKeyCodeMap[evt.keyCode]) {
+						self.menu.filter(evt.target.value);
+					}
+				}, 0);
+			});
+
+			Event.add(this.id + '_input', 'keydown', function (evt) {
+				switch (evt.keyCode) {
+                    // enter
+                    case 13:
+                        Event.cancel(evt);
+
+                        if (this.value === "") {
+                            self.showMenu();
+                        } else {
+							self.settings.onselect(this.value);
+							self.hideMenu();
+							
+							this.value = "";
+                        }
+                        break;
+                    // down arrow
+                    case 40:
+					case 38:
+						self.showMenu();
+                        Event.cancel(evt);
+                        break;
+                    // backspace
+                    case 8:
+                        // keep normal behaviour while input has a value
+                        if (this.value) {
+                            return;
+						}
+						
+						Event.cancel(evt);
+
+                        /*var $tags = $('.uk-datalist-tag', container);
+
+                        if ($tags.length) {
+                            var val = $tags.last().val();
+
+                            // remove tag
+                            removeTag($tags.last());
+
+                            e.preventDefault();
+
+                            // update value with tag value and focus
+                            $(this).val(val).focus();
+                        }*/
+                        break;
+                }
+			});
+
 			Event.add(this.id, 'focus', function () {
 				if (!this._focused) {
+
 					this.keyDownHandler = Event.add(this.id, 'keydown', function (e) {
 						if (e.keyCode == 40) {
 							self.showMenu();
 							Event.cancel(e);
 						}
 					});
+
 					this.keyPressHandler = Event.add(this.id, 'keypress', function (e) {
 						var value;
 						if (e.keyCode == 13) {
