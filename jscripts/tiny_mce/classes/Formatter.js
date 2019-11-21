@@ -1643,7 +1643,7 @@
 
 					// Walk left/right
 					for (sibling = parent[siblingName]; sibling; sibling = sibling[siblingName]) {
-						if (!isBogusBr(sibling) && !isElementNode(sibling)) {
+						if (!isBookmarkNode(sibling) && !isWhiteSpaceNode(sibling) && !isBogusBr(sibling) && !isCaretNode(sibling)) {
 							return parent;
 						}
 					}
