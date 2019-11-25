@@ -443,7 +443,7 @@
 				} else {
 					item.id = DOM.uniqueId();
 					item.role = "option";
-					item.onclick = function () {
+					item.onclick = function () {						
 						if (self.settings.onselect(item.value) !== false) {
 							self.select(item.value);
 						} // Must be run after
@@ -538,20 +538,6 @@
 						}
 						
 						Event.cancel(evt);
-
-                        /*var $tags = $('.uk-datalist-tag', container);
-
-                        if ($tags.length) {
-                            var val = $tags.last().val();
-
-                            // remove tag
-                            removeTag($tags.last());
-
-                            e.preventDefault();
-
-                            // update value with tag value and focus
-                            $(this).val(val).focus();
-                        }*/
                         break;
                 }
 			});
