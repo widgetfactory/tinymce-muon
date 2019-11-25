@@ -548,12 +548,12 @@
 						return;
 					}
 
-					if (isCaretNode(node)) {
+					/*if (isCaretNode(node)) {
 						node = dom.getParent(node, dom.isBlock);
-					}
+					}*/
 
-					//if (dom.is(node, format.selector) && !isCaretNode(node)) {
-					if (dom.is(node, format.selector)) {
+					if (dom.is(node, format.selector) && !isCaretNode(node)) {
+					//if (dom.is(node, format.selector)) {
 						setElementFormat(node, format);
 						found = true;
 						return false;
@@ -1038,8 +1038,6 @@
 						// so let's see if we can use the first child instead
 						// This will happen if you triple click a table cell and use remove formatting
 
-						// Remove from JCE as causes issues with other browsers
-
 						/*if (/^(TR|TH|TD)$/.test(startContainer.nodeName) && startContainer.firstChild) {
 							if (startContainer.nodeName == "TR") {
 								startContainer = startContainer.firstChild.firstChild || startContainer;
@@ -1071,6 +1069,7 @@
 							id: '_start',
 							'data-mce-type': 'bookmark'
 						});
+
 						endContainer = wrap(endContainer, 'span', {
 							id: '_end',
 							'data-mce-type': 'bookmark'
@@ -1096,7 +1095,7 @@
 
 				// Remove items between start/end
 				rangeUtils.walk(rng, function (nodes) {
-					each(nodes, function (node) {
+					each(nodes, function (node) {						
 						process(node);
 
 						// Remove parent span if it only contains text-decoration: underline, yet a parent node is also underlined.
@@ -1131,6 +1130,7 @@
 
 			if (getContentEditable(selection.getNode()) === "false") {
 				node = selection.getNode();
+
 				for (var i = 0, l = formatList.length; i < l; i++) {
 					if (formatList[i].ceFalseOverride) {
 						if (removeFormat(formatList[i], vars, node, node)) {
@@ -1153,7 +1153,7 @@
 				}
 
 				ed.nodeChanged();
-			} else {
+			} else {				
 				performCaretAction('remove', name, vars, similar);
 			}
 		}
