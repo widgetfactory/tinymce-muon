@@ -471,7 +471,12 @@
 					return;
 				}
 
-				self.showMenu(evt);
+				if (self.menu && self.menu.isMenuVisible) {
+					self.hideMenu(evt);
+				} else {
+					self.showMenu(evt);
+				}
+
 				Event.cancel(evt);
 			});
 
@@ -481,7 +486,12 @@
 				}
 
 				if (evt.keyCode == 32) { // Space
-					self.showMenu(evt);
+					if (self.menu && self.menu.isMenuVisible) {
+						self.hideMenu(evt);
+					} else {
+						self.showMenu(evt);
+					}
+					
 					Event.cancel(evt);
 				}
 			});
