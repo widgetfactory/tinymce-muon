@@ -9,8 +9,7 @@
  */
 
 (function (tinymce) {
-	var is = tinymce.is,
-		DOM = tinymce.DOM,
+	var DOM = tinymce.DOM,
 		each = tinymce.each,
 		Event = tinymce.dom.Event,
 		undef;
@@ -35,7 +34,7 @@
 		17: 'ctrl',
 		18: 'alt',
 		27: 'esc',
-		32: 'space',
+		//32: 'space',
 		37: 'left',
 		39: 'right',
 		13: 'enter',
@@ -116,6 +115,9 @@
 			this.onShowMenu = new tinymce.util.Dispatcher(this);
 			this.onHideMenu = new tinymce.util.Dispatcher(this);
 			this.classPrefix = 'mceMenu';
+
+			// array of selected elements
+			this.selected = [];
 		},
 
 		/**
@@ -182,9 +184,39 @@
 				return;
 			}
 
-			self.selected = node;
-
 			if (item.isDisabled()) {
+				return;
+			}
+
+			var idx = tinymce.inArray(self.selected, node);
+
+			if (idx >= 0) {
+				self.selected.splice(idx, 1);
+				item.setSelected(0);
+			} else {
+				self.selected.push(node);
+				item.setSelected(1);
+			}
+
+			// trigger click event
+			if (item.settings.onclick) {
+				item.settings.onclick(e);
+			}
+
+			// update tags
+			if (self.settings.filter) {
+				// clear input
+				self.clearFilterInput(true);
+
+				// add tags
+				tinymce.each(self.selected, function (el) {
+					var item = self.items[el.id];
+
+					if (item) {
+						self.addFilterTag(item);
+					}
+				});
+
 				return;
 			}
 
@@ -197,10 +229,67 @@
 
 				dm = dm.settings.parent;
 			}
+		},
 
-			if (item.settings.onclick) {
-				item.settings.onclick(e);
+		findItem: function (val) {
+			var self = this, found;
+
+			each(self.items, function (item) {
+				if (item.settings.title === val) {
+					found = item;
+
+					// break
+					return false;
+				}
+			});
+
+			return found;
+		},
+
+		clearFilterInput: function (removetags) {
+			var self = this, input = DOM.select('input', 'menu_filter_input_' + self.id)[0];
+
+			// find and clear input element
+			input.value = '';
+			input.focus();
+
+			self.clearFilteredItems();
+
+			if (removetags) {
+				DOM.remove(DOM.select('button', 'menu_filter_' + self.id));
 			}
+		},
+
+		removeFilterTag: function (tag, item) {
+			var self = this;
+
+			DOM.remove(tag);
+
+			if (!item) {
+				item = self.findItem(tag.value);
+			}
+
+			if (item) {
+				var node = DOM.get(item.id);
+				self.selectItem({}, node);
+			}
+		},
+
+		addFilterTag: function (item) {
+			var self = this, value = item.settings.title;
+
+			var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', { 'class': 'mceButton', 'value': value }, '<label>' + value + '</label>');
+			DOM.insertBefore(btn, filter.lastChild);
+
+			Event.add(btn, 'click', function (evt) {
+				evt.preventDefault();
+
+				if (evt.target.nodeName === 'LABEL') {
+					return;
+				}
+
+				self.removeFilterTag(btn);
+			});
 		},
 
 		/**
@@ -310,10 +399,10 @@
 				}
 			});
 
-			Event.add(co, 'keydown', self._keyHandler, self);
+			Event.add(co, 'keydown', self._keyDownHandler, self);
 
 			if (s.filter) {
-				Event.add(co, 'keyup', self._filterHandler, self);
+				Event.add(co, 'keyup', self._keyUpHandler, self);
 			}
 
 			self.onShowMenu.dispatch(self);
@@ -321,18 +410,22 @@
 			// scroll to selected item
 			each(self.items, function (o) {
 				if (o.selected) {
+					if (self.settings.filter) {
+						self.addFilterTag(o);
+					}
+
 					var el = DOM.get(o.id);
 
 					if (el) {
-						self.selected = el;
+						if (tinymce.inArray(self.selected, el) === -1) {
+							self.selected.push(el);
+						}
 					}
-
-					return false;
 				}
 			});
 
-			if (self.selected) {
-				self.scrollTo(self.selected);
+			if (self.selected.length) {
+				self.scrollTo(self.selected[0]);
 			} else {
 				// reset scroll position
 				DOM.get('menu_' + self.id + '_items').scrollTop = 0;
@@ -340,6 +433,15 @@
 
 			if (s.keyboard_focus) {
 				self._setupKeyboardNav();
+			}
+
+			if (s.filter) {
+				// focus input
+				var input = DOM.select('input', 'menu_filter_input_' + self.id);
+
+				if (input) {
+					input[0].focus();
+				}
 			}
 		},
 
@@ -357,13 +459,20 @@
 				return;
 			}
 
+			// reset filter
+			if (self.settings.filter) {
+				self.clearFilterInput(true);
+			}
+
+			// destroy keyboard nav
 			if (self.keyboardNav) {
 				self.keyboardNav.destroy();
 			}
 
-			//Event.remove(co, 'mouseover', self.mouseOverFunc);
 			Event.remove(co, 'click', self.mouseClickFunc);
-			Event.remove(co, 'keydown', self._keyHandler);
+			Event.remove(co, 'keydown', self._keyDownHandler);
+			Event.remove(co, 'keyup', self._keyUpHandler);
+
 			DOM.hide(co);
 
 			self.isMenuVisible = 0;
@@ -382,10 +491,7 @@
 				DOM.removeClass(e.firstChild, self.classPrefix + 'ItemActive');
 			}
 
-			each(self.items, function (o, id) {
-				DOM.removeClass(id, 'mceMenuItemHidden');
-			});
-
+			// trigger event
 			self.onHideMenu.dispatch(self);
 		},
 
@@ -450,8 +556,8 @@
 			Event.remove(co, 'mouseover', self.mouseOverFunc);
 			Event.remove(DOM.select('a', co), 'focus', self.mouseOverFunc);
 			Event.remove(co, 'click', self.mouseClickFunc);
-			Event.remove(co, 'keyup', self._filterHandler);
-			Event.remove(co, 'keydown', self._keyHandler);
+			Event.remove(co, 'keyup', self._keyUpHandler);
+			Event.remove(co, 'keydown', self._keyDownHandler);
 
 			DOM.remove(co);
 		},
@@ -476,13 +582,20 @@
 				DOM.setAttrib(menu, 'aria-parent', 'menu_' + self.settings.parent.id);
 			}
 
+			// create autocomplete filter
 			if (s.filter) {
 				var filter = DOM.add(menu, 'div', {
+					id: 'menu_filter_' + self.id,
 					'class': self.classPrefix + 'Filter'
-				}, '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" /><svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 512 512"><title>Search</title><path d="M496.131 435.698l-121.276-103.147c-12.537-11.283-25.945-16.463-36.776-15.963 28.628-33.534 45.921-77.039 45.921-124.588 0-106.039-85.961-192-192-192s-192 85.961-192 192c0 106.039 85.961 192 192 192 47.549 0 91.054-17.293 124.588-45.922-0.5 10.831 4.68 24.239 15.963 36.776l103.147 121.276c17.661 19.623 46.511 21.277 64.11 3.678s15.946-46.449-3.677-64.11zM192 320c-70.692 0-128-57.308-128-128s57.308-128 128-128 128 57.308 128 128-57.307 128-128 128z"></path></svg>');
+				}, '');
+
+				var filterInput = DOM.add(filter, 'div', {
+					id: 'menu_filter_input_' + self.id,
+					'class': self.classPrefix + 'FilterInput'
+				}, '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="..." />')
 
 				self.onHideMenu.add(function () {
-					filter.firstChild.value = "";
+					filterInput.firstChild.value = "";
 				});
 			}
 
@@ -505,7 +618,7 @@
 		_setupKeyboardNav: function () {
 			var contextMenu, menuItems, self = this;
 			contextMenu = DOM.get('menu_' + self.id);
-			
+
 			menuItems = DOM.select('div[role="option"]', 'menu_' + self.id);
 			menuItems.splice(0, 0, contextMenu);
 
@@ -517,24 +630,31 @@
 				},
 				onAction: function (e, id) {
 					// process filter value
-					if (e.target && e.target.nodeName === "INPUT") {						
-						self.settings.onselect(e.target.value);
-					} else {
-						if (menuItems.length > 1) {
-							var n = DOM.get(id);
-	
-							if (n) {
-								self.selectItem(e, n);
-							}
-	
-						} else {
-							if (self.settings.onselect) {
-								self.settings.onselect(e.target);
-							}
-						}
-					}
+					if (menuItems.length > 1) {
+						if (e.target && e.target.nodeName === "INPUT") {
+							var item = self.findItem(e.target.value);
 
-					self.hideMenu();
+							if (item) {
+								id = item.id;
+							}
+
+							// clear input
+							e.target.value = '';
+						}
+
+						var n = DOM.get(id);
+
+						if (n) {
+							self.selectItem(e, n);
+						}
+
+					} else {
+						if (self.settings.onselect) {
+							self.settings.onselect(e.target);
+						}
+
+						self.hideMenu();
+					}
 				},
 				enableUpDown: true
 			});
@@ -542,8 +662,29 @@
 			contextMenu.focus();
 		},
 
-		filter: function (value) {
+		_updateKeyboardNav: function () {
+			// update keyboard nav with new list
+			var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', 'menu_' + this.id);
+			this.keyboardNav.update(items);
+		},
+
+		clearFilteredItems: function () {
+			each(this.items, function (o, id) {
+				DOM.removeClass(id, 'mceMenuItemHidden');
+			});
+
+			if (this.keyboardNav) {
+				this._updateKeyboardNav();
+			}
+		},
+
+		filterItems: function (value) {
 			var self = this;
+
+			if (value === '') {
+				self.clearFilteredItems();
+				return;
+			}
 
 			var matcher = new RegExp('^' + escapeRegExChars(value), "i");
 
@@ -564,12 +705,38 @@
 				}
 			});
 
-			var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', 'menu_' + self.id);
-			self.keyboardNav.update(items);
+			this._updateKeyboardNav();
 		},
 
-		_keyHandler: function (evt) {
+		_keyDownHandler: function (evt) {
 			var self = this;
+
+			// backspace
+			if (evt.keyCode === 8) {
+				if (evt.target && evt.target.nodeName === "INPUT") {
+					var input = evt.target;
+
+					// keep normal behaviour while input has a value
+					if (input.value) {
+						return;
+					}
+
+					var tags = DOM.select('button', 'menu_filter_' + self.id);
+
+					if (tags.length) {
+						var tag = tags.pop(), val = DOM.getValue(tag);
+
+						// remove tag
+						self.removeFilterTag(tag);
+
+						evt.preventDefault();
+
+						// update value with tag value and focus
+						input.value = val;
+						input.focus();
+					}
+				}
+			}
 
 			var tabIndex = 0;
 
@@ -608,13 +775,30 @@
 			}
 		},
 
-		_filterHandler: function(evt) {
+		_keyUpHandler: function (evt) {
 			var self = this;
-			
+
 			if (evt.target && evt.target.nodeName === "INPUT") {
+				var input = evt.target;
+
 				setTimeout(function () {
+					if (evt.keyCode === 32) {
+						var item = self.findItem(input.value);
+
+						if (item) {
+							var node = DOM.get(item.id);
+
+							if (node) {
+								self.selectItem(evt, node);
+							}
+						}
+
+						// clear input
+						input.value = '';
+					}
+
 					if (!specialKeyCodeMap[evt.keyCode]) {
-						self.filter(evt.target.value);
+						self.filterItems(input.value);
 					}
 				}, 0);
 			}
