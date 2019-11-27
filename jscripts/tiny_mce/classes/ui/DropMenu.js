@@ -818,7 +818,7 @@
 				return;
 			}
 
-			item = DOM.add(menu, 'div', {
+			var item = DOM.add(menu, 'div', {
 				id: o.id,
 				'class': cp + 'Item ' + cp + 'ItemEnabled'
 			});
