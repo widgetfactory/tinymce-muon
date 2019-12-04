@@ -238,6 +238,10 @@
 		add: function (name, value, settings) {
 			settings = settings || {};
 
+			if (this.hasItem(value)) {
+				return;
+			}
+
 			settings = tinymce.extend(settings, {
 				title: name,
 				value: value
@@ -245,6 +249,16 @@
 
 			this.items.push(settings);
 			this.onAdd.dispatch(this, settings);
+		},
+
+		hasItem: function (value) {
+			for (var i = 0; i < this.items.length; i++) {
+				if (this.items[i].value === value) {
+					return true;
+				}
+			}
+
+			return false;
 		},
 
 		/**
@@ -443,7 +457,7 @@
 				} else {
 					item.id = DOM.uniqueId();
 					item.role = "option";
-					item.onclick = function () {						
+					item.onclick = function () {
 						if (self.settings.onselect(item.value) !== false) {
 							self.select(item.value);
 						} // Must be run after
@@ -491,7 +505,7 @@
 					} else {
 						self.showMenu(evt);
 					}
-					
+
 					Event.cancel(evt);
 				}
 			});
@@ -521,35 +535,35 @@
 
 			Event.add(this.id + '_input', 'keydown', function (evt) {
 				switch (evt.keyCode) {
-                    // enter
-                    case 13:
-                        Event.cancel(evt);
+					// enter
+					case 13:
+						Event.cancel(evt);
 
-                        if (this.value === "") {
-                            self.showMenu();
-                        } else {
+						if (this.value === "") {
+							self.showMenu();
+						} else {
 							self.settings.onselect(this.value);
 							self.hideMenu();
-							
+
 							this.value = "";
-                        }
-                        break;
-                    // down arrow
-                    case 40:
+						}
+						break;
+					// down arrow
+					case 40:
 					case 38:
 						self.showMenu();
-                        Event.cancel(evt);
-                        break;
-                    // backspace
-                    case 8:
-                        // keep normal behaviour while input has a value
-                        if (this.value) {
-                            return;
-						}
-						
 						Event.cancel(evt);
-                        break;
-                }
+						break;
+					// backspace
+					case 8:
+						// keep normal behaviour while input has a value
+						if (this.value) {
+							return;
+						}
+
+						Event.cancel(evt);
+						break;
+				}
 			});
 
 			Event.add(this.id, 'focus', function () {
