@@ -1042,7 +1042,8 @@
 					default:
 						// IE has odd anonymous function for event attributes
 						if (n.indexOf('on') === 0 && v) {
-							v = tinymce._replace(/^function\s+\w+\(\)\s+\{\s+(.*)\s+\}$/, '$1', '' + v);
+							v = '' + v;
+							v = v.replace(/^function\s+\w+\(\)\s+\{\s+(.*)\s+\}$/, '$1');
 						}
 				}
 			}
@@ -1741,7 +1742,7 @@
 
 									// Remove everything but class name
 									ov = v;
-									v = tinymce._replace(/.*\.([a-z0-9_\-]+).*/i, '$1', v);
+									v = v.replace(/.*\.([a-z0-9_\-]+).*/i, '$1');
 
 									// Filter classes
 									if (f && !(v = f(v, ov))) {

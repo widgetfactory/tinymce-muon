@@ -874,31 +874,6 @@
 			}
 
 			return u.replace('#', v + '#');
-		},
-
-		// Fix function for IE 9 where regexps isn't working correctly
-		// Todo: remove me once MS fixes the bug
-		_replace: function (find, replace, str) {
-			// On IE9 we have to fake $x replacement
-			if (isRegExpBroken) {
-				return str.replace(find, function () {
-					var val = replace,
-						args = arguments,
-						i;
-
-					for (i = 0; i < args.length - 2; i++) {
-						if (args[i] === undef) {
-							val = val.replace(new RegExp('\\$' + i, 'g'), '');
-						} else {
-							val = val.replace(new RegExp('\\$' + i, 'g'), args[i]);
-						}
-					}
-
-					return val;
-				});
-			}
-
-			return str.replace(find, replace);
 		}
 
 		/**#@-*/

@@ -263,7 +263,7 @@ var tinyMCEPopup = {
 
 		// Restore selection in IE when focus is placed on a non textarea or input element of the type text
 		if (tinymce.isIE) {
-			document.addEventListener('mouseup', tinyMCEPopup._restoreSelection, false);
+			//document.addEventListener('mouseup', tinyMCEPopup._restoreSelection, false);
 		}
 
 		this.restoreSelection();
