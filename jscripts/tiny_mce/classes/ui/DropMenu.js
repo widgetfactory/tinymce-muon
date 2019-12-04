@@ -632,10 +632,26 @@
 					// process filter value
 					if (menuItems.length > 1) {
 						if (e.target && e.target.nodeName === "INPUT") {
-							var item = self.findItem(e.target.value);
+							if (e.target.value !== '') {
+								var item = self.findItem(e.target.value);
 
-							if (item) {
-								id = item.id;
+								if (item) {
+									id = item.id;
+								} else {
+									/*id = DOM.uniqueId();
+									
+									item = {
+										id: id,
+										role: 'option',
+										title: e.target.value,
+										onclick: function () {
+											self.settings.onselect(e.target.value);
+										}
+									};
+
+									self.add(item);*/
+									self.settings.onselect(e.target.value);
+								}
 							}
 
 							// clear input
