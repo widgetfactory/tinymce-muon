@@ -12,18 +12,19 @@
 
     tinymce.util.PreviewCss = function (ed, fmt) {
         var name, previewElm, dom = ed.dom,
-            previewCss = '',
-            parentFontSize, previewStylesName;
+            previewCss = '';
 
         var previewStyles = ed.settings.preview_styles;
 
         // No preview forced
-        if (previewStyles === false)
+        if (previewStyles === false) {
             return '';
+        }
 
         // Default preview
-        if (!previewStyles)
+        if (!previewStyles) {
             previewStyles = 'font-family font-size font-weight text-decoration text-transform color background-color';
+        }
 
         // Removes any variables since these can't be previewed
         function removeVars(val) {
@@ -68,6 +69,7 @@
             position: 'absolute',
             left: -0xFFFF
         });
+
         ed.getBody().appendChild(previewElm);
 
         // Get parent container font size so we can compute px values out of em/% for older IE:s
@@ -77,27 +79,17 @@
         each(previewStyles.split(' '), function (name) {
             var value = dom.getStyle(previewElm, name, true);
 
-            // If background is transparent then check if the body has a background color we can use
-            if (name == 'background-color' && /transparent|rgba\s*\([^)]+,\s*0\)/.test(value)) {
-                value = dom.getStyle(ed.getBody(), name, true);
+            // If text color is white and the background color is white or transparent, override with default color
+            if (name == 'color' && dom.toHex(value).toLowerCase() == '#ffffff') {
+                var bgcolor = dom.getStyle(previewElm, 'background-color', true);
 
-                // Ignore white since it's the default color, not the nicest fix
-                if (dom.toHex(value).toLowerCase() == '#ffffff') {
-                    return;
+                if (dom.toHex(bgcolor).toLowerCase() == '#ffffff' || /transparent|rgba\s*\([^)]+,\s*0\)/.test(bgcolor)) {
+                    value = 'inherit';
                 }
             }
 
-            // Old IE won't calculate the font size so we need to do that manually
-            if (name == 'font-size') {
-                if (/em|%$/.test(value)) {
-                    if (parentFontSize === 0) {
-                        return;
-                    }
-
-                    // Convert font size from em/% to px
-                    value = parseFloat(value, 10) / (/%$/.test(value) ? 100 : 1);
-                    value = (value * parentFontSize) + 'px';
-                }
+            if (name == 'font-size' && parseInt(value) === 0) {
+                value = 'inherit';
             }
 
             previewCss += name + ':' + value + ';';
