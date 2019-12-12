@@ -548,12 +548,8 @@
 						return;
 					}
 
-					/*if (isCaretNode(node)) {
-						node = dom.getParent(node, dom.isBlock);
-					}*/
-
+					// apply format to element, but not caret node
 					if (dom.is(node, format.selector) && !isCaretNode(node)) {
-					//if (dom.is(node, format.selector)) {
 						setElementFormat(node, format);
 						found = true;
 						return false;
@@ -838,7 +834,7 @@
 				return;
 			}
 
-			if (format) {
+			if (format) {				
 				if (node) {
 					if (node.nodeType) {
 						if (!applyNodeStyle(formatList, node)) {														
