@@ -408,7 +408,7 @@
 			}
 
 			// Ignore all events while resizing or if the editor instance was removed
-			if (resizeStarted || editor.removed) {
+			if (resizeStarted || editor.removed || editor !== tinymce.activeEditor) {
 				return;
 			}
 
@@ -633,7 +633,7 @@
 					throttledUpdateResizeRect({
 						type: ''
 					});
-				}, 20);
+				}, 100);
 			});
 
 			// Toogle resize when image is dropped
