@@ -363,7 +363,6 @@
 
 				if (n && (n = DOM.getParent(n, '.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
 					self.selectItem(e, n);
-
 					return false; // Cancel to fix onbeforeunload problem
 				}
 			});
@@ -479,10 +478,6 @@
 
 			if (!c) {
 				self.collapse(1);
-			}
-
-			if (co) {
-				DOM.hide(co);
 			}
 
 			e = DOM.get(self.id);
