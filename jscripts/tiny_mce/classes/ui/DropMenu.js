@@ -132,15 +132,13 @@
 				cs = self.settings,
 				m;
 
-				s = tinymce.extend(s, cs);
-
-			/*s.container = s.container || cs.container;
+			s.container = s.container || cs.container;
 			s.parent = self;
 			s.constrain = s.constrain || cs.constrain;
 			s['class'] = s['class'] || cs['class'];
 			s.vp_offset_x = s.vp_offset_x || cs.vp_offset_x;
 			s.vp_offset_y = s.vp_offset_y || cs.vp_offset_y;
-			s.keyboard_focus = cs.keyboard_focus;*/
+			s.keyboard_focus = cs.keyboard_focus;
 			m = new tinymce.ui.DropMenu(s.id || DOM.uniqueId(), s);
 
 			m.onAddItem.add(self.onAddItem.dispatch, self.onAddItem);
