@@ -422,7 +422,6 @@
 				max_height: this.settings.max_height || '',
 				filter: !!this.settings.filter,
 				keyboard_focus: true,
-				constrain: true,
 				onselect: function (value) {
 					if (self.settings.onselect(value) !== false) {
 						self.select(value);
