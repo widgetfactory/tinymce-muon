@@ -638,7 +638,7 @@
             }
 
             win.zIndex = this.zIndex++;
-            DOM.setStyle(id, 'zIndex', win.zIndex);
+            DOM.setStyle(id + '_frame', 'zIndex', win.zIndex);
 
             DOM.removeClass(this.lastId, 'mceFocus');
             DOM.addClass(id + '_frame', 'mceFocus');
