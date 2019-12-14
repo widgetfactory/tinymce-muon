@@ -10,6 +10,16 @@
 (function () {
     var each = tinymce.each;
 
+    function luminance(hex) {
+        hex = hex.substr(1);
+        var rgb = parseInt(hex, 16);
+        var r = (rgb >> 16) & 0xff;  // extract red
+        var g = (rgb >> 8) & 0xff;  // extract green
+        var b = (rgb >> 0) & 0xff;  // extract blue
+
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
+    }
+
     tinymce.util.PreviewCss = function (ed, fmt) {
         var name, previewElm, dom = ed.dom,
             previewCss = '';
@@ -80,11 +90,19 @@
             var value = dom.getStyle(previewElm, name, true);
 
             // If text color is white and the background color is white or transparent, override with default color
-            if (name == 'color' && dom.toHex(value).toLowerCase() == '#ffffff') {
-                var bgcolor = dom.getStyle(previewElm, 'background-color', true);
+            if (name == 'color') {
+                value = dom.toHex(value).toLowerCase();
 
-                if (dom.toHex(bgcolor).toLowerCase() == '#ffffff' || /transparent|rgba\s*\([^)]+,\s*0\)/.test(bgcolor)) {
-                    value = 'inherit';
+                // get background color and luminance of style
+                var bgcolor = dom.getStyle(previewElm, 'background-color', true), bgluma = luminance(dom.toHex(bgcolor));
+
+                if (bgluma > 239 || /transparent|rgba\s*\([^)]+,\s*0\)/.test(bgcolor)) {
+                    // get rgb value and luminance
+                    var luma = luminance(value);
+
+                    if (luma > 200) {
+                        value = 'inherit';
+                    }
                 }
             }
 
