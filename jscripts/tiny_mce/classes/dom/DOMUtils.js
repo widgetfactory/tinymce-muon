@@ -1702,6 +1702,20 @@
 			return s;
 		},
 
+		toRGB : function(s) {
+			var c = /^\s*?#([0-9A-F]{2})([0-9A-F]{1,2})([0-9A-F]{2})?\s*?$/.exec(s);
+
+			if (c) {
+				// #FFF -> #FFFFFF
+				if (!is(c[3]))
+					c[3] = c[2] = c[1];
+
+				return "rgb(" + parseInt(c[1], 16) + "," + parseInt(c[2], 16) + "," + parseInt(c[3], 16) + ")";
+			}
+
+			return s;
+		},
+
 		/**
 		 * Returns a array of all single CSS classes in the document. A single CSS class is a simple
 		 * rule like ".class" complex ones like "div td.class" will not be added to output.
@@ -2231,7 +2245,7 @@
 		_isRes: function (c) {
 			// Is live resizble element
 			return /^(top|left|bottom|right|width|height)/i.test(c) || /;\s*(top|left|bottom|right|width|height)/i.test(c);
-		}
+		},
 
 		/*
 		walk : function(n, f, s) {
@@ -2244,22 +2258,6 @@
 					f.call(s || this, n);
 			} else
 				tinymce.walk(n, f, 'childNodes', s);
-		}
-		*/
-
-		/*
-		toRGB : function(s) {
-			var c = /^\s*?#([0-9A-F]{2})([0-9A-F]{1,2})([0-9A-F]{2})?\s*?$/.exec(s);
-
-			if (c) {
-				// #FFF -> #FFFFFF
-				if (!is(c[3]))
-					c[3] = c[2] = c[1];
-
-				return "rgb(" + parseInt(c[1], 16) + "," + parseInt(c[2], 16) + "," + parseInt(c[3], 16) + ")";
-			}
-
-			return s;
 		}
 		*/
 	});
