@@ -12,17 +12,19 @@
 
     function luminance(hex) {
         hex = hex.substr(1);
+
         var rgb = parseInt(hex, 16);
-        var r = (rgb >> 16) & 0xff;  // extract red
-        var g = (rgb >> 8) & 0xff;  // extract green
-        var b = (rgb >> 0) & 0xff;  // extract blue
+
+        var r = (rgb >> 16) & 0xFF;  // extract red
+        var g = (rgb >> 8) & 0xFF;  // extract green
+        var b = (rgb >> 0) & 0xFF;  // extract blue
 
         return 0.2126 * r + 0.7152 * g + 0.0722 * b; // per ITU-R BT.709
     }
 
     tinymce.util.PreviewCss = function (ed, fmt) {
         var name, previewElm, dom = ed.dom,
-            previewCss = '';
+            previewCss = {};
 
         var previewStyles = ed.settings.preview_styles;
 
@@ -83,38 +85,53 @@
         ed.getBody().appendChild(previewElm);
 
         // Get parent container font size so we can compute px values out of em/% for older IE:s
-        parentFontSize = dom.getStyle(ed.getBody(), 'fontSize', true);
-        parentFontSize = /px$/.test(parentFontSize) ? parseInt(parentFontSize, 10) : 0;
+        var parentFontSize = dom.getStyle(ed.getBody(), 'fontSize', true);
+        var parentFontSize = /px$/.test(parentFontSize) ? parseInt(parentFontSize, 10) : 0;
+
+        var bodyColor = dom.getStyle(ed.getBody(), 'background-color', true), bodyLuma = luminance(dom.toHex(bodyColor));
 
         each(previewStyles.split(' '), function (name) {
             var value = dom.getStyle(previewElm, name, true);
 
             // If text color is white and the background color is white or transparent, override with default color
             if (name == 'color') {
-                value = dom.toHex(value).toLowerCase();
-
                 // get background color and luminance of style
                 var bgcolor = dom.getStyle(previewElm, 'background-color', true), bgluma = luminance(dom.toHex(bgcolor));
 
-                if (bgluma > 239 || /transparent|rgba\s*\([^)]+,\s*0\)/.test(bgcolor)) {
-                    // get rgb value and luminance
-                    var luma = luminance(value);
+                var luma = luminance(dom.toHex(value));
 
-                    if (luma > 200) {
-                        value = 'inherit';
+                // a light color...
+                if (luma > 200) {
+                    // background is too light, check body background color
+                    if (bgluma > 239 || /transparent|rgba\s*\([^)]+,\s*0\)/.test(bgcolor)) {
+                        // body background color is dark, so use it
+                        if (bodyLuma < 128) {
+                            previewCss['background-color'] = bodyColor;
+                        } else {
+                            value = 'inherit';
+                        }
                     }
                 }
+
+                // a dark color and background is too dark, reset
+                if (luma < 128 && bgluma < 128) {
+                    previewCss['background-color'] = 'inherit';
+                }
+            }
+            // skip if already added
+            if (name == 'background-color' && previewCss[name]) {
+                return true;
             }
 
             if (name == 'font-size' && parseInt(value) === 0) {
                 value = 'inherit';
             }
 
-            previewCss += name + ':' + value + ';';
+            previewCss[name] = value;
         });
 
         dom.remove(previewElm);
 
-        return previewCss;
+        return dom.serializeStyle(previewCss);
     };
 })();
