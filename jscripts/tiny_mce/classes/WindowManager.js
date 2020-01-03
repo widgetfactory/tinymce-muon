@@ -360,8 +360,14 @@
 
                 // enter triggers focused button
                 if (evt.keyCode === 13) {
-                    if (evt.target && evt.target.nodeName === "BUTTON") {
-                        Event.fire(evt.target, 'click');
+                    if (evt.target) {
+                        if (evt.target.nodeName === "TEXTAREA") {
+                            return;
+                        }
+                        
+                        if (evt.target.nodeName === "BUTTON") {
+                            Event.fire(evt.target, 'click');
+                        }
                     }
 
                     // or cancel
