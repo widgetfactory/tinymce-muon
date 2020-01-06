@@ -39,6 +39,8 @@
 			self.prefix = s.prefix || ed.id + '_';
 			self._cls = {};
 
+			self.classPrefix = 'mce';
+
 			self.onPostRender.add(function () {
 				each(self.controls, function (c) {
 					c.postRender();
