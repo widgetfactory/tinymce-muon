@@ -415,6 +415,10 @@
             Event.add(id, 'mousedown', function (e) {
                 var n = e.target
 
+                if (/(input|select|textarea|button|label)/i.test(n.nodeName)) {
+                    return;
+                }
+
                 self.focus(id);
 
                 // ignore if the target is the close button, as this has it's own onclick event
@@ -460,7 +464,7 @@
             self.focus(id);
 
             self.count++;
-
+            
             return win;
         },
 
@@ -480,7 +484,7 @@
 
             // Probably not inline
             if (!win) {
-                return;
+                return false;
             }
 
             self.count--;
@@ -517,6 +521,8 @@
                     fw.focus();
                 }
             }
+
+            return true;
         },
 
         setTitle: function (win, title) {
