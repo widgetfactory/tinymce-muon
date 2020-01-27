@@ -729,8 +729,8 @@
 
 						if (node) {
 
-							// skip breaks with style
-							if (node.attr('style')) {
+							// skip breaks with attributes
+							if (node.attributes.length && node.attributes[0].name !== 'data-mce-bogus') {
 								continue;
 							}
 
