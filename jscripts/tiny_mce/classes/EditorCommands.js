@@ -294,6 +294,10 @@
 				toggleFormat(command, value);
 			},
 
+			ApplyFormat: function (command, ui, value) {
+				formatter.apply(value.name, value.args || {}, value.node || null);
+			},
+
 			RemoveFormat: function (command) {
 				formatter.remove(command);
 			},
