@@ -200,7 +200,7 @@
 
 			// trigger click event
 			if (item.settings.onclick) {
-				item.settings.onclick(e);
+				item.settings.onclick.apply(item, e);
 			}
 
 			// update tags
