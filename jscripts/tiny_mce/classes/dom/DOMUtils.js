@@ -1241,7 +1241,7 @@
 				
 				link = self.create('link', {
 					rel: 'stylesheet',
-					'data-cfasync': 'false',
+					'data-cfasync': false,
 					href: tinymce._addVer(u)
 				});
 
@@ -1685,7 +1685,13 @@
 		 * @return {String} Hex version of that RGB value like #FF00FF.
 		 */
 		toHex: function (s) {
-			var c = /^\s*rgb\s*?\(\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?\)\s*$/i.exec(s);
+			//var c = /^\s*rgb\s*?\(\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?,\s*?([0-9]+)\s*?,\s*?([0-9\.]*)\s*?\)\s*$/i.exec(s);
+
+			// clean up rgb string
+			s = s.replace(/\s/g, '').replace(/(rgb|rgba)\(/i, '').replace(/\)/, '').replace(/\s/g, '');
+
+			// split by comma seperator
+			var c = s.split(',');
 
 			function hex(s) {
 				s = parseInt(s, 10).toString(16);
@@ -1693,8 +1699,8 @@
 				return s.length > 1 ? s : '0' + s; // 0 -> 00
 			}
 
-			if (c) {
-				s = '#' + hex(c[1]) + hex(c[2]) + hex(c[3]);
+			if (c.length >= 3) {
+				s = '#' + hex(c[0]) + hex(c[1]) + hex(c[2]);
 
 				return s;
 			}
