@@ -888,18 +888,13 @@
 			}
 		}
 
-		// Opera doesn't support focus event for contentEditable elements so we need to fake it
-		function doOperaFocus() {
-			self.focus(true);
-		}
-
 		var timer;
 
 		function nodeChanged(ed, e) {
 			if (timer) {
 				clearTimeout(timer);
 			}
-			
+
 			// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
 			if (e.keyCode != 65 || !tinymce.VK.metaKeyPressed(e)) {
 				self.selection.normalize();
@@ -1024,26 +1019,71 @@
 			});
 		});
 
+		function hasModifier(e) {
+			return e.altKey || e.ctrlKey || e.metaKey;
+		}
+
+		function isFunctionKey(e) {
+			return e.type === "keydown" && e.keyCode >= 112 && e.keyCode <= 123;
+		}
+
+		function matchShortcut(e, shortcut) {
+			if (!shortcut) {
+				return false;
+			}
+
+			/*var ctrlState = tinymce.isMac ? e.metaKey : e.ctrlKey;
+
+			if (shortcut.ctrl != ctrlState) {
+				return false;
+			}*/
+
+			if (shortcut.ctrl != e.ctrlKey || shortcut.meta != e.metaKey) {
+				return false;
+			}
+
+			if (shortcut.alt != e.altKey || shortcut.shift != e.shiftKey) {
+				return false;
+			}
+
+			if (e.keyCode == shortcut.keyCode || (e.charCode && e.charCode == shortcut.charCode)) {
+				e.preventDefault();
+				return true;
+			}
+
+			return false;
+		}
+
+		function executeShortcutAction(shortcut) {
+			return shortcut.func ? shortcut.func.call(shortcut.scope) : null;
+		}
+
+		var pendingPatterns = [];
+
 		// Add shortcuts
-		function handleShortcut(e, execute) {
-			if (e.altKey || e.ctrlKey || e.metaKey) {
+		function handleShortcut(e) {
+			if ((hasModifier(e) || isFunctionKey(e)) && !e.isDefaultPrevented()) {
 				each(self.shortcuts, function (shortcut) {
-					var ctrlState = tinymce.isMac ? e.metaKey : e.ctrlKey;
+					if (matchShortcut(e, shortcut)) {
+						pendingPatterns = shortcut.subpatterns.slice(0);
 
-					if (shortcut.ctrl != ctrlState || shortcut.alt != e.altKey || shortcut.shift != e.shiftKey) {
-						return;
-					}
-
-					if (e.keyCode == shortcut.keyCode || (e.charCode && e.charCode == shortcut.charCode)) {
-						e.preventDefault();
-
-						if (execute) {
-							shortcut.func.call(shortcut.scope);
+						if (e.type == "keydown") {
+							executeShortcutAction(shortcut);
 						}
 
 						return true;
 					}
 				});
+
+				if (matchShortcut(e, pendingPatterns[0])) {
+					if (pendingPatterns.length === 1) {
+						if (e.type == "keydown") {
+							executeShortcutAction(pendingPatterns[0]);
+						}
+					}
+
+					pendingPatterns.shift();
+				}
 			}
 		}
 
@@ -1056,7 +1096,7 @@
 		});
 
 		self.onKeyDown.add(function (ed, e) {
-			handleShortcut(e, true);
+			handleShortcut(e);
 		});
 	};
 })(tinymce);

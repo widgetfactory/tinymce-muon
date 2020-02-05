@@ -120,8 +120,8 @@
 		});
 
 		// Add keyboard shortcuts for undo/redo keys
-		editor.addShortcut('ctrl+z', 'undo_desc', 'Undo');
-		editor.addShortcut('ctrl+y', 'redo_desc', 'Redo');
+		editor.addShortcut('meta+z', '', 'Undo');
+		editor.addShortcut('meta+y,meta+shift+z', '', 'Redo');
 
 		um = {
 			// Explose for debugging reasons

@@ -98,84 +98,84 @@
 				}],
 
 				alignleft: [{
-						selector: 'figure[data-mce-image]',
-						collapsed: false,
-						styles: {
-							'float': 'left'
-						}
-					},
-					{
-						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-						styles: {
-							textAlign: 'left'
-						},
-						defaultBlock: 'div'
-					},
-					{
-						selector: 'img,table',
-						collapsed: false,
-						styles: {
-							'float': 'left'
-						}
+					selector: 'figure[data-mce-image]',
+					collapsed: false,
+					styles: {
+						'float': 'left'
 					}
+				},
+				{
+					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+					styles: {
+						textAlign: 'left'
+					},
+					defaultBlock: 'div'
+				},
+				{
+					selector: 'img,table',
+					collapsed: false,
+					styles: {
+						'float': 'left'
+					}
+				}
 				],
 
 				aligncenter: [{
-						selector: 'figure[data-mce-image]',
-						collapsed: false,
-						styles: {
-							marginLeft: 'auto',
-							marginRight: 'auto',
-							display: 'table'
-						}
-					},
-					{
-						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-						styles: {
-							textAlign: 'center'
-						},
-						defaultBlock: 'div'
-					},
-					{
-						selector: 'img',
-						collapsed: false,
-						styles: {
-							display: 'block',
-							marginLeft: 'auto',
-							marginRight: 'auto'
-						}
-					},
-					{
-						selector: 'table',
-						collapsed: false,
-						styles: {
-							marginLeft: 'auto',
-							marginRight: 'auto'
-						}
+					selector: 'figure[data-mce-image]',
+					collapsed: false,
+					styles: {
+						marginLeft: 'auto',
+						marginRight: 'auto',
+						display: 'table'
 					}
+				},
+				{
+					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+					styles: {
+						textAlign: 'center'
+					},
+					defaultBlock: 'div'
+				},
+				{
+					selector: 'img',
+					collapsed: false,
+					styles: {
+						display: 'block',
+						marginLeft: 'auto',
+						marginRight: 'auto'
+					}
+				},
+				{
+					selector: 'table',
+					collapsed: false,
+					styles: {
+						marginLeft: 'auto',
+						marginRight: 'auto'
+					}
+				}
 				],
 
 				alignright: [{
-						selector: 'figure[data-mce-image]',
-						collapsed: false,
-						styles: {
-							'float': 'right'
-						}
-					},
-					{
-						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-						styles: {
-							textAlign: 'right'
-						},
-						defaultBlock: 'div'
-					},
-					{
-						selector: 'img,table',
-						collapsed: false,
-						styles: {
-							'float': 'right'
-						}
+					selector: 'figure[data-mce-image]',
+					collapsed: false,
+					styles: {
+						'float': 'right'
 					}
+				},
+				{
+					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+					styles: {
+						textAlign: 'right'
+					},
+					defaultBlock: 'div'
+				},
+				{
+					selector: 'img,table',
+					collapsed: false,
+					styles: {
+						'float': 'right'
+					}
+				}
 				],
 
 				alignfull: [{
@@ -187,61 +187,61 @@
 				}],
 
 				bold: [{
-						inline: 'strong',
-						remove: 'all'
-					},
-					{
-						inline: 'span',
-						styles: {
-							fontWeight: 'bold'
-						}
-					},
-					{
-						inline: 'b',
-						remove: 'all'
+					inline: 'strong',
+					remove: 'all'
+				},
+				{
+					inline: 'span',
+					styles: {
+						fontWeight: 'bold'
 					}
+				},
+				{
+					inline: 'b',
+					remove: 'all'
+				}
 				],
 
 				italic: [{
-						inline: 'em',
-						remove: 'all'
-					},
-					{
-						inline: 'span',
-						styles: {
-							fontStyle: 'italic'
-						}
-					},
-					{
-						inline: 'i',
-						remove: 'all'
+					inline: 'em',
+					remove: 'all'
+				},
+				{
+					inline: 'span',
+					styles: {
+						fontStyle: 'italic'
 					}
+				},
+				{
+					inline: 'i',
+					remove: 'all'
+				}
 				],
 
 				underline: [{
-						inline: 'span',
-						styles: {
-							textDecoration: 'underline'
-						},
-						exact: true
+					inline: 'span',
+					styles: {
+						textDecoration: 'underline'
 					},
-					{
-						inline: 'u',
-						remove: 'all'
-					}
+					exact: true
+				},
+				{
+					inline: 'u',
+					remove: 'all'
+				}
 				],
 
 				strikethrough: [{
-						inline: 'span',
-						styles: {
-							textDecoration: 'line-through'
-						},
-						exact: true
+					inline: 'span',
+					styles: {
+						textDecoration: 'line-through'
 					},
-					{
-						inline: 'strike',
-						remove: 'all'
-					}
+					exact: true
+				},
+				{
+					inline: 'strike',
+					remove: 'all'
+				}
 				],
 
 				forecolor: {
@@ -311,28 +311,28 @@
 				},
 
 				removeformat: [{
-						selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
-						remove: 'all',
-						split: true,
-						expand: false,
-						block_expand: true,
-						deep: true
-					},
-					{
-						selector: 'span',
-						attributes: ['style', 'class'],
-						remove: 'empty',
-						split: true,
-						expand: false,
-						deep: true
-					},
-					{
-						selector: '*',
-						attributes: ['style', 'class'],
-						split: false,
-						expand: false,
-						deep: true
-					}
+					selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
+					remove: 'all',
+					split: true,
+					expand: false,
+					block_expand: true,
+					deep: true
+				},
+				{
+					selector: 'span',
+					attributes: ['style', 'class'],
+					remove: 'empty',
+					split: true,
+					expand: false,
+					deep: true
+				},
+				{
+					selector: '*',
+					attributes: ['style', 'class'],
+					split: false,
+					expand: false,
+					deep: true
+				}
 				]
 			});
 
@@ -348,7 +348,7 @@
 			register(ed.settings.formats);
 		}
 
-		function addKeyboardShortcuts() {
+		/*function addKeyboardShortcuts() {
 			// Add some inline shortcuts
 			ed.addShortcut('ctrl+b', 'bold_desc', 'Bold');
 			ed.addShortcut('ctrl+i', 'italic_desc', 'Italic');
@@ -368,6 +368,22 @@
 				//ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
 				ed.addShortcut('ctrl+' + n, '', ['FormatBlock', false, name]);
 			});
+		}*/
+
+		function addKeyboardShortcuts() {
+			// Add some inline shortcuts
+			ed.addShortcut('meta+b', 'bold_desc', 'Bold');
+			ed.addShortcut('meta+i', 'italic_desc', 'Italic');
+			ed.addShortcut('meta+u', 'underline_desc', 'Underline');
+
+			// BlockFormat shortcuts keys
+			for (var i = 1; i <= 6; i++) {
+				ed.addShortcut('access+' + i, '', ['FormatBlock', false, 'h' + i]);
+			}
+
+			ed.addShortcut('access+7', '', ['FormatBlock', false, 'p']);
+			ed.addShortcut('access+8', '', ['FormatBlock', false, 'div']);
+			ed.addShortcut('access+9', '', ['FormatBlock', false, 'address']);
 		}
 
 		// Public functions
@@ -540,7 +556,7 @@
 				if (!format.selector) {
 					return false;
 				}
-				
+
 				// Look for matching formats
 				each(formatList, function (format) {
 					// Check collapsed state if it exists
@@ -834,10 +850,10 @@
 				return;
 			}
 
-			if (format) {				
+			if (format) {
 				if (node) {
 					if (node.nodeType) {
-						if (!applyNodeStyle(formatList, node)) {														
+						if (!applyNodeStyle(formatList, node)) {
 							rng = dom.createRng();
 							rng.setStartBefore(node);
 							rng.setEndAfter(node);
@@ -1091,7 +1107,7 @@
 
 				// Remove items between start/end
 				rangeUtils.walk(rng, function (nodes) {
-					each(nodes, function (node) {						
+					each(nodes, function (node) {
 						process(node);
 
 						// Remove parent span if it only contains text-decoration: underline, yet a parent node is also underlined.
@@ -1149,7 +1165,7 @@
 				}
 
 				ed.nodeChanged();
-			} else {				
+			} else {
 				performCaretAction('remove', name, vars, similar);
 			}
 		}
