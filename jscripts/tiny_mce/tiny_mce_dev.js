@@ -101,6 +101,7 @@
 	include('dom/Selection.js');
 	include('dom/Serializer.js');
 	include('dom/ScriptLoader.js');
+	include('dom/StyleSheetLoader.js');
 	include('dom/RangeUtils.js');
 	include('dom/ControlSelection.js');
 
