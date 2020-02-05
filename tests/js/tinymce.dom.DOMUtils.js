@@ -533,12 +533,13 @@
 		DOM.remove('test');
 	});
 
-	test('toHex', 5, function() {
+	test('toHex', 6, function() {
 		equal(DOM.toHex('rgb(0, 255, 255)'), '#00ffff');
 		equal(DOM.toHex('rgb(255, 0, 0)'), '#ff0000');
 		equal(DOM.toHex('rgb(0, 0, 255)'), '#0000ff');
 		equal(DOM.toHex('rgb  (  0  , 0  , 255  )  '), '#0000ff');
 		equal(DOM.toHex('   RGB  (  0  , 0  , 255  )  '), '#0000ff');
+		equal(DOM.toHex('   rgba  (  0  , 0  , 255,0.5  )  '), '#0000ff');
 	});
 
 	test('getOuterHTML', 4, function() {
