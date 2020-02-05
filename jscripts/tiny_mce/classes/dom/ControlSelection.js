@@ -344,7 +344,7 @@
 						'data-mce-bogus': 'all',
 						'class': 'mce-resizehandle',
 						unselectable: true,
-						style: 'cursor:' + name + '-resize; margin:0; padding:0'
+						style: 'cursor:' + name + '-resize;'
 					});
 
 					// Hides IE move layer cursor
