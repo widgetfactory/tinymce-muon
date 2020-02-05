@@ -217,7 +217,7 @@
 					}
 				});
 
-				return;
+				return item;
 			}
 
 			dm = self;
@@ -229,6 +229,8 @@
 
 				dm = dm.settings.parent;
 			}
+
+			return item;
 		},
 
 		findItem: function (val) {
