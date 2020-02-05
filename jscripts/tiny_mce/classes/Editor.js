@@ -447,19 +447,6 @@
 			// Create all plugins
 			each(explode(s.plugins.replace(/\-/g, '')), initPlugin);
 
-			// Setup popup CSS path(s)
-			if (s.popup_css !== false) {
-				if (s.popup_css) {
-					s.popup_css = self.documentBaseURI.toAbsolute(s.popup_css);
-				} else {
-					s.popup_css = self.baseURI.toAbsolute("themes/" + s.theme + "/skins/" + s.skin + "/dialog.css");
-				}
-			}
-
-			if (s.popup_css_add) {
-				s.popup_css += ',' + self.documentBaseURI.toAbsolute(s.popup_css_add);
-			}
-
 			/**
 			 * Control manager instance for the editor. Will enables you to create new UI elements and change their states etc.
 			 *
@@ -572,7 +559,7 @@
 				tinymce.relaxedDomain = document.domain;
 			}
 
-			self.iframeHTML = s.doctype + '<html><head xmlns="http://www.w3.org/1999/xhtml">';
+			self.iframeHTML = s.doctype + '<html dir="' + s.directionality + '"><head xmlns="http://www.w3.org/1999/xhtml">';
 
 			// We only need to override paths if we have to
 			// IE has a bug where it remove site absolute urls to relative ones if this is specified
@@ -583,12 +570,12 @@
 			self.iframeHTML += '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />';
 
 			// Load the CSS by injecting them into the HTML this will reduce "flicker"
-			for (i = 0; i < self.contentCSS.length; i++) {
+			/*for (i = 0; i < self.contentCSS.length; i++) {
 				var cssUrl = tinymce._addVer(self.contentCSS[i]);
 				self.iframeHTML += '<link type="text/css" data-cfasync="false" rel="stylesheet" href="' + cssUrl + '" />';
 			}
 
-			self.contentCSS = [];
+			self.contentCSS = [];*/
 
 			bi = s.body_id || 'tinymce';
 
@@ -613,7 +600,6 @@
 			}
 
 			// Create iframe
-			// TODO: ACC add the appropriate description on this.
 			var ifr = DOM.add(o.iframeContainer, 'iframe', {
 				id: self.id + "_ifr",
 				frameBorder: '0',
@@ -908,6 +894,7 @@
 				initial: true,
 				format: 'html'
 			});
+
 			self.startContent = self.getContent({
 				format: 'raw'
 			});
@@ -922,15 +909,29 @@
 			 *     return editor && editor.initialized;
 			 * }
 			 */
-			self.initialized = true;
+			function initEditor() {
+				self.initialized = true;
 
-			self.onInit.dispatch(self);
-			self.execCallback('setupcontent_callback', self.id, body, doc);
-			self.execCallback('init_instance_callback', self);
-			self.focus(true);
-			self.nodeChanged({
-				initial: true
-			});
+				self.onInit.dispatch(self);
+				self.execCallback('setupcontent_callback', self.id, body, doc);
+				self.execCallback('init_instance_callback', self);
+				self.focus(true);
+				self.nodeChanged({
+					initial: true
+				});
+
+				// Handle auto focus
+				if (settings.auto_focus) {
+					setTimeout(function () {
+						var ed = tinymce.get(settings.auto_focus);
+
+						ed.selection.select(ed.getBody(), 1);
+						ed.selection.collapse(1);
+						ed.getBody().focus();
+						ed.getWin().focus();
+					}, 100);
+				}
+			}
 
 			// Add editor specific CSS styles
 			if (self.contentStyles.length > 0) {
@@ -943,22 +944,16 @@
 				self.dom.addStyle(contentCssText);
 			}
 
+			var styleLoader = new tinymce.dom.StyleSheetLoader(self.getDoc());
+
 			// Load specified content CSS last
 			each(self.contentCSS, function (url) {
-				self.dom.loadCSS(url);
+				styleLoader.add(url);
 			});
 
-			// Handle auto focus
-			if (settings.auto_focus) {
-				setTimeout(function () {
-					var ed = tinymce.get(settings.auto_focus);
-
-					ed.selection.select(ed.getBody(), 1);
-					ed.selection.collapse(1);
-					ed.getBody().focus();
-					ed.getWin().focus();
-				}, 100);
-			}
+			styleLoader.loadQueue(function () {
+				initEditor();
+			});
 
 			// Clean up references for IE
 			targetElm = doc = body = null;
@@ -2152,6 +2147,15 @@
 			}
 
 			self.destroyed = 1;
+		},
+
+		setMode: function(disabled) {
+			// It will not steal focus while setting contentEditable
+			body = self.getBody();
+
+			body.contentEditable = disabled;
+
+			body.disabled = disabled;
 		},
 
 		// Internal functions
