@@ -1406,7 +1406,7 @@
 				shortcuts = tinymce.map(explode(pattern, '>'), parseShortcut);
 				shortcuts[shortcuts.length - 1] = extend(shortcuts[shortcuts.length - 1], {
 					func: cmdFunc,
-					scope: scope || editor
+					scope: scope || self
 				});
 
 				return extend(shortcuts[0], {
