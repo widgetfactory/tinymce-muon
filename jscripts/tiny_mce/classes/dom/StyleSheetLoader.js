@@ -100,7 +100,7 @@
 				}
 			}
 
-			function waitForLoaded() {
+			function waitForLoaded() {				
 				wait(function () {
 					var styleSheets = document.styleSheets,
 						styleSheet, i = styleSheets.length,
@@ -137,19 +137,8 @@
 			// Add onload listener
 			elm.onload = waitForLoaded;
 
-			// Add onerror event will get fired on some browsers but not all of them
+			// Add onerror event
 			elm.onerror = error;
-
-			elm.onreadystatechange = function () {
-				var state = elm.readyState;
-
-				// Loaded state is passed on IE 6 however there
-				// are known issues with this method but we can't use
-				// XHR in a cross domain loading
-				if (state == 'complete' || state == 'loaded') {
-					waitForLoaded();
-				}
-			};
 
 			// Add stylesheet to document
 			(document.getElementsByTagName('head')[0] || document.body).appendChild(elm);
