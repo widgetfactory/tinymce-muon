@@ -3,9 +3,10 @@
  *
  * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
+ * 
+ * This is a modified version of the ScriptLoader to load stylesheet files
  *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * License: https://github.com/tinymce/tinymce/blob/3.x/LICENSE.TXT
  */
 
 /*eslint no-console:1 */
@@ -87,6 +88,7 @@
 			}
 
 			// Calls the waitCallback until the test returns true or the timeout occurs
+			// Uses methods from Tinymce 4.x for testing stylesheet files - https://github.com/tinymce/tinymce/blob/4.5.x/js/tinymce/classes/dom/StyleSheetLoader.js
 			function wait(testCallback, waitCallback) {
 				if (!testCallback()) {
 					// Wait for timeout
