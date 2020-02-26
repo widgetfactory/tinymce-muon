@@ -1164,7 +1164,7 @@
 					node = root;
 				}
 
-				if (node.getAttribute('data-mce-bogus')) {
+				if (node.nodeType !== 1 || node.getAttribute('data-mce-bogus')) {
 					node = node.parentNode;
 				}
 
