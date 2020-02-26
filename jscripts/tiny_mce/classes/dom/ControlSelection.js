@@ -100,6 +100,10 @@
 
 		// Details about each resize handle how to scale etc
 		resizeHandles = {
+			/*n: [0.5, 0, 0, -1],
+			e: [1, 0.5, 1, 0],
+			s: [0.5, 1, 0, 1],
+			w: [0, 0.5, -1, 0],*/
 			nw: [0, 0, -1, -1],
 			ne: [1, 0, 1, -1],
 			se: [1, 1, 1, 1],
@@ -212,11 +216,11 @@
 		function endGhostResize() {
 			resizeStarted = false;
 
-			function setSizeProp(name, value) {				
+			function setSizeProp(name, value) {
 				if (value) {
 					// Resize by using style or attribute
 					//if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
-					if (selectedElm.nodeName !== 'IMG') {	
+					if (selectedElm.nodeName !== 'IMG') {
 						dom.setStyle(selectedElm, name, value);
 					} else {
 						dom.setAttrib(selectedElm, name, value);
