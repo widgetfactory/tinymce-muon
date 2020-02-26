@@ -181,7 +181,7 @@
 		// Add execCommand overrides
 		addCommands({
 			// Ignore these, added for compatibility
-			'mceResetDesignMode,mceBeginUndoLevel': function () {},
+			'mceResetDesignMode,mceBeginUndoLevel': function () { },
 
 			// Add undo manager logic
 			'mceEndUndoLevel,mceAddUndoLevel': function () {
@@ -545,33 +545,36 @@
 				}
 
 				marker = dom.get('mce_marker');
-				selection.scrollIntoView(marker);
 
-				// Move selection before marker and remove it
-				rng = dom.createRng();
+				if (marker) {
+					selection.scrollIntoView(marker);
 
-				// If previous sibling is a text node set the selection to the end of that node
-				node = marker.previousSibling;
-				if (node && node.nodeType == 3) {
-					rng.setStart(node, node.nodeValue.length);
+					// Move selection before marker and remove it
+					rng = dom.createRng();
 
-					// TODO: Why can't we normalize on IE
-					if (!tinymce.isIE) {
-						node2 = marker.nextSibling;
-						if (node2 && node2.nodeType == 3) {
-							node.appendData(node2.data);
-							node2.parentNode.removeChild(node2);
+					// If previous sibling is a text node set the selection to the end of that node
+					node = marker.previousSibling;
+					if (node && node.nodeType == 3) {
+						rng.setStart(node, node.nodeValue.length);
+
+						// TODO: Why can't we normalize on IE
+						if (!tinymce.isIE) {
+							node2 = marker.nextSibling;
+							if (node2 && node2.nodeType == 3) {
+								node.appendData(node2.data);
+								node2.parentNode.removeChild(node2);
+							}
 						}
+					} else {
+						// If the previous sibling isn't a text node or doesn't exist set the selection before the marker node
+						rng.setStartBefore(marker);
+						rng.setEndBefore(marker);
 					}
-				} else {
-					// If the previous sibling isn't a text node or doesn't exist set the selection before the marker node
-					rng.setStartBefore(marker);
-					rng.setEndBefore(marker);
-				}
 
-				// Remove the marker node and set the new range
-				dom.remove(marker);
-				selection.setRng(rng);
+					// Remove the marker node and set the new range
+					dom.remove(marker);
+					selection.setRng(rng);
+				}
 
 				// Dispatch after event and add any visual elements needed
 				selection.onSetContent.dispatch(selection, args);
