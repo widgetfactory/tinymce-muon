@@ -288,19 +288,7 @@
 					if (doc.body.childNodes.length === 0) {
 						doc.body.innerHTML = content;
 					} else {
-						// createContextualFragment doesn't exists in IE 9 DOMRanges
-						if (rng.createContextualFragment) {
-							rng.insertNode(rng.createContextualFragment(content));
-						} else {
-							// Fake createContextualFragment call in IE 9
-							frag = doc.createDocumentFragment();
-							temp = doc.createElement('div');
-
-							frag.appendChild(temp);
-							temp.outerHTML = content;
-
-							rng.insertNode(frag);
-						}
+						rng.insertNode(rng.createContextualFragment(content));
 					}
 				}
 
