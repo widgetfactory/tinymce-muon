@@ -564,7 +564,12 @@ tinymce.util.Quirks = function (editor) {
 				}
 
 				// Remove all spans that aren't marked and retain selection
-				tinymce.each(record.addedNodes, function (node) {
+				tinymce.each(record.addedNodes, function (node) {					
+					// remove new runtime style attributes on addedNodes
+					if (node.getAttribute('style') && !node.getAttribute('data-mce-style')) {
+						node.removeAttribute("style");
+					}
+					
 					if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
 						var offset, container;
 
@@ -742,10 +747,10 @@ tinymce.util.Quirks = function (editor) {
 	}
 
 	/**
-	 * Remove runtime styles from Chrome, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
+	 * Remove runtime styles from Chrome / Safari, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
 	 */
 	function cleanupRuntimeStyles() {
-		function removeStyleSpan(node) {
+		function removeRuntimeStyle(node) {
 			var style = node.attr('style');
 
 			if (style) {
@@ -762,7 +767,7 @@ tinymce.util.Quirks = function (editor) {
 				node;
 			while (i--) {
 				node = nodes[i];
-				removeStyleSpan(node);
+				removeRuntimeStyle(node);
 			}
 		});
 
@@ -771,7 +776,7 @@ tinymce.util.Quirks = function (editor) {
 				node;
 			while (i--) {
 				node = nodes[i];
-				removeStyleSpan(node);
+				removeRuntimeStyle(node);
 			}
 		});
 	}
