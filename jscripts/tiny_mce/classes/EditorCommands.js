@@ -217,9 +217,9 @@
 			// Override unlink command
 			unlink: function () {
 				if (selection.isCollapsed()) {
-					var elm = selection.getNode();
+					var elm = editor.dom.getParent(selection.getStart(), 'a');
 
-					if (elm.tagName == 'A') {
+					if (elm) {
 						editor.dom.remove(elm, true);
 					}
 
