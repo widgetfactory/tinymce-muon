@@ -570,7 +570,8 @@
             new RangeUtils(dom).normalize(rng);
             container = rng.startContainer;
             offset = rng.startOffset;
-            newBlockName = (settings.force_p_newlines ? 'p' : '') || settings.forced_root_block;
+            //newBlockName = (settings.force_block_newlines ? 'p' : '') || settings.forced_root_block;
+            newBlockName = settings.force_block_newlines ? (settings.forced_root_block || 'p') : '';
             newBlockName = newBlockName ? newBlockName.toUpperCase() : '';
             documentMode = dom.doc.documentMode;
             shiftKey = evt.shiftKey;
