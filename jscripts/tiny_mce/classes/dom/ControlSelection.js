@@ -337,16 +337,16 @@
 					}
 
 					// Get existing or render resize handle
-					handleElm = dom.get('mceResizeHandle' + name);
+					handleElm = dom.get('mceResizeHandle' + name.toUpperCase());
 
 					if (handleElm) {
 						dom.remove(handleElm);
 					}
 
 					handleElm = dom.add(rootElement, 'div', {
-						id: 'mceResizeHandle' + name,
+						id: 'mceResizeHandle' + name.toUpperCase(),
 						'data-mce-bogus': 'all',
-						'class': 'mce-resizehandle',
+						'class': 'mce-resizehandle mce-resizehandle-' + name,
 						unselectable: true,
 						style: 'cursor:' + name + '-resize;'
 					});
@@ -390,7 +390,7 @@
 			}
 
 			for (name in resizeHandles) {
-				handleElm = dom.get('mceResizeHandle' + name);
+				handleElm = dom.get('mceResizeHandle' + name.toUpperCase());
 				if (handleElm) {
 					dom.unbind(handleElm);
 					dom.remove(handleElm);
