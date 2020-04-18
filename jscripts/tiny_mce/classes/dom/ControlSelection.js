@@ -223,6 +223,13 @@
 					if (selectedElm.nodeName !== 'IMG') {
 						dom.setStyle(selectedElm, name, value);
 					} else {
+						// only set the width value for responsive images, if a value is not alrady set
+						/*if (name == 'height' && editor.settings.object_resizing_responsive !== false) {
+							if (!dom.getAttrib(selectedElm, name)) {
+								value = '';
+							}
+						}*/
+						
 						dom.setAttrib(selectedElm, name, value);
 					}
 				}
