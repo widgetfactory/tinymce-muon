@@ -246,6 +246,10 @@
 
 			if (!s.onselect) {
 				s.onselect = function (v) {
+					if (!s.cmd) {
+						return false;
+					}
+					
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
