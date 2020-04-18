@@ -76,172 +76,187 @@
 
 		function defaultFormats() {
 			register({
-				valigntop: [{
-					selector: 'td,th',
-					styles: {
-						'verticalAlign': 'top'
+				valigntop: [
+					{
+						selector: 'td,th',
+						styles: {
+							'verticalAlign': 'top'
+						}
 					}
-				}],
-
-				valignmiddle: [{
-					selector: 'td,th',
-					styles: {
-						'verticalAlign': 'middle'
-					}
-				}],
-
-				valignbottom: [{
-					selector: 'td,th',
-					styles: {
-						'verticalAlign': 'bottom'
-					}
-				}],
-
-				alignleft: [{
-					selector: 'figure[data-mce-image]',
-					collapsed: false,
-					styles: {
-						'float': 'left'
-					}
-				},
-				{
-					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-					styles: {
-						textAlign: 'left'
-					},
-					defaultBlock: 'div'
-				},
-				{
-					selector: 'img,table',
-					collapsed: false,
-					styles: {
-						'float': 'left'
-					}
-				}
 				],
 
-				aligncenter: [{
-					selector: 'figure[data-mce-image]',
-					collapsed: false,
-					styles: {
-						marginLeft: 'auto',
-						marginRight: 'auto',
-						display: 'table'
+				valignmiddle: [
+					{
+						selector: 'td,th',
+						styles: {
+							'verticalAlign': 'middle'
+						}
 					}
-				},
-				{
-					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-					styles: {
-						textAlign: 'center'
-					},
-					defaultBlock: 'div'
-				},
-				{
-					selector: 'img',
-					collapsed: false,
-					styles: {
-						display: 'block',
-						marginLeft: 'auto',
-						marginRight: 'auto'
-					}
-				},
-				{
-					selector: 'table',
-					collapsed: false,
-					styles: {
-						marginLeft: 'auto',
-						marginRight: 'auto'
-					}
-				}
 				],
 
-				alignright: [{
-					selector: 'figure[data-mce-image]',
-					collapsed: false,
-					styles: {
-						'float': 'right'
+				valignbottom: [
+					{
+						selector: 'td,th',
+						styles: {
+							'verticalAlign': 'bottom'
+						}
 					}
-				},
-				{
-					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
-					styles: {
-						textAlign: 'right'
-					},
-					defaultBlock: 'div'
-				},
-				{
-					selector: 'img,table',
-					collapsed: false,
-					styles: {
-						'float': 'right'
-					}
-				}
 				],
 
-				alignfull: [{
-					selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
-					styles: {
-						textAlign: 'justify'
+				alignleft: [
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'left'
+						},
+						defaultBlock: 'div'
 					},
-					defaultBlock: 'div'
-				}],
-
-				bold: [{
-					inline: 'strong',
-					remove: 'all'
-				},
-				{
-					inline: 'span',
-					styles: {
-						fontWeight: 'bold'
+					{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							'float': 'left'
+						}
+					},
+					{
+						selector: 'img,table',
+						collapsed: false,
+						styles: {
+							'float': 'left'
+						}
 					}
-				},
-				{
-					inline: 'b',
-					remove: 'all'
-				}
 				],
 
-				italic: [{
-					inline: 'em',
-					remove: 'all'
-				},
-				{
-					inline: 'span',
-					styles: {
-						fontStyle: 'italic'
+				aligncenter: [
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'center'
+						},
+						defaultBlock: 'div'
+					},
+					{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							marginLeft: 'auto',
+							marginRight: 'auto',
+							display: 'table'
+						}
+					},
+					{
+						selector: 'img',
+						collapsed: false,
+						styles: {
+							display: 'block',
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						}
+					},
+					{
+						selector: 'table',
+						collapsed: false,
+						styles: {
+							marginLeft: 'auto',
+							marginRight: 'auto'
+						}
 					}
-				},
-				{
-					inline: 'i',
-					remove: 'all'
-				}
 				],
 
-				underline: [{
-					inline: 'span',
-					styles: {
-						textDecoration: 'underline'
+				alignright: [
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+						styles: {
+							textAlign: 'right'
+						},
+						defaultBlock: 'div'
 					},
-					exact: true
-				},
-				{
-					inline: 'u',
-					remove: 'all'
-				}
+					{
+						selector: 'figure[data-mce-image]',
+						collapsed: false,
+						styles: {
+							'float': 'right'
+						}
+					},
+					{
+						selector: 'img,table',
+						collapsed: false,
+						styles: {
+							'float': 'right'
+						}
+					}
 				],
 
-				strikethrough: [{
-					inline: 'span',
-					styles: {
-						textDecoration: 'line-through'
+				alignfull: [
+					{
+						selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+						styles: {
+							textAlign: 'justify'
+						},
+						defaultBlock: 'div'
+					}
+				],
+
+				bold: [
+					{
+						inline: 'strong',
+						remove: 'all'
 					},
-					exact: true
-				},
-				{
-					inline: 'strike',
-					remove: 'all'
-				}
+					{
+						inline: 'span',
+						styles: {
+							fontWeight: 'bold'
+						}
+					},
+					{
+						inline: 'b',
+						remove: 'all'
+					}
+				],
+
+				italic: [
+					{
+						inline: 'em',
+						remove: 'all'
+					},
+					{
+						inline: 'span',
+						styles: {
+							fontStyle: 'italic'
+						}
+					},
+					{
+						inline: 'i',
+						remove: 'all'
+					}
+				],
+
+				underline: [
+					{
+						inline: 'span',
+						styles: {
+							textDecoration: 'underline'
+						},
+						exact: true
+					},
+					{
+						inline: 'u',
+						remove: 'all'
+					}
+				],
+
+				strikethrough: [
+					{
+						inline: 'span',
+						styles: {
+							textDecoration: 'line-through'
+						},
+						exact: true
+					},
+					{
+						inline: 'strike',
+						remove: 'all'
+					}
 				],
 
 				forecolor: {
@@ -310,29 +325,30 @@
 					}
 				},
 
-				removeformat: [{
-					selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
-					remove: 'all',
-					split: true,
-					expand: false,
-					block_expand: true,
-					deep: true
-				},
-				{
-					selector: 'span',
-					attributes: ['style', 'class'],
-					remove: 'empty',
-					split: true,
-					expand: false,
-					deep: true
-				},
-				{
-					selector: '*',
-					attributes: ['style', 'class'],
-					split: false,
-					expand: false,
-					deep: true
-				}
+				removeformat: [
+					{
+						selector: 'b,strong,em,i,font,u,strike,sub,sup,dfn,code,samp,kbd,var,cite,mark,q,del,ins',
+						remove: 'all',
+						split: true,
+						expand: false,
+						block_expand: true,
+						deep: true
+					},
+					{
+						selector: 'span',
+						attributes: ['style', 'class'],
+						remove: 'empty',
+						split: true,
+						expand: false,
+						deep: true
+					},
+					{
+						selector: '*',
+						attributes: ['style', 'class'],
+						split: false,
+						expand: false,
+						deep: true
+					}
 				]
 			});
 
