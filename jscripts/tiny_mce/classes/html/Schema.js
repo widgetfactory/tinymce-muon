@@ -310,7 +310,9 @@
             addAttrs("input textarea", "placeholder");
             addAttrs("a", "download");
             addAttrs("link script img", "crossorigin");
-            addAttrs("iframe", "sandbox seamless allowfullscreen allow referrerpolicy"); // Excluded: srcdoc
+            addAttrs("iframe", "sandbox seamless allowfullscreen allow referrerpolicy loading"); // Excluded: srcdoc
+
+            addAttrs("img", "loading decoding");
 
             // form events
             addAttrs("form", "oncontextmenu onformchange onforminput oninput oninvalid");
