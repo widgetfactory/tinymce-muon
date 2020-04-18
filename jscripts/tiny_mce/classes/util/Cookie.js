@@ -124,7 +124,8 @@
                 ((e) ? "; expires=" + e.toGMTString() : "") +
                 ((p) ? "; path=" + escape(p) : "") +
                 ((d) ? "; domain=" + d : "") +
-                ((s) ? "; secure" : "");
+                ((s) ? "; secure" : "") + 
+                "; SameSite=Strict";
         },
 
         /**
