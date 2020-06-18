@@ -54,18 +54,14 @@
 		 * Sets / gets the input value.
 		 *
 		 * @method select
-		 * @param {String/function} value Value to set for the textbox.
+		 * @param {String/function} val Value to set for the textbox.
 		 */
-		value: function (value) {
-			var self = this;
-
-			if (value == undef) {
-				return DOM.get(self.id).value;
+		value: function (val) {			
+			if (!arguments.length) {
+				return DOM.getValue(this.id);
 			}
 
-			this._value = value;
-
-			DOM.get(self.id).value = value;
+			DOM.setValue(this.id, val);
 		},
 
 		/**
@@ -82,9 +78,9 @@
 			var type = s.subtype ? s.subtype : 'text';
 
 			if (s.multiline) {
-				html += '<textarea id="' + this.id + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '">' + DOM.encode(this._value);
+				html += '<textarea id="' + this.id + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '" tabindex="0" autofocus>' + DOM.encode(this._value);
 			} else {
-				html += '<input type="' + type + '" id="' + this.id + '" value="' + this._value + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '"';
+				html += '<input type="' + type + '" id="' + this.id + '" value="' + this._value + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '" tabindex="0" autofocus';
 			}
 
 			if (s.attributes) {
@@ -100,14 +96,6 @@
 			}
 
 			return html;
-		},
-
-		value: function(val) {
-			if (!arguments.length) {
-				return DOM.getValue(this.id);
-			}
-
-			DOM.setValue(this.id, val);
 		},
 
 		/**
