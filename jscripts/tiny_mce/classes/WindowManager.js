@@ -292,7 +292,9 @@
 
                         // add onClose event to destroy controls
                         self.onClose.add(function () {
-                            ctrl.destroy();
+                            if (this.id === id) {
+                                ctrl.destroy();
+                            }
                         });
                     });
                 }
