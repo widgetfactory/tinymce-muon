@@ -97,7 +97,7 @@
 
         var lvl = (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
 
-        return lvl >= 3; // AALarge
+        return lvl >= 2;
     }
 
     tinymce.util.PreviewCss = function (ed, fmt) {
