@@ -118,7 +118,7 @@
 			}
 
 			if (typeof selector != 'string') {
-				selector = 'table,img,div,figure[data-mce-image]';
+				selector = 'table,img';
 			}
 
 			if (elm.getAttribute('data-mce-resize') === 'false') {
@@ -429,7 +429,7 @@
 			});
 
 			controlElm = e.type == 'mousedown' ? e.target : selection.getNode();
-			controlElm = dom.closest(controlElm, isIE ? 'table' : 'table,img,figure[data-mce-image],hr')[0];
+			controlElm = dom.closest(controlElm, isIE ? 'table' : 'table,img')[0];
 
 			if (isChildOrEqual(controlElm, rootElement)) {
 				disableGeckoResize();
