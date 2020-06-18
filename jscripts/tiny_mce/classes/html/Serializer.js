@@ -104,6 +104,11 @@
 						sortedAttrs.map = {};
 
 						elementRule = schema.getElementRule(node.name);
+
+						if (!elementRule) {
+							return;
+						}
+
 						for (i = 0, l = elementRule.attributesOrder.length; i < l; i++) {
 							attrName = elementRule.attributesOrder[i];
 
