@@ -855,6 +855,13 @@
 					}
 				}
 
+				if (s.image) {
+					DOM.add(item, 'span', {
+						'class': 'mceImage',
+						style: 'background-image:url("' + s.image + '")'
+					});
+				}
+
 				var txt = DOM.add(item, s.element || 'span', {
 					'class': 'mceText',
 					title: o.settings.title

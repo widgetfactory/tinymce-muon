@@ -214,7 +214,7 @@
 					}
 				});
 			}
-			
+
 			ed.onRemove.add(function () {
 				c.destroy();
 			});
@@ -249,7 +249,7 @@
 					if (!s.cmd) {
 						return false;
 					}
-					
+
 					ed.execCommand(s.cmd, s.ui || false, v || s.value);
 				};
 			}
@@ -484,6 +484,38 @@
 				ed = self.editor,
 				c, cls;
 
+			id = self.prefix + id;
+
+			if (self.get(id)) {
+				return null;
+			}
+
+			s.title = ed.translate(s.title);
+			s.label = ed.translate(s.label);
+			s.scope = s.scope || ed;
+
+			s = extend({
+				title: s.title,
+				'class': 'mce_' + id,
+				scope: s.scope,
+				control_manager: self
+			}, s);
+
+			cls = cc || tinymce.ui.TextBox;
+			c = new cls(id, s, ed);
+
+			return self.add(c);
+		},
+
+		createUrlBox: function (id, s, cc) {
+			return this.createTextBox(id, s, tinymce.ui.UrlBox);
+		},
+
+		createCheckBox: function (id, s, cc) {
+			var self = this,
+				ed = self.editor,
+				c, cls;
+
 			if (self.get(id)) {
 				return null;
 			}
@@ -501,7 +533,7 @@
 
 			id = self.prefix + id;
 
-			cls = tinymce.ui.TextBox;
+			cls = tinymce.ui.CheckBox;
 			c = new cls(id, s, ed);
 
 			return self.add(c);
