@@ -105,27 +105,21 @@
         globalAttributes = split("id accesskey class dir lang style tabindex title");
 
         // global event attributes
-        globalAttributes.push.apply(globalAttributes, split("onclick ondblclick onmousedown " +
-            "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup"));
+        eventAttributes = split("onclick ondblclick onmousedown " +
+            "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup");
 
         // html5 mouse events
         if (type != "html4") {
-            globalAttributes.push.apply(globalAttributes, split("ondrag ondragend ondragenter " +
-                "ondragleave ondragover ondragstart ondrop onmousewheel onscroll"));
+            eventAttributes.push.apply(eventAttributes, split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
+                "ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
+                "onerror onfocus oninput oninvalid onload onloadeddata onloadedmetadata onloadstart " +
+                "onmouseenter onmouseleave onmousewheel onpause onplay onplaying onprogress onratechange " +
+                "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
+                "onwaiting onwheel"));
         }
 
         // Event attributes can be opt-in/opt-out
-        eventAttributes = split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
-            "ondblclick ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
-            "onerror onfocus oninput oninvalid onkeydown onkeypress onkeyup onload onloadeddata onloadedmetadata onloadstart " +
-            "onmouseenter onmouseleave onpause onplay onplaying onprogress onratechange " +
-            "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
-            "onwaiting onwheel"
-        );
-
-        if (type != "html4") {
-            globalAttributes.push.apply(globalAttributes, eventAttributes);
-        }
+        globalAttributes.push.apply(globalAttributes, eventAttributes);
 
         // schema.org attributes
         globalAttributes.push.apply(globalAttributes, split("itemscope itemtype itemid itemprop itemref"));
