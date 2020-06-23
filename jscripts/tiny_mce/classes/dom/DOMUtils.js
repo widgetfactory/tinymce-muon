@@ -563,6 +563,10 @@
 			container = doc.createElement("div");
 			frag = doc.createDocumentFragment();
 
+			// Append the container to the fragment so as to remove it from
+			// the current document context
+			frag.appendChild(container);
+
 			if (html) {
 				container.innerHTML = html;
 			}
@@ -570,6 +574,9 @@
 			while ((node = container.firstChild)) {
 				frag.appendChild(node);
 			}
+
+			// Remove the container now that all the children have been transferred
+			frag.removeChild(container);
 
 			return frag;
 		},
@@ -1238,7 +1245,7 @@
 				}
 
 				self.files[u] = true;
-				
+
 				link = self.create('link', {
 					rel: 'stylesheet',
 					'data-cfasync': false,
@@ -1263,7 +1270,7 @@
 		 * // Adds a class to a specific element in the current page
 		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
 		 */
-		addClass: function (e, c) {			
+		addClass: function (e, c) {
 			if (!c) {
 				return '';
 			}
@@ -1272,7 +1279,7 @@
 				if (Array.isArray(value)) {
 					return value;
 				}
-				
+
 				if (typeof value === "string") {
 					return value.split(' ');
 				}
@@ -1291,7 +1298,7 @@
 					if (!cls) {
 						return true;
 					}
-					
+
 					e.classList.add(cls);
 				});
 
@@ -1926,7 +1933,7 @@
 						// Keep elements with data-bookmark attributes or name attribute like <a name="1"></a>
 						attributes = self.getAttribs(node);
 						i = attributes.length;
-						
+
 						while (i--) {
 							name = attributes[i].nodeName;
 							if (name === "name" || name === 'data-mce-bookmark') {
