@@ -64,13 +64,17 @@
 	tinymce.html.SaxParser = function (settings, schema) {
 		var self = this;
 
-		function noop() {}
+		function noop() { }
 
 		settings = settings || {};
 		self.schema = schema = schema || new tinymce.html.Schema();
 
 		if (settings.fix_self_closing !== false) {
 			settings.fix_self_closing = true;
+		}
+
+		if (settings.allow_event_attributes !== false) {
+			settings.allow_event_attributes = true;
 		}
 
 		// Add handler functions from settings and setup default handlers
@@ -173,6 +177,20 @@
 				return name.indexOf('-') > 0;
 			}
 
+			function isEventAttribute(name) {
+				return name.indexOf('on') == 0;
+			}
+
+			function trimComments(text) {
+				var sanitizedText = text;
+
+				while (/<!--|--!?>/g.test(sanitizedText)) {
+					sanitizedText = sanitizedText.replace(/<!--|--!?>/g, '');
+				}
+
+				return sanitizedText;
+			}
+
 			function parseAttribute(match, name, value, val2, val3) {
 				var attrRule, i, trimRegExp = /[\s\u0000-\u001F]+/g;
 
@@ -181,6 +199,12 @@
 
 				// Validate name and value pass through all data- attributes
 				if (validate && !isInternalElement && !isDataAttribute(name)) {
+
+					// block event attributes, eg: onload
+					if (!settings.allow_event_attributes && isEventAttribute(name)) {
+						return;
+					}
+
 					attrRule = validAttributesMap[name];
 
 					// Find rule by pattern matching
@@ -457,7 +481,7 @@
 
 					self.comment(value);
 				} else if ((value = matches[2])) { // CDATA
-					self.cdata(value);
+					self.cdata(trimComments(value));
 				} else if ((value = matches[3])) { // DOCTYPE
 					self.doctype(value);
 				} else if ((value = matches[4])) { // PI

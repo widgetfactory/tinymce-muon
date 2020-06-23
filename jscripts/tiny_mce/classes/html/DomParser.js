@@ -413,6 +413,7 @@
 				validate: validate,
 				allow_script_urls: settings.allow_script_urls,
 				allow_conditional_comments: settings.allow_conditional_comments,
+				allow_event_attributes: settings.allow_event_attributes,
 
 				// Exclude P and LI from DOM parsing since it's treated better by the DOM parser
 				self_closing_elements: cloneAndExcludeBlocks(schema.getSelfClosingElements()),
@@ -462,6 +463,7 @@
 					var newNode, attrFiltersLen, elementRule, attrName, parent;
 
 					elementRule = validate ? schema.getElementRule(name) : {};
+
 					if (elementRule) {
 						newNode = createNode(elementRule.outputName || name, 1);
 						newNode.attributes = attrs;
@@ -477,6 +479,7 @@
 						}
 
 						attrFiltersLen = attributeFilters.length;
+						
 						while (attrFiltersLen--) {
 							attrName = attributeFilters[attrFiltersLen].name;
 

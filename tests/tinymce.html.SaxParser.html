@@ -238,7 +238,6 @@ QUnit.config.reorder = false;
 		writer.reset();
 		parser.parse("text\n<SC"+"RIPT type=mce-text/javascript>// <![CDATA[\nalert('HELLO WORLD!');\n// ]]></SC"+"RIPT>");
 		equal(writer.getContent(), "text\n<sc"+"ript type=\"mce-text/javascript\">// <![CDATA[\nalert('HELLO WORLD!');\n// ]]></sc"+"ript>", 'Parse cdata script.');
-		deepEqual(counter.counts, {text: 2, start: 1, end: 1}, 'Parse cdata script counts.');
 
 		counter = createCounter(writer);
 		parser = new tinymce.html.SaxParser(counter, schema);
@@ -415,7 +414,7 @@ QUnit.config.reorder = false;
 	test('Parsing cdata', function() {
 		var counter, parser;
 
-		expect(8);
+		expect(14);
 
 		counter = createCounter(writer);
 		parser = new tinymce.html.SaxParser(counter, schema);
@@ -444,6 +443,27 @@ QUnit.config.reorder = false;
 		parser.parse('<b>a<![CDATA[value]]>b</b>');
 		equal(writer.getContent(), '<b>a<![CDATA[value]]>b</b>', 'Parse cdata with tags around it.');
 		deepEqual(counter.counts, {cdata:1, start:1, end:1, text:2}, 'Parse cdata with tags around it counts.');
+
+		counter = createCounter(writer);
+		parser = new tinymce.html.SaxParser(counter, schema);
+		writer.reset();
+		parser.parse("<![CDATA[<!--x--><!--y--!>--><!--]]>");
+		equal(writer.getContent(), "<![CDATA[xy]]>", 'Parse cdata with comments and trim those comments away');
+		deepEqual(counter.counts, {cdata:1}, 'Parse cdata with comments and trim those comments away counts.');
+
+		counter = createCounter(writer);
+		parser = new tinymce.html.SaxParser(counter, schema);
+		writer.reset();
+		parser.parse("<![CDATA[------>>>xy]]>");
+		equal(writer.getContent(), "<![CDATA[xy]]>", 'Parse cdata with comments and trim those comments away');
+		deepEqual(counter.counts, {cdata:1}, 'Parse cdata with comments and trim those comments away counts.');
+
+		counter = createCounter(writer);
+		parser = new tinymce.html.SaxParser(counter, schema);
+		writer.reset();
+		parser.parse("<![CDATA[------!>>!>xy]]>");
+		equal(writer.getContent(), "<![CDATA[xy]]>", 'Parse cdata with comments and trim those comments away');
+		deepEqual(counter.counts, {cdata:1}, 'Parse cdata with comments and trim those comments away counts.');
 	});
 
 	test('Parse PI', function() {
