@@ -73,8 +73,12 @@
 			settings.fix_self_closing = true;
 		}
 
-		if (settings.allow_event_attributes !== false) {
-			settings.allow_event_attributes = true;
+		if (settings.allow_event_attributes !== true) {
+			settings.allow_event_attributes = false;
+		}
+
+		if (settings.preserve_cdata !== false) {
+			settings.preserve_cdata = true;
 		}
 
 		// Add handler functions from settings and setup default handlers
@@ -132,7 +136,7 @@
 		 * @method parse
 		 * @param {String} html Html string to sax parse.
 		 */
-		self.parse = function (html) {
+		self.parse = function (html, format) {
 			var self = this,
 				matches, index = 0,
 				value, endRegExp, stack = [],
@@ -142,9 +146,11 @@
 			var attributesRequired, attributesDefault, attributesForced;
 			var anyAttributesRequired, selfClosing, tokenRegExp, attrRegExp, specialElements, attrValue, idCount = 0;
 			var decode = Entities.decode,
-				fixSelfClosing, filteredUrlAttrs = tinymce.makeMap('src,href,data,background,formaction,poster');
-			var scriptUriRegExp = /((java|vb)script|mhtml):/i,
-				dataUriRegExp = /^data:/i;
+				fixSelfClosing, filteredUrlAttrs = tinymce.makeMap('src,href,data,background,formaction,poster,xlink:href');
+			var scriptUriRegExp = /((java|vb)script|mhtml):/i;
+
+			// parser format - html, xml
+			format = format || 'html';
 
 			function processEndTag(name) {
 				var pos, i;
@@ -172,6 +178,17 @@
 					stack.length = pos;
 				}
 			}
+
+			function isInvalidUri(settings, uri) {
+				if (settings.allow_html_data_urls) {
+					return false;
+				} else if (/^data:image\//i.test(uri)) {
+					return settings.allow_svg_data_urls === false && /^data:image\/svg\+xml/i.test(uri);
+				} else {
+					return /^data:/i.test(uri);
+				}
+			}
+
 			// a data attribute is any attribute with a hyphen, eg: data- or ng- or v-
 			function isDataAttribute(name) {
 				return name.indexOf('-') > 0;
@@ -179,6 +196,59 @@
 
 			function isEventAttribute(name) {
 				return name.indexOf('on') == 0;
+			}
+
+			function processComment(value) {
+				// Ignore empty comments
+				if (value === '') {
+					return value;
+				}
+
+				// Padd comment value to avoid browsers from parsing invalid comments as HTML
+				if (value.charAt(0) === '>') {
+					value = ' ' + value;
+				}
+
+				if (!settings.allow_conditional_comments && value.substr(0, 3).toLowerCase() === '[if') {
+					value = ' ' + value;
+				}
+
+				return value;
+			}
+
+			function processMalformedComment(value, startIndex) {
+				var startTag = value || '';
+				var isBogus = startTag.indexOf('--') !== 0;
+
+				// Find the end of the malformed/bogus comment
+				var endIndex = findCommentEndIndex(html, isBogus, startIndex);
+				value = html.substr(startIndex, endIndex - startIndex);
+
+				value = processComment(isBogus ? startTag + value : value);
+
+				return endIndex + 1;
+			}
+
+			function isConditionalComment(html, startIndex) {
+				return /^\s*\[if [\w\W]+\]>.*<!\[endif\](--!?)?>/.test(html.substr(startIndex));
+			}
+
+			function findCommentEndIndex(html, isBogus, startIndex) {
+				var lcHtml = html.toLowerCase();
+				if (lcHtml.indexOf('[if ', startIndex) !== -1 && isConditionalComment(lcHtml, startIndex)) {
+					var endIfIndex = lcHtml.indexOf('[endif]', startIndex);
+					return lcHtml.indexOf('>', endIfIndex);
+				} else {
+					if (isBogus) {
+						var endIndex = lcHtml.indexOf('>', startIndex);
+						return endIndex !== -1 ? endIndex : lcHtml.length;
+					} else {
+						var endCommentRegexp = /--!?>/;
+						endCommentRegexp.lastIndex = startIndex;
+						var match = endCommentRegexp.exec(html);
+						return match ? match.index + match[0].length : lcHtml.length;
+					}
+				}
 			}
 
 			function trimComments(text) {
@@ -189,6 +259,19 @@
 				}
 
 				return sanitizedText;
+			}
+
+			function checkBogusAttribute(regExp, attrString) {
+				var matches = regExp.exec(attrString);
+
+				if (matches) {
+					var name = matches[1];
+					var value = matches[2];
+
+					return typeof name === 'string' && name.toLowerCase() === 'data-mce-bogus' ? value : null;
+				} else {
+					return null;
+				}
 			}
 
 			function parseAttribute(match, name, value, val2, val3) {
@@ -250,9 +333,14 @@
 						return;
 					}
 
-					if (!settings.allow_html_data_urls && dataUriRegExp.test(uri) && !/^data:image\//i.test(uri)) {
+					if (isInvalidUri(settings, uri)) {
 						return;
 					}
+				}
+
+				// Block data or event attributes on elements marked as internal
+				if (isInternalElement && (name in filteredUrlAttrs || name.indexOf('on') === 0)) {
+					return;
 				}
 
 				// Add attribute to list and map
@@ -265,12 +353,12 @@
 
 			// Precompile RegExps and map objects
 			tokenRegExp = new RegExp('<(?:' +
-				'(?:!--([\\w\\W]*?)-->)|' + // Comment
+				'(?:!--([\\w\\W]*?)--!?>)|' + // Comment
 				'(?:!\\[CDATA\\[([\\w\\W]*?)\\]\\]>)|' + // CDATA
-				'(?:!DOCTYPE([\\w\\W]*?)>)|' + // DOCTYPE
+				'(?:![Dd][Oo][Cc][Tt][Yy][Pp][Ee]([\\w\\W]*?)>)|' + // DOCTYPE (case insensitive)
 				'(?:\\?([^\\s\\/<>]+) ?([\\w\\W]*?)[?/]>)|' + // PI
-				'(?:\\/([^>]+)>)|' + // End element
-				'(?:([A-Za-z0-9\\-_\\:\\.]+)((?:\\s+[^"\'>]+(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>]*))*|\\/|\\s+)>)' + // Start element
+				'(?:\\/([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)>)|' + // End element
+				`(?:([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)((?:\\s+[^"'>]+(?:(?:"[^"]*")|(?:'[^']*')|[^>]*))*|\\/|\\s+)>)` + // Start element
 				')', 'g');
 
 			attrRegExp = /([\w:\-]+)(?:\s*=\s*(?:(?:\"((?:[^\"])*)\")|(?:\'((?:[^\'])*)\')|([^>\s]+)))?/g;
@@ -283,8 +371,9 @@
 			removeInternalElements = settings.remove_internals;
 			fixSelfClosing = settings.fix_self_closing;
 			specialElements = schema.getSpecialElements();
+			processHtml = html + '>';
 
-			while ((matches = tokenRegExp.exec(html))) {
+			while ((matches = tokenRegExp.exec(processHtml))) {
 				// Text
 				if (index < matches.index) {
 					self.text(decode(html.substr(index, matches.index - index)));
@@ -300,6 +389,14 @@
 
 					processEndTag(value);
 				} else if ((value = matches[7])) { // Start element
+					// Did we consume the extra character then treat it as text
+					// This handles the case with html like this: "text a<b text"
+					if (matches.index + matches[0].length > html.length) {
+						self.text(decode(html.substr(matches.index)));
+						index = matches.index + matches[0].length;
+						continue;
+					}
+
 					value = value.toLowerCase();
 
 					// IE will add a ":" in front of elements it doesn't understand like custom elements or HTML5 elements
@@ -312,6 +409,18 @@
 					// Is self closing tag for example an <li> after an open <li>
 					if (fixSelfClosing && selfClosing[value] && stack.length > 0 && stack[stack.length - 1].name === value) {
 						processEndTag(value);
+					}
+
+					// Always invalidate element if it's marked as bogus
+					var bogusValue = checkBogusAttribute(attrRegExp, matches[8]);
+					if (bogusValue !== null) {
+						if (bogusValue === 'all') {
+							index = self.findEndTag(schema, html, tokenRegExp.lastIndex);
+							tokenRegExp.lastIndex = index;
+							continue;
+						}
+
+						isValidElement = false;
 					}
 
 					// Validate element
@@ -470,22 +579,35 @@
 						}
 					}
 				} else if ((value = matches[1])) { // Comment
-					// Padd comment value to avoid browsers from parsing invalid comments as HTML
-					if (value.charAt(0) === '>') {
-						value = ' ' + value;
-					}
-
-					if (!settings.allow_conditional_comments && value.substr(0, 3) === '[if') {
-						value = ' ' + value;
-					}
-
-					self.comment(value);
+					self.comment(trimComments(processComment(value)));
 				} else if ((value = matches[2])) { // CDATA
-					self.cdata(trimComments(value));
+
+					// Ensure we are in a valid CDATA context (eg child of svg or mathml). If we aren't in a valid context then the cdata should
+					// be treated as a bogus comment. See https://html.spec.whatwg.org/multipage/parsing.html#markup-declaration-open-state
+					var isValidCdataSection = format === 'xml' || settings.preserve_cdata || stack.length > 0 && schema.isValidChild(stack[stack.length - 1].name, '#cdata');
+
+					if (isValidCdataSection) {
+						self.cdata(trimComments(value));
+					} else {
+						index = processMalformedComment('', matches.index + 2);
+						tokenRegExp.lastIndex = index;
+						continue;
+					}
 				} else if ((value = matches[3])) { // DOCTYPE
 					self.doctype(value);
 				} else if ((value = matches[4])) { // PI
 					self.pi(value, matches[5]);
+
+					/*if (format === 'xml') {
+						self.pi(value, matches[5]);
+					} else {
+						// Processing Instructions aren't valid in HTML so it should be treated as a bogus comment.
+						// See https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
+						index = processMalformedComment('?', matches.index + 2); // <? === 2 chars
+
+						tokenRegExp.lastIndex = index;
+						continue;
+					}*/
 				}
 
 				index = matches.index + matches[0].length;
