@@ -486,7 +486,7 @@ test('Remove internal classes', function() {
 	DOM.setHTML('test', '<span class="mceItemX"></span>');
 	equal(ser.serialize(DOM.get('test')), '<span></span>');
 	DOM.setHTML('test', '<span class="mceItemX b"></span>');
-	equal(ser.serialize(DOM.get('test')), '<span class=" b"></span>');
+	equal(ser.serialize(DOM.get('test')), '<span class="b"></span>');
 	DOM.setHTML('test', '<span class="b mceItemX"></span>');
 	equal(ser.serialize(DOM.get('test')), '<span class="b"></span>');
 });

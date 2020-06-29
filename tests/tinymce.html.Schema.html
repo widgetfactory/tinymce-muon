@@ -148,10 +148,10 @@ test('getBoolAttrs', function() {
 	deepEqual(schema.getBoolAttrs(), {
 		"CONTROLS": {}, "LOOP": {}, "AUTOPLAY": {}, "SELECTED": {}, "READONLY": {}, "NOWRAP": {},
 		"NOSHADE": {}, "NORESIZE": {}, "NOHREF": {}, "MULTIPLE": {}, "ISMAP": {}, "ITEMSCOPE": {},"DISABLED": {}, "DEFER": {},
-		"DECLARE": {}, "COMPACT": {}, "CHECKED": {},
+		"DECLARE": {}, "COMPACT": {}, "CHECKED": {}, "PLAYSINLINE" : {},
 		"controls": {}, "loop": {}, "autoplay": {}, "selected": {}, "readonly": {}, "nowrap": {},
 		"noshade": {}, "noresize": {}, "nohref": {}, "multiple": {}, "ismap": {}, "itemscope": {},"disabled": {}, "defer": {},
-		"declare": {}, "compact": {}, "checked": {}
+		"declare": {}, "compact": {}, "checked": {}, "playsinline" : {}
 	});
 });
 
@@ -197,11 +197,11 @@ test('getNonEmptyElements', function() {
 		"EMBED": {}, "PARAM": {}, "META": {}, "LINK": {}, "ISINDEX": {},
 		"INPUT": {}, "IMG": {}, "HR": {}, "FRAME": {}, "COL": {}, "BR": {},
 		"BASEFONT": {}, "BASE": {}, "AREA": {}, "SOURCE" : {},
-		"TD": {}, "TH": {}, "IFRAME": {}, "VIDEO": {}, "AUDIO": {}, "OBJECT": {}, "WBR": {}, "TRACK" : {}, "SCRIPT" : {},
+		"TD": {}, "TH": {}, "IFRAME": {}, "VIDEO": {}, "AUDIO": {}, "OBJECT": {}, "WBR": {}, "TRACK" : {}, "SCRIPT" : {}, "DIV" : {},
 		"embed": {}, "param": {}, "meta": {}, "link": {}, "isindex": {},
 		"input": {}, "img": {}, "hr": {}, "frame": {}, "col": {}, "br": {},
 		"basefont": {}, "base": {}, "area": {}, "source" : {},
-		"td": {}, "th": {}, "iframe": {}, "video": {}, "audio": {}, "object": {}, "wbr" : {}, "track" : {},  "script" : {}
+		"td": {}, "th": {}, "iframe": {}, "video": {}, "audio": {}, "object": {}, "wbr" : {}, "track" : {},  "script" : {}, "div" : {}
 	});
 });
 
