@@ -44,13 +44,13 @@ tinymce.html.Writer = function (settings) {
 
 	return {
 		/**
-		 * Writes the a start element such as <p id="a">.
-		 *
-		 * @method start
-		 * @param {String} name Name of the element.
-		 * @param {Array} attrs Optional attribute array or undefined if it hasn't any.
-		 * @param {Boolean} empty Optional empty state if the tag should end like <br />.
-		 */
+       * Writes the a start element such as <p id="a">.
+       *
+       * @method start
+       * @param {String} name Name of the element.
+       * @param {Array} attrs Optional attribute array or undefined if it hasn't any.
+       * @param {Boolean} empty Optional empty state if the tag should end like <br />.
+       */
 		start: function (name, attrs, empty) {
 			var i, l, attr, value;
 
@@ -97,7 +97,7 @@ tinymce.html.Writer = function (settings) {
 
 			/*if (indent && indentBefore[name] && html.length > 0) {
 				value = html[html.length - 1];
-
+	
 				if (value.length > 0 && value !== '\n')
 					html.push('\n');
 			}*/
@@ -155,7 +155,7 @@ tinymce.html.Writer = function (settings) {
 		 */
 		pi: function (name, text) {
 			if (text) {
-				html.push('<?', name, ' ', text, '?>');
+				html.push('<?', name, ' ', encode(text), '?>');
 			} else {
 				html.push('<?', name, '?>');
 			}
