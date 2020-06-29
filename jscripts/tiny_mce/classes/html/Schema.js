@@ -755,9 +755,11 @@
             });
 
             // Remove these if they have no attributes
-            /*each(split('span'), function (name) {
-                elements[name].removeEmptyAttrs = true;
-            });*/
+            if (settings.allow_empty_spans === false) {
+                each(split('span'), function (name) {
+                    elements[name].removeEmptyAttrs = true;
+                });
+            }
 
             // Remove these by default
             // TODO: Reenable in 4.1
