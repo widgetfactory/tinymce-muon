@@ -396,10 +396,8 @@
 				}
 
 				// Nodes needs to be attached to something in WebKit/Opera
-				// Older builds of Opera crashes if you attach the node to an document created dynamically
-				// and since we can't feature detect a crash we need to sniff the acutal build number
-				// This fix will make DOM ranges and make Sizzle happy!
-				impl = node.ownerDocument.implementation;
+        		// This fix will make DOM ranges and make Sizzle happy!
+				impl = document.implementation;
 				if (impl.createHTMLDocument) {
 					// Create an empty HTML document
 					doc = impl.createHTMLDocument("");
