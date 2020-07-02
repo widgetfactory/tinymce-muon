@@ -2147,6 +2147,7 @@
 
 			self.onVisualAid.dispatch(self, elm, self.hasVisual);
 		},
+		
 
 		/**
 		 * Removes the editor from the dom and tinymce collection.
@@ -2170,6 +2171,7 @@
 				self.save();
 
 				DOM.setStyle(self.id, 'display', self.orgDisplay);
+				self.getBody().onload = null; // Prevent #6816
 
 				// Don't clear the window or document if content editable
 				// is enabled since other instances might still be present
