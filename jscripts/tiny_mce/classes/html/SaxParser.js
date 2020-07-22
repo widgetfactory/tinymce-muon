@@ -221,8 +221,8 @@
 				var isBogus = startTag.indexOf('--') !== 0;
 
 				// Find the end of the malformed/bogus comment
-				var endIndex = findCommentEndIndex(html, isBogus, startIndex);
-				value = html.substr(startIndex, endIndex - startIndex);
+				var endIndex = findCommentEndIndex(value, isBogus, startIndex);
+				value = value.substr(startIndex, endIndex - startIndex);
 
 				value = processComment(isBogus ? startTag + value : value);
 
