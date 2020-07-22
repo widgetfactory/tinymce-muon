@@ -66,7 +66,8 @@
             name = split(name);
             ni = name.length;
             while (ni--) {
-                attributesOrder = [].concat(globalAttributes, split(attributes));
+                attributesOrder = [].concat(split(attributes), globalAttributes);
+
                 schema[name[ni]] = {
                     attributes: arrayToMap(attributesOrder),
                     attributesOrder: attributesOrder,
