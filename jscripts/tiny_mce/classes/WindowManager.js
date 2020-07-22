@@ -103,7 +103,6 @@
          * @option {Boolean} resizable Specifies whether the popup window is resizable or not.
          * @option {Boolean} maximizable Specifies whether the popup window has a "maximize" button and can get maximized or not.
          * @option {Boolean} inline Specifies whether to display in-line (set to 1 or true for in-line display; requires inlinepopups plugin).
-         * @option {String/Boolean} popup_css Optional CSS to use in the popup. Set to false to remove the default one.
          * @option {Boolean} translate_i18n Specifies whether translation should occur or not of i18 key strings. Default is true.
          * @option {String/bool} close_previous Specifies whether a previously opened popup window is to be closed or not (like when calling the file browser window over the advlink popup).
          * @option {String/bool} scrollbars Specifies whether the popup window can have scrollbars if required (i.e. content larger than the popup size specified).
