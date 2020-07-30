@@ -339,9 +339,9 @@
 				}
 
 				// Block data or event attributes on elements marked as internal
-				if (isInternalElement && (name in filteredUrlAttrs || name.indexOf('on') === 0)) {
+				/*if (isInternalElement && (name in filteredUrlAttrs || name.indexOf('on') === 0)) {
 					return;
-				}
+				}*/
 
 				// Add attribute to list and map
 				attrList.map[name] = value;
