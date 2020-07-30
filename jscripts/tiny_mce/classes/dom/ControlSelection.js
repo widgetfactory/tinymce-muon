@@ -113,9 +113,13 @@
 		function isResizable(elm) {
 			var selector = editor.settings.object_resizing;
 
-			if (selector === false || tinymce.isIOS) {
+			if (selector === false) {
 				return false;
 			}
+
+			/*if (tinymce.isIOS) {
+				return false;
+			}*/
 
 			if (typeof selector != 'string') {
 				selector = 'table,img';
@@ -132,9 +136,22 @@
 			return editor.dom.is(elm, selector);
 		}
 
+		function updateWithTouchData(e) {
+			var keys, i;
+	
+			if (e.changedTouches) {
+				keys = "screenX screenY pageX pageY clientX clientY".split(' ');
+				for (i = 0; i < keys.length; i++) {
+					e[keys[i]] = e.changedTouches[0][keys[i]];
+				}
+			}
+		}
+
 		function resizeGhostElement(e) {
 			var deltaX, deltaY, proportional;
 			var resizeHelperX, resizeHelperY;
+
+			updateWithTouchData(e);
 
 			// Calc new width/height
 			deltaX = e.screenX - startX;
@@ -239,12 +256,12 @@
 			setSizeProp('width', width);
 			setSizeProp('height', height);
 
-			dom.unbind(editableDoc, 'mousemove', resizeGhostElement);
-			dom.unbind(editableDoc, 'mouseup', endGhostResize);
+			dom.unbind(editableDoc, 'mousemove touchmove', resizeGhostElement);
+			dom.unbind(editableDoc, 'mouseup touchend', endGhostResize);
 
 			if (rootDocument != editableDoc) {
-				dom.unbind(rootDocument, 'mousemove', resizeGhostElement);
-				dom.unbind(rootDocument, 'mouseup', endGhostResize);
+				dom.unbind(rootDocument, 'mousemove touchmove', resizeGhostElement);
+				dom.unbind(rootDocument, 'mouseup touchend', endGhostResize);
 			}
 
 			// Remove ghost/helper and update resize handle positions
@@ -320,12 +337,12 @@
 						selectedElmGhost.removeAttribute('data-mce-selected');
 						rootElement.appendChild(selectedElmGhost);
 
-						dom.bind(editableDoc, 'mousemove', resizeGhostElement);
-						dom.bind(editableDoc, 'mouseup', endGhostResize);
+						dom.bind(editableDoc, 'mousemove touchmove', resizeGhostElement);
+						dom.bind(editableDoc, 'mouseup touchend', endGhostResize);
 
 						if (rootDocument != editableDoc) {
-							dom.bind(rootDocument, 'mousemove', resizeGhostElement);
-							dom.bind(rootDocument, 'mouseup', endGhostResize);
+							dom.bind(rootDocument, 'mousemove touchmove', resizeGhostElement);
+							dom.bind(rootDocument, 'mouseup touchend', endGhostResize);
 						}
 
 						resizeHelper = dom.add(rootElement, 'div', {
