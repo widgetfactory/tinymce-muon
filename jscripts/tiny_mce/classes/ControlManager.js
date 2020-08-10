@@ -237,8 +237,10 @@
 				ed = self.editor,
 				c, cls;
 
-			if (self.get(id)) {
-				return null;
+			c = self.get(id);
+
+			if (c) {
+				return c;
 			}
 
 			s.title = ed.translate(s.title);
@@ -486,8 +488,10 @@
 
 			id = self.prefix + id;
 
-			if (self.get(id)) {
-				return null;
+			c = self.get(id);
+
+			if (c) {
+				return c;
 			}
 
 			s.title = ed.translate(s.title);
@@ -516,8 +520,10 @@
 				ed = self.editor,
 				c, cls;
 
-			if (self.get(id)) {
-				return null;
+			c = self.get(id);
+
+			if (c) {
+				return c;
 			}
 
 			s.title = ed.translate(s.title);
@@ -645,13 +651,15 @@
 			var c, self = this,
 				cls;
 
+			c = self.get(id);
+
+			if (c) {
+				return c;
+			}
+
 			id = self.prefix + id;
 			cls = cc || self._cls.form || tinymce.ui.Form;
 			c = new cls(id, s, self.editor);
-
-			if (self.get(id)) {
-				return null;
-			}
 
 			return self.add(c);
 		},
