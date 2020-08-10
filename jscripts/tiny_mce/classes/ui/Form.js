@@ -87,6 +87,18 @@
 			}
 		},
 
+		empty: function() {
+			var i;
+
+			var controls = this.controls;
+
+			for (i = 0; i < controls.length; i++) {
+				controls[i].remove();
+			}
+
+			this.controls = [];
+		},
+
 		destroy: function () {
 			var settings = this.settings,
 				i;
