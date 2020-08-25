@@ -601,9 +601,9 @@
 		});
 
 		// empty spans are allowed by schema
-		test('Parse no attributes span before strong', function() {
-			var parser, root, schema = new tinymce.html.Schema({allow_empty_spans : false});
-	
+		test('Parse no attributes span before strong', function () {
+			var parser, root, schema = new tinymce.html.Schema({ allow_empty_spans: false });
+
 			counter = createCounter(writer);
 			counter.validate = true;
 			parser = new tinymce.html.SaxParser(counter, schema);
@@ -743,13 +743,13 @@
 			testBogusSaxParse('a<b data-mce-bogus="all"></b><b>c</b>', 'a<b>c</b>', { start: 1, end: 1, text: 2 });
 		});
 
-		test('findEndTag', function() {
+		test('findEndTag', function () {
 			parser = new tinymce.html.SaxParser(counter, schema);
-			
+
 			function testFindEndTag(html, startIndex, expectedIndex) {
 				equal(parser.findEndTag(schema, html, startIndex), expectedIndex);
 			}
-	
+
 			testFindEndTag('<b>', 3, 3);
 			testFindEndTag('<img>', 3, 3);
 			testFindEndTag('<b></b>', 3, 7);
@@ -827,6 +827,23 @@
 			testFindEndTag('<b><img></b>', 3, 12);
 			testFindEndTag('<b><!-- </b> --></b>', 3, 20);
 			testFindEndTag('<span><b><i>a<img>b</i><b>c</b></b></span>', 9, 35);
+		});
+
+		test('Parse special elements', function () {
+			var counter, parser;
+			var specialHtml = ('<strong>' +
+				'<textarea></strong></textarea><title></strong></title><script></strong><\/script>' +
+				'<iframe><img src="image.png"></iframe>' +
+				'<noframes></strong></noframes><noscript></strong></noscript><style><\/strong></style>' +
+				'<xmp></strong></xmp>' +
+				'<noembed></strong></noembed>' +
+				'</strong>');
+			counter = createCounter(writer);
+			parser = new tinymce.html.SaxParser(counter, schema);
+			writer.reset();
+			parser.parse(specialHtml);
+			equal(writer.getContent(), specialHtml);
+			deepEqual(counter.counts, { start: 10, text: 9, end: 10 });
 		});
 
 		test('Parse malformed elements that start with numbers', function () {
