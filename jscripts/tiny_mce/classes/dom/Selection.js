@@ -13,6 +13,7 @@
 	var is = tinymce.is,
 		isIE = tinymce.isIE,
 		each = tinymce.each,
+		extend = tinymce.extend,
 		TreeWalker = tinymce.dom.TreeWalker;
 
 	/**
@@ -81,6 +82,14 @@
 				'onGetContent'
 			], function (e) {
 				self[e] = new tinymce.util.Dispatcher(self);
+			});
+
+			// Add onBeforeSetContent with cleanup
+			self.onBeforeSetContent.add(function(self, args) {				
+				if (args.format !== 'raw') {
+					var node = editor.parser.parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
+					args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
+				}
 			});
 
 			if (tinymce.isIE && !tinymce.isIE11 && dom.boxModel) {
@@ -1265,7 +1274,7 @@
 				var walker = new TreeWalker(startNode, self.dom.getRoot());
 
 				while ((node = walker.next()) && node != endNode) {
-					
+
 					// check for parent node that is an element...
 					if (node.parentNode !== self.dom.getRoot()) {
 						continue;
