@@ -87,7 +87,7 @@
 			// Add onBeforeSetContent with cleanup
 			self.onBeforeSetContent.add(function(self, args) {				
 				if (args.format !== 'raw') {
-					var node = editor.parser.parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
+					var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
 					args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
 				}
 			});
