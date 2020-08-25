@@ -161,20 +161,20 @@
 			}
 
 			// Do we need to do something?
-			if (value != this.selectedValue) {
-				// Find item
-				each(this.items, function (item, i) {
-					if (fn(item.value)) {
-						fv = 1;
-						self.selectByIndex(i);
-						return false;
-					}
-				});
-
-				if (!fv) {
-					this.selectByIndex(-1);
+			//if (value != this.selectedValue) {
+			// Find item
+			each(this.items, function (item, i) {
+				if (fn(item.value)) {
+					fv = 1;
+					self.selectByIndex(i);
+					return false;
 				}
+			});
+
+			if (!fv) {
+				this.selectByIndex(-1);
 			}
+			//}
 		},
 
 		value: function (val) {
@@ -197,25 +197,25 @@
 
 			this.marked = {};
 
-			if (idx != this.selectedIndex) {
-				elm = DOM.get(this.id + '_text');
-				item = this.items[idx];
+			//if (idx != this.selectedIndex) {
+			elm = DOM.get(this.id + '_text');
+			item = this.items[idx];
 
-				if (item) {
-					this.selectedValue = item.value;
-					this.selectedIndex = idx;
-					DOM.setHTML(elm, DOM.encode(item.title));
-					DOM.removeClass(elm, 'mceTitle');
-					DOM.setAttrib(this.id, 'aria-valuenow', item.title);
-				} else {
-					DOM.setHTML(elm, DOM.encode(this.settings.title));
-					DOM.addClass(elm, 'mceTitle');
-					this.selectedValue = this.selectedIndex = null;
-					DOM.setAttrib(this.id, 'aria-valuenow', this.settings.title);
-				}
-
-				elm = 0;
+			if (item) {
+				this.selectedValue = item.value;
+				this.selectedIndex = idx;
+				DOM.setHTML(elm, DOM.encode(item.title));
+				DOM.removeClass(elm, 'mceTitle');
+				DOM.setAttrib(this.id, 'aria-valuenow', item.title);
+			} else {
+				DOM.setHTML(elm, DOM.encode(this.settings.title));
+				DOM.addClass(elm, 'mceTitle');
+				this.selectedValue = this.selectedIndex = null;
+				DOM.setAttrib(this.id, 'aria-valuenow', this.settings.title);
 			}
+
+			elm = 0;
+			//}
 		},
 
 		/**
