@@ -57,10 +57,20 @@
 			l = DOM.encode(s.label || '');
 			h = '<button type="button" id="' + this.id + '" class="' + cp + ' ' + s['class'] + (l ? ' ' + cp + 'Labeled' : '') + '" title="' + DOM.encode(s.title) + '" aria-label="' + DOM.encode(s.title) + '">';
 
+			if (s['class']) {
+				s['class'] = ' ' + tinymce.trim(s['class']);
+			}
+
+			s.icon = s.icon || '';
+			
 			if (s.image) {
-				h += '<span role="presentation" class="mceIcon mceIconImage ' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+				h += '<span role="presentation" class="mceIcon mceIconImage' + s['class'] + '"><img class="mceIcon" src="' + s.image + '" alt="' + DOM.encode(s.title) + '" /></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			} else {
-				h += '<span role="presentation" class="mceIcon ' + s['class'] + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
+				if (s.icon) {
+					s.icon = ' mce_' + s.icon;
+				}
+
+				h += '<span role="presentation" class="mceIcon' + s['class'] + '' + s.icon + '"></span>' + (l ? '<span class="' + cp + 'Label">' + l + '</span>' : '');
 			}
 
 			h += '</button>';
