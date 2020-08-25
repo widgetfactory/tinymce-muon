@@ -853,6 +853,8 @@
 							src: s.icon_src
 						});
 					}
+
+					DOM.addClass(item, 'mceHasIcon');
 				}
 
 				if (s.image) {
