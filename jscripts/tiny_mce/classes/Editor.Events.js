@@ -915,7 +915,10 @@
 			var i, currentPath;
 
 			currentPath = ed.dom.getParents(startElm, '*', ed.getBody());
-			currentPath.push(startElm);
+
+			if (tinymce.inArray(currentPath, startElm) === -1) {
+				currentPath.push(startElm);
+			}
 
 			if (currentPath.length === lastPath.length) {
 				for (i = currentPath.length; i >= 0; i--) {
@@ -981,6 +984,9 @@
 		self.onSelectionChange.add(function (ed, e) {
 			var startElm = ed.selection.getStart(true);
 
+			// it seems to be necessary to prefill this value with the current element before checking isSameElementPath...?
+			lastPath = [startElm];
+
 			if (!isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
 				nodeChanged(ed, e);
 			}
@@ -988,7 +994,7 @@
 
 		// Fire an extra nodeChange on mouseup for compatibility reasons
 		self.onMouseUp.add(function (ed, e) {
-			if (!e.isDefaultPrevented()) {
+			if (!e.isDefaultPrevented()) {			
 				// Delay nodeChanged call for WebKit edge case issue where the range
 				// isn't updated until after you click outside a selected image
 				if (ed.selection.getNode().nodeName == 'IMG') {
