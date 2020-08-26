@@ -274,7 +274,7 @@
 				format: 'html'
 			};
 			args.set = true;
-			content = args.content = content;
+			args.content = content;
 
 			// Dispatch before set content event
 			if (!args.no_events) {
