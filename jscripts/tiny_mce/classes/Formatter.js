@@ -74,6 +74,10 @@
 			return node.nodeType === 1 && node.id === '_mce_caret';
 		}
 
+		function isWhiteSpaceNode(node) {
+			return node && node.nodeType === 3 && /^([\t \r\n]+|)$/.test(node.nodeValue);
+		}
+
 		function defaultFormats() {
 			register({
 				valigntop: [
@@ -1612,10 +1616,6 @@
 			return value;
 		}
 
-		function isWhiteSpaceNode(node) {
-			return node && node.nodeType === 3 && /^([\t \r\n]+|)$/.test(node.nodeValue);
-		}
-
 		function wrap(node, name, attrs) {
 			var wrapper = dom.create(name, attrs);
 
@@ -2710,50 +2710,31 @@
 		 * Moves the start to the first suitable text node.
 		 */
 		function moveStart(rng) {
-			var container = rng.startContainer,
-				offset = rng.startOffset,
-				isAtEndOfText,
-				walker, node, nodes, tmpNode;
+			var offset = rng.startOffset;
+			var container = rng.startContainer, walker, node, nodes;
 
-			if (rng.startContainer == rng.endContainer) {
+			if (rng.startContainer === rng.endContainer) {
 				if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
 					return;
 				}
 			}
 
-			// Convert text node into index if possible
-			if (container.nodeType == 3 && offset >= container.nodeValue.length) {
-				// Get the parent container location and walk from there
-				offset = nodeIndex(container);
-				container = container.parentNode;
-				isAtEndOfText = true;
-			}
-
 			// Move startContainer/startOffset in to a suitable node
-			if (container.nodeType == 1) {
+			if (container.nodeType === 1) {
 				nodes = container.childNodes;
-				container = nodes[Math.min(offset, nodes.length - 1)];
-				walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
-
-				// If offset is at end of the parent node walk to the next one
-				if (offset > nodes.length - 1 || isAtEndOfText) {
-					walker.next();
+				if (offset < nodes.length) {
+					container = nodes[offset];
+					walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
 				}
-
+				else {
+					container = nodes[nodes.length - 1];
+					walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
+					walker.next(true);
+				}
 				for (node = walker.current(); node; node = walker.next()) {
-					if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
-						// IE has a "neat" feature where it moves the start node into the closest element
-						// we can avoid this by inserting an element before it and then remove it after we set the selection
-						tmpNode = dom.create('a', {
-							'data-mce-bogus': 'all'
-						}, INVISIBLE_CHAR);
-						node.parentNode.insertBefore(tmpNode, node);
-
-						// Set selection and remove tmpNode
+					if (node.nodeType === 3 && !isWhiteSpaceNode(node)) {
 						rng.setStart(node, 0);
 						selection.setRng(rng);
-						dom.remove(tmpNode);
-
 						return;
 					}
 				}
