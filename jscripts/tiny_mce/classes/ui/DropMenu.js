@@ -314,6 +314,9 @@
 				return;
 			}
 
+			// clear selection
+			self.selected = [];
+
 			if (!self.rendered) {
 				co = DOM.add(self.settings.container, self.renderNode());
 
