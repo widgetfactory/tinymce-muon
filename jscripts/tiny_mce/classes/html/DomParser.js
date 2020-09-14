@@ -324,9 +324,8 @@
 				while (node) {
 					next = node.next;
 
-					if (node.type == 3 || (node.type == 1 && node.name !== 'p' &&
-							!blockElements[node.name] && !node.attr('data-mce-type'))) {
-						if (!rootBlockNode) {
+					if ((node.type == 3 && tinymce.trim(node.value)) || (node.type == 1 && node.name !== 'p' && !blockElements[node.name] && !node.attr('data-mce-type'))) {
+						if (!rootBlockNode) {							
 							// Create a new root block element
 							rootBlockNode = createNode(rootBlockName, 1);
 							rootBlockNode.attr(settings.forced_root_block_attrs);
