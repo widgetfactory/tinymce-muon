@@ -564,12 +564,12 @@ tinymce.util.Quirks = function (editor) {
 				}
 
 				// Remove all spans that aren't marked and retain selection
-				tinymce.each(record.addedNodes, function (node) {					
+				tinymce.each(record.addedNodes, function (node) {
 					// remove new runtime style attributes on addedNodes
 					if (node.getAttribute('style') && !node.getAttribute('data-mce-style')) {
 						node.removeAttribute("style");
 					}
-					
+
 					if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
 						var offset, container;
 
@@ -1521,11 +1521,73 @@ tinymce.util.Quirks = function (editor) {
 		editor.onMouseUp.add(normalize);
 	}
 
+	function inlineBoundary() {
+		function isBoundaryNode(node) {
+			return node && node.nodeName === 'A';
+		}
+
+		function isLastChildOf(node) {
+			return node.parentNode && node.parentNode.lastChild === node;
+		}
+
+		editor.onNodeChange.add(function () {
+			// remove existing selections
+			dom.removeAttrib(dom.select('a'), 'data-mce-selected');
+			
+			var node = editor.selection.getNode(), node = dom.getParent(node, 'a');
+
+			if (isBoundaryNode(node)) {
+				node.setAttribute('data-mce-selected', 'inline-boundary');
+			}
+		});
+
+		/**
+		 * Attempt to move caret after a container element like <a> or <code>
+		 */
+		editor.onKeyDown.addToTop(function (editor, e) {
+			if (e.keyCode == VK.RIGHT) {
+				var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
+
+				if (!node || node === editor.getBody()) {
+					return;
+				}
+
+				node = dom.getParent(node, 'a');
+
+				if (!isBoundaryNode(node) || !isLastChildOf(node)) {
+					return;
+				}
+
+				if (container.nodeType === 3 && node) {
+					var text = container.data;
+
+					if (text && text.length && rng.startOffset == text.length) {
+						var marker = dom.add(node.parentNode, 'span', { 'data-mce-type': "bookmark" }, '\uFEFF');
+
+						// Move the caret to the end of the marker
+						rng = dom.createRng();
+						rng.setStart(marker, 0);
+						rng.setEnd(marker, 0);
+						selection.setRng(rng);
+
+						// remove marker
+						dom.remove(marker);
+
+						editor.nodeChanged();
+						e.preventDefault();
+					}
+				}
+			}
+		});
+	}
+
 	// All browsers
 	normalizeSelection();
 
 	removeBlockQuoteOnBackSpace();
 	emptyEditorWhenDeleting();
+
+	inlineBoundary();
 
 	// WebKit
 	if (tinymce.isWebKit) {
@@ -1567,7 +1629,7 @@ tinymce.util.Quirks = function (editor) {
 		removeHrOnBackspace();
 		removeStylesWhenDeletingAcrossBlockElements();
 		setGeckoEditingOptions();
-		addBrAfterLastLinks();
+		//addBrAfterLastLinks();
 		showBrokenImageIcon();
 		blockCmdArrowNavigation();
 		disableBackspaceIntoATable();
