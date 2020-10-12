@@ -564,7 +564,11 @@ tinymce.util.Quirks = function (editor) {
 				}
 
 				// Remove all spans that aren't marked and retain selection
-				tinymce.each(record.addedNodes, function (node) {
+				tinymce.each(record.addedNodes, function (node) {					
+					if (node.nodeType !== 1) {
+						return true;
+					}
+					
 					// remove new runtime style attributes on addedNodes
 					if (node.getAttribute('style') && !node.getAttribute('data-mce-style')) {
 						node.removeAttribute("style");
@@ -1587,7 +1591,7 @@ tinymce.util.Quirks = function (editor) {
 	removeBlockQuoteOnBackSpace();
 	emptyEditorWhenDeleting();
 
-	inlineBoundary();
+	//inlineBoundary();
 
 	// WebKit
 	if (tinymce.isWebKit) {
