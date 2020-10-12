@@ -602,7 +602,7 @@
 		DOM.remove('test');
 	});
 
-	test('isEmpty', 14, function() {
+	test('isEmpty', 22, function() {
 		DOM.schema = new tinymce.html.Schema(); // A schema will be added when used within a editor instance
 		DOM.add(document.body, 'div', {id : 'test'}, '');
 
@@ -646,6 +646,30 @@
 
 		DOM.setHTML('test', '<div><!-- comment --></div>');
 		ok(!DOM.isEmpty(DOM.get('test')), 'Element with comment.');
+
+		DOM.setHTML('test', '<span data-mce-bogus="1"></span>');
+		ok(DOM.isEmpty(DOM.get('test')), 'Contains just a bogus element.');
+
+		DOM.setHTML('test', '<span data-mce-bogus="1">a</span>');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a text node in a bogus element.');
+
+		DOM.setHTML('test', '<span data-mce-bogus="all">a</span>');
+		ok(DOM.isEmpty(DOM.get('test')), 'Contains just a bogus all element.');
+
+		DOM.setHTML('test', '<span data-mce-bogus="all">a</span>b');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a bogus all element but some text as well.');
+
+		DOM.setHTML('test', '<code> </code>');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a code element should be treated as content.');
+
+		DOM.setHTML('test', '<pre> </pre>');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a pre element should be treated as content.');
+
+		DOM.setHTML('test', '<code></code>');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a code element should be treated as content.');
+
+		DOM.setHTML('test', '<pre></pre>');
+		ok(!DOM.isEmpty(DOM.get('test')), 'Contains a pre element should be treated as content.');
 
 		DOM.remove('test');
 	});
