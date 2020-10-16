@@ -869,7 +869,7 @@
 			reset: 'onReset',
 			contextmenu: 'onContextMenu',
 			dblclick: 'onDblClick',
-			paste: 'onPaste', // Doesn't work in all browsers yet,
+			paste: 'onPaste',
 			cut: 'onCut',
 			copy: 'onCopy',
 			selectionchange: 'onSelectionChange'
