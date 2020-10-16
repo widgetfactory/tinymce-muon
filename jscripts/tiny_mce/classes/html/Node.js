@@ -244,7 +244,7 @@
 		 * @method clone
 		 * @return {tinymce.html.Node} New copy of the original node.
 		 */
-		clone: function () {
+		clone: function (deep) {
 			var self = this,
 				clone = new Node(self.name, self.type),
 				i, l, selfAttrs, selfAttr, cloneAttrs;
@@ -272,6 +272,13 @@
 
 			clone.value = self.value;
 			clone.shortEnded = self.shortEnded;
+
+			if (deep) {
+				// Collect the children
+				for (node = self.firstChild; node; node = walk(node, self)) {
+					clone.append(node);
+				}
+			}
 
 			return clone;
 		},
