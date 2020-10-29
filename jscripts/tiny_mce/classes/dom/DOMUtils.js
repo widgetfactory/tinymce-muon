@@ -1932,19 +1932,13 @@
 
 						// Keep elements with data-bookmark attributes or name attribute like <a name="1"></a>
 						attributes = self.getAttribs(node);
-						/*i = attributes.length;
+						i = attributes.length;
 
 						while (i--) {
 							name = attributes[i].nodeName;
-
 							if (name === "name" || name === 'data-mce-bookmark') {
 								return false;
 							}
-						}*/
-
-						// keep any elements with attributes
-						if (attributes.length) {
-							continue;
 						}
 					}
 
