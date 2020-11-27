@@ -16,6 +16,11 @@
 		extend = tinymce.extend,
 		TreeWalker = tinymce.dom.TreeWalker;
 
+
+	function isRestricted(element) {
+		return !!element && !Object.getPrototypeOf(element);
+	}
+
 	/**
 	 * This class handles text and control selection it's an crossbrowser utility class.
 	 * Consult the TinyMCE Wiki API for more details and examples on how to use this class.
@@ -85,7 +90,7 @@
 			});
 
 			// Add onBeforeSetContent with cleanup
-			self.onBeforeSetContent.add(function(self, args) {				
+			self.onBeforeSetContent.add(function (self, args) {
 				if (args.format !== 'raw') {
 					var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
 					args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
@@ -341,13 +346,13 @@
 		},
 
 		/**
-       * Returns the start element of a selection range. If the start is in a text
-       * node the parent element will be returned.
-       *
-       * @method getStart
-       * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
-       * @return {Element} Start element of selection range.
-       */
+	   * Returns the start element of a selection range. If the start is in a text
+	   * node the parent element will be returned.
+	   *
+	   * @method getStart
+	   * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
+	   * @return {Element} Start element of selection range.
+	   */
 		getStart: function (real) {
 			var self = this,
 				rng = self.getRng(),
@@ -363,6 +368,7 @@
 				checkRng = rng.duplicate();
 				checkRng.collapse(1);
 				startElement = checkRng.parentElement();
+
 				if (startElement.ownerDocument !== self.dom.doc) {
 					startElement = self.dom.getRoot();
 				}
@@ -370,6 +376,7 @@
 				// Check if range parent is inside the start element, then return the inner parent element
 				// This will fix issues when a single element is selected, IE would otherwise return the wrong start element
 				parentElement = node = rng.parentElement();
+
 				while ((node = node.parentNode)) {
 					if (node == startElement) {
 						startElement = parentElement;
@@ -947,14 +954,14 @@
 		},
 
 		/**
-       * Returns the browsers internal range object.
-       *
-       * @method getRng
-       * @param {Boolean} w3c Forces a compatible W3C range on IE.
-       * @return {Range} Internal browser range object.
-       * @see http://www.quirksmode.org/dom/range_intro.html
-       * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
-       */
+	   * Returns the browsers internal range object.
+	   *
+	   * @method getRng
+	   * @param {Boolean} w3c Forces a compatible W3C range on IE.
+	   * @return {Range} Internal browser range object.
+	   * @see http://www.quirksmode.org/dom/range_intro.html
+	   * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+	   */
 		getRng: function (w3c) {
 			var self = this,
 				selection, rng, elm, doc, ieRng, evt;
@@ -1000,7 +1007,7 @@
 			}
 
 			try {
-				if ((selection = self.getSel())) {
+				if ((selection = self.getSel()) && !isRestricted(selection.anchorNode)) {
 					if (selection.rangeCount > 0) {
 						rng = selection.getRangeAt(0);
 					} else {
@@ -1027,6 +1034,11 @@
 					rng.setStartBefore(elm);
 					rng.setEndAfter(elm);
 				}
+			}
+
+			// Firefox throws an error in restricted ranges, such as when clicking in a video element, so reset rng
+			if (isRestricted(rng.startContainer)) {
+				rng = null;
 			}
 
 			// No range found then create an empty one
@@ -1059,12 +1071,12 @@
 		},
 
 		/**
-       * Changes the selection to the specified DOM range.
-       *
-       * @method setRng
-       * @param {Range} rng Range to select.
-       * @param {Boolean} forward Optional boolean if the selection is forwards or backwards.
-       */
+	   * Changes the selection to the specified DOM range.
+	   *
+	   * @method setRng
+	   * @param {Range} rng Range to select.
+	   * @param {Boolean} forward Optional boolean if the selection is forwards or backwards.
+	   */
 		setRng: function (rng, forward) {
 			var self = this,
 				sel, node;
