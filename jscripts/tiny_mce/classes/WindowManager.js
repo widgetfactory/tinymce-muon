@@ -139,7 +139,7 @@
 
             // modal html
             var html = '' +
-                '<div class="mceModalBody" id="' + id + '" dir="' + ed.settings.directionality + '">' +
+                '<div class="mceModalBody" id="' + id + '" dir="' + ed.settings.skin_directionality + '">' +
                 '   <div class="mceModalContainer">' +
                 '       <div class="mceModalHeader" id="' + id + '_header">' +
                 '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
