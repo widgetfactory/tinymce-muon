@@ -1220,24 +1220,23 @@
 		 */
 		function matchNode(node, name, vars, similar) {
 			var formatList = get(name),
-				format, i, classes;
+				format, i, x, classes, dom = ed.dom;
 
-			function matchItems(node, format, item_name) {
-				var key, value, items = format[item_name],
-					i;
+			function matchItems(node, format, itemName) {
+				var key, value, items = format[itemName], i;
 
 				// Custom match
 				if (format.onmatch) {
-					return format.onmatch(node, format, item_name);
+					return format.onmatch(node, format, itemName);
 				}
 
 				// Check all items
 				if (items) {
 					// Non indexed object
-					if (items.length === undef) {
+					if (typeof items.length === 'undefined') {
 						for (key in items) {
 							if (items.hasOwnProperty(key)) {
-								if (item_name === 'attributes') {
+								if (itemName === 'attributes') {
 									value = dom.getAttrib(node, key);
 								} else {
 									value = getStyle(node, key);
@@ -1255,14 +1254,12 @@
 					} else {
 						// Only one match needed for indexed arrays
 						for (i = 0; i < items.length; i++) {
-							if (item_name === 'attributes' ? dom.getAttrib(node, items[i]) : getStyle(node, items[i])) {
+							if (itemName === 'attributes' ? dom.getAttrib(node, items[i]) : getStyle(node, items[i])) {
 								return format;
 							}
 						}
 					}
 				}
-
-				return format;
 			}
 
 			if (formatList && node) {
@@ -1274,8 +1271,8 @@
 					if (matchName(node, format) && matchItems(node, format, 'attributes') && matchItems(node, format, 'styles')) {
 						// Match classes
 						if ((classes = format.classes)) {
-							for (i = 0; i < classes.length; i++) {
-								if (!dom.hasClass(node, classes[i])) {
+							for (x = 0; x < classes.length; x++) {
+								if (!dom.hasClass(node, classes[x])) {
 									return;
 								}
 							}
@@ -1326,12 +1323,14 @@
 
 			// Check selected node
 			node = selection.getNode();
+
 			if (matchParents(node)) {
 				return TRUE;
 			}
 
 			// Check start node if it's different
 			startNode = selection.getStart();
+			
 			if (startNode != node) {
 				if (matchParents(startNode)) {
 					return TRUE;
