@@ -107,7 +107,6 @@
 				entity_encoding: 'named',
 				url_converter: self.convertURL,
 				url_converter_scope: self,
-				ie7_compat: TRUE,
 				validate_styles: TRUE
 			}, settings);
 
@@ -203,6 +202,8 @@
 
 			// Call setup
 			self.execCallback('setup', self);
+
+
 		},
 
 		/**
