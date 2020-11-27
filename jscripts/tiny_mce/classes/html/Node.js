@@ -274,9 +274,11 @@
 			clone.shortEnded = self.shortEnded;
 
 			if (deep) {
-				// Collect the children
-				for (node = self.firstChild; node; node = walk(node, self)) {
+				// append all the children
+				for (node = self.firstChild; node;) {
+					next = node.next;
 					clone.append(node);
+					node = next;
 				}
 			}
 
@@ -523,19 +525,19 @@
 						}
 
 						// Keep elements with data attributes or name attribute like <a name="1"></a>
-						/*i = node.attributes.length;
+						i = node.attributes.length;
 
 						while (i--) {
 							name = node.attributes[i].name;
 							if (name === "name" || name.indexOf('data-mce-bookmark') === 0) {
 								return false;
 							}
-						}*/
+						}
 
 						// Keep elements with attributes
-						if (node.attributes.length) {							
+						/*if (node.attributes.length) {							
 							return false;
-						}
+						}*/
 					}
 
 					// Keep comments
