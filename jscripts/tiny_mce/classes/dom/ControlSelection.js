@@ -122,7 +122,7 @@
 			}*/
 
 			if (typeof selector != 'string') {
-				selector = 'table,img';
+				selector = 'table,img,[data-mce-resize]';
 			}
 
 			if (elm.getAttribute('data-mce-resize') === 'false') {
@@ -147,6 +147,10 @@
 			}
 		}
 
+		function isProportionalResize(elm) {
+			return elm.nodeName === 'IMG' || elm.getAttribute('data-mce-resize') === 'proportional';
+		}
+
 		function resizeGhostElement(e) {
 			var deltaX, deltaY, proportional;
 			var resizeHelperX, resizeHelperY;
@@ -165,7 +169,7 @@
 			width = width < 5 ? 5 : width;
 			height = height < 5 ? 5 : height;
 
-			if (selectedElm.nodeName == "IMG" && editor.settings.resize_img_proportional !== false) {
+			if (isProportionalResize(selectedElm) && editor.settings.resize_img_proportional !== false) {
 				proportional = !VK.modifierPressed(e);
 			} else {
 				proportional = VK.modifierPressed(e) || (selectedElm.nodeName == "IMG" && selectedHandle[2] * selectedHandle[3] !== 0);
@@ -236,17 +240,9 @@
 			function setSizeProp(name, value) {
 				if (value) {
 					// Resize by using style or attribute
-					//if (selectedElm.style[name] || !editor.schema.isValid(selectedElm.nodeName.toLowerCase(), name)) {
 					if (selectedElm.nodeName !== 'IMG') {
 						dom.setStyle(selectedElm, name, value);
 					} else {
-						// only set the width value for responsive images, if a value is not alrady set
-						/*if (name == 'height' && editor.settings.object_resizing_responsive !== false) {
-							if (!dom.getAttrib(selectedElm, name)) {
-								value = '';
-							}
-						}*/
-						
 						dom.setAttrib(selectedElm, name, value);
 					}
 				}
@@ -267,6 +263,8 @@
 			// Remove ghost/helper and update resize handle positions
 			dom.remove(selectedElmGhost);
 			dom.remove(resizeHelper);
+
+			dom.removeClass(selectedElm, 'mce-resizing');
 
 			if (!isIE || selectedElm.nodeName == "TABLE") {
 				showResizeRect(selectedElm);
@@ -322,7 +320,8 @@
 						startScrollWidth = rootElement.scrollWidth;
 						startScrollHeight = rootElement.scrollHeight;
 
-						selectedElmGhost = selectedElm.cloneNode(true);
+						// create clone as ghost of parent item only
+						selectedElmGhost = selectedElm.cloneNode();
 						dom.addClass(selectedElmGhost, 'mce-clonedresizable');
 						dom.setAttrib(selectedElmGhost, 'data-mce-bogus', 'all');
 						selectedElmGhost.contentEditable = false; // Hides IE move layer cursor
@@ -333,6 +332,9 @@
 							top: selectedElmY,
 							margin: 0
 						});
+
+						// mark selectedElm
+						dom.addClass(selectedElm, 'mce-resizing');
 
 						selectedElmGhost.removeAttribute('data-mce-selected');
 						rootElement.appendChild(selectedElmGhost);
@@ -441,12 +443,12 @@
 			}
 
 			// Remove data-mce-selected from all elements since they might have been copied using Ctrl+c/v
-			each(dom.select('img[data-mce-selected],hr[data-mce-selected]'), function (img) {
+			/*each(dom.select('img[data-mce-selected],hr[data-mce-selected],span[data-mce-selected]'), function (img) {
 				img.removeAttribute('data-mce-selected');
-			});
+			});*/
 
 			controlElm = e.type == 'mousedown' ? e.target : selection.getNode();
-			controlElm = dom.closest(controlElm, isIE ? 'table' : 'table,img')[0];
+			controlElm = dom.closest(controlElm, isIE ? 'table' : 'table,img,[data-mce-resize]')[0];
 
 			if (isChildOrEqual(controlElm, rootElement)) {
 				disableGeckoResize();
