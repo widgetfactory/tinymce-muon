@@ -240,14 +240,17 @@ var tinyMCEPopup = {
 	 * @method close
 	 */
 	close: function () {	
-		this.editor.windowManager.close(window);
-		tinymce = tinyMCE = this.editor = this.params = this.dom = this.dom.doc = null; // Cleanup
+		if (this.editor) {
+			this.editor.windowManager.close(window);
+
+			tinymce = tinyMCE = this.editor = this.params = this.dom = this.dom.doc = null; // Cleanup
+		}
 	},
 
 	// Internal functions
 
 	_restoreSelection: function (e) {
-		e = (e && e.target) || window.event.srcElement;
+		e = e && e.target;
 
 		if (e.nodeName == 'INPUT' && (e.type == 'submit' || e.type == 'button')) {
 			tinyMCEPopup.restoreSelection();
@@ -260,11 +263,6 @@ var tinyMCEPopup = {
 			title = document.title;
 
 		document.body.style.display = '';
-
-		// Restore selection in IE when focus is placed on a non textarea or input element of the type text
-		if (tinymce.isIE) {
-			//document.addEventListener('mouseup', tinyMCEPopup._restoreSelection, false);
-		}
 
 		this.restoreSelection();
 		this.resizeToInnerSize();
