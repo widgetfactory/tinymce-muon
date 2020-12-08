@@ -74,10 +74,6 @@
 			return node.nodeType === 1 && node.id === '_mce_caret';
 		}
 
-		function isWhiteSpaceNode(node) {
-			return node && node.nodeType === 3 && /^([\t \r\n]+|)$/.test(node.nodeValue);
-		}
-
 		function defaultFormats() {
 			register({
 				valigntop: [
@@ -113,7 +109,8 @@
 						styles: {
 							textAlign: 'left'
 						},
-						defaultBlock: 'div'
+						defaultBlock: 'div',
+						inherit: false
 					},
 					{
 						selector: 'figure[data-mce-image]',
@@ -137,7 +134,8 @@
 						styles: {
 							textAlign: 'center'
 						},
-						defaultBlock: 'div'
+						defaultBlock: 'div',
+						inherit: false
 					},
 					{
 						selector: 'figure[data-mce-image]',
@@ -173,7 +171,8 @@
 						styles: {
 							textAlign: 'right'
 						},
-						defaultBlock: 'div'
+						defaultBlock: 'div',
+						inherit: false
 					},
 					{
 						selector: 'figure[data-mce-image]',
@@ -197,7 +196,8 @@
 						styles: {
 							textAlign: 'justify'
 						},
-						defaultBlock: 'div'
+						defaultBlock: 'div',
+						inherit: false
 					}
 				],
 
@@ -1220,23 +1220,24 @@
 		 */
 		function matchNode(node, name, vars, similar) {
 			var formatList = get(name),
-				format, i, x, classes, dom = ed.dom;
+				format, i, classes;
 
-			function matchItems(node, format, itemName) {
-				var key, value, items = format[itemName], i;
+			function matchItems(node, format, item_name) {
+				var key, value, items = format[item_name],
+					i;
 
 				// Custom match
 				if (format.onmatch) {
-					return format.onmatch(node, format, itemName);
+					return format.onmatch(node, format, item_name);
 				}
 
 				// Check all items
 				if (items) {
 					// Non indexed object
-					if (typeof items.length === 'undefined') {
+					if (items.length === undef) {
 						for (key in items) {
 							if (items.hasOwnProperty(key)) {
-								if (itemName === 'attributes') {
+								if (item_name === 'attributes') {
 									value = dom.getAttrib(node, key);
 								} else {
 									value = getStyle(node, key);
@@ -1254,12 +1255,14 @@
 					} else {
 						// Only one match needed for indexed arrays
 						for (i = 0; i < items.length; i++) {
-							if (itemName === 'attributes' ? dom.getAttrib(node, items[i]) : getStyle(node, items[i])) {
+							if (item_name === 'attributes' ? dom.getAttrib(node, items[i]) : getStyle(node, items[i])) {
 								return format;
 							}
 						}
 					}
 				}
+
+				return format;
 			}
 
 			if (formatList && node) {
@@ -1271,8 +1274,8 @@
 					if (matchName(node, format) && matchItems(node, format, 'attributes') && matchItems(node, format, 'styles')) {
 						// Match classes
 						if ((classes = format.classes)) {
-							for (x = 0; x < classes.length; x++) {
-								if (!dom.hasClass(node, classes[x])) {
+							for (i = 0; i < classes.length; i++) {
+								if (!dom.hasClass(node, classes[i])) {
 									return;
 								}
 							}
@@ -1323,14 +1326,12 @@
 
 			// Check selected node
 			node = selection.getNode();
-
 			if (matchParents(node)) {
 				return TRUE;
 			}
 
 			// Check start node if it's different
 			startNode = selection.getStart();
-			
 			if (startNode != node) {
 				if (matchParents(startNode)) {
 					return TRUE;
@@ -1613,6 +1614,10 @@
 			}
 
 			return value;
+		}
+
+		function isWhiteSpaceNode(node) {
+			return node && node.nodeType === 3 && /^([\t \r\n]+|)$/.test(node.nodeValue);
 		}
 
 		function wrap(node, name, attrs) {
@@ -2709,31 +2714,50 @@
 		 * Moves the start to the first suitable text node.
 		 */
 		function moveStart(rng) {
-			var offset = rng.startOffset;
-			var container = rng.startContainer, walker, node, nodes;
+			var container = rng.startContainer,
+				offset = rng.startOffset,
+				isAtEndOfText,
+				walker, node, nodes, tmpNode;
 
-			if (rng.startContainer === rng.endContainer) {
+			if (rng.startContainer == rng.endContainer) {
 				if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
 					return;
 				}
 			}
 
+			// Convert text node into index if possible
+			if (container.nodeType == 3 && offset >= container.nodeValue.length) {
+				// Get the parent container location and walk from there
+				offset = nodeIndex(container);
+				container = container.parentNode;
+				isAtEndOfText = true;
+			}
+
 			// Move startContainer/startOffset in to a suitable node
-			if (container.nodeType === 1) {
+			if (container.nodeType == 1) {
 				nodes = container.childNodes;
-				if (offset < nodes.length) {
-					container = nodes[offset];
-					walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
+				container = nodes[Math.min(offset, nodes.length - 1)];
+				walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
+
+				// If offset is at end of the parent node walk to the next one
+				if (offset > nodes.length - 1 || isAtEndOfText) {
+					walker.next();
 				}
-				else {
-					container = nodes[nodes.length - 1];
-					walker = new TreeWalker(container, dom.getParent(container, dom.isBlock));
-					walker.next(true);
-				}
+
 				for (node = walker.current(); node; node = walker.next()) {
-					if (node.nodeType === 3 && !isWhiteSpaceNode(node)) {
+					if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
+						// IE has a "neat" feature where it moves the start node into the closest element
+						// we can avoid this by inserting an element before it and then remove it after we set the selection
+						tmpNode = dom.create('a', {
+							'data-mce-bogus': 'all'
+						}, INVISIBLE_CHAR);
+						node.parentNode.insertBefore(tmpNode, node);
+
+						// Set selection and remove tmpNode
 						rng.setStart(node, 0);
 						selection.setRng(rng);
+						dom.remove(tmpNode);
+
 						return;
 					}
 				}
