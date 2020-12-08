@@ -1037,7 +1037,7 @@
 			}
 
 			// Firefox throws an error in restricted ranges, such as when clicking in a video element, so reset rng
-			if (isRestricted(rng.startContainer)) {
+			if (rng && isRestricted(rng.startContainer)) {
 				rng = null;
 			}
 
