@@ -869,7 +869,8 @@
 
 				var txt = DOM.add(item, s.element || 'span', {
 					'class': 'mceText',
-					title: o.settings.title
+					title: o.settings.title,
+					'aria-label': o.settings.title
 				}, o.settings.title);
 
 				if (o.settings.style) {
