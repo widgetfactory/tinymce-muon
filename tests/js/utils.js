@@ -55,6 +55,52 @@
 		editor.selection.setRng(rng);
 	}
 
+	function assertCaretPosition(actual, expected, message) {
+		if (expected === null) {
+			strictEqual(actual, expected, message || 'Expected null.');
+			return;
+		}
+
+		if (actual === null) {
+			strictEqual(actual, expected, message || 'Didn\'t expect null.');
+			return;
+		}
+
+		deepEqual({
+			container: actual.container(),
+			offset: actual.offset()
+		}, {
+			container: expected.container(),
+			offset: expected.offset()
+		}, message);
+	}
+
+	function assertRange(actual, expected) {
+		deepEqual({
+			startContainer: actual.startContainer,
+			startOffset: actual.startOffset,
+			endContainer: actual.endContainer,
+			endOffset: actual.endOffset
+		}, {
+			startContainer: expected.startContainer,
+			startOffset: expected.startOffset,
+			endContainer: expected.endContainer,
+			endOffset: expected.endOffset
+		});
+	}
+
+	function createRange(startContainer, startOffset, endContainer, endOffset) {
+		var rng = tinymce.DOM.createRng();
+
+		rng.setStart(startContainer, startOffset);
+
+		if (endContainer) {
+			rng.setEnd(endContainer, endOffset);
+		}
+
+		return rng;
+	}
+
 	function trimContent(content) {
 		return content.replace(/^<p>&nbsp;<\/p>\n?/, '').replace(/\n?<p>&nbsp;<\/p>$/, '');
 	}
@@ -316,6 +362,20 @@
 		dom.fire(target, 'keyup', evt);
 	}
 
+	function pressKey(evt) {
+		var dom = editor.dom, target = editor.selection.getNode();
+
+		if (typeof evt == "number") {
+			evt = {keyCode: evt};
+		}
+
+		evt = tinymce.extend({keyCode: 37}, evt);
+
+		dom.fire(target, 'keydown', evt);
+		dom.fire(target, 'keypress', evt);
+		dom.fire(target, 'keyup', evt);
+	}
+
 	function trimBrsOnIE(html) {
 		return html.replace(/<br[^>]*>/gi, '');
 	}
@@ -392,6 +452,10 @@
 		trimBrsOnIE: trimBrsOnIE,
 		patch: patch,
 		unpatch: unpatch,
-		triggerElementChange: triggerElementChange
+		triggerElementChange: triggerElementChange,
+		assertCaretPosition: assertCaretPosition,
+		assertRange: assertRange,
+		createRange: createRange,
+		pressKey: pressKey
 	};
 })();

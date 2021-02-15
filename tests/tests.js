@@ -27,20 +27,22 @@ provide([
 
 		{"title": "tinymce.dom", "tests": [
 			{"title": "Selection", "url": "tinymce.dom.Selection.html"},
-			{"title": "TridentSelection (IE)", "url": "tinymce.dom.TridentSelection.html"},
+			/*{"title": "TridentSelection (IE)", "url": "tinymce.dom.TridentSelection.html"},*/
 			{"title": "Range (IE/Native)", "url": "tinymce.dom.Range.html"},
 			{"title": "Serializer", "url": "tinymce.dom.Serializer.html"},
 			{"title": "DOMUtils", "url": "tinymce.dom.DOMUtils.html"},
-			{"title": "DOMUtils (jQuery)", "url": "tinymce.dom.DOMUtils_jquery.html"},
-			{"title": "DOMUtils (jQuery 1.8)", "url": "tinymce.dom.DOMUtils_jquery_1.8.html"},
-			{"title": "EventUtils", "url": "tinymce.dom.EventUtils.html"}
+			/*{"title": "DOMUtils (jQuery)", "url": "tinymce.dom.DOMUtils_jquery.html"},
+			{"title": "DOMUtils (jQuery 1.8)", "url": "tinymce.dom.DOMUtils_jquery_1.8.html"},*/
+			{"title": "EventUtils", "url": "tinymce.dom.EventUtils.html"},
+			{"title": "NodeType", "url": "tinymce.dom.NodeType.html"}
 		]},
 
 		{"title": "tinymce", "tests": [
 			{"title": "UndoManager", "url": "tinymce.UndoManager.html"},
 			{"title": "EditorCommands", "url": "tinymce.EditorCommands.html"},
 			{"title": "ForceBlocks", "url": "tinymce.ForceBlocks.html"},
-			{"title": "EnterKey", "url": "tinymce.EnterKey.html"}
+			{"title": "EnterKey", "url": "tinymce.EnterKey.html"},
+			{"title": "SelectionOverrides", "url": "tinymce.SelectionOverrides.html"}
 		]}
 	], [
 		{"title": "tinymce.html", "tests": [
@@ -68,6 +70,18 @@ provide([
 			{"title": "JSON", "url": "tinymce.util.JSON.html"},
 			{"title": "XHR", "url": "tinymce.util.XHR.html"},
 			{"title": "JSONRequest", "url": "tinymce.util.JSONRequest.html"}
+		]},
+
+		{"title": "tinymce.caret", "tests": [
+			{"title": "CaretBookmark", "url": "tinymce.caret.CaretBookmark.html"},
+			{"title": "CaretCandidate", "url": "tinymce.caret.CaretCandidate.html"},
+			{"title": "CaretContainer", "url": "tinymce.caret.CaretContainer.html"},
+			{"title": "CaretPosition", "url": "tinymce.caret.CaretPosition.html"},
+			{"title": "CaretUtils", "url": "tinymce.caret.CaretUtils.html"},
+			{"title": "CaretWalker", "url": "tinymce.caret.CaretWalker.html"},
+			{"title": "FakeCaret", "url": "tinymce.caret.FakeCaret.html"},
+			{"title": "LineUtils", "url": "tinymce.caret.LineUtils.html"},
+			{"title": "LineWalker", "url": "tinymce.caret.LineWalker.html"}
 		]},
 
 		{"title": "List tests", "tests": [

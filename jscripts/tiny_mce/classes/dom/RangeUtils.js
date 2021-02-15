@@ -517,6 +517,17 @@
         return rng;
     };
 
+    tinymce.dom.RangeUtils.getSelectedNode = function (range) {
+        var startContainer = range.startContainer,
+            startOffset = range.startOffset;
+
+        if (startContainer.hasChildNodes() && range.endOffset == startOffset + 1) {
+            return startContainer.childNodes[startOffset];
+        }
+
+        return null;
+    };
+
     tinymce.dom.RangeUtils.getNode = function (container, offset) {
         if (container.nodeType == 1 && container.hasChildNodes()) {
             if (offset >= container.childNodes.length) {

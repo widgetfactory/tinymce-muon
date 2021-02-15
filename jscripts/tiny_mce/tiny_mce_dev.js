@@ -72,69 +72,117 @@
 	if (query.api)
 		include('adapter/' + query.api + '/adapter.js');
 
-	// tinymce.util.*
-	include('util/Dispatcher.js');
-	include('util/URI.js');
-	include('util/Cookie.js');
-	include('util/JSON.js');
-	include('util/JSONP.js');
-	include('util/XHR.js');
-	include('util/JSONRequest.js');
-	include('util/VK.js');
-	include('util/Quirks.js');
+	// Core ns
+    include('tinymce.js');
 
-	// tinymce.html.*
-	include('html/Entities.js');
-	include('html/Styles.js');
-	include('html/Schema.js');
-	include('html/SaxParser.js');
-	include('html/Node.js');
-	include('html/DomParser.js');
-	include('html/Serializer.js');
-	include('html/Writer.js');
+    // tinymce.util.*
+    include('util/Dispatcher.js');
+    include('util/URI.js');
+    include('util/Cookie.js');
+    include('util/JSON.js');
+    include('util/JSONP.js');
+    include('util/XHR.js');
+    include('util/JSONRequest.js');
+    include('util/VK.js');
+    include('util/Quirks.js');
+    include('util/Preview.js');
 
-	// tinymce.dom.*
-	include('dom/EventUtils.js');
-	include('dom/TreeWalker.js');
-	include('dom/DOMUtils.js');
-	include('dom/Sizzle.js');
-	include('dom/Selection.js');
-	include('dom/Serializer.js');
-	include('dom/ScriptLoader.js');
-	include('dom/StyleSheetLoader.js');
-	include('dom/RangeUtils.js');
-	include('dom/ControlSelection.js');
+    include('util/Arr.js');
+	include('util/Fun.js');
 
-	// tinymce.ui.*
-	include('ui/KeyboardNavigation.js');
-	include('ui/Control.js');
-	include('ui/Container.js');
-	include('ui/Separator.js');
-	include('ui/MenuItem.js');
-	include('ui/Menu.js');
-	include('ui/DropMenu.js');
-	include('ui/Button.js');
-	include('ui/ListBox.js');
-	include('ui/NativeListBox.js');
-	include('ui/MenuButton.js');
-	include('ui/SplitButton.js');
-	include('ui/ColorSplitButton.js');
-	include('ui/ToolbarGroup.js');
-	include('ui/Toolbar.js');
+    // tinymce.html.*
+    include('html/Entities.js');
+    include('html/Styles.js');
+    include('html/Schema.js');
+    include('html/SaxParser.js');
+    include('html/Node.js');
+    include('html/DomParser.js');
+    include('html/Serializer.js');
+    include('html/Writer.js');
 
-	// tinymce.*
-	include('AddOnManager.js');
-	include('EditorManager.js');
-	include('Editor.js');
-	include('Editor.Events.js');
-	include('EditorCommands.js');
-	include('UndoManager.js');
-	include('ForceBlocks.js');
-	include('ControlManager.js');
-	include('WindowManager.js');
-	include('Formatter.js');
-	include('LegacyInput.js');
-	include('EnterKey.js');
+	// tinymce.geom.*
+	include('geom/ClientRect.js');
+	include('geom/Rect.js');
+
+    // tinymce.dom.*
+    include('dom/EventUtils.js');
+    include('dom/TreeWalker.js');
+    include('dom/DOMUtils.js');
+    //include('dom/Range.js');
+    //include('dom/TridentSelection.js');
+    include('dom/Sizzle.js');
+    include('dom/Selection.js');
+    include('dom/Serializer.js');
+    include('dom/ScriptLoader.js');
+    include('dom/StyleSheetLoader.js');
+    include('dom/RangeUtils.js');
+    include('dom/ControlSelection.js');
+
+    include('dom/NodeType.js');
+    include('dom/Dimensions.js');
+
+    // tinymce.text.*
+	include('text/ExtendingChar.js');
+	include('text/Zwsp.js');
+
+	// tinymce.caret.*
+	include('caret/CaretBookmark.js');
+    include('caret/CaretContainer.js');
+	include('caret/CaretCandidate.js');
+	include('caret/CaretContainerRemove.js');
+	include('caret/CaretPosition.js');
+	include('caret/CaretUtils.js');
+	include('caret/CaretWalker.js');
+	include('caret/FakeCaret.js');
+	include('caret/LineUtils.js');
+	include('caret/LineWalker.js');
+
+    // tinymce.ui.*
+    include('ui/KeyboardNavigation.js');
+    include('ui/Control.js');
+    include('ui/Container.js');
+    include('ui/Form.js');
+    include('ui/Separator.js');
+    include('ui/MenuItem.js');
+    include('ui/Menu.js');
+    include('ui/DropMenu.js');
+    include('ui/Button.js');
+    include('ui/ListBox.js');
+    include('ui/NativeListBox.js');
+    include('ui/TextBox.js');
+    include('ui/UrlBox.js');
+    include('ui/CheckBox.js');
+    include('ui/MenuButton.js');
+    include('ui/SplitButton.js');
+    include('ui/ColorSplitButton.js');
+    include('ui/ToolbarGroup.js');
+    include('ui/Toolbar.js');
+    include('ui/Layout.js');
+    include('ui/Panel.js');
+    include('ui/ContextPanel.js');
+    include('ui/PanelButton.js');
+    include('ui/PanelSplitButton.js');
+    include('ui/ButtonDialog.js');
+
+    // tinymce.*
+    include('AddOnManager.js');
+    include('EditorManager.js');
+    include('Editor.js');
+    include('Editor.Events.js');
+
+	include('InsertList.js');
+    include('InsertContent.js');
+
+    include('EditorCommands.js');
+    include('UndoManager.js');
+    include('ForceBlocks.js');
+    include('ControlManager.js');
+    include('WindowManager.js');
+    include('Formatter.js');
+    include('LegacyInput.js');
+    include('EnterKey.js');
+
+    include('SelectionOverrides.js');
 
 	load();
 }());

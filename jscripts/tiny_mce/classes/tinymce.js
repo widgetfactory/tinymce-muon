@@ -164,6 +164,14 @@
 			 */
 			self.isIOS5 = self.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1] >= 534;
 
+			/**
+			 * Constant that is true if the browser supports contentEditable=false regions.
+			 *
+			 * @property ceFalse
+			 * @type Boolean
+			 */
+			self.ceFalse = true;
+
 			// Get suffix and base
 			self.suffix = '';
 
@@ -898,6 +906,30 @@
 	 *
 	 * @namespace tinymce.dom
 	 */
+
+	/**
+	 * Contains various tools for rect/position calculation.
+	 *
+	 * @namespace tinymce.geom
+	 */
+
+	tinymce.geom = {};
+
+	/**
+	 * Contains various tools for characters and zero width space.
+	 *
+	 * @namespace tinymce.text
+	 */
+
+	 tinymce.text = {};
+
+	/**
+	 * Contains various tools for carets.
+	 *
+	 * @namespace tinymce.caret
+	 */
+
+	tinymce.caret = {};
 
 	/**
 	 * Contains html parser and serializer logic.
