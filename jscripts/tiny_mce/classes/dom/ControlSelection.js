@@ -443,9 +443,9 @@
 			}
 
 			// Remove data-mce-selected from all elements since they might have been copied using Ctrl+c/v
-			/*each(dom.select('img[data-mce-selected],hr[data-mce-selected],span[data-mce-selected]'), function (img) {
+			each(dom.select('img[data-mce-selected],hr[data-mce-selected],span[data-mce-selected]'), function (img) {
 				img.removeAttribute('data-mce-selected');
-			});*/
+			});
 
 			controlElm = e.type == 'mousedown' ? e.target : selection.getNode();
 			controlElm = dom.closest(controlElm, isIE ? 'table' : 'table,img,[data-mce-resize]')[0];
