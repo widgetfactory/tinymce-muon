@@ -202,7 +202,7 @@
       dom.remove(marker);
 
       if (parentBlock && dom.isEmpty(parentBlock)) {
-        editor.$(parentBlock).empty();
+        dom.empty(parentBlock);
 
         rng.setStart(parentBlock, 0);
         rng.setEnd(parentBlock, 0);
