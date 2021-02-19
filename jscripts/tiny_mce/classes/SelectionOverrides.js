@@ -99,15 +99,15 @@
     }
 
     function showCaret(direction, node, before) {
-      var e;
-
-      e = editor.onShowCaret.dispatch(editor, {
+      var evt = {
         target: node,
         direction: direction,
         before: before
-      });
+      };
 
-      if (e === false) {
+      editor.onShowCaret.dispatch(editor, evt);
+
+      if (!evt.target) {
         return null;
       }
 
@@ -117,13 +117,13 @@
     }
 
     function selectNode(node) {
-      var e;
-
-      e = editor.onBeforeObjectSelected.dispatch(editor, {
+      var evt = {
         target: node
-      });
+      };
 
-      if (e === false) {
+      editor.onBeforeObjectSelected.dispatch(editor, evt);
+
+      if (!evt.target) {
         return null;
       }
 
@@ -594,7 +594,7 @@
       });
 
       editor.dom.bind(editor.getBody(), 'blur NewBlock', function () {
-        removeContentEditableSelection();
+        //removeContentEditableSelection();
         hideFakeCaret();
       });
 
@@ -671,7 +671,7 @@
         if (contentEditableRoot) {
           if (isContentEditableFalse(contentEditableRoot)) {
             e.preventDefault();
-            //setContentEditableSelection(selectNode(contentEditableRoot));
+            setContentEditableSelection(selectNode(contentEditableRoot));
 
             // fire fake event
             editor.onContentEditableSelect.dispatch(editor, e);
@@ -801,6 +801,44 @@
           setEditorTimeout(editor, function () {
             setRange(renderRangeCaret(deleteContentEditableNode(node)));
           });
+        }
+      });
+
+      editor.selection.onGetSelectionRange.add(function (sel, e) {
+        var rng = e.range;
+
+        if (selectedContentEditableNode) {
+          if (!selectedContentEditableNode.parentNode) {
+            selectedContentEditableNode = null;
+            return;
+          }
+
+          rng = rng.cloneRange();
+          rng.selectNode(selectedContentEditableNode);
+          e.range = rng;
+        }
+      });
+
+      editor.selection.onSetSelectionRange.add(function (sel, e) {
+        var rng;
+
+
+        rng = setContentEditableSelection(e.range);
+
+        if (rng) {
+          e.range = rng;
+        }
+      });
+
+      editor.selection.onAfterSetSelectionRange.add(function (sel, e) {
+        var rng = e.range;
+
+        if (!isRangeInCaretContainer(rng)) {
+          hideFakeCaret();
+        }
+
+        if (!isFakeSelectionElement(rng.startContainer.parentNode)) {
+          removeContentEditableSelection();
         }
       });
 

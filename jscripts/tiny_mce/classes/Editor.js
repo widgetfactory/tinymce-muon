@@ -828,6 +828,8 @@
 			self.enterKey = new tinymce.EnterKey(self);
 			self.editorCommands = new tinymce.EditorCommands(self);
 
+			self._selectionOverrides = new tinymce.SelectionOverrides(self);
+
 			self.onExecCommand.add(function (editor, command) {
 				// Don't refresh the select lists until caret move
 				if (!/^(FontName|FontSize)$/.test(command)) {
@@ -2189,6 +2191,8 @@
 
 				// Clear all execCommand listeners this is required to avoid errors if the editor was removed inside another command
 				self.onExecCommand.listeners = [];
+
+				self._selectionOverrides.destroy();
 
 				tinymce.remove(self);
 				DOM.remove(elm);

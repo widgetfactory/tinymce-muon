@@ -84,7 +84,34 @@
 				 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
 				 * @param {Object} args Contains things like the contents that will be returned.
 				 */
-				'onGetContent'
+				'onGetContent',
+
+				/**
+				 * This event gets executed when a range is extracted from the selection.
+				 *
+				 * @event onSetSelectionRange
+				 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+				 * @param {Object} args Contains things like the contents that will be returned.
+				 */
+				'onGetSelectionRange',
+
+				/**
+				 * This event gets executed when a selection range is set.
+				 *
+				 * @event onSetSelectionRange
+				 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+				 * @param {Object} args Contains things like the contents that will be returned.
+				 */
+				'onSetSelectionRange',
+
+				/**
+				 * This event gets executed after a selection range is set.
+				 *
+				 * @event onAfterSetSelectionRange
+				 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+				 * @param {Object} args Contains things like the contents that will be returned.
+				 */
+				'onAfterSetSelectionRange'
 			], function (e) {
 				self[e] = new tinymce.util.Dispatcher(self);
 			});
@@ -97,9 +124,9 @@
 				}
 			});
 
-			if (tinymce.isIE && !tinymce.isIE11 && dom.boxModel) {
+			/*if (tinymce.isIE && !tinymce.isIE11 && dom.boxModel) {
 				this._fixIESelection();
-			}
+			}*/
 
 			// Prevent leaks
 			tinymce.addUnload(self.destroy, self);
@@ -1018,6 +1045,14 @@
 				// IE throws unspecified error here if TinyMCE is placed in a frame/iframe
 			}
 
+			var evt = {range : rng};
+
+			self.onGetSelectionRange.dispatch(self, evt);
+
+			if (evt.range !== rng) {
+				return evt.range;
+			}
+
 			// We have W3C ranges and it's IE then fake control selection since IE9 doesn't handle that correctly yet
 			// IE 11 doesn't support the selection object so we check for that as well
 			if (isIE && rng && rng.setStart && doc.selection) {
@@ -1100,6 +1135,12 @@
 
 			sel = self.getSel();
 
+			var evt = {range : rng};
+
+			self.onSetSelectionRange.dispatch(self, evt);
+
+			rng = evt.range;
+
 			if (sel) {
 				self.explicitRange = rng;
 
@@ -1144,6 +1185,10 @@
 					}
 				}
 			}
+
+			self.onAfterSetSelectionRange.dispatch(self, {
+				range: rng
+			});
 		},
 
 		/**
@@ -1568,15 +1613,8 @@
 			return self;
 		},
 
-		scrollIntoView: function (elm) {
-			var y, viewPort, self = this,
-				dom = self.dom;
-
-			viewPort = dom.getViewPort(self.editor.getWin());
-			y = dom.getPos(elm).y;
-			if (y < viewPort.y || y + 25 > viewPort.y + viewPort.h) {
-				self.editor.getWin().scrollTo(0, y < viewPort.y ? y : y - viewPort.h + 25);
-			}
+		scrollIntoView: function (elm, alignToTop) {
+			tinymce.dom.ScrollIntoView(this.editor, elm, alignToTop);
 		},
 
 		placeCaretAt: function (clientX, clientY) {

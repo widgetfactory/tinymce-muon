@@ -558,7 +558,7 @@
 
 			// Create default constructor
 			if (!p[cn]) {
-				p[cn] = function () {};
+				p[cn] = function () { };
 				de = 1;
 			}
 
@@ -907,6 +907,8 @@
 	 * @namespace tinymce.dom
 	 */
 
+	tinymce.dom = {};
+
 	/**
 	 * Contains various tools for rect/position calculation.
 	 *
@@ -921,7 +923,7 @@
 	 * @namespace tinymce.text
 	 */
 
-	 tinymce.text = {};
+	tinymce.text = {};
 
 	/**
 	 * Contains various tools for carets.
@@ -937,17 +939,23 @@
 	 * @namespace tinymce.html
 	 */
 
+	tinymce.html = {};
+
 	/**
 	 * Contains the different UI types such as buttons, listboxes etc.
 	 *
 	 * @namespace tinymce.ui
 	 */
 
+	tinymce.ui = {};
+
 	/**
 	 * Contains various utility classes such as json parser, cookies etc.
 	 *
 	 * @namespace tinymce.util
 	 */
+
+	tinymce.util = {};
 
 	/**
 	 * Contains plugin classes.
