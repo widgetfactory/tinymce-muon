@@ -1922,6 +1922,28 @@
 
 			node = node.firstChild;
 
+			function isValidAttribute(name) {
+				// allow for anchors and html templating
+				if (name == "name" || name == "id" || name == "class") {
+					return true;
+				}
+
+				// allow some system and generic data- attributes
+				if (name.indexOf('-') != -1) {
+					if (name == 'data-mce-bookmark') {
+						return true;
+					}
+
+					if (name.indexOf('data-mce-') != -1) {
+						return false;
+					}
+
+					return true;
+				}
+
+				return false;
+			}
+
 			if (node) {
 				walker = new tinymce.dom.TreeWalker(node, node.parentNode);
 				elements = elements || (self.schema ? self.schema.getNonEmptyElements() : null);
@@ -1958,7 +1980,8 @@
 
 						while (i--) {
 							name = attributes[i].nodeName;
-							if (name === "name" || name === 'data-mce-bookmark') {
+
+							if (isValidAttribute(name)) {
 								return false;
 							}
 						}
