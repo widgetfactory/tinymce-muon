@@ -929,20 +929,28 @@
 
 			// Merges the styles for each node
 			function process(node) {
-				var children, i, l, lastContentEditable, hasContentEditableState;
+				var children, i, l, lastContentEditable;//, hasContentEditableState;
 
 				// Node has a contentEditable value
 				if (node.nodeType === 1 && getContentEditable(node)) {
 					lastContentEditable = contentEditable;
 					contentEditable = getContentEditable(node) === "true";
-					hasContentEditableState = true; // We don't want to wrap the container only it's children
+					//hasContentEditableState = true; // We don't want to wrap the container only it's children
 				}
 
 				// Grab the children first since the nodelist might be changed
 				children = tinymce.grep(node.childNodes);
 
 				// Process current node
-				if (contentEditable && !hasContentEditableState) {
+				/*if (contentEditable && !hasContentEditableState) {
+					for (i = 0, l = formatList.length; i < l; i++) {
+						if (removeFormat(formatList[i], vars, node, node)) {
+							break;
+						}
+					}
+				}*/
+
+				if (contentEditable) {
 					for (i = 0, l = formatList.length; i < l; i++) {
 						if (removeFormat(formatList[i], vars, node, node)) {
 							break;
@@ -957,9 +965,9 @@
 							process(children[i]);
 						}
 
-						if (hasContentEditableState) {
+						/*if (hasContentEditableState) {
 							contentEditable = lastContentEditable; // Restore last contentEditable state from stack
-						}
+						}*/
 					}
 				}
 			}
