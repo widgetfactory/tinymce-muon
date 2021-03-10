@@ -293,6 +293,21 @@ test('mceInsertContent - invalid insertion with spans on page', function(){
 	equal(editor.getContent(), insertedContent + startingContent);
 });
 
+test('mceInsertContent - insertion with spans marked as invalid elements', function(){
+	editor.settings.invalid_elements = 'span';
+
+	var content = '<p>123 testing <em>some content</em></p>';
+
+	expect(1);
+
+	// Forced root block
+	editor.getBody().innerHTML = '';
+
+	editor.execCommand('mceInsertContent', false, content);
+
+	equal(editor.getContent(), content);
+});
+
 test('InsertHorizontalRule', function() {
 	var rng;
 	
