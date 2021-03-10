@@ -131,6 +131,22 @@
 		DOM.remove('test');
 	});
 
+	test('toggleClass', 2, function() {
+		DOM.add(document.body, 'div', {id : 'test'});
+
+		DOM.get('test').className = 'abc';
+
+		DOM.toggleClass('test', 'abc');
+
+		equal(DOM.get('test').className, '');
+
+		DOM.toggleClass('test', '123');
+
+		equal(DOM.get('test').className, '123');
+
+		DOM.remove('test');
+	});
+
 	test('add', 5, function() {
 		var e;
 

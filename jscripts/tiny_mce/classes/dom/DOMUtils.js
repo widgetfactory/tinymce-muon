@@ -1351,7 +1351,29 @@
 				return false;
 			}
 
-			return n.classList.contains(c);
+			return n.classList && n.classList.contains(c);
+		},
+
+		/**
+		 * Adds or removes a class on a sepecified element
+		 *
+		 * @method toggleClass
+		 * @param {String/Element} n HTML element or element id string to check CSS class on.
+		 * @param {String} c CSS class to add or remove.
+		 * @return {String/Array} String with new class value or array with new class values for all elements.
+		 */
+		toggleClass: function(n, c) {
+			n = this.get(n);
+
+			if (!n || !c) {
+				return false;
+			}
+			
+			if (this.hasClass(n, c)) {
+				return this.removeClass(n, c);
+			} else {
+				return this.addClass(n, c);
+			}
 		},
 
 		/**
