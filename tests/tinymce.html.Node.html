@@ -419,7 +419,7 @@ test('empty', function() {
 test('isEmpty', function() {
 	var root, node1, node2;
 
-	expect(9);
+	expect(12);
 
 	root = new tinymce.html.Node('#frag', 11);
 	node1 = root.append(new tinymce.html.Node('p', 1));
@@ -450,6 +450,18 @@ test('isEmpty', function() {
 	root = new tinymce.html.Node('#frag', 11);
 	node1 = root.append(new tinymce.html.Node('a', 1)).attr('name', 'x');
 	ok(!root.isEmpty({img: 1}), 'Contains anchor with name attribute.');
+
+	root = new tinymce.html.Node('#frag', 11);
+	node1 = root.append(new tinymce.html.Node('div', 1)).attr('data-mce-tmp', 'x');
+	ok(node1.isEmpty({img: 1}), 'Contains system data-mce- attribute.');
+
+	root = new tinymce.html.Node('#frag', 11);
+	node1 = root.append(new tinymce.html.Node('div', 1)).attr('data-value', 'x');
+	ok(!root.isEmpty({img: 1}), 'Contains generic data- attribute.');
+
+	root = new tinymce.html.Node('#frag', 11);
+	node1 = root.append(new tinymce.html.Node('div', 1)).attr('v-on', 'x');
+	ok(!root.isEmpty({img: 1}), 'Contains generic - attribute.');
 });
 </script>
 </head>

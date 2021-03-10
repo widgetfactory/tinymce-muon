@@ -511,6 +511,28 @@
 				node = self.firstChild,
 				i, name;
 
+				function isValidAttribute(name) {
+					// allow for anchors and html templating
+					if (name == "name" || name == "id" || name == "class") {
+						return true;
+					}
+
+					// allow some system and generic data- attributes
+					if (name.indexOf('-') !== -1) {
+						if (name = 'data-mce-bookmark') {
+							return true;
+						}
+
+						if (name.indexOf('data-mce-') === 0) {
+							return false;
+						}
+
+						return true;
+					}
+
+					return false;
+				}
+
 			if (node) {
 				do {
 					if (node.type === 1) {
@@ -529,7 +551,8 @@
 
 						while (i--) {
 							name = node.attributes[i].name;
-							if (name === "name" || name.indexOf('data-mce-bookmark') === 0) {
+
+							if (isValidAttribute(name)) {
 								return false;
 							}
 						}
