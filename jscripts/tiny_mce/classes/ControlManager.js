@@ -512,6 +512,11 @@
 		},
 
 		createUrlBox: function (id, s, cc) {
+			var ed = this.editor;
+			
+			s.upload_label = ed.getLang(s.upload_label, 'Upload');
+			s.picker_label = ed.getLang(s.picker_label, 'Browse');
+			
 			return this.createTextBox(id, s, tinymce.ui.UrlBox);
 		},
 

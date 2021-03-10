@@ -45,10 +45,46 @@
 
 			if (s.picker) {
 				var icon = s.picker_icon || 'file';
-				html += '<button class="mceButton mceButtonPicker" id="' + this.id + '_picker"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
+				html += '<button class="mceButton mceButtonPicker" id="' + this.id + '_picker" title="' + DOM.encode(s.picker_label || '') + '"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
+			}
+
+			if (s.upload) {
+				var accept = tinymce.map(s.upload_accept || [], function(val) {
+					if (val.indexOf('/') == -1 && val.charAt(0) != '.') {
+						val = '.' + val;
+					}
+
+					return val;
+				});
+				
+				html += '<a class="mceButton mceButtonUpload" role="button" aria-label="' + DOM.encode(s.upload_label || '') + '"><span role="presentation" class="mceIcon mce_upload"></span><span role="presentation" class="mceIcon mce_spinner"></span><input id="' + this.id + '_upload" type="file" aria-hidden="true" title="' + DOM.encode(s.upload_label || '') + '" accept="' + accept.join(',') + '" /></a>';
 			}
 
 			return html;
+		},
+
+		/**
+		 * Sets the disabled state for the control. This will add CSS classes to the
+		 * element that contains the control. So that it can be disabled visually.
+		 *
+		 * @method setDisabled
+		 * @param {Boolean} state Boolean state if the control should be disabled or not.
+		 */
+		 setLoading: function (state) {
+			this.setAriaProperty('busy', state);
+			this.setDisabled(state);
+		},
+
+		/**
+		 * Sets the disabled state for the control. This will add CSS classes to the
+		 * element that contains the control. So that it can be disabled visually.
+		 *
+		 * @method setDisabled
+		 * @param {Boolean} state Boolean state if the control should be disabled or not.
+		 */
+		 setDisabled: function (state) {
+			this.parent(state);
+			DOM.get(this.id + '_upload').disabled = state;
 		},
 
 		/**
@@ -64,10 +100,49 @@
 
 			if (s.picker) {
 				DOM.addClass(this.id, 'mceUrlBoxPicker');
-				
+
 				Event.add(this.id + '_picker', 'click', function (e) {
 					Event.cancel(e);
 					s.onpick.call(self);
+				});
+			}
+
+			if (s.upload) {
+				DOM.addClass(this.id, 'mceUrlBoxUpload');
+
+				Event.add(this.id + '_upload', 'change', function (e) {
+					if (this.files && this.files.length) {
+						s.upload.call(self, e, this.files[0]);
+					}
+
+					Event.cancel(e);
+				});
+
+				DOM.bind(this.id, 'drag dragstart dragend dragover dragenter dragleave', function (e) {
+					Event.cancel(e);
+				});
+
+				DOM.bind(this.id, 'dragover dragenter', function (e) {
+					DOM.addClass(this.id, 'mceUrlBoxUploadHover')
+				});
+
+				DOM.bind(this.id, 'dragleave', function (e) {
+					DOM.removeClass(this.id, 'mceUrlBoxUploadHover')
+				});
+
+				DOM.bind(this.id, 'drop', function (e) {
+					var dataTransfer = e.dataTransfer;
+
+					// Add dropped files
+					if (dataTransfer && dataTransfer.files && dataTransfer.files.length) {
+						var file = dataTransfer.files[0];
+
+						if (file) {
+							s.upload.call(self, e, file);
+						}
+					}
+
+					Event.cancel(e);
 				});
 			}
 		}
