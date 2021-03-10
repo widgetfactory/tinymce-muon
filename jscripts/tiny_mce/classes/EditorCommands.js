@@ -348,8 +348,6 @@
 				selection.select(value);
 			},
 
-
-			/*
 			mceInsertContent: function (command, ui, value) {
 				var parser, serializer, parentNode, rootNode, fragment, args;
 				var marker, rng, node, node2, bookmarkHtml, merge;
@@ -493,6 +491,8 @@
 					}
 				}
 
+				editor._selectionOverrides.showBlockCaretContainer(parentNode);
+
 				// If parser says valid we can insert the contents into that parent
 				if (!parserArgs.invalid) {
 					value = serializer.serialize(fragment);
@@ -581,10 +581,6 @@
 				// Dispatch after event and add any visual elements needed
 				selection.onSetContent.dispatch(selection, args);
 				editor.addVisual();
-			},*/
-
-			mceInsertContent: function (command, ui, value) {
-				tinymce.InsertContent.insertAtCaret(editor, value);
 			},
 
 			mceInsertRawHTML: function (command, ui, value) {
