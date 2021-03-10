@@ -518,12 +518,12 @@
 					}
 
 					// allow some system and generic data- attributes
-					if (name.indexOf('-') !== -1) {
-						if (name = 'data-mce-bookmark') {
+					if (name.indexOf('-') != -1) {
+						if (name == 'data-mce-bookmark') {
 							return true;
 						}
 
-						if (name.indexOf('data-mce-') === 0) {
+						if (name.indexOf('data-mce-') != -1) {
 							return false;
 						}
 
