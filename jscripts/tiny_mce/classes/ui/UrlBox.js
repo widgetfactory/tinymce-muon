@@ -64,11 +64,11 @@
 		},
 
 		/**
-		 * Sets the disabled state for the control. This will add CSS classes to the
-		 * element that contains the control. So that it can be disabled visually.
+		 * Sets the loading state for the control. This will add an aria-busy property to the
+		 * element that contains the control and set the disable state.
 		 *
-		 * @method setDisabled
-		 * @param {Boolean} state Boolean state if the control should be disabled or not.
+		 * @method setLoading
+		 * @param {Boolean} state Boolean state if the control should be set loading or not.
 		 */
 		 setLoading: function (state) {
 			this.setAriaProperty('busy', state);
