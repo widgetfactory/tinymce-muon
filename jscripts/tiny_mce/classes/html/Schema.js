@@ -790,7 +790,8 @@
 
         // If the user didn't allow span only allow internal spans
         if (!getElementRule('span')) {
-            addValidElements('span[!data-mce-type|*]');
+            //addValidElements('span[!data-mce-type|*]');
+            addValidElements('span[*]');
         }
 
         /**
