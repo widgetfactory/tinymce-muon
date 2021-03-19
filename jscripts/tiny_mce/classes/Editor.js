@@ -19,6 +19,7 @@
 		is = tinymce.is,
 		ThemeManager = tinymce.ThemeManager,
 		PluginManager = tinymce.PluginManager,
+		EditorFocus = tinymce.EditorFocus,
 		explode = tinymce.explode;
 
 	/**
@@ -861,8 +862,6 @@
 
 			self.quirks = tinymce.util.Quirks(self);
 
-			self.controlSelection = tinymce.dom.ControlSelection(self);
-
 			if (settings.directionality) {
 				body.dir = settings.directionality;
 			}
@@ -970,7 +969,7 @@
 		 * @param {Boolean} skip_focus Skip DOM focus. Just set is as the active editor.
 		 */
 		focus: function (skip_focus) {
-			var oed, self = this,
+			/*var oed, self = this,
 				selection = self.selection,
 				contentEditable = self.settings.content_editable,
 				ieRng, controlElm, doc = self.getDoc(),
@@ -1029,7 +1028,9 @@
 				self.onActivate.dispatch(self, oed);
 			}
 
-			tinymce._setActive(self);
+			tinymce.setActive(self);*/
+
+			EditorFocus.focus(this, skip_focus);
 		},
 
 		/**
@@ -2258,24 +2259,6 @@
 			body.contentEditable = disabled;
 
 			body.disabled = disabled;
-		},
-
-		// Internal functions
-
-		_refreshContentEditable: function () {
-			var self = this,
-				body, parent;
-
-			// Check if the editor was hidden and the re-initalize contentEditable mode by removing and adding the body again
-			if (self._isHidden()) {
-				body = self.getBody();
-				parent = body.parentNode;
-
-				parent.removeChild(body);
-				parent.appendChild(body);
-
-				body.focus();
-			}
 		},
 
 		_isHidden: function () {
