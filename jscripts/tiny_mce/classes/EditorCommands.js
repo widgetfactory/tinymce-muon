@@ -347,7 +347,7 @@
 			mceSelectNode: function (command, ui, value) {
 				selection.select(value);
 			},
-
+			/*
 			mceInsertContent: function (command, ui, value) {
 				var parser, serializer, parentNode, rootNode, fragment, args;
 				var marker, rng, node, node2, bookmarkHtml, merge;
@@ -581,6 +581,10 @@
 				// Dispatch after event and add any visual elements needed
 				selection.onSetContent.dispatch(selection, args);
 				editor.addVisual();
+			},
+			*/
+			mceInsertContent: function (command, ui, value) {
+				tinymce.InsertContent.insertAtCaret(editor, value);
 			},
 
 			mceInsertRawHTML: function (command, ui, value) {
