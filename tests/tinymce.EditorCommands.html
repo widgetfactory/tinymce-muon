@@ -253,7 +253,7 @@ test('mceInsertContent before HR', function() {
 	rng.setEnd(editor.getBody(), 0);
 	editor.selection.setRng(rng);
 	editor.execCommand('mceInsertContent', false, 'x');
-	equal(getContent(), '<p>x</p><hr />');
+	equal(getContent(), '<p>x</p><hr>');
 });
 
 test('mceInsertContent - forced root block', function() {
@@ -263,7 +263,7 @@ test('mceInsertContent - forced root block', function() {
 
 	// Forced root block
 	editor.getBody().innerHTML = '';
-	editor.execCommand('mceInsertContent', false, 'test<b>123</b><!-- a -->');
+	editor.execCommand('mceInsertContent', false, 'test<strong>123</strong><!-- a -->');
 	// Opera adds an extra paragraph since it adds a BR at the end of the contents pass though this for now since it's an minority browser
 	equal(editor.getContent().replace(/<p>\u00a0<\/p>/g, ''), '<p>test<strong>123</strong></p><!-- a -->');
 });
@@ -276,7 +276,7 @@ test('mceInsertContent - mixed inline content inside td', function() {
 	// Forced root block
 	editor.getBody().innerHTML = '<table><tr><td>X</td></tr></table>';
 	setSelection('td', 0, 'td', 0);
-	editor.execCommand('mceInsertContent', false, 'test<b>123</b><!-- a -->');
+	editor.execCommand('mceInsertContent', false, 'test<strong>123</strong><!-- a -->');
 	equal(editor.getContent(), '<table><tbody><tr><td>test<strong>123</strong><!-- a -->X</td></tr></tbody></table>');
 });
 
@@ -363,7 +363,7 @@ test('insertAtCaret - selected image with bogus div', function () {
 	// editor.selection.setCursorLocation(editor.getBody(), 0);
 	editor.selection.select(editor.dom.select('img')[0]);
 	InsertContent.insertAtCaret(editor, 'a');
-	equal(trimBrs(editor.getBody().innerHTML), 'a<div data-mce-bogus="all">x</div>');
+	equal(trimBrs(editor.getBody().innerHTML), '<p>a</p><div data-mce-bogus="all">x</div>');
 });
 
 test('insertAtCaret - selected text with bogus div', function () {
@@ -374,7 +374,7 @@ test('insertAtCaret - selected text with bogus div', function () {
 	rng.setEnd(editor.getBody().firstChild, 1);
 	editor.selection.setRng(rng);
 	InsertContent.insertAtCaret(editor, 'b');
-	equal(trimBrs(editor.getBody().innerHTML), 'b<div data-mce-bogus="all">x</div>');
+	equal(trimBrs(editor.getBody().innerHTML), '<p>b</p><div data-mce-bogus="all">x</div>');
 });
 
 var InsertContent = tinymce.InsertContent;

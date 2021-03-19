@@ -337,7 +337,7 @@
 		});
 
 		test('Remove redundant br elements', function () {
-			var parser, root, schema = new tinymce.html.Schema();
+			var parser, root, schema = new tinymce.html.Schema({remove_empty_spans : true});
 
 			expect(1);
 
