@@ -573,10 +573,11 @@
         }
       });
 
-      editor.onClick.add(function (e) {
+      editor.onClick.add(function (editor, e) {
         var contentEditableRoot;
 
         contentEditableRoot = getContentEditableRoot(e.target);
+
         if (contentEditableRoot) {
           // Prevent clicks on links in a cE=false element
           if (isContentEditableFalse(contentEditableRoot)) {
@@ -593,8 +594,13 @@
         }
       });
 
-      editor.dom.bind(editor.getBody(), 'blur NewBlock', function () {
-        //removeContentEditableSelection();
+      editor.onNewBlock.add(function () {
+        removeContentEditableSelection();
+        hideFakeCaret();
+      });
+
+      editor.onBlur.add(function () {
+        removeContentEditableSelection();
         hideFakeCaret();
       });
 
@@ -676,7 +682,11 @@
             // fire fake event
             editor.onContentEditableSelect.dispatch(editor, e);
           } else {
-            if (!isXYWithinRange(e.clientX, e.clientY, editor.selection.getRng())) {
+            /*if (!isXYWithinRange(e.clientX, e.clientY, editor.selection.getRng())) {
+              editor.selection.placeCaretAt(e.clientX, e.clientY);
+            }*/
+
+            if (!editor.selection.isCollapsed()) {
               editor.selection.placeCaretAt(e.clientX, e.clientY);
             }
           }
@@ -853,8 +863,10 @@
         var clipboardData = e.clipboardData;
 
         // Make sure we get proper html/text for the fake cE=false selection
-        if (!e.isDefaultPrevented() && e.clipboardData) {
+        if (!e.isDefaultPrevented() && clipboardData) {
+
           var realSelectionElement = getRealSelectionElement();
+
           if (realSelectionElement) {
             e.preventDefault();
             clipboardData.clearData();
@@ -928,7 +940,16 @@
 
       targetClone = origTargetClone = node.cloneNode(true);
 
-      editor.onObjectSelected.dispatch(editor, node, targetClone);
+      var evt = {
+        node: node,
+        target: targetClone
+      };
+
+      editor.onObjectSelected.dispatch(editor, evt);
+
+      if (!evt.isDefaultPrevented === false) {
+        return null;
+      }
 
       $realSelectionContainer = dom.get(realSelectionId);
 
@@ -941,16 +962,14 @@
 
       dom.empty($realSelectionContainer);
 
-      var text = document.createTextNode('\u00a0');
-
-      $realSelectionContainer.appendChild(text);
+      $realSelectionContainer.appendChild(document.createTextNode('\u00a0'));
       $realSelectionContainer.appendChild(targetClone);
-      $realSelectionContainer.appendChild(text);
+      $realSelectionContainer.appendChild(document.createTextNode('\u00a0'));
 
       range.setStart($realSelectionContainer.firstChild, 1);
       range.setEnd($realSelectionContainer.lastChild, 0);
 
-      dom.setStyle($realSelectionContainer, 'top', dom.getPos(node, editor.getBody()).y)
+      dom.setStyle($realSelectionContainer, 'top', dom.getPos(node, editor.getBody()).y);
 
       $realSelectionContainer.focus();
       sel = editor.selection.getSel();
@@ -985,9 +1004,7 @@
       fakeCaret.hide();
     }
 
-    if (tinymce.ceFalse) {
-      registerEvents();
-    }
+    registerEvents();
 
     return {
       showBlockCaretContainer: showBlockCaretContainer,
