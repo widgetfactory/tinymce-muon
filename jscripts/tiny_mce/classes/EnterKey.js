@@ -26,6 +26,8 @@
 
         var isIE = tinymce.isIE && tinymce.isIE < 11;
 
+        editor.onNewBlock = new tinymce.util.Dispatcher();
+
         function handleEnterKey(evt) {
             var rng = selection.getRng(true),
                 tmpRng, editableRoot, container, offset, parentBlock, documentMode, shiftKey,
@@ -710,6 +712,10 @@
             }
 
             dom.setAttrib(newBlock, 'id', ''); // Remove ID since it needs to be document unique
+
+            // Allow custom handling of new blocks
+            editor.onNewBlock.dispatch(editor, newBlock);
+
             undoManager.add();
         }
 
