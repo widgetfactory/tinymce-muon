@@ -180,7 +180,7 @@
         add("head", "", "base command link meta noscript script style title");
         add("title hr noscript br");
         add("base", "href target");
-        add("link", "href rel media hreflang type sizes hreflang");
+        add("link", "href rel media hreflang type sizes");
         add("meta", "name http-equiv content charset");
         add("style", "media type scoped");
         add("script", "src async defer type charset");
@@ -308,6 +308,8 @@
             addAttrs("iframe", "sandbox seamless allowfullscreen allow referrerpolicy loading"); // Excluded: srcdoc
 
             addAttrs("img", "loading decoding");
+
+            addAttrs("link", "as disabled imagesizes imagesrcset title");
 
             // form events
             addAttrs("form", "oncontextmenu onformchange onforminput oninput oninvalid");
