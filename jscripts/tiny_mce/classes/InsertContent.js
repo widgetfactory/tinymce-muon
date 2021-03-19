@@ -240,7 +240,7 @@
       format: 'html',
       selection: true
     };
-    //editor.fire('BeforeSetContent', args);
+
     selection.onBeforeSetContent.dispatch(selection, args);
     value = args.content;
 
@@ -300,7 +300,7 @@
       marker = node;
 
       for (node = node.prev; node; node = node.walk(true)) {
-        if (node.type == 3 || !dom.isBlock(node.name)) {
+        if (node.type == 3 || !dom.isBlock(node.name)) {          
           if (editor.schema.isValidChild(node.parent.name, 'span')) {
             node.parent.insert(marker, node, node.name === 'br');
           }
@@ -339,6 +339,7 @@
 
       // Get the outer/inner HTML depending on if we are in the root and parser and serialize that
       value = parentNode == rootNode ? rootNode.innerHTML : dom.getOuterHTML(parentNode);
+
       value = serializer.serialize(
         parser.parse(
           // Need to replace by using a function since $ in the contents would otherwise be a problem
@@ -360,10 +361,8 @@
     moveSelectionToMarker(dom.get('mce_marker'));
     umarkFragmentElements(editor.getBody());
 
-    //editor.onSetContent.dispatch(editor, args);
     selection.onSetContent.dispatch(selection, args);
 
-    //editor.fire('SetContent', args);
     editor.addVisual();
   };
 
