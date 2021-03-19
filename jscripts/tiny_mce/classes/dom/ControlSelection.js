@@ -64,7 +64,7 @@
 	 * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
 	 * @param {tinymce.html.Schema} schema Optional schema reference.
 	 */
-	tinymce.dom.ControlSelection = function (editor) {
+	tinymce.dom.ControlSelection = function (selection, editor) {
 
 		function getContentEditableRoot(root, node) {
 			while (node && node != root) {
@@ -77,8 +77,6 @@
 
 			return null;
 		}
-
-		var selection = editor.selection;
 
 		var dom = editor.dom,
 			each = tinymce.each;
@@ -658,7 +656,7 @@
 			});
 
 			// Toogle resize when image is selected
-			editor.onNodeChange.add(function () {
+			editor.onNodeChange.add(function () {				
 				setTimeout(function () {
 					throttledUpdateResizeRect({
 						type: ''
@@ -688,6 +686,10 @@
 				updateTableRect(editor, e);
 			});
 
+    		// Hide rect on focusout since it would float on top of windows otherwise
+    		//editor.onFocusOut.add(hideResizeRect);
+
+			editor.onBlur.add(hideResizeRect);
 			editor.onHide.add(hideResizeRect);
 		});
 
