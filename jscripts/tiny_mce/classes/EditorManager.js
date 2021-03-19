@@ -329,7 +329,7 @@
 			editors[editor.id] = editor;
 			editors.push(editor);
 
-			self._setActive(editor);
+			self.setActive(editor);
 			self.onAddEditor.dispatch(self, editor);
 
 			return editor;
@@ -366,7 +366,7 @@
 
 			// Select another editor since the active one was removed
 			if (this.activeEditor == editor) {
-				this._setActive(editors[0]);
+				this.setActive(editors[0]);
 			}
 
 			editor.destroy();
@@ -515,10 +515,13 @@
 
 		// Private methods
 
-		_setActive: function (editor) {
+		setActive: function (editor) {
 			this.selectedInstance = this.activeEditor = editor;
 		}
 	});
+
+	tinymce.FocusManager = new tinymce.dom.FocusManager(tinymce.EditorManager);
+
 })(tinymce);
 
 /**
