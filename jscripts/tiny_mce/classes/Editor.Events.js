@@ -814,7 +814,39 @@
 			 *    }
 			 * });
 			 */
-			'onSelectionChange'
+			'onSelectionChange',
+			
+			/**
+			 * Fires when the editor loses focus.
+			 *
+			 * @event onBlur
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onBlur',
+			
+			/**
+			 * Fires after the editor is focused.
+			 *
+			 * @event onFocus
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onFocus',
+			
+			/**
+			 * Fires when focus is moved to the editor.
+			 *
+			 * @event onFocusIn
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onFocusIn',
+			
+			/**
+			 * Fires when focus is moved from the editor.
+			 *
+			 * @event onFocusOut
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onFocusOut'
 
 		], function (name) {
 			self[name] = new tinymce.util.Dispatcher(self);
@@ -872,7 +904,9 @@
 			paste: 'onPaste',
 			cut: 'onCut',
 			copy: 'onCopy',
-			selectionchange: 'onSelectionChange'
+			selectionchange: 'onSelectionChange',
+			focusin: 'onFocusIn',
+			focusout: 'onFocusOut'
 		};
 
 		// Handler that takes a native event and sends it out to a dispatcher like onKeyDown
