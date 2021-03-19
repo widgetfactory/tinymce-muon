@@ -445,6 +445,10 @@
 			return result;
 		},
 
+		contains: function(context, elm) {
+			return tinymce.dom.Sizzle.contains(context, elm);
+		},
+
 		// #endif
 
 		/**
