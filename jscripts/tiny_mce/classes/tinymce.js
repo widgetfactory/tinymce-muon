@@ -164,14 +164,6 @@
 			 */
 			self.isIOS5 = self.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1] >= 534;
 
-			/**
-			 * Constant that is true if the browser supports contentEditable=false regions.
-			 *
-			 * @property ceFalse
-			 * @type Boolean
-			 */
-			self.ceFalse = true;
-
 			// Get suffix and base
 			self.suffix = '';
 
