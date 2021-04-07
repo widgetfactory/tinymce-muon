@@ -860,6 +860,7 @@
 
 			if (getContentEditable(selection.getNode()) === "false") {
 				node = selection.getNode();
+
 				for (var i = 0, l = formatList.length; i < l; i++) {
 					if (formatList[i].ceFalseOverride && dom.is(node, formatList[i].selector)) {
 						setElementFormat(node, formatList[i]);
@@ -883,7 +884,7 @@
 						applyRngStyle(node, null, true);
 					}
 				} else {
-					if (!isCollapsed || !format.inline || dom.select('td.mceSelected,th.mceSelected').length) {
+					if (!isCollapsed || !format.inline || dom.select('td.mceSelected,th.mceSelected,div.mceSelected').length) {
 						// Obtain selection node before selection is unselected by applyRngStyle()
 						var curSelNode = selection.getNode();
 
@@ -1182,7 +1183,7 @@
 				return;
 			}
 
-			if (!selection.isCollapsed() || !format.inline || dom.select('td.mceSelected,th.mceSelected').length) {
+			if (!selection.isCollapsed() || !format.inline || dom.select('td.mceSelected,th.mceSelected,div.mceSelected').length) {
 				bookmark = selection.getBookmark();
 				removeRngStyle(selection.getRng(TRUE));
 				selection.moveToBookmark(bookmark);

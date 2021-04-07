@@ -41,9 +41,9 @@
                 ancestor, startPoint,
                 endPoint, node, parent, siblings, nodes;
 
-            // Handle table cell selection the table plugin enables
-            // you to fake select table cells and perform formatting actions on them
-            nodes = dom.select('td.mceSelected,th.mceSelected');
+            // Handle table cell and column selection
+            nodes = dom.select('td.mceSelected,th.mceSelected,div.mceSelected');
+
             if (nodes.length > 0) {
                 each(nodes, function (node) {
                     callback([node]);
