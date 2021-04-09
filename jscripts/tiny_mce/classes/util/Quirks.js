@@ -1633,9 +1633,11 @@ tinymce.util.Quirks = function (editor) {
 		removeHrOnBackspace();
 		removeStylesWhenDeletingAcrossBlockElements();
 		setGeckoEditingOptions();
-		//addBrAfterLastLinks();
+		addBrAfterLastLinks();
 		showBrokenImageIcon();
 		blockCmdArrowNavigation();
 		disableBackspaceIntoATable();
+		// added for gecko selection bug on images with a style of display:block
+		selectControlElements();
 	}
 };
