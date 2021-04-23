@@ -115,6 +115,7 @@
 					{
 						selector: 'figure[data-mce-image]',
 						collapsed: false,
+						ceFalseOverride: true,
 						styles: {
 							'float': 'left'
 						}
@@ -140,6 +141,7 @@
 					{
 						selector: 'figure[data-mce-image]',
 						collapsed: false,
+						ceFalseOverride: true,
 						styles: {
 							marginLeft: 'auto',
 							marginRight: 'auto',
@@ -177,6 +179,7 @@
 					{
 						selector: 'figure[data-mce-image]',
 						collapsed: false,
+						ceFalseOverride: true,
 						styles: {
 							'float': 'right'
 						}
