@@ -150,7 +150,7 @@
                 // Old IE versions doesn't properly render blocks with br elements in them
                 // For example <p><br></p> wont be rendered correctly in a contentEditable area
                 // until you remove the br producing <p></p>
-                if (isIE && tinymce.isIE < 9 && parentBlock && parentBlock.firstChild) {
+                if (isIE && parentBlock && parentBlock.firstChild) {
                     if (parentBlock.firstChild == parentBlock.lastChild && parentBlock.firstChild.tagName == 'BR') {
                         dom.remove(parentBlock.firstChild);
                     }
@@ -606,13 +606,13 @@
             undoManager.beforeChange();
 
             // If editable root isn't block nor the root of the editor
-            if (!dom.isBlock(editableRoot) && editableRoot != dom.getRoot()) {
+            /*if (!dom.isBlock(editableRoot) && editableRoot != dom.getRoot()) {
                 if (!newBlockName || shiftKey) {
                     insertBr();
                 }
 
                 return;
-            }
+            }*/
 
             // Wrap the current node and it's sibling in a default block if it's needed.
             // for example this <td>text|<b>text2</b></td> will become this <td><p>text|<b>text2</p></b></td>
