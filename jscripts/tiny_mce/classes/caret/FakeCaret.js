@@ -16,10 +16,10 @@
  */
 (function (tinymce) {
   var NodeType = tinymce.dom.NodeType,
-  DOM = tinymce.DOM,
-  ClientRect = tinymce.geom.ClientRect,
-  CaretContainer = tinymce.caret.CaretContainer,
-  CaretContainerRemove = tinymce.caret.CaretContainerRemove;
+    DOM = tinymce.DOM,
+    ClientRect = tinymce.geom.ClientRect,
+    CaretContainer = tinymce.caret.CaretContainer,
+    CaretContainerRemove = tinymce.caret.CaretContainerRemove;
 
   var isContentEditableFalse = NodeType.isContentEditableFalse;
 
@@ -104,7 +104,7 @@
         clientRect = getAbsoluteClientRect(node, before);
         DOM.setStyle(caretContainerNode, 'top', clientRect.top);
 
-        $lastVisualCaret = DOM.add(rootNode, 'div', {'class' : 'mce-visual-caret', 'data-mce-bogus' : 'all', 'style' : clientRect});
+        $lastVisualCaret = DOM.add(rootNode, 'div', { 'class': 'mce-visual-caret', 'data-mce-bogus': 'all', 'style': clientRect });
 
         if (before) {
           DOM.addClass($lastVisualCaret, 'mce-visual-caret-before');
@@ -149,9 +149,19 @@
       clearInterval(cursorInterval);
     }
 
+    var hasFocus = function () {
+      return rootNode.ownerDocument.activeElement === rootNode;
+    };
+
     function startBlink() {
       cursorInterval = setInterval(function () {
-        DOM.toggleClass(DOM.select('div.mce-visual-caret', rootNode), 'mce-visual-caret-hidden');
+        var caret = DOM.select('div.mce-visual-caret', rootNode)[0];
+
+        if (hasFocus()) {
+          DOM.toggleClass(caret, 'mce-visual-caret-hidden');
+        } else {
+          DOM.addClass(caret, 'mce-visual-caret-hidden');
+        }
       }, 500);
     }
 
