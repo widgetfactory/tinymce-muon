@@ -171,6 +171,7 @@
     // tinymce.*
     include('AddOnManager.js');
     include('EditorManager.js');
+    include('EditorFocus.js');
     include('Editor.js');
     include('Editor.Events.js');
 
