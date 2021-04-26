@@ -274,6 +274,7 @@
 					links: true,
 					remove_similar: true
 				},
+
 				hilitecolor: {
 					inline: 'span',
 					styles: {
@@ -282,35 +283,42 @@
 					links: true,
 					remove_similar: true
 				},
+
 				fontname: {
 					inline: 'span',
 					styles: {
 						fontFamily: '%value'
 					}
 				},
+
 				fontsize: {
 					inline: 'span',
 					styles: {
 						fontSize: '%value'
 					}
 				},
+
 				fontsize_class: {
 					inline: 'span',
 					attributes: {
 						'class': '%value'
 					}
 				},
+
 				blockquote: {
 					block: 'blockquote',
 					wrapper: 1,
 					remove: 'all'
 				},
+
 				subscript: {
 					inline: 'sub'
 				},
+
 				superscript: {
 					inline: 'sup'
 				},
+				
 				code: {
 					inline: 'code'
 				},
@@ -541,10 +549,6 @@
 				fmt = fmt || format;
 
 				if (elm) {
-					if (fmt.onformat) {
-						fmt.onformat(elm, fmt, vars, node);
-					}
-
 					each(fmt.styles, function (value, name) {
 						dom.setStyle(elm, name, replaceVars(value, vars));
 					});
@@ -570,6 +574,10 @@
 							dom.addClass(elm, value);
 						}
 					});
+
+					if (fmt.onformat) {
+						fmt.onformat(elm, fmt, vars, node);
+					}
 				}
 			}
 
@@ -752,7 +760,6 @@
 				}
 
 				// Cleanup
-
 				each(newWrappers, function (node) {
 					var childCount;
 
@@ -933,28 +940,18 @@
 
 			// Merges the styles for each node
 			function process(node) {
-				var children, i, l, lastContentEditable;//, hasContentEditableState;
+				var children, i, l;
 
 				// Node has a contentEditable value
 				if (node.nodeType === 1 && getContentEditable(node)) {
-					lastContentEditable = contentEditable;
 					contentEditable = getContentEditable(node) === "true";
-					//hasContentEditableState = true; // We don't want to wrap the container only it's children
 				}
 
 				// Grab the children first since the nodelist might be changed
 				children = tinymce.grep(node.childNodes);
 
 				// Process current node
-				/*if (contentEditable && !hasContentEditableState) {
-					for (i = 0, l = formatList.length; i < l; i++) {
-						if (removeFormat(formatList[i], vars, node, node)) {
-							break;
-						}
-					}
-				}*/
-
-				if (contentEditable) {
+				if (contentEditable || format.ceFalseOverride) {
 					for (i = 0, l = formatList.length; i < l; i++) {
 						if (removeFormat(formatList[i], vars, node, node)) {
 							break;
@@ -968,10 +965,6 @@
 						for (i = 0, l = children.length; i < l; i++) {
 							process(children[i]);
 						}
-
-						/*if (hasContentEditableState) {
-							contentEditable = lastContentEditable; // Restore last contentEditable state from stack
-						}*/
 					}
 				}
 			}
@@ -2038,6 +2031,10 @@
 			// Check if node matches format
 			if (!matchName(node, format) && !isColorFormatAndAnchor(node, format)) {
 				return FALSE;
+			}
+
+			if (format.onremove) {
+				format.onremove(node);
 			}
 
 			// Should we compare with format attribs and styles
