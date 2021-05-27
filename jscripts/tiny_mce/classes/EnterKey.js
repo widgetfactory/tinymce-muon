@@ -298,7 +298,7 @@
                     return true;
                 }
 
-                // If the caret if before the first element in parentBlock
+                // If the caret is before the first element in parentBlock
                 if (start && container.nodeType == 1 && container == parentBlock.firstChild) {
                     return true;
                 }
@@ -692,6 +692,7 @@
                 fragment = tmpRng.extractContents();
                 trimLeadingLineBreaks(fragment);
                 newBlock = fragment.firstChild;
+
                 dom.insertAfter(fragment, parentBlock);
                 trimInlineElementsOnLeftSideOfBlock(newBlock);
                 addBrToBlockIfNeeded(parentBlock);
@@ -700,15 +701,16 @@
                     emptyBlock(parentBlock);
                 }
 
-                newBlock.normalize();
-
                 // New block might become empty if it's <p><b>a |</b></p>
-                if (dom.isEmpty(newBlock)) {
+                // need to check for newBlock as it can be undefined in some instances (enter in paragraph converted from text in figcaption...)
+                if (!newBlock || dom.isEmpty(newBlock)) {
                     dom.remove(newBlock);
                     insertNewBlockAfter();
                 } else {
                     moveToCaretPosition(newBlock);
                 }
+
+                newBlock.normalize();
             }
 
             dom.setAttrib(newBlock, 'id', ''); // Remove ID since it needs to be document unique
