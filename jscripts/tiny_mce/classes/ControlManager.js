@@ -294,6 +294,73 @@
 		},
 
 		/**
+		 * Creates a list box control instance by id. A list box is either a native select element or a DOM/JS based list box control. This
+		 * depends on the use_native_selects settings state.
+		 *
+		 * @method createListBox
+		 * @param {String} id Unique id for the new listbox instance. For example "styles".
+		 * @param {Object} s Optional settings object for the control.
+		 * @param {Object} cc Optional control class to use instead of the default one.
+		 * @return {tinymce.ui.Control} Control instance that got created and added.
+		 */
+		 createStylesBox: function (id, s, cc) {
+			var self = this,
+				ed = self.editor;
+			
+			s = tinymce.extend({
+				filter: true,
+				max_height: 384
+			}, s || {});
+
+            function loadClasses(ctrl) {
+                if (!Array.isArray(ed.settings.importcss_classes)) {
+                    return;
+                }
+
+                if (ctrl.hasClasses) {
+                    return;
+                }
+
+                each(ed.settings.importcss_classes, function (item, idx) {
+                    // Parse simple element.class1, .class1
+					var selector = /^(?:([a-z0-9\-_]+))?(\.[a-z0-9_\-\.]+)$/i.exec(item.selector || item);
+
+					// no match
+					if (!selector) {
+						return;
+					}
+
+					// skip element assignments
+					if (selector[1]) {
+						return;
+					}
+
+					var classes = selector[2].substr(1).split('.');
+
+					each(classes, function(cls) {
+						ctrl.add(cls, cls, {
+                            style: function () {
+								return tinymce.util.PreviewCss(ed, {classes: cls});
+                            }
+                        });
+					});
+                });
+
+                if (Array.isArray(ed.settings.importcss_classes)) {
+                    ctrl.hasClasses = true;
+                }
+            }
+
+			var c = this.createListBox(id, s, cc);
+
+			c.onPostRender.add(function (c, n) {
+				loadClasses(c, n);
+			});
+
+			return c;
+		},
+
+		/**
 		 * Creates a button control instance by id.
 		 *
 		 * @method createButton
