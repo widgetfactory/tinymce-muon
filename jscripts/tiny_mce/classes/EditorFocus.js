@@ -61,11 +61,6 @@
     // Focus the window iframe
     if (!contentEditable) {
       // WebKit needs this call to fire focusin event properly see #5948
-      // But Opera pre Blink engine will produce an empty selection so skip Opera
-      if (!tinymce.isOpera) {
-        editor.getBody().focus();
-      }
-
       editor.getWin().focus();
     }
 
@@ -84,11 +79,12 @@
     // Restore selected control element
     // This is needed when for example an image is selected within a
     // layer a call to focus will then remove the control selection
-    if (controlElm && controlElm.ownerDocument == doc) {
+    // This appears to cause an issue with Chrome etc. with image selection in a contenteditable=false parent
+    /*if (controlElm && controlElm.ownerDocument == doc) {
       rng = doc.body.createControlRange();
       rng.addElement(controlElm);
       rng.select();
-    }
+    }*/
   };
 
   var activateEditor = function (editor) {
