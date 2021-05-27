@@ -969,67 +969,6 @@
 		 * @param {Boolean} skip_focus Skip DOM focus. Just set is as the active editor.
 		 */
 		focus: function (skip_focus) {
-			/*var oed, self = this,
-				selection = self.selection,
-				contentEditable = self.settings.content_editable,
-				ieRng, controlElm, doc = self.getDoc(),
-				body;
-
-			if (!skip_focus) {
-				if (self.bookmark) {
-					selection.moveToBookmark(self.bookmark);
-					self.bookmark = null;
-				}
-
-				// Get selected control element
-				ieRng = selection.getRng();
-				if (ieRng.item) {
-					controlElm = ieRng.item(0);
-				}
-
-				self._refreshContentEditable();
-
-				// Focus the window iframe
-				if (!contentEditable) {
-					self.getWin().focus();
-				}
-
-				// Focus the body as well since it's contentEditable
-				if (tinymce.isGecko || contentEditable) {
-					body = self.getBody();
-
-					// Check for setActive since it doesn't scroll to the element
-					if (body.setActive && !tinymce.isIE11) {
-						body.setActive();
-					} else {
-						body.focus();
-					}
-
-					if (contentEditable) {
-						selection.normalize();
-					}
-				}
-
-				// Restore selected control element
-				// This is needed when for example an image is selected within a
-				// layer a call to focus will then remove the control selection
-				if (controlElm && controlElm.ownerDocument == doc) {
-					ieRng = doc.body.createControlRange();
-					ieRng.addElement(controlElm);
-					ieRng.select();
-				}
-			}
-
-			if (tinymce.activeEditor != self) {
-				if ((oed = tinymce.activeEditor) != null) {
-					oed.onDeactivate.dispatch(oed, self);
-				}
-
-				self.onActivate.dispatch(self, oed);
-			}
-
-			tinymce.setActive(self);*/
-
 			EditorFocus.focus(this, skip_focus);
 		},
 
@@ -2151,7 +2090,7 @@
 
 			self.onVisualAid.dispatch(self, elm, self.hasVisual);
 		},
-		
+
 
 		/**
 		 * Removes the editor from the dom and tinymce collection.
