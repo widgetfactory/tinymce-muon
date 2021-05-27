@@ -91,13 +91,14 @@
           if (!/[\u00a0| ]$/.test(value)) {
             value += ' ';
           }
-        } else if (container.data[offset - 1] === '\u00a0') {
+        }
+        // Not sure about this - removes existing space at the beginning of content, which may be intentional
+        /*else if (container.data[offset - 1] === '\u00a0') {
           container.deleteData(offset - 1, 1);
-
           if (!/[\u00a0| ]$/.test(value)) {
             value = ' ' + value;
           }
-        }
+        }*/
       }
     }
 
