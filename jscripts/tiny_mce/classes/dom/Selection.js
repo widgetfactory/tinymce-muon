@@ -885,55 +885,63 @@
 		getNode: function () {
 			var self = this,
 				rng = self.getRng(),
-				elm, start = rng.startContainer,
-				end = rng.endContainer;
+				elm;
+			var startContainer, endContainer, startOffset, endOffset, root = self.dom.getRoot();
 
-			function skipEmptyTextNodes(n, forwards) {
-				var orig = n;
-				while (n && n.nodeType === 3 && n.length === 0) {
-					n = forwards ? n.nextSibling : n.previousSibling;
+			function skipEmptyTextNodes(node, forwards) {
+				var orig = node;
+
+				while (node && node.nodeType === 3 && node.length === 0) {
+					node = forwards ? node.nextSibling : node.previousSibling;
 				}
-				return n || orig;
+
+				return node || orig;
 			}
 
 			// Range maybe lost after the editor is made visible again
 			if (!rng) {
-				return self.dom.getRoot();
+				return root;
 			}
+
+			startContainer = rng.startContainer;
+			endContainer = rng.endContainer;
+			startOffset = rng.startOffset;
+			endOffset = rng.endOffset;
 
 			if (rng.setStart) {
 				elm = rng.commonAncestorContainer;
 
 				// Handle selection a image or other control like element such as anchors
 				if (!rng.collapsed) {
-					if (rng.startContainer == rng.endContainer) {
-						if (rng.endOffset - rng.startOffset < 2) {
-							if (rng.startContainer.hasChildNodes()) {
-								elm = rng.startContainer.childNodes[rng.startOffset];
+					if (startContainer == endContainer) {
+						if (endOffset - startOffset < 2) {
+							if (startContainer.hasChildNodes()) {
+								elm = startContainer.childNodes[startOffset];
 							}
 						}
 					}
 
 					// If the anchor node is a element instead of a text node then return this element
 					//if (tinymce.isWebKit && sel.anchorNode && sel.anchorNode.nodeType == 1)
-					//	return sel.anchorNode.childNodes[sel.anchorOffset];
+					// return sel.anchorNode.childNodes[sel.anchorOffset];
 
 					// Handle cases where the selection is immediately wrapped around a node and return that node instead of it's parent.
 					// This happens when you double click an underlined word in FireFox.
-					if (start.nodeType === 3 && end.nodeType === 3) {
-						if (start.length === rng.startOffset) {
-							start = skipEmptyTextNodes(start.nextSibling, true);
+					if (startContainer.nodeType === 3 && endContainer.nodeType === 3) {
+						if (startContainer.length === startOffset) {
+							startContainer = skipEmptyTextNodes(startContainer.nextSibling, true);
 						} else {
-							start = start.parentNode;
-						}
-						if (rng.endOffset === 0) {
-							end = skipEmptyTextNodes(end.previousSibling, false);
-						} else {
-							end = end.parentNode;
+							startContainer = startContainer.parentNode;
 						}
 
-						if (start && start === end) {
-							return start;
+						if (endOffset === 0) {
+							endContainer = skipEmptyTextNodes(endContainer.previousSibling, false);
+						} else {
+							endContainer = endContainer.parentNode;
+						}
+
+						if (startContainer && startContainer === endContainer) {
+							return startContainer;
 						}
 					}
 				}
@@ -945,7 +953,9 @@
 				return elm;
 			}
 
-			return rng.item ? rng.item(0) : rng.parentElement();
+			elm = rng.item ? rng.item(0) : rng.parentElement();
+
+			return elm;
 		},
 
 		getSelectedBlocks: function (st, en) {
