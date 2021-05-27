@@ -441,7 +441,7 @@
 			}
 
 			// Remove data-mce-selected from all elements since they might have been copied using Ctrl+c/v
-			each(dom.select('img[data-mce-selected],hr[data-mce-selected],span[data-mce-selected]'), function (img) {
+			each(dom.select('img[data-mce-selected][data-mce-resize],hr[data-mce-selected][data-mce-resize],span[data-mce-selected][data-mce-resize]'), function (img) {
 				img.removeAttribute('data-mce-selected');
 			});
 
