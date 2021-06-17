@@ -383,6 +383,10 @@
 			return tinymce.dom.Sizzle(selector, self.get(scope) || self.settings.root_element || self.doc, []);
 		},
 
+		unique: function(arr) {
+			return tinymce.dom.Sizzle.uniqueSort(arr);
+		},
+
 		/**
 		 * Returns true/false if the specified element matches the specified css pattern.
 		 *
