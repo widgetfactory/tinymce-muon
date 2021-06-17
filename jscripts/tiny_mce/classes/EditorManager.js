@@ -48,6 +48,37 @@
 		tinymce.onBeforeUnload.dispatch(tinymce, e);
 	});
 
+	function removeEditorFromList(targetEditor) {
+		var EditorManager = tinymce.EditorManager, editors = EditorManager.editors, oldEditors = editors;
+
+		editors = tinymce.grep(editors, function (editor) {
+			return targetEditor !== editor;
+		});
+
+		// Select another editor since the active one was removed
+		if (EditorManager.activeEditor === targetEditor) {
+			EditorManager.activeEditor = editors.length > 0 ? editors[0] : null;
+		}
+
+		// Clear focusedEditor if necessary, so that we don't try to blur the destroyed editor
+		if (EditorManager.focusedEditor === targetEditor) {
+			EditorManager.focusedEditor = null;
+		}
+
+		return oldEditors.length !== editors.length;
+	}
+
+	function purgeDestroyedEditor(editor) {
+		// User has manually destroyed the editor lets clean up the mess
+		if (editor && editor.initialized && !(editor.getContainer() || editor.getBody()).parentNode) {
+			removeEditorFromList(editor);
+			editor.remove();
+			editor = null;
+		}
+
+		return editor;
+	}
+
 	/**
 	 * Fires when a new editor instance is added to the tinymce collection.
 	 *
@@ -118,10 +149,9 @@
 		 *    some_settings : 'some value'
 		 * });
 		 */
-		init: function (s) {
+		init: function (settings) {
 			var self = this,
-				el = [],
-				ed;
+				result;
 
 			function createId(elm) {
 				var id = elm.id;
@@ -143,54 +173,53 @@
 				return id;
 			}
 
-			function execCallback(se, n, s) {
-				var f = se[n];
+			function execCallback(name) {
+				var callback = settings[name];
 
-				if (!f) {
+				if (!callback) {
 					return;
 				}
 
-				if (tinymce.is(f, 'string')) {
-					s = f.replace(/\.\w+$/, '');
-					s = s ? tinymce.resolve(s) : 0;
-					f = tinymce.resolve(f);
+				return callback.apply(self, Array.prototype.slice.call(arguments, 2));
+			}
+
+			function hasClass(elm, className) {
+				return className.constructor === RegExp ? className.test(elm.className) : DOM.hasClass(elm, className);
+			}
+
+			function findTargets(settings) {
+				var l, targets = [];
+
+				if (settings.types) {
+					each(settings.types, function (type) {
+						targets = targets.concat(DOM.select(type.selector));
+					});
+
+					return targets;
+				} else if (settings.selector) {
+					return DOM.select(settings.selector);
+				} else if (settings.target) {
+					return [settings.target];
 				}
 
-				return f.apply(s || this, Array.prototype.slice.call(arguments, 2));
-			}
-
-			function hasClass(n, c) {
-				return c.constructor === RegExp ? c.test(n.className) : DOM.hasClass(n, c);
-			}
-
-			this.settings = s;
-
-			// Legacy call
-			Event.bind(window, 'ready', function () {
-				var l, co;
-
-				execCallback(s, 'onpageload');
-
-				switch (s.mode) {
+				// Fallback to old setting
+				switch (settings.mode) {
 					case "exact":
-						l = s.elements || '';
+						l = settings.elements || '';
 
 						if (l.length > 0) {
-							each(explode(l), function (v) {
-								if (DOM.get(v)) {
-									ed = new tinymce.Editor(v, s);
-									el.push(ed);
-									ed.render(1);
+							each(explode(l), function (id) {
+								var elm;
+
+								if ((elm = DOM.get(id))) {
+									targets.push(elm);
 								} else {
 									each(document.forms, function (f) {
 										each(f.elements, function (e) {
-											if (e.name === v) {
-												v = 'mce_editor_' + instanceCounter++;
-												DOM.setAttrib(e, 'id', v);
-
-												ed = new tinymce.Editor(v, s);
-												el.push(ed);
-												ed.render(1);
+											if (e.name === id) {
+												id = 'mce_editor_' + instanceCounter++;
+												DOM.setAttrib(e, 'id', id);
+												targets.push(e);
 											}
 										});
 									});
@@ -202,74 +231,68 @@
 					case "textareas":
 					case "specific_textareas":
 						each(DOM.select('textarea'), function (elm) {
-							if (s.editor_deselector && hasClass(elm, s.editor_deselector)) {
+							if (settings.editor_deselector && hasClass(elm, settings.editor_deselector)) {
 								return;
 							}
 
-							if (!s.editor_selector || hasClass(elm, s.editor_selector)) {
-
-								var id = createId(elm);
-
-								// don't create an editor that is already created
-								if (self.get(id)) {
-									return;
-								}
-
-								ed = new tinymce.Editor(id, s);
-								el.push(ed);
-								ed.render(1);
+							if (!settings.editor_selector || hasClass(elm, settings.editor_selector)) {
+								targets.push(elm);
 							}
 						});
 						break;
-
-					default:
-						if (s.types) {
-							// Process type specific selector
-							each(s.types, function (type) {
-								each(DOM.select(type.selector), function (elm) {
-									var editor = new tinymce.Editor(createId(elm), tinymce.extend({}, s, type));
-									el.push(editor);
-									editor.render(1);
-								});
-							});
-						} else if (s.selector) {
-							// Process global selector
-							each(DOM.select(s.selector), function (elm) {
-								var editor = new tinymce.Editor(createId(elm), s);
-								el.push(editor);
-								editor.render(1);
-							});
-						}
 				}
 
-				// Call onInit when all editors are initialized
-				if (s.oninit) {
-					l = co = 0;
+				return targets;
+			}
 
-					each(el, function (ed) {
-						co++;
+			var provideResults = function (editors) {
+				result = editors;
+			};
 
-						if (!ed.initialized) {
-							// Wait for it
-							ed.onInit.add(function () {
-								l++;
+			function initEditors() {
+				var initCount = 0,
+					editors = [],
+					targets;
 
-								// All done
-								if (l == co) {
-									execCallback(s, 'oninit');
-								}
-							});
-						} else {
-							l++;
-						}
+				function createEditor(id, settings, targetElm) {
+					var editor = new tinymce.Editor(id, settings, self);
 
-						// All done
-						if (l == co) {
-							execCallback(s, 'oninit');
+					editors.push(editor);
+
+					editor.onInit.add(function () {
+						if (++initCount === targets.length) {
+							provideResults(editors);
 						}
 					});
+
+					editor.targetElm = editor.targetElm || targetElm;
+					editor.render();
 				}
-			});
+
+				DOM.unbind(window, 'ready', initEditors);
+				execCallback('onpageload');
+
+				targets = DOM.unique(findTargets(settings));
+
+				each(targets, function (elm) {
+					purgeDestroyedEditor(self.get(elm.id));
+				});
+
+				targets = tinymce.grep(targets, function (elm) {
+					return !self.get(elm.id);
+				});
+
+				if (targets.length === 0) {
+					provideResults([]);
+				} else {
+					each(targets, function (elm) {
+						createEditor(createId(elm), settings, elm);
+					});
+				}
+			}
+
+			self.settings = settings;
+			DOM.bind(window, 'ready', initEditors);
 		},
 
 		/**
