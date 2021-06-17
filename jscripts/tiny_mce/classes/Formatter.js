@@ -58,6 +58,10 @@
 			return !!ed.schema.getTextBlockElements()[name.toLowerCase()];
 		}
 
+		function isShortEnded(node) {
+			return !!ed.schema.getShortEndedElements()[node.nodeName.toLowerCase()];
+		}
+
 		function isTableCell(node) {
 			return /^(TH|TD)$/.test(node.nodeName);
 		}
@@ -72,6 +76,10 @@
 
 		function isCaretNode(node) {
 			return node.nodeType === 1 && node.id === '_mce_caret';
+		}
+
+		function isFigure(node) {
+			return getParents(node, 'FIGURE') && node.nodeName != 'FIGURE';
 		}
 
 		function defaultFormats() {
@@ -653,7 +661,7 @@
 					/**
 					 * Process a list of nodes wrap them.
 					 */
-					function process(node) {
+					function process(node) {						
 						var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
 
 						lastContentEditable = contentEditable;
@@ -664,7 +672,7 @@
 						if (node.nodeType === 1 && getContentEditable(node)) {
 							lastContentEditable = contentEditable;
 							contentEditable = getContentEditable(node) === "true";
-							hasContentEditableState = true; // We don't want to wrap the container only it's children
+							hasContentEditableState = !isShortEnded(node); // We don't want to wrap the container only it's children
 						}
 
 						// Stop wrapping on br elements
@@ -708,15 +716,17 @@
 							}
 						}
 
+						function isBOM(node) {
+							return !node_specific && node.nodeType === 3 && node.nodeValue.length === 1 && node.nodeValue.charCodeAt(0) === 65279;
+						}
+
 						// Is it valid to wrap this item
 						// TODO: Break this if up, too complex
 						if (contentEditable && !hasContentEditableState && isValidChild(wrapName, nodeName) && isValidChild(parentName, wrapName) &&
-							!(!node_specific && node.nodeType === 3 &&
-								node.nodeValue.length === 1 &&
-								node.nodeValue.charCodeAt(0) === 65279) &&
+							!isBOM(node) &&
 							!isCaretNode(node) &&
-							(!format.inline || !isBlock(node))) {
-							// Start wrapping
+							(!format.inline || !isBlock(node))) {															
+								// Start wrapping
 							if (!currentWrapElm) {
 								// Wrap the node
 								currentWrapElm = dom.clone(wrapElm, FALSE);
@@ -872,7 +882,7 @@
 				node = selection.getNode();
 
 				for (var i = 0, l = formatList.length; i < l; i++) {
-					if (formatList[i].ceFalseOverride && dom.is(node, formatList[i].selector)) {
+					if ((formatList[i].ceFalseOverride) && dom.is(node, formatList[i].selector)) {
 						setElementFormat(node, formatList[i]);
 						return;
 					}
@@ -951,7 +961,7 @@
 				children = tinymce.grep(node.childNodes);
 
 				// Process current node
-				if (contentEditable || format.ceFalseOverride) {
+				if (contentEditable || format.ceFalseOverride || isFigure(node)) {
 					for (i = 0, l = formatList.length; i < l; i++) {
 						if (removeFormat(formatList[i], vars, node, node)) {
 							break;
