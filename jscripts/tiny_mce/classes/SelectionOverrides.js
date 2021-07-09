@@ -739,6 +739,11 @@
             break;
 
           default:
+            // allow for cut/copy (CTRL + X and CTRL + C) on contenteditable="false" data-mce-contenteditable="true" nodes, eg: media
+            if (isContentEditableTrue(editor.selection.getNode())) {
+              return;
+            }
+
             if (isContentEditableFalse(editor.selection.getNode()) && isContentKey(e)) {
               e.preventDefault();
             }
