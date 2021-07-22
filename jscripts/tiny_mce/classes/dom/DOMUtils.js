@@ -544,7 +544,7 @@
 			o += '<' + n;
 
 			for (k in a) {
-				if (a.hasOwnProperty(k)) {
+				if (a.hasOwnProperty(k) && a[k] != '') {
 					o += ' ' + k + '="' + self.encode(a[k]) + '"';
 				}
 			}
