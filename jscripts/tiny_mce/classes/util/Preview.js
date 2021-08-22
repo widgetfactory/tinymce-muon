@@ -7,7 +7,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses.
  */
-(function () {
+(function (tinymce) {
     var each = tinymce.each;
 
     var rgba = {}, luma = {}, white = 'rgb(255, 255, 255)';
@@ -209,4 +209,4 @@
 
         return dom.serializeStyle(previewCss);
     };
-})();
+})(tinymce);

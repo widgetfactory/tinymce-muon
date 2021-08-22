@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function () {
+(function (tinymce) {
 	var each = tinymce.each,
 		trim = tinymce.trim;
 	var queryParts = "source protocol authority userInfo user password host port relative path directory file query anchor".split(' ');
@@ -435,4 +435,4 @@
 
 		return baseUrl;
 	};
-})();
+})(tinymce);

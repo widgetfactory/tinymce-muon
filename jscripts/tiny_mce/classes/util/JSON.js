@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function () {
+(function (tinymce) {
     /**
      * JSON parser and serializer class wrapper for native JSON
      *
@@ -54,4 +54,4 @@
             }
             /**#@-*/
     };
-})();
+})(tinymce);

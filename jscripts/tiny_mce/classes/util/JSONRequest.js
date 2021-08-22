@@ -8,7 +8,7 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
-(function () {
+(function (tinymce) {
 	var extend = tinymce.extend,
 		JSON = tinymce.util.JSON,
 		XHR = tinymce.util.XHR;
@@ -113,4 +113,4 @@
 			}
 		}
 	});
-});
+})(tinymce);
