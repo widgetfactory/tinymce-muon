@@ -695,7 +695,7 @@
 					node, blockElements = extend({}, schema.getBlockElements());
 				var nonEmptyElements = schema.getNonEmptyElements(),
 					parent, lastParent, prev, prevName;
-				var textNode;
+				var textNode, elementRule;
 
 				// Remove brs from body element as well
 				blockElements.body = 1;
