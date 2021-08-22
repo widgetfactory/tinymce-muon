@@ -12,6 +12,7 @@
     var DOM = tinymce.DOM,
         Event = tinymce.dom.Event,
         each = tinymce.each,
+        extend = tinymce.extend,
         Dispatcher = tinymce.util.Dispatcher;
 
     function ucfirst(s) {
@@ -36,7 +37,7 @@
      * @example
      * // Opens a new dialog with the file.htm file and the size 320x240
      * // It also adds a custom parameter this can be retrieved by using tinyMCEPopup.getWindowArg inside the dialog.
-     * tinyMCE.activeEditor.windowManager.open({
+     * tinymce.activeEditor.windowManager.open({
      *    url : 'file.htm',
      *    width : 320,
      *    height : 240
@@ -44,52 +45,29 @@
      *    custom_param : 1
      * });
      * // Displays an alert box using the active editors window manager instance
-     * tinyMCE.activeEditor.windowManager.alert('Hello world!');
+     * tinymce.activeEditor.windowManager.alert('Hello world!');
      *
      * // Displays an confirm box and an alert message will be displayed depending on what you choose in the confirm
-     * tinyMCE.activeEditor.windowManager.confirm("Do you want to do something", function(s) {
+     * tinymce.activeEditor.windowManager.confirm("Do you want to do something", function(s) {
      *    if (s)
-     *       tinyMCE.activeEditor.windowManager.alert("Ok");
+     *       tinymce.activeEditor.windowManager.alert("Ok");
      *    else
-     *       tinyMCE.activeEditor.windowManager.alert("Cancel");
+     *       tinymce.activeEditor.windowManager.alert("Cancel");
      * });
      */
-    tinymce.create('tinymce.WindowManager', {
-        /**
-         * Constructs a new window manager instance.
-         *
-         * @constructor
-         * @method WindowManager
-         * @param {tinymce.Editor} ed Editor instance that the windows are bound to.
-         */
-        WindowManager: function (ed) {
-            this.editor = ed;
-            this.onOpen = new Dispatcher(this);
-            this.onClose = new Dispatcher(this);
-            this.params = {};
-            this.features = {};
+    tinymce.WindowManager = function (ed) {
+        this.editor = ed;
+        this.onOpen = new Dispatcher(this);
+        this.onClose = new Dispatcher(this);
+        this.params = {};
+        this.features = {};
 
-            this.zIndex = 700002;
-            this.count = 0;
-            this.windows = {};
-        },
+        this.zIndex = 700002;
+        this.count = 0;
+        this.windows = {};
+    }
 
-        /**
-         * Creates a instance of a class. This method was needed since IE can't create instances
-         * of classes from a parent window due to some reference problem. Any arguments passed after the class name
-         * will be passed as arguments to the constructor.
-         *
-         * @method createInstance
-         * @param {String} cl Class name to create an instance of.
-         * @return {Object} Instance of the specified class.
-         * @example
-         * var uri = tinyMCEPopup.editor.windowManager.createInstance('tinymce.util.URI', 'http://www.somesite.com');
-         * alert(uri.getURI());
-         */
-        createInstance: function (cl, a, b, c, d, e) {
-            var fn = tinymce.resolve(cl);
-            return new fn(a, b, c, d, e);
-        },
+    tinymce.WindowManager.prototype = {
 
         /**
          * Opens a new window.
@@ -120,22 +98,20 @@
             f = f || {};
             p = p || {};
 
+            id = DOM.uniqueId("mce_window_"); // Use a prefix so this can't conflict with other ids
+
+            f = extend({ width: 0, height: 0 }, f || {});
+            p = extend({ mce_window_id: id }, p || {});
+
             // Only store selection if the type is a normal window
             if (!f.type) {
                 self.bookmark = ed.selection.getBookmark(1);
             }
 
-            id = DOM.uniqueId("mce_window_"); // Use a prefix so this can't conflict with other ids
-
-            f.width = parseInt(f.width || 0);
-            f.height = parseInt(f.height || 0);
-
-            p.mce_window_id = id;
-
-            self.features = f;
-            self.params = p;
-
             self.onOpen.dispatch(self, f, p);
+
+            this.features = f;
+            this.params = p;
 
             // modal html
             var html = '' +
@@ -365,7 +341,7 @@
                         if (evt.target.nodeName === "TEXTAREA") {
                             return;
                         }
-                        
+
                         if (evt.target.nodeName === "BUTTON") {
                             Event.fire(evt.target, 'click');
                         }
@@ -465,7 +441,7 @@
             self.focus(id);
 
             self.count++;
-            
+
             return win;
         },
 
@@ -547,11 +523,11 @@
          * @param {Object} s Optional scope to execute the callback in.
          * @example
          * // Displays an confirm box and an alert message will be displayed depending on what you choose in the confirm
-         * tinyMCE.activeEditor.windowManager.confirm("Do you want to do something", function(s) {
+         * tinymce.activeEditor.windowManager.confirm("Do you want to do something", function(s) {
          *    if (s)
-         *       tinyMCE.activeEditor.windowManager.alert("Ok");
+         *       tinymce.activeEditor.windowManager.alert("Ok");
          *    else
-         *       tinyMCE.activeEditor.windowManager.alert("Cancel");
+         *       tinymce.activeEditor.windowManager.alert("Cancel");
          * });
          */
         confirm: function (txt, cb, s) {
@@ -590,7 +566,7 @@
          * @param {Object} s Optional scope to execute the callback in.
          * @example
          * // Displays an alert box using the active editors window manager instance
-         * tinyMCE.activeEditor.windowManager.alert('Hello world!');
+         * tinymce.activeEditor.windowManager.alert('Hello world!');
          */
         alert: function (txt, cb, s) {
             var self = this;
@@ -682,10 +658,8 @@
 
         // Internal functions
         _startDrag: function (id, se, ac) {
-            var self = this,
-                mu, mm, d = DOM.doc,
-                w = self.windows[id],
-                sx, sy, cp;
+            var mu, mm, d = DOM.doc,
+                sx, sy, p, vp, cp, dx, dy;
 
             if (DOM.hasClass(id, 'dragging')) {
                 end();
@@ -727,7 +701,7 @@
 
             // Handle mouse move/drag
             mm = Event.add(d, 'mousemove touchmove', function (e) {
-                var x, y, v;
+                var x, y;
 
                 updateWithTouchData(e);
 
@@ -784,5 +758,5 @@
 
             return w;
         }
-    });
+    };
 })(tinymce);
