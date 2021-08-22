@@ -86,8 +86,8 @@
 	 * @param {tinymce} sender TinyMCE root class/namespace.
 	 * @param {tinymce.Editor} editor Editor instance.
 	 * @example
-	 * tinyMCE.execCommand("mceAddControl", false, "some_textarea");
-	 * tinyMCE.onAddEditor.add(function(mgr,ed) {
+	 * tinymce.execCommand("mceAddControl", false, "some_textarea");
+	 * tinymce.onAddEditor.add(function(mgr,ed) {
 	 *     console.debug('A new editor is available' + ed.id);
 	 * });
 	 */
@@ -109,8 +109,8 @@
 		 * @property editors
 		 * @type Object
 		 * @example
-		 * for (edId in tinyMCE.editors)
-		 *     tinyMCE.editors[edId].save();
+		 * for (edId in tinymce.editors)
+		 *     tinymce.editors[edId].save();
 		 */
 		editors: [],
 
@@ -128,7 +128,7 @@
 		 * @property activeEditor
 		 * @type tinymce.Editor
 		 * @example
-		 * tinyMCE.activeEditor.selection.getContent();
+		 * tinymce.activeEditor.selection.getContent();
 		 * tinymce.EditorManager.activeEditor.selection.getContent();
 		 */
 		activeEditor: null,
@@ -145,7 +145,7 @@
 		 * });
 		 *
 		 * // Initializes a editor instance using the shorter version
-		 * tinyMCE.init({
+		 * tinymce.init({
 		 *    some_settings : 'some value'
 		 * });
 		 */
@@ -303,7 +303,7 @@
 		 * @return {tinymce.Editor} Editor instance to return.
 		 * @example
 		 * // Adds an onclick event to an editor by id (shorter version)
-		 * tinyMCE.get('mytextbox').onClick.add(function(ed, e) {
+		 * tinymce.get('mytextbox').onClick.add(function(ed, e) {
 		 *    ed.windowManager.alert('Hello world!');
 		 * });
 		 *
@@ -499,7 +499,7 @@
 		 * @method triggerSave
 		 * @example
 		 * // Saves all contents
-		 * tinyMCE.triggerSave();
+		 * tinymce.triggerSave();
 		 */
 		triggerSave: function () {
 			each(this.editors, function (e) {
@@ -555,7 +555,7 @@
  * @type tinymce
  * @example
  * // To initialize editor instances
- * tinyMCE.init({
+ * tinymce.init({
  *    ...
  * });
  */

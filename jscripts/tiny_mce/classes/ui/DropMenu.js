@@ -51,7 +51,7 @@
 	 * @extends tinymce.ui.Menu
 	 * @example
 	 * // Adds a menu to the currently active editor instance
-	 * var dm = tinyMCE.activeEditor.controlManager.createDropMenu('somemenu');
+	 * var dm = tinymce.activeEditor.controlManager.createDropMenu('somemenu');
 	 *
 	 * // Add some menu items
 	 * dm.add({title : 'Menu 1', onclick : function() {

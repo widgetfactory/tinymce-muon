@@ -30,7 +30,7 @@
 	 *                 var mlb = cm.createListBox('mylistbox', {
 	 *                      title : 'My list box',
 	 *                      onselect : function(v) {
-	 *                          tinyMCE.activeEditor.windowManager.alert('Value selected:' + v);
+	 *                          tinymce.activeEditor.windowManager.alert('Value selected:' + v);
 	 *                      }
 	 *                 });
 	 *
@@ -51,7 +51,7 @@
 	 * tinymce.PluginManager.add('example', tinymce.plugins.ExamplePlugin);
 	 *
 	 * // Initialize TinyMCE with the new plugin and button
-	 * tinyMCE.init({
+	 * tinymce.init({
 	 *    ...
 	 *    plugins : '-example', // - means TinyMCE will not try to load it
 	 *    theme_advanced_buttons1 : 'mylistbox' // Add the new example listbox to the toolbar

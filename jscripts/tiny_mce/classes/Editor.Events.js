@@ -28,8 +28,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @see #onInit
 			 * @example
-			 * // Adds an observer to the onPreInit event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onPreInit event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onPreInit.add(function(ed) {
@@ -46,8 +46,8 @@
 			 * @event onBeforeRenderUI
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onBeforeRenderUI event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onBeforeRenderUI event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *      ed.onBeforeRenderUI.add(function(ed, cm) {
@@ -64,8 +64,8 @@
 			 * @event onPostRender
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onPostRender event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onPostRender event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onPostRender.add(function(ed, cm) {
@@ -82,8 +82,8 @@
 			 * @event onLoad
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onLoad event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onLoad event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onLoad.add(function(ed, cm) {
@@ -101,8 +101,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @see #onPreInit
 			 * @example
-			 * // Adds an observer to the onInit event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onInit event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onInit.add(function(ed) {
@@ -119,8 +119,8 @@
 			 * @event onRemove
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onRemove event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onRemove event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onRemove.add(function(ed) {
@@ -137,8 +137,8 @@
 			 * @event onActivate
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onActivate event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onActivate event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onActivate.add(function(ed) {
@@ -155,8 +155,8 @@
 			 * @event onDeactivate
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onDeactivate event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onDeactivate event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onDeactivate.add(function(ed) {
@@ -173,8 +173,8 @@
 			 * @event onShow
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onShow event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onShow event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onShow.add(function(ed) {
@@ -191,8 +191,8 @@
 			 * @event onHide
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onHide event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onHide event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onHide.add(function(ed) {
@@ -210,8 +210,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onClick event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onClick event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onClick.add(function(ed, e) {
@@ -229,8 +229,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onEvent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onEvent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onEvent.add(function(ed, e) {
@@ -248,8 +248,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onMouseUp event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onMouseUp event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onMouseUp.add(function(ed, e) {
@@ -267,8 +267,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onMouseDown event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onMouseDown event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onMouseDown.add(function(ed, e) {
@@ -286,8 +286,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onDblClick event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onDblClick event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onDblClick.add(function(ed, e) {
@@ -305,8 +305,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onKeyDown event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onKeyDown event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onKeyDown.add(function(ed, e) {
@@ -324,8 +324,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onKeyUp event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onKeyUp event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onKeyUp.add(function(ed, e) {
@@ -343,8 +343,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onKeyPress event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onKeyPress event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onKeyPress.add(function(ed, e) {
@@ -362,8 +362,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onContextMenu event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onContextMenu event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onContextMenu.add(function(ed, e) {
@@ -381,8 +381,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onSubmit event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onSubmit event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSubmit.add(function(ed, e) {
@@ -400,8 +400,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onReset event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onReset event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onReset.add(function(ed, e) {
@@ -419,8 +419,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onPaste event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onPaste event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onPaste.add(function(ed, e) {
@@ -438,8 +438,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onCut event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onCut event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onCut.add(function(ed, e) {
@@ -457,8 +457,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onCopy event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onCopy event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onCopy.add(function(ed, e) {
@@ -481,8 +481,8 @@
 			 * @option {Boolean} set Is true if the process is on a setContent operation.
 			 * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
 			 * @example
-			 * // Adds an observer to the onPreProcess event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onPreProcess event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onPreProcess.add(function(ed, o) {
@@ -501,8 +501,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Object} obj PreProcess object.
 			 * @example
-			 * // Adds an observer to the onPostProcess event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onPostProcess event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onPostProcess.add(function(ed, o) {
@@ -521,8 +521,8 @@
 			 * @event onBeforeSetContent
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onBeforeSetContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onBeforeSetContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onBeforeSetContent.add(function(ed, o) {
@@ -541,8 +541,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Event} evt W3C DOM Event instance.
 			 * @example
-			 * // Adds an observer to the onBeforeGetContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onBeforeGetContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onBeforeGetContent.add(function(ed, o) {
@@ -559,8 +559,8 @@
 			 * @event onSetContent
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onSetContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onSetContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSetContent.add(function(ed, o) {
@@ -578,8 +578,8 @@
 			 * @event onGetContent
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onGetContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onGetContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onGetContent.add(function(ed, o) {
@@ -597,8 +597,8 @@
 			 * @event onLoadContent
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onLoadContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onLoadContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onLoadContent.add(function(ed, o) {
@@ -616,8 +616,8 @@
 			 * @event onSaveContent
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onSaveContent event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onSaveContent event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSaveContent.add(function(ed, o) {
@@ -635,8 +635,8 @@
 			 * @event onNodeChange
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onNodeChange event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onNodeChange event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onNodeChange.add(function(ed, cm, e) {
@@ -655,8 +655,8 @@
 			 * @event onChange
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onChange event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onChange event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onChange.add(function(ed, l) {
@@ -673,8 +673,8 @@
 			 * @event onBeforeExecCommand
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onBeforeExecCommand event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onBeforeExecCommand event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onBeforeExecCommand.add(function(ed, cmd, ui, val) {
@@ -691,8 +691,8 @@
 			 * @event onExecCommand
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onExecCommand event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onExecCommand event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onExecCommand.add(function(ed, cmd, ui, val) {
@@ -710,8 +710,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Object} level Undo level object.
 			 * @ example
-			 * // Adds an observer to the onUndo event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onUndo event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onUndo.add(function(ed, level) {
@@ -729,8 +729,8 @@
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @param {Object} level Undo level object.
 			 * @example
-			 * // Adds an observer to the onRedo event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onRedo event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onRedo.add(function(ed, level) {
@@ -747,8 +747,8 @@
 			 * @event onVisualAid
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onVisualAid event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onVisualAid event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onVisualAid.add(function(ed, e, s) {
@@ -765,8 +765,8 @@
 			 * @event onSetProgressState
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onSetProgressState event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onSetProgressState event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSetProgressState.add(function(ed, b) {
@@ -786,8 +786,8 @@
 			 * @event onSetAttrib
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onSetAttrib event using tinyMCE.init
-			 *tinyMCE.init({
+			 * // Adds an observer to the onSetAttrib event using tinymce.init
+			 *tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSetAttrib.add(function(ed, node, attribute, attributeValue) {
@@ -804,8 +804,8 @@
 			 * @event onSelectionChange
 			 * @param {tinymce.Editor} sender Editor instance.
 			 * @example
-			 * // Adds an observer to the onSelectionChange event using tinyMCE.init
-			 * tinyMCE.init({
+			 * // Adds an observer to the onSelectionChange event using tinymce.init
+			 * tinymce.init({
 			 *    ...
 			 *    setup : function(ed) {
 			 *       ed.onSelectionChange.add(function(ed, e) {
