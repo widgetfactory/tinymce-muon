@@ -27,9 +27,71 @@
 	 * tinymce.DOM.addClass('someid', 'someclass');
 	 *
 	 * // Add a class to an element by id inside the editor
-	 * tinyMCE.activeEditor.dom.addClass('someid', 'someclass');
+	 * tinymce.activeEditor.dom.addClass('someid', 'someclass');
 	 */
-	tinymce.create('tinymce.dom.DOMUtils', {
+	/**
+		 * Constructs a new DOMUtils instance. Consult the Wiki for more details on settings etc for this class.
+		 *
+		 * @constructor
+		 * @method DOMUtils
+		 * @param {Document} d Document reference to bind the utility class to.
+		 * @param {settings} s Optional settings collection.
+		 */
+	tinymce.dom.DOMUtils = function (d, s) {
+		var self = this,
+			blockElementsMap;
+
+		self.doc = d;
+		self.win = window;
+		self.files = {};
+		self.cssFlicker = false;
+		self.counter = 0;
+		self.stdMode = !tinymce.isIE || d.documentMode >= 8;
+		self.boxModel = !tinymce.isIE || d.compatMode == "CSS1Compat" || self.stdMode;
+		self.hasOuterHTML = "outerHTML" in d.createElement("a");
+
+		self.settings = s = tinymce.extend({
+			keep_values: false,
+			hex_colors: 1
+		}, s);
+
+		self.schema = s.schema;
+		self.styles = new tinymce.html.Styles({
+			url_converter: s.url_converter,
+			url_converter_scope: s.url_converter_scope
+		}, s.schema);
+
+		self.events = s.ownEvents ? new tinymce.dom.EventUtils(s.proxy) : tinymce.dom.Event;
+		tinymce.addUnload(self.destroy, this);
+		blockElementsMap = s.schema ? s.schema.getBlockElements() : {};
+
+		/**
+		 * Returns true/false if the specified element is a block element or not.
+		 *
+		 * @method isBlock
+		 * @param {Node/String} node Element/Node to check.
+		 * @return {Boolean} True/False state if the node is a block element or not.
+		 */
+		self.isBlock = function (node) {
+			// Fix for #5446
+			if (!node) {
+				return false;
+			}
+
+			// This function is called in module pattern style since it might be executed with the wrong this scope
+			var type = node.nodeType;
+
+			// If it's a node then check the type and use the nodeName
+			if (type) {
+				return !!(type === 1 && blockElementsMap[node.nodeName]);
+			}
+
+			return !!blockElementsMap[node];
+		};
+	};
+
+	tinymce.dom.DOMUtils.prototype = {
+
 		doc: null,
 		root: null,
 		files: null,
@@ -47,67 +109,6 @@
 			id: "id",
 			name: "name",
 			type: "type"
-		},
-
-		/**
-		 * Constructs a new DOMUtils instance. Consult the Wiki for more details on settings etc for this class.
-		 *
-		 * @constructor
-		 * @method DOMUtils
-		 * @param {Document} d Document reference to bind the utility class to.
-		 * @param {settings} s Optional settings collection.
-		 */
-		DOMUtils: function (d, s) {
-			var self = this,
-				blockElementsMap;
-
-			self.doc = d;
-			self.win = window;
-			self.files = {};
-			self.cssFlicker = false;
-			self.counter = 0;
-			self.stdMode = !tinymce.isIE || d.documentMode >= 8;
-			self.boxModel = !tinymce.isIE || d.compatMode == "CSS1Compat" || self.stdMode;
-			self.hasOuterHTML = "outerHTML" in d.createElement("a");
-
-			self.settings = s = tinymce.extend({
-				keep_values: false,
-				hex_colors: 1
-			}, s);
-
-			self.schema = s.schema;
-			self.styles = new tinymce.html.Styles({
-				url_converter: s.url_converter,
-				url_converter_scope: s.url_converter_scope
-			}, s.schema);
-
-			self.events = s.ownEvents ? new tinymce.dom.EventUtils(s.proxy) : tinymce.dom.Event;
-			tinymce.addUnload(self.destroy, this);
-			blockElementsMap = s.schema ? s.schema.getBlockElements() : {};
-
-			/**
-			 * Returns true/false if the specified element is a block element or not.
-			 *
-			 * @method isBlock
-			 * @param {Node/String} node Element/Node to check.
-			 * @return {Boolean} True/False state if the node is a block element or not.
-			 */
-			self.isBlock = function (node) {
-				// Fix for #5446
-				if (!node) {
-					return false;
-				}
-
-				// This function is called in module pattern style since it might be executed with the wrong this scope
-				var type = node.nodeType;
-
-				// If it's a node then check the type and use the nodeName
-				if (type) {
-					return !!(type === 1 && blockElementsMap[node.nodeName]);
-				}
-
-				return !!blockElementsMap[node];
-			};
 		},
 
 		clone: function (node, deep) {
@@ -371,10 +372,10 @@
 		 * @return {Array} Array with all matched elements.
 		 * @example
 		 * // Adds a class to all paragraphs in the currently active editor
-		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
+		 * tinymce.activeEditor.dom.addClass(tinymce.activeEditor.dom.select('p'), 'someclass');
 		 *
 		 * // Adds a class to all spans that has the test class in the currently active editor
-		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('span.test'), 'someclass');
+		 * tinymce.activeEditor.dom.addClass(tinymce.activeEditor.dom.select('span.test'), 'someclass');
 		 */
 		select: function (selector, scope) {
 			var self = this;
@@ -383,7 +384,7 @@
 			return tinymce.dom.Sizzle(selector, self.get(scope) || self.settings.root_element || self.doc, []);
 		},
 
-		unique: function(arr) {
+		unique: function (arr) {
 			return tinymce.dom.Sizzle.uniqueSort(arr);
 		},
 
@@ -449,7 +450,7 @@
 			return result;
 		},
 
-		contains: function(context, elm) {
+		contains: function (context, elm) {
 			return tinymce.dom.Sizzle.contains(context, elm);
 		},
 
@@ -467,7 +468,7 @@
 		 * @return {Element/Array} Element that got created or array with elements if multiple elements where passed.
 		 * @example
 		 * // Adds a new paragraph to the end of the active editor
-		 * tinyMCE.activeEditor.dom.add(tinyMCE.activeEditor.getBody(), 'p', {title : 'my title'}, 'Some content');
+		 * tinymce.activeEditor.dom.add(tinymce.activeEditor.getBody(), 'p', {title : 'my title'}, 'Some content');
 		 */
 		add: function (p, n, a, h, c) {
 			var self = this;
@@ -500,8 +501,8 @@
 		 * @return {Element} HTML DOM node element that got created.
 		 * @example
 		 * // Adds an element where the caret/selection is in the active editor
-		 * var el = tinyMCE.activeEditor.dom.create('div', {id : 'test', 'class' : 'myclass'}, 'some content');
-		 * tinyMCE.activeEditor.selection.setNode(el);
+		 * var el = tinymce.activeEditor.dom.create('div', {id : 'test', 'class' : 'myclass'}, 'some content');
+		 * tinymce.activeEditor.selection.setNode(el);
 		 */
 		create: function (n, a, h) {
 			return this.add(this.doc.createElement(n), n, a, h, 1);
@@ -534,7 +535,7 @@
 		 * @return {String} String with new HTML element like for example: <a href="#">test</a>.
 		 * @example
 		 * // Creates a html chunk and inserts it at the current selection/caret location
-		 * tinyMCE.activeEditor.selection.setContent(tinyMCE.activeEditor.dom.createHTML('a', {href : 'test.html'}, 'some line'));
+		 * tinymce.activeEditor.selection.setContent(tinymce.activeEditor.dom.createHTML('a', {href : 'test.html'}, 'some line'));
 		 */
 		createHTML: function (n, a, h) {
 			var o = '',
@@ -598,10 +599,10 @@
 		 * @return {Element/Array} HTML DOM element that got removed or array of elements depending on input.
 		 * @example
 		 * // Removes all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.remove(tinyMCE.activeEditor.dom.select('p'));
+		 * tinymce.activeEditor.dom.remove(tinymce.activeEditor.dom.select('p'));
 		 *
 		 * // Removes a element by id in the document
-		 * tinyMCE.DOM.remove('mydiv');
+		 * tinymce.DOM.remove('mydiv');
 		 */
 		remove: function (node, keep_children) {
 			return this.run(node, function (node) {
@@ -658,10 +659,10 @@
 		 * @param {String} v Value to set on the style.
 		 * @example
 		 * // Sets a style value on all paragraphs in the currently active editor
-		 * tinyMCE.activeEditor.dom.setStyle(tinyMCE.activeEditor.dom.select('p'), 'background-color', 'red');
+		 * tinymce.activeEditor.dom.setStyle(tinymce.activeEditor.dom.select('p'), 'background-color', 'red');
 		 *
 		 * // Sets a style value to an element by id in the current document
-		 * tinyMCE.DOM.setStyle('mydiv', 'background-color', 'red');
+		 * tinymce.DOM.setStyle('mydiv', 'background-color', 'red');
 		 */
 		setStyle: function (n, na, v) {
 			var self = this;
@@ -751,10 +752,10 @@
 		 * @param {Object} o Name/Value collection of style items to add to the element(s).
 		 * @example
 		 * // Sets styles on all paragraphs in the currently active editor
-		 * tinyMCE.activeEditor.dom.setStyles(tinyMCE.activeEditor.dom.select('p'), {'background-color' : 'red', 'color' : 'green'});
+		 * tinymce.activeEditor.dom.setStyles(tinymce.activeEditor.dom.select('p'), {'background-color' : 'red', 'color' : 'green'});
 		 *
 		 * // Sets styles to an element by id in the current document
-		 * tinyMCE.DOM.setStyles('mydiv', {'background-color' : 'red', 'color' : 'green'});
+		 * tinymce.DOM.setStyles('mydiv', {'background-color' : 'red', 'color' : 'green'});
 		 */
 		setStyles: function (e, o) {
 			var self = this,
@@ -818,10 +819,10 @@
 		 * @param {String} v Value to set on the attribute of this value is falsy like null 0 or '' it will remove the attribute instead.
 		 * @example
 		 * // Sets an attribute to all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.setAttrib(tinyMCE.activeEditor.dom.select('p'), 'class', 'myclass');
+		 * tinymce.activeEditor.dom.setAttrib(tinymce.activeEditor.dom.select('p'), 'class', 'myclass');
 		 *
 		 * // Sets an attribute to a specific element in the current page
-		 * tinyMCE.dom.setAttrib('mydiv', 'class', 'myclass');
+		 * tinymce.dom.setAttrib('mydiv', 'class', 'myclass');
 		 */
 		setAttrib: function (e, n, v) {
 			var self = this;
@@ -890,8 +891,8 @@
 				}
 
 				// fire onChangeAttrib event for attributes that have changed
-				if (tinyMCE.activeEditor && originalValue != v) {
-					var ed = tinyMCE.activeEditor;
+				if (tinymce.activeEditor && originalValue != v) {
+					var ed = tinymce.activeEditor;
 					ed.onSetAttrib.dispatch(ed, e, n, v);
 				}
 			});
@@ -905,10 +906,10 @@
 		 * @param {Object} o Name/Value collection of attribute items to add to the element(s).
 		 * @example
 		 * // Sets some attributes to all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.setAttribs(tinyMCE.activeEditor.dom.select('p'), {'class' : 'myclass', title : 'some title'});
+		 * tinymce.activeEditor.dom.setAttribs(tinymce.activeEditor.dom.select('p'), {'class' : 'myclass', title : 'some title'});
 		 *
 		 * // Sets some attributes to a specific element in the current page
-		 * tinyMCE.DOM.setAttribs('mydiv', {'class' : 'myclass', title : 'some title'});
+		 * tinymce.DOM.setAttribs('mydiv', {'class' : 'myclass', title : 'some title'});
 		 */
 		setAttribs: function (e, o) {
 			var self = this;
@@ -1226,10 +1227,10 @@
 		 * tinymce.DOM.loadCSS('somepath/some.css');
 		 *
 		 * // Loads a CSS file into the currently active editor instance
-		 * tinyMCE.activeEditor.dom.loadCSS('somepath/some.css');
+		 * tinymce.activeEditor.dom.loadCSS('somepath/some.css');
 		 *
 		 * // Loads a CSS file into an editor instance by id
-		 * tinyMCE.get('someid').dom.loadCSS('somepath/some.css');
+		 * tinymce.get('someid').dom.loadCSS('somepath/some.css');
 		 *
 		 * // Loads multiple CSS files into the current document
 		 * tinymce.DOM.loadCSS('somepath/some.css,somepath/someother.css');
@@ -1273,10 +1274,10 @@
 		 * @return {String/Array} String with new class value or array with new class values for all elements.
 		 * @example
 		 * // Adds a class to all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'myclass');
+		 * tinymce.activeEditor.dom.addClass(tinymce.activeEditor.dom.select('p'), 'myclass');
 		 *
 		 * // Adds a class to a specific element in the current page
-		 * tinyMCE.DOM.addClass('mydiv', 'myclass');
+		 * tinymce.DOM.addClass('mydiv', 'myclass');
 		 */
 		addClass: function (e, c) {
 			if (!c) {
@@ -1323,10 +1324,10 @@
 		 * @return {String/Array} String with new class value or array with new class values for all elements.
 		 * @example
 		 * // Removes a class from all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.removeClass(tinyMCE.activeEditor.dom.select('p'), 'myclass');
+		 * tinymce.activeEditor.dom.removeClass(tinymce.activeEditor.dom.select('p'), 'myclass');
 		 *
 		 * // Removes a class from a specific element in the current page
-		 * tinyMCE.DOM.removeClass('mydiv', 'myclass');
+		 * tinymce.DOM.removeClass('mydiv', 'myclass');
 		 */
 		removeClass: function (e, c) {
 			var self = this;
@@ -1370,13 +1371,13 @@
 		 * @param {String} c CSS class to add or remove.
 		 * @return {String/Array} String with new class value or array with new class values for all elements.
 		 */
-		toggleClass: function(n, c) {
+		toggleClass: function (n, c) {
 			n = this.get(n);
 
 			if (!n || !c) {
 				return false;
 			}
-			
+
 			if (this.hasClass(n, c)) {
 				return this.removeClass(n, c);
 			} else {
@@ -1441,10 +1442,10 @@
 		 * @param {String} h HTML content to set as inner HTML of the element.
 		 * @example
 		 * // Sets the inner HTML of all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.setHTML(tinyMCE.activeEditor.dom.select('p'), 'some inner html');
+		 * tinymce.activeEditor.dom.setHTML(tinymce.activeEditor.dom.select('p'), 'some inner html');
 		 *
 		 * // Sets the inner HTML of a element by id in the document
-		 * tinyMCE.DOM.setHTML('mydiv', 'some inner html');
+		 * tinymce.DOM.setHTML('mydiv', 'some inner html');
 		 */
 		setHTML: function (element, html) {
 			var self = this;
@@ -1493,7 +1494,7 @@
 		 * @return {String} Outer HTML string.
 		 * @example
 		 * tinymce.DOM.getOuterHTML(editorElement);
-		 * tinyMCE.activeEditor.getOuterHTML(tinyMCE.activeEditor.getBody());
+		 * tinymce.activeEditor.getOuterHTML(tinymce.activeEditor.getBody());
 		 */
 		getOuterHTML: function (elm) {
 			var doc, self = this;
@@ -1523,10 +1524,10 @@
 		 * @param {Document} d Optional document scope to use in this process defaults to the document of the DOM class.
 		 * @example
 		 * // Sets the outer HTML of all paragraphs in the active editor
-		 * tinyMCE.activeEditor.dom.setOuterHTML(tinyMCE.activeEditor.dom.select('p'), '<div>some html</div>');
+		 * tinymce.activeEditor.dom.setOuterHTML(tinymce.activeEditor.dom.select('p'), '<div>some html</div>');
 		 *
 		 * // Sets the outer HTML of a element by id in the document
-		 * tinyMCE.DOM.setOuterHTML('mydiv', '<div>some html</div>');
+		 * tinymce.DOM.setOuterHTML('mydiv', '<div>some html</div>');
 		 */
 		setOuterHTML: function (e, h, d) {
 			var self = this;
@@ -2228,7 +2229,7 @@
 
 			// Check for fake content editable
 			contentEditable = node.getAttribute("data-mce-contenteditable");
-			
+
 			if (contentEditable && contentEditable !== "inherit") {
 				return contentEditable;
 			}
@@ -2313,7 +2314,7 @@
 				tinymce.walk(n, f, 'childNodes', s);
 		}
 		*/
-	});
+	};
 
 	/**
 	 * Instance of DOMUtils for the current document.

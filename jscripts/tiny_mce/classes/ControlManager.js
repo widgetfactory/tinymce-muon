@@ -14,40 +14,31 @@
 		each = tinymce.each,
 		extend = tinymce.extend;
 
+	tinymce.ControlManager = function (ed, s) {
+		var self = this;
+
+		s = s || {};
+		self.editor = ed;
+		self.controls = {};
+		self.onAdd = new tinymce.util.Dispatcher(self);
+		self.onPostRender = new tinymce.util.Dispatcher(self);
+		self.prefix = s.prefix || ed.id + '_';
+		self._cls = {};
+
+		self.classPrefix = 'mce';
+
+		self.onPostRender.add(function () {
+			each(self.controls, function (c) {
+				c.postRender();
+			});
+		});
+	}
+
 	/**
 	 * This class is responsible for managing UI control instances. It's both a factory and a collection for the controls.
 	 * @class tinymce.ControlManager
 	 */
-	tinymce.create('tinymce.ControlManager', {
-		/**
-		 * Constructs a new control manager instance.
-		 * Consult the Wiki for more details on this class.
-		 *
-		 * @constructor
-		 * @method ControlManager
-		 * @param {tinymce.Editor} ed TinyMCE editor instance to add the control to.
-		 * @param {Object} s Optional settings object for the control manager.
-		 */
-		ControlManager: function (ed, s) {
-			var self = this;
-
-			s = s || {};
-			self.editor = ed;
-			self.controls = {};
-			self.onAdd = new tinymce.util.Dispatcher(self);
-			self.onPostRender = new tinymce.util.Dispatcher(self);
-			self.prefix = s.prefix || ed.id + '_';
-			self._cls = {};
-
-			self.classPrefix = 'mce';
-
-			self.onPostRender.add(function () {
-				each(self.controls, function (c) {
-					c.postRender();
-				});
-			});
-		},
-
+	tinymce.ControlManager.prototype = {
 		/**
 		 * Returns a control by id or undefined it it wasn't found.
 		 *
@@ -303,26 +294,26 @@
 		 * @param {Object} cc Optional control class to use instead of the default one.
 		 * @return {tinymce.ui.Control} Control instance that got created and added.
 		 */
-		 createStylesBox: function (id, s, cc) {
+		createStylesBox: function (id, s, cc) {
 			var self = this,
 				ed = self.editor;
-			
+
 			s = tinymce.extend({
 				filter: true,
 				max_height: 384
 			}, s || {});
 
-            function loadClasses(ctrl) {
-                if (!Array.isArray(ed.settings.importcss_classes)) {
-                    return;
-                }
+			function loadClasses(ctrl) {
+				if (!Array.isArray(ed.settings.importcss_classes)) {
+					return;
+				}
 
-                if (ctrl.hasClasses) {
-                    return;
-                }
+				if (ctrl.hasClasses) {
+					return;
+				}
 
-                each(ed.settings.importcss_classes, function (item, idx) {
-                    // Parse simple element.class1, .class1
+				each(ed.settings.importcss_classes, function (item, idx) {
+					// Parse simple element.class1, .class1
 					var selector = /^(?:([a-z0-9\-_]+))?(\.[a-z0-9_\-\.]+)$/i.exec(item.selector || item);
 
 					// no match
@@ -337,19 +328,19 @@
 
 					var classes = selector[2].substr(1).split('.');
 
-					each(classes, function(cls) {
+					each(classes, function (cls) {
 						ctrl.add(cls, cls, {
-                            style: function () {
-								return tinymce.util.PreviewCss(ed, {classes: cls});
-                            }
-                        });
+							style: function () {
+								return tinymce.util.PreviewCss(ed, { classes: cls });
+							}
+						});
 					});
-                });
+				});
 
-                if (Array.isArray(ed.settings.importcss_classes)) {
-                    ctrl.hasClasses = true;
-                }
-            }
+				if (Array.isArray(ed.settings.importcss_classes)) {
+					ctrl.hasClasses = true;
+				}
+			}
 
 			var c = this.createListBox(id, s, cc);
 
@@ -580,10 +571,10 @@
 
 		createUrlBox: function (id, s, cc) {
 			var ed = this.editor;
-			
+
 			s.upload_label = ed.getLang(s.upload_label, 'Upload');
 			s.picker_label = ed.getLang(s.picker_label, 'Browse');
-			
+
 			return this.createTextBox(id, s, tinymce.ui.UrlBox);
 		},
 
@@ -773,5 +764,5 @@
 
 			this.controls = null;
 		}
-	});
+	};
 })(tinymce);

@@ -11,21 +11,21 @@
 (function (tinymce) {
 	var Dispatcher = tinymce.util.Dispatcher;
 
+	tinymce.AddOnManager = function () {
+		var self = this;
+
+		self.items = [];
+		self.urls = {};
+		self.lookup = {};
+		self.onAdd = new Dispatcher(self);
+	}
+
 	/**
 	 * This class handles the loading of themes/plugins or other add-ons and their language packs.
 	 *
 	 * @class tinymce.AddOnManager
 	 */
-	tinymce.create('tinymce.AddOnManager', {
-		AddOnManager: function () {
-			var self = this;
-
-			self.items = [];
-			self.urls = {};
-			self.lookup = {};
-			self.onAdd = new Dispatcher(self);
-		},
-
+	tinymce.AddOnManager.prototype = {
 		/**
 		 * Fires when a item is added.
 		 *
@@ -90,7 +90,7 @@
 		 * tinymce.PluginManager.add('test', tinymce.plugins.TestPlugin);
 		 *
 		 * // Initialize TinyMCE
-		 * tinyMCE.init({
+		 * tinymce.init({
 		 *    ...
 		 *    plugins : '-test' // Init the plugin but don't try to load it
 		 * });
@@ -146,7 +146,7 @@
 		 * tinymce.PluginManager.load('myplugin', '/some/dir/someplugin/editor_plugin.js');
 		 *
 		 * // Initialize TinyMCE
-		 * tinyMCE.init({
+		 * tinymce.init({
 		 *    ...
 		 *    plugins : '-myplugin' // Don't try to load it again
 		 * });
@@ -191,7 +191,7 @@
 				tinymce.ScriptLoader.add(url, loadDependencies, s);
 			}
 		}
-	});
+	};
 
 	// Create plugin and theme managers
 	tinymce.PluginManager = new tinymce.AddOnManager();
@@ -252,7 +252,7 @@
  * tinymce.PluginManager.add('example', tinymce.plugins.ExamplePlugin);
  *
  * // Initialize TinyMCE with the new plugin and button
- * tinyMCE.init({
+ * tinymce.init({
  *    ...
  *    plugins : '-example', // - means TinyMCE will not try to load it
  *    theme_advanced_buttons1 : 'example' // Add the new example button to the toolbar
@@ -269,7 +269,7 @@
  * // Creates a new plugin class
  * tinymce.create('tinymce.plugins.ExamplePlugin', {
  *     init : function(ed, url) {
- *         // Register the command so that it can be invoked by using tinyMCE.activeEditor.execCommand('mceExample');
+ *         // Register the command so that it can be invoked by using tinymce.activeEditor.execCommand('mceExample');
  *         ed.addCommand('mceExample', function() {
  *             ed.windowManager.open({
  *                 file : url + '/dialog.htm',
@@ -324,7 +324,7 @@
  * tinymce.PluginManager.add('example', tinymce.plugins.ExamplePlugin);
  *
  * // Initialize TinyMCE with the new plugin
- * tinyMCE.init({
+ * tinymce.init({
  *    ...
  *    plugins : '-example' // - means TinyMCE will not try to load it
  * });
@@ -346,7 +346,7 @@
  *                 var mlb = cm.createListBox('mylistbox', {
  *                      title : 'My list box',
  *                      onselect : function(v) {
- *                          tinyMCE.activeEditor.windowManager.alert('Value selected:' + v);
+ *                          tinymce.activeEditor.windowManager.alert('Value selected:' + v);
  *                      }
  *                 });
  *
@@ -367,7 +367,7 @@
  * tinymce.PluginManager.add('example', tinymce.plugins.ExamplePlugin);
  *
  * // Initialize TinyMCE with the new plugin and button
- * tinyMCE.init({
+ * tinymce.init({
  *    ...
  *    plugins : '-example', // - means TinyMCE will not try to load it
  *    theme_advanced_buttons1 : 'mylistbox' // Add the new mylistbox control to the toolbar

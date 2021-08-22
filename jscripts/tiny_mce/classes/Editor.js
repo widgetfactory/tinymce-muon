@@ -28,10 +28,10 @@
 	 * @class tinymce.Editor
 	 * @example
 	 * // Add a class to all paragraphs in the editor.
-	 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
+	 * tinymce.activeEditor.dom.addClass(tinymce.activeEditor.dom.select('p'), 'someclass');
 	 *
 	 * // Gets the current editors selection as text
-	 * tinyMCE.activeEditor.selection.getContent({format : 'text'});
+	 * tinymce.activeEditor.selection.getContent({format : 'text'});
 	 *
 	 * // Creates a new editor instance
 	 * var ed = new tinymce.Editor('textareaid', {
@@ -45,168 +45,157 @@
 	 *
 	 * ed.render();
 	 */
-	tinymce.create('tinymce.Editor', {
+	tinymce.Editor = function (id, settings) {
+		var self = this,
+			TRUE = true;
+
 		/**
-		 * Constructs a editor instance by id.
+		 * Name/value collection with editor settings.
 		 *
-		 * @constructor
-		 * @method Editor
-		 * @param {String} id Unique id for the editor.
-		 * @param {Object} settings Optional settings string for the editor.
-		 * @author Moxiecode
+		 * @property settings
+		 * @type Object
+		 * @example
+		 * // Get the value of the theme setting
+		 * tinymce.activeEditor.windowManager.alert("You are using the " + tinymce.activeEditor.settings.theme + " theme");
 		 */
-		Editor: function (id, settings) {
-			var self = this,
-				TRUE = true;
+		self.settings = settings = extend({
+			id: id,
+			language: 'en',
+			theme: 'advanced',
+			skin: 'modern',
+			delta_width: 0,
+			delta_height: 0,
+			popup_css: '',
+			plugins: '',
+			document_base_url: tinymce.documentBaseURL,
+			add_form_submit_trigger: TRUE,
+			submit_patch: TRUE,
+			add_unload_trigger: TRUE,
+			convert_urls: TRUE,
+			relative_urls: TRUE,
+			remove_script_host: TRUE,
+			table_inline_editing: false,
+			object_resizing: TRUE,
+			accessibility_focus: TRUE,
+			doctype: '<!DOCTYPE html>',
+			visual: TRUE,
+			font_size_style_values: 'xx-small,x-small,small,medium,large,x-large,xx-large',
+			font_size_legacy_values: 'xx-small,small,medium,large,x-large,xx-large,300%', // See: http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size
+			apply_source_formatting: TRUE,
+			directionality: 'ltr',
+			forced_root_block: 'p',
+			hidden_input: TRUE,
+			padd_empty_editor: TRUE,
+			render_ui: TRUE,
+			indentation: '30px',
+			fix_table_elements: TRUE,
+			inline_styles: TRUE,
+			convert_fonts_to_spans: TRUE,
+			indent: 'simple',
+			indent_before: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
+			indent_after: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
+			validate: TRUE,
+			entity_encoding: 'named',
+			url_converter: self.convertURL,
+			url_converter_scope: self,
+			validate_styles: TRUE
+		}, settings);
 
-			/**
-			 * Name/value collection with editor settings.
-			 *
-			 * @property settings
-			 * @type Object
-			 * @example
-			 * // Get the value of the theme setting
-			 * tinyMCE.activeEditor.windowManager.alert("You are using the " + tinyMCE.activeEditor.settings.theme + " theme");
-			 */
-			self.settings = settings = extend({
-				id: id,
-				language: 'en',
-				theme: 'advanced',
-				skin: 'modern',
-				delta_width: 0,
-				delta_height: 0,
-				popup_css: '',
-				plugins: '',
-				document_base_url: tinymce.documentBaseURL,
-				add_form_submit_trigger: TRUE,
-				submit_patch: TRUE,
-				add_unload_trigger: TRUE,
-				convert_urls: TRUE,
-				relative_urls: TRUE,
-				remove_script_host: TRUE,
-				table_inline_editing: false,
-				object_resizing: TRUE,
-				accessibility_focus: TRUE,
-				doctype: '<!DOCTYPE html>',
-				visual: TRUE,
-				font_size_style_values: 'xx-small,x-small,small,medium,large,x-large,xx-large',
-				font_size_legacy_values: 'xx-small,small,medium,large,x-large,xx-large,300%', // See: http://www.w3.org/TR/CSS2/fonts.html#propdef-font-size
-				apply_source_formatting: TRUE,
-				directionality: 'ltr',
-				forced_root_block: 'p',
-				hidden_input: TRUE,
-				padd_empty_editor: TRUE,
-				render_ui: TRUE,
-				indentation: '30px',
-				fix_table_elements: TRUE,
-				inline_styles: TRUE,
-				convert_fonts_to_spans: TRUE,
-				indent: 'simple',
-				indent_before: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
-				indent_after: 'p,h1,h2,h3,h4,h5,h6,blockquote,div,title,style,pre,script,td,ul,li,area,table,thead,tfoot,tbody,tr,section,article,hgroup,aside,figure,option,optgroup,datalist',
-				validate: TRUE,
-				entity_encoding: 'named',
-				url_converter: self.convertURL,
-				url_converter_scope: self,
-				validate_styles: TRUE
-			}, settings);
+		/**
+		 * Editor instance id, normally the same as the div/textarea that was replaced.
+		 *
+		 * @property id
+		 * @type String
+		 */
+		self.id = self.editorId = id;
 
-			/**
-			 * Editor instance id, normally the same as the div/textarea that was replaced.
-			 *
-			 * @property id
-			 * @type String
-			 */
-			self.id = self.editorId = id;
+		/**
+		 * State to force the editor to return false on a isDirty call.
+		 *
+		 * @property isNotDirty
+		 * @type Boolean
+		 * @example
+		 * function ajaxSave() {
+		 *     var ed = tinymce.get('elm1');
+		 *
+		 *     // Save contents using some XHR call
+		 *     alert(ed.getContent());
+		 *
+		 *     ed.isNotDirty = 1; // Force not dirty state
+		 * }
+		 */
+		self.isNotDirty = false;
 
-			/**
-			 * State to force the editor to return false on a isDirty call.
-			 *
-			 * @property isNotDirty
-			 * @type Boolean
-			 * @example
-			 * function ajaxSave() {
-			 *     var ed = tinyMCE.get('elm1');
-			 *
-			 *     // Save contents using some XHR call
-			 *     alert(ed.getContent());
-			 *
-			 *     ed.isNotDirty = 1; // Force not dirty state
-			 * }
-			 */
-			self.isNotDirty = false;
+		/**
+		 * Name/Value object containting plugin instances.
+		 *
+		 * @property plugins
+		 * @type Object
+		 * @example
+		 * // Execute a method inside a plugin directly
+		 * tinymce.activeEditor.plugins.someplugin.someMethod();
+		 */
+		self.plugins = {};
 
-			/**
-			 * Name/Value object containting plugin instances.
-			 *
-			 * @property plugins
-			 * @type Object
-			 * @example
-			 * // Execute a method inside a plugin directly
-			 * tinyMCE.activeEditor.plugins.someplugin.someMethod();
-			 */
-			self.plugins = {};
+		/**
+		 * URI object to document configured for the TinyMCE instance.
+		 *
+		 * @property documentBaseURI
+		 * @type tinymce.util.URI
+		 * @example
+		 * // Get relative URL from the location of document_base_url
+		 * tinymce.activeEditor.documentBaseURI.toRelative('/somedir/somefile.htm');
+		 *
+		 * // Get absolute URL from the location of document_base_ur\
+		 * tinymce.activeEditor.documentBaseURI.toAbsolute('somefile.htm');
+		 */
+		self.documentBaseURI = new tinymce.util.URI(settings.document_base_url || tinymce.documentBaseURL, {
+			base_uri: tinymce.baseURI
+		});
 
-			/**
-			 * URI object to document configured for the TinyMCE instance.
-			 *
-			 * @property documentBaseURI
-			 * @type tinymce.util.URI
-			 * @example
-			 * // Get relative URL from the location of document_base_url
-			 * tinyMCE.activeEditor.documentBaseURI.toRelative('/somedir/somefile.htm');
-			 *
-			 * // Get absolute URL from the location of document_base_ur\
-			 * tinyMCE.activeEditor.documentBaseURI.toAbsolute('somefile.htm');
-			 */
-			self.documentBaseURI = new tinymce.util.URI(settings.document_base_url || tinymce.documentBaseURL, {
-				base_uri: tinyMCE.baseURI
-			});
+		/**
+		 * URI object to current document that holds the TinyMCE editor instance.
+		 *
+		 * @property baseURI
+		 * @type tinymce.util.URI
+		 * @example
+		 * // Get relative URL from the location of the API
+		 * tinymce.activeEditor.baseURI.toRelative('/somedir/somefile.htm');
+		 *
+		 * // Get absolute URL from the location of the API
+		 * tinymce.activeEditor.baseURI.toAbsolute('somefile.htm');
+		 */
+		self.baseURI = tinymce.baseURI;
 
-			/**
-			 * URI object to current document that holds the TinyMCE editor instance.
-			 *
-			 * @property baseURI
-			 * @type tinymce.util.URI
-			 * @example
-			 * // Get relative URL from the location of the API
-			 * tinyMCE.activeEditor.baseURI.toRelative('/somedir/somefile.htm');
-			 *
-			 * // Get absolute URL from the location of the API
-			 * tinyMCE.activeEditor.baseURI.toAbsolute('somefile.htm');
-			 */
-			self.baseURI = tinymce.baseURI;
+		/**
+		 * Array with CSS files to load into the iframe.
+		 *
+		 * @property contentCSS
+		 * @type Array
+		 */
+		self.contentCSS = [];
 
-			/**
-			 * Array with CSS files to load into the iframe.
-			 *
-			 * @property contentCSS
-			 * @type Array
-			 */
-			self.contentCSS = [];
+		/**
+		 * Array of CSS styles to add to head of document when the editor loads.
+		 *
+		 * @property contentStyles
+		 * @type Array
+		 */
+		self.contentStyles = [];
 
-			/**
-			 * Array of CSS styles to add to head of document when the editor loads.
-			 *
-			 * @property contentStyles
-			 * @type Array
-			 */
-			self.contentStyles = [];
+		// Creates all events like onClick, onSetContent etc see Editor.Events.js for the actual logic
+		self.setupEvents();
 
-			// Creates all events like onClick, onSetContent etc see Editor.Events.js for the actual logic
-			self.setupEvents();
+		// Internal command handler objects
+		self.execCommands = {};
+		self.queryStateCommands = {};
+		self.queryValueCommands = {};
 
-			// Internal command handler objects
-			self.execCommands = {};
-			self.queryStateCommands = {};
-			self.queryValueCommands = {};
+		// Call setup
+		self.execCallback('setup', self);
+	};
 
-			// Call setup
-			self.execCallback('setup', self);
-
-
-		},
-
+	tinymce.Editor.prototype = {
 		/**
 		 * Renderes the editor/adds it to the page.
 		 *
@@ -226,7 +215,7 @@
 				return;
 			}
 
-			tinyMCE.settings = s;
+			tinymce.settings = s;
 
 			// Element not found, then skip initialization
 			if (!self.getElement()) {
@@ -260,11 +249,11 @@
 			 * @type tinymce.WindowManager
 			 * @example
 			 * // Shows an alert message
-			 * tinyMCE.activeEditor.windowManager.alert('Hello world!');
+			 * tinymce.activeEditor.windowManager.alert('Hello world!');
 			 *
 			 * // Opens a new dialog with the file.htm file and the size 320x240
 			 * // It also adds a custom parameter this can be retrieved by using tinyMCEPopup.getWindowArg inside the dialog.
-			 * tinyMCE.activeEditor.windowManager.open({
+			 * tinymce.activeEditor.windowManager.open({
 			 *    url : 'file.htm',
 			 *    width : 320,
 			 *    height : 240
@@ -294,7 +283,7 @@
 			}
 
 			if (s.add_unload_trigger) {
-				self._beforeUnload = tinyMCE.onBeforeUnload.add(function () {
+				self._beforeUnload = tinymce.onBeforeUnload.add(function () {
 					if (self.initialized && !self.destroyed && !self.isHidden()) {
 						self.save({
 							format: 'raw',
@@ -343,7 +332,7 @@
 				}
 
 				if (s.theme && typeof s.theme != "function" && s.theme.charAt(0) != '-' && !ThemeManager.urls[s.theme]) {
-					ThemeManager.load(s.theme, 'themes/' + s.theme + '/editor_template' + tinymce.suffix + '.js');
+					ThemeManager.load(s.theme, 'themes/' + s.theme + '/theme' + tinymce.suffix + '.js');
 				}
 
 				each(explode(s.plugins), function (p) {
@@ -355,7 +344,7 @@
 								var defaultSettings = {
 									prefix: 'plugins/',
 									resource: dep,
-									suffix: '/editor_plugin' + tinymce.suffix + '.js'
+									suffix: '/plugin' + tinymce.suffix + '.js'
 								};
 								dep = PluginManager.createUrl(defaultSettings, dep);
 								PluginManager.load(dep.resource, dep);
@@ -364,7 +353,7 @@
 							PluginManager.load(p, {
 								prefix: 'plugins/',
 								resource: p,
-								suffix: '/editor_plugin' + tinymce.suffix + '.js'
+								suffix: '/plugin' + tinymce.suffix + '.js'
 							});
 						}
 					}
@@ -410,7 +399,7 @@
 			 * @type tinymce.Theme
 			 * @example
 			 * // Executes a method on the theme directly
-			 * tinyMCE.activeEditor.theme.someMethod();
+			 * tinymce.activeEditor.theme.someMethod();
 			 */
 			if (s.theme) {
 				if (typeof s.theme != "function") {
@@ -435,6 +424,7 @@
 					each(PluginManager.dependencies(p), function (dep) {
 						initPlugin(dep);
 					});
+
 					po = new c(self, u);
 
 					self.plugins[p] = po;
@@ -456,7 +446,7 @@
 			 * @type tinymce.ControlManager
 			 * @example
 			 * // Disables the bold button
-			 * tinyMCE.activeEditor.controlManager.setDisabled('bold', true);
+			 * tinymce.activeEditor.controlManager.setDisabled('bold', true);
 			 */
 			self.controlManager = new tinymce.ControlManager(self);
 
@@ -593,12 +583,12 @@
 				bc = bc[self.id] || '';
 			}
 
-			self.iframeHTML += '</head><body id="' + bi + '" class="mceContentBody ' + bc + '" onload="window.parent.tinyMCE.get(\'' + self.id + '\').onLoad.dispatch();"><br></body></html>';
+			self.iframeHTML += '</head><body id="' + bi + '" class="mceContentBody ' + bc + '"><br></body></html>';
 
 			// Domain relaxing enabled, then set document domain
 			if (tinymce.relaxedDomain) {
 				// We need to write the contents here in IE since multiple writes messes up refresh button and back button
-				url = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinyMCE.get("' + self.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody();})()';
+				url = 'javascript:(function(){document.open();document.domain="' + document.domain + '";var ed = window.parent.tinymce.get("' + self.id + '");document.write(ed.iframeHTML);document.close();ed.initContentBody();})()';
 			}
 
 			// Create iframe
@@ -610,7 +600,12 @@
 				style: {
 					height: h
 				}
-			});
+			});	
+
+			ifr.onload = function () {
+				ifr.onload = null;
+				self.onLoad.dispatch();
+			};
 
 			DOM.setAttrib(ifr, "src", url || 'javascript:""');
 
@@ -693,7 +688,7 @@
 			 * @type tinymce.dom.DOMUtils
 			 * @example
 			 * // Adds a class to all paragraphs within the editor
-			 * tinyMCE.activeEditor.dom.addClass(tinyMCE.activeEditor.dom.select('p'), 'someclass');
+			 * tinymce.activeEditor.dom.addClass(tinymce.activeEditor.dom.select('p'), 'someclass');
 			 */
 			self.dom = new tinymce.dom.DOMUtils(doc, {
 				keep_values: true,
@@ -785,7 +780,7 @@
 			 * @type tinymce.dom.Serializer
 			 * @example
 			 * // Serializes the first paragraph in the editor into a string
-			 * tinyMCE.activeEditor.serializer.serialize(tinyMCE.activeEditor.dom.select('p')[0]);
+			 * tinymce.activeEditor.serializer.serialize(tinymce.activeEditor.dom.select('p')[0]);
 			 */
 			self.serializer = new tinymce.dom.Serializer(settings, self.dom, self.schema);
 
@@ -796,13 +791,13 @@
 			 * @type tinymce.dom.Selection
 			 * @example
 			 * // Sets some contents to the current selection in the editor
-			 * tinyMCE.activeEditor.selection.setContent('Some contents');
+			 * tinymce.activeEditor.selection.setContent('Some contents');
 			 *
 			 * // Gets the current selection
-			 * alert(tinyMCE.activeEditor.selection.getContent());
+			 * alert(tinymce.activeEditor.selection.getContent());
 			 *
 			 * // Selects the first paragraph found
-			 * tinyMCE.activeEditor.selection.select(tinyMCE.activeEditor.dom.select('p')[0]);
+			 * tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select('p')[0]);
 			 */
 			self.selection = new tinymce.dom.Selection(self.dom, self.getWin(), self.serializer, self);
 
@@ -821,7 +816,7 @@
 			 * @type tinymce.UndoManager
 			 * @example
 			 * // Undoes the last modification to the editor
-			 * tinyMCE.activeEditor.undoManager.undo();
+			 * tinymce.activeEditor.undoManager.undo();
 			 */
 			self.undoManager = new tinymce.UndoManager(self);
 
@@ -1051,10 +1046,10 @@
 		 * @return {String} Configuration parameter value or default value.
 		 * @example
 		 * // Returns a specific config value from the currently active editor
-		 * var someval = tinyMCE.activeEditor.getParam('myvalue');
+		 * var someval = tinymce.activeEditor.getParam('myvalue');
 		 *
 		 * // Returns a specific config value from a specific editor instance by id
-		 * var someval2 = tinyMCE.get('my_editor').getParam('myvalue');
+		 * var someval2 = tinymce.get('my_editor').getParam('myvalue');
 		 */
 		getParam: function (n, dv, ty) {
 			var tr = tinymce.trim,
@@ -1094,7 +1089,7 @@
 		nodeChanged: function (args) {
 			var self = this,
 				selection = self.selection,
-				node;
+				node, root, parents;
 
 			// Fix for bug #1896577 it seems that this can not be fired while the editor is loading
 			if (self.initialized && selection && !self.settings.disable_nodechange && !self.readonly) {
@@ -1147,7 +1142,7 @@
 		 * @example
 		 * // Adds a custom button to the editor and when a user clicks the button it will open
 		 * // an alert box with the selected contents as plain text.
-		 * tinyMCE.init({
+		 * tinymce.init({
 		 *    ...
 		 *
 		 *    theme_advanced_buttons1 : 'example,..'
@@ -1181,7 +1176,7 @@
 		 * @param {Object} scope Optional scope to execute the function in.
 		 * @example
 		 * // Adds a custom command that later can be executed using execCommand
-		 * tinyMCE.init({
+		 * tinymce.init({
 		 *    ...
 		 *
 		 *    setup : function(ed) {
@@ -1647,13 +1642,13 @@
 		 * @return {Boolean} Same as the input state.
 		 * @example
 		 * // Show progress for the active editor
-		 * tinyMCE.activeEditor.setProgressState(true);
+		 * tinymce.activeEditor.setProgressState(true);
 		 *
 		 * // Hide progress for the active editor
-		 * tinyMCE.activeEditor.setProgressState(false);
+		 * tinymce.activeEditor.setProgressState(false);
 		 *
 		 * // Show progress after 3 seconds
-		 * tinyMCE.activeEditor.setProgressState(true, 3000);
+		 * tinymce.activeEditor.setProgressState(true, 3000);
 		 */
 		setProgressState: function (b, ti, o) {
 			this.onSetProgressState.dispatch(this, b, ti, o);
@@ -1756,16 +1751,16 @@
 		 * @return {String} HTML string that got set into the editor.
 		 * @example
 		 * // Sets the HTML contents of the activeEditor editor
-		 * tinyMCE.activeEditor.setContent('<span>some</span> html');
+		 * tinymce.activeEditor.setContent('<span>some</span> html');
 		 *
 		 * // Sets the raw contents of the activeEditor editor
-		 * tinyMCE.activeEditor.setContent('<span>some</span> html', {format : 'raw'});
+		 * tinymce.activeEditor.setContent('<span>some</span> html', {format : 'raw'});
 		 *
 		 * // Sets the content of a specific editor (my_editor in this example)
-		 * tinyMCE.get('my_editor').setContent(data);
+		 * tinymce.get('my_editor').setContent(data);
 		 *
 		 * // Sets the bbcode contents of the activeEditor editor if the bbcode plugin was added
-		 * tinyMCE.activeEditor.setContent('[b]some[/b] html', {format : 'bbcode'});
+		 * tinymce.activeEditor.setContent('[b]some[/b] html', {format : 'bbcode'});
 		 */
 		setContent: function (content, args) {
 			var self = this,
@@ -1844,13 +1839,13 @@
 		 * @return {String} Cleaned content string, normally HTML contents.
 		 * @example
 		 * // Get the HTML contents of the currently active editor
-		 * console.debug(tinyMCE.activeEditor.getContent());
+		 * console.debug(tinymce.activeEditor.getContent());
 		 *
 		 * // Get the raw contents of the currently active editor
-		 * tinyMCE.activeEditor.getContent({format : 'raw'});
+		 * tinymce.activeEditor.getContent({format : 'raw'});
 		 *
 		 * // Get content of a specific editor:
-		 * tinyMCE.get('content id').getContent()
+		 * tinymce.get('content id').getContent()
 		 */
 		getContent: function (args) {
 			var self = this,
@@ -1897,7 +1892,7 @@
 		 * @method isDirty
 		 * @return {Boolean} True/false if the editor is dirty or not. It will get dirty if the user has made modifications to the contents.
 		 * @example
-		 * if (tinyMCE.activeEditor.isDirty())
+		 * if (tinymce.activeEditor.isDirty())
 		 *     alert("You must save your contents.");
 		 */
 		isDirty: function () {
@@ -2164,7 +2159,7 @@
 
 			if (!s) {
 				tinymce.removeUnload(self.destroy);
-				tinyMCE.onBeforeUnload.remove(self._beforeUnload);
+				tinymce.onBeforeUnload.remove(self._beforeUnload);
 
 				// Manual destroy
 				if (self.theme && self.theme.destroy) {
@@ -2211,5 +2206,5 @@
 			s = this.selection.getSel();
 			return (!s || !s.rangeCount || s.rangeCount === 0);
 		}
-	});
+	};
 })(tinymce);
