@@ -7,7 +7,7 @@
  *  Released under the MIT, BSD, and GPL Licenses.
  *  More information: http://sizzlejs.com/
  */
-(function () {
+(function (tinymce) {
 
 	var i,
 		support,
@@ -2053,8 +2053,8 @@
 
 	// EXPOSE
 
-	window.tinymce.dom.Sizzle = Sizzle;
+	tinymce.dom.Sizzle = Sizzle;
 
-})();
+})(tinymce);
 
 /*eslint-enable */
