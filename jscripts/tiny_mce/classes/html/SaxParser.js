@@ -148,6 +148,7 @@
 			var decode = Entities.decode,
 				fixSelfClosing, filteredUrlAttrs = tinymce.makeMap('src,href,data,background,formaction,poster,xlink:href');
 			var scriptUriRegExp = /((java|vb)script|mhtml):/i;
+			var processHtml;
 
 			// parser format - html, xml
 			format = format || 'html';
