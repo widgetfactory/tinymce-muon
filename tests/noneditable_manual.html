@@ -6,7 +6,7 @@
 <!-- TinyMCE -->
 <script type="text/javascript" src="../jscripts/tiny_mce/tiny_mce_dev.js"></script>
 <script type="text/javascript">
-	tinyMCE.init({
+	tinymce.init({
 		// General options
 		mode : "textareas",
 		theme : "advanced",
@@ -52,10 +52,10 @@
 				&lt;p&gt;[[item1]][[item2]]&lt;/p&gt;
 			</textarea>
 		</div>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').getContent());return false;">[Get contents]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').getContent({format: 'raw'}));return false;">[Get contents raw]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').selection.getContent());return false;">[Get selected]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').selection.getContent({format : 'raw'}));return false;">[Get selected raw]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').getContent());return false;">[Get contents]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').getContent({format: 'raw'}));return false;">[Get contents raw]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').selection.getContent());return false;">[Get selected]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').selection.getContent({format : 'raw'}));return false;">[Get selected raw]</a>
 	</div>
 </form>
 

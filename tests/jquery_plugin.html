@@ -23,7 +23,7 @@ module("jQuery plugin", {
 test("Get contents using jQuery", function() {
 	expect(4);
 
-	tinyMCE.get('elm1').setContent('<p>Editor 1</p>');
+	tinymce.get('elm1').setContent('<p>Editor 1</p>');
 
 	equal($('#elm1').html(), '<p>Editor 1</p>');
 	equal($('#elm1').val(), '<p>Editor 1</p>');
@@ -50,7 +50,7 @@ test("Set contents using jQuery", function() {
 test("append/prepend contents using jQuery", function() {
 	expect(2);
 
-	tinyMCE.get('elm1').setContent('<p>Editor 1</p>');
+	tinymce.get('elm1').setContent('<p>Editor 1</p>');
 
 	$('#elm1').append('<p>Test 1</p>');
 	equal($('#elm1').html(), '<p>Editor 1</p>\n<p>Test 1</p>');
@@ -101,7 +101,7 @@ $().ready(function() {
 		theme_advanced_resizing : true,
 
 		init_instance_callback : function(ed) {
-			var ed1 = tinyMCE.get('elm1'), ed2 = tinyMCE.get('elm2');
+			var ed1 = tinymce.get('elm1'), ed2 = tinymce.get('elm2');
 
 			// When both editors are initialized
 			if (ed1 && ed1.initialized && ed2 && ed2.initialized)

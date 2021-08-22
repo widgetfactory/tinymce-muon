@@ -7,7 +7,7 @@
 <!-- TinyMCE -->
 <script type="text/javascript" src="http://b.test.com/tinymce/tinymce/trunk/jscripts/tiny_mce/tiny_mce.js"></script>
 <script type="text/javascript">
-tinyMCE.init({
+tinymce.init({
 	// General options
 	mode : "textareas",
 	theme : "advanced",
@@ -63,17 +63,17 @@ tinyMCE.init({
 
 	<div>
 		<!-- Some integration calls -->
-		<a href="javascript:;" onmousedown="tinyMCE.get('elm1').show();">[Show]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.get('elm1').hide();">[Hide]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.execCommand('mceAddControl', false, 'elm1');">[Add]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.execCommand('mceRemoveControl', false, 'elm1');">[Remove]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.get('elm1').execCommand('Bold');">[Bold]</a>
-		<a href="javascript:;" onmousedown="alert(tinyMCE.get('elm1').getContent());">[Get contents]</a>
-		<a href="javascript:;" onmousedown="alert(tinyMCE.get('elm1').selection.getContent());">[Get selected HTML]</a>
-		<a href="javascript:;" onmousedown="alert(tinyMCE.get('elm1').selection.getContent({format : 'text'}));">[Get selected text]</a>
-		<a href="javascript:;" onmousedown="alert(tinyMCE.get('elm1').selection.getNode().nodeName);">[Get selected element]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');">[Insert HTML]</a>
-		<a href="javascript:;" onmousedown="tinyMCE.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');">[Replace selection]</a>
+		<a href="javascript:;" onmousedown="tinymce.get('elm1').show();">[Show]</a>
+		<a href="javascript:;" onmousedown="tinymce.get('elm1').hide();">[Hide]</a>
+		<a href="javascript:;" onmousedown="tinymce.execCommand('mceAddControl', false, 'elm1');">[Add]</a>
+		<a href="javascript:;" onmousedown="tinymce.execCommand('mceRemoveControl', false, 'elm1');">[Remove]</a>
+		<a href="javascript:;" onmousedown="tinymce.get('elm1').execCommand('Bold');">[Bold]</a>
+		<a href="javascript:;" onmousedown="alert(tinymce.get('elm1').getContent());">[Get contents]</a>
+		<a href="javascript:;" onmousedown="alert(tinymce.get('elm1').selection.getContent());">[Get selected HTML]</a>
+		<a href="javascript:;" onmousedown="alert(tinymce.get('elm1').selection.getContent({format : 'text'}));">[Get selected text]</a>
+		<a href="javascript:;" onmousedown="alert(tinymce.get('elm1').selection.getNode().nodeName);">[Get selected element]</a>
+		<a href="javascript:;" onmousedown="tinymce.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');">[Insert HTML]</a>
+		<a href="javascript:;" onmousedown="tinymce.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');">[Replace selection]</a>
 	</div>
 
 	<br />

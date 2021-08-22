@@ -241,7 +241,7 @@ if (!document.createRange) {
 		equal(r2.commonAncestorContainer.nodeName, 'P')
 	});
 
-	if (tinyMCE.isGecko) {
+	if (tinymce.isGecko) {
 		test('test_cloneContents (SKIPPED)', function() {
 			ok(true, 'Before Firefox 3.6 this test fails because of a corner case bug but since the point is to test the IE Range implementation we skip it.');
 		});

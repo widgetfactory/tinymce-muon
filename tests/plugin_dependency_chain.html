@@ -14,7 +14,7 @@ QUnit.config.reorder = false;
 QUnit.config.autostart = false;
 
 function check_plugin_loaded(name){
-	var pluginManager = tinyMCE.PluginManager;
+	var pluginManager = tinymce.PluginManager;
 	var depPlugin = pluginManager.get(name);
 	ok(depPlugin, name + " plugin should have loaded");
 	
@@ -31,7 +31,7 @@ tinymce.create('tinymce.plugins.DependencyChain', {});
 // Register plugin
 	tinymce.PluginManager.add('depend_chain', tinymce.plugins.DependencyChain, ["example_dependency"]);
 
-	tinyMCE.init({
+	tinymce.init({
 	mode : "exact",
 	elements : "elm1",
 	add_unload_trigger : false,

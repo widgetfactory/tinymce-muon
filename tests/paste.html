@@ -265,7 +265,7 @@ test('paste plain text with paragraphs', function(){
 	equal(editor.getContent().replace(/[\r\n]+/g, ''), '<p>t</p><p>a</p><p>b</p><p>c</p><p>xt</p>');
 });
 
-tinyMCE.init({
+tinymce.init({
 	mode : "exact",
 	elements : "elm1",
 	theme : "advanced",

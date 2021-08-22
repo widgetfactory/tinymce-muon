@@ -9,7 +9,7 @@
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.17/themes/cupertino/jquery-ui.css" type="text/css" />
 <script type="text/javascript">
-	tinyMCE.init({
+	tinymce.init({
 		mode: "exact",
 		elements: "elm1",
 		plugins: "autolink,lists,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview," +
@@ -63,7 +63,7 @@
 		}
 	});
 
-	tinyMCE.init({
+	tinymce.init({
 		mode: "exact",
 		elements: "elm2",
 		plugins: "autolink,lists,pagebreak,style,layer,table,save,advhr,advimage,advlink,emotions,iespell,inlinepopups,insertdatetime,preview," +
@@ -137,15 +137,15 @@
 		</div>
 
 		<!-- Some integration calls -->
-		<a href="javascript:;" onclick="tinyMCE.get('elm1').show();return false;">[Show]</a>
-		<a href="javascript:;" onclick="tinyMCE.get('elm1').hide();return false;">[Hide]</a>
-		<a href="javascript:;" onclick="tinyMCE.get('elm1').execCommand('Bold');return false;">[Bold]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').getContent());return false;">[Get contents]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').selection.getContent());return false;">[Get selected HTML]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').selection.getContent({format : 'text'}));return false;">[Get selected text]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm1').selection.getNode().nodeName);return false;">[Get selected element]</a>
-		<a href="javascript:;" onclick="tinyMCE.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');return false;">[Insert HTML]</a>
-		<a href="javascript:;" onclick="tinyMCE.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');return false;">[Replace selection]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm1').show();return false;">[Show]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm1').hide();return false;">[Hide]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm1').execCommand('Bold');return false;">[Bold]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').getContent());return false;">[Get contents]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').selection.getContent());return false;">[Get selected HTML]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').selection.getContent({format : 'text'}));return false;">[Get selected text]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm1').selection.getNode().nodeName);return false;">[Get selected element]</a>
+		<a href="javascript:;" onclick="tinymce.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');return false;">[Insert HTML]</a>
+		<a href="javascript:;" onclick="tinymce.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');return false;">[Replace selection]</a>
 	</div>
 
 	<div>
@@ -164,15 +164,15 @@
 		</div>
 
 		<!-- Some integration calls -->
-		<a href="javascript:;" onclick="tinyMCE.get('elm2').show();return false;">[Show]</a>
-		<a href="javascript:;" onclick="tinyMCE.get('elm2').hide();return false;">[Hide]</a>
-		<a href="javascript:;" onclick="tinyMCE.get('elm2').execCommand('Bold');return false;">[Bold]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm2').getContent());return false;">[Get contents]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm2').selection.getContent());return false;">[Get selected HTML]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm2').selection.getContent({format : 'text'}));return false;">[Get selected text]</a>
-		<a href="javascript:;" onclick="alert(tinyMCE.get('elm2').selection.getNode().nodeName);return false;">[Get selected element]</a>
-		<a href="javascript:;" onclick="tinyMCE.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');return false;">[Insert HTML]</a>
-		<a href="javascript:;" onclick="tinyMCE.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');return false;">[Replace selection]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm2').show();return false;">[Show]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm2').hide();return false;">[Hide]</a>
+		<a href="javascript:;" onclick="tinymce.get('elm2').execCommand('Bold');return false;">[Bold]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm2').getContent());return false;">[Get contents]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm2').selection.getContent());return false;">[Get selected HTML]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm2').selection.getContent({format : 'text'}));return false;">[Get selected text]</a>
+		<a href="javascript:;" onclick="alert(tinymce.get('elm2').selection.getNode().nodeName);return false;">[Get selected element]</a>
+		<a href="javascript:;" onclick="tinymce.execCommand('mceInsertContent',false,'<b>Hello world!!</b>');return false;">[Insert HTML]</a>
+		<a href="javascript:;" onclick="tinymce.execCommand('mceReplaceContent',false,'<b>{$selection}</b>');return false;">[Replace selection]</a>
 	</div>
 </form>
 </body>
