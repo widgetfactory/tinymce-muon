@@ -1,0 +1,123 @@
+/**
+ * Cookie.js
+ *
+ * Copyright, Moxiecode Systems AB
+ * Released under LGPL License.
+ *
+ * License: http://www.tinymce.com/license
+ * Contributing: http://www.tinymce.com/contributing
+ */
+
+(function (tinymce) {
+    var each = tinymce.each;
+
+    /**
+     * This class contains simple storage manangement functions.
+     *
+     * @class tinymce.util.Storage
+     * @static
+     * @example
+     * // Gets a cookie from the browser
+     * console.debug(tinymce.util.Storage.get('mycookie'));
+     *
+     * // Gets a hash table cookie from the browser and takes out the x parameter from it
+     * console.debug(tinymce.util.Storage.getHash('mycookie').x);
+     *
+     * // Sets a hash table cookie to the browser
+     * tinymce.util.Storage.setHash({x : '1', y : '2'});
+     */
+    tinymce.create('static tinymce.util.Storage', {
+        /**
+         * Parses the specified query string into an name/value object.
+         *
+         * @method getHash
+         * @param {String} n String to parse into a n Hashtable object.
+         * @return {Object} Name/Value object with items parsed from querystring.
+         */
+        getHash: function (n) {
+            var v = this.get(n),
+                h;
+
+            if (v) {
+                try {
+                    h = JSON.parse(v);
+                } catch (e) { }
+            }
+
+            return h;
+        },
+
+        /**
+         * Sets a hashtable name/value object to a sessionStorage item.
+         *
+         * @method setHash
+         * @param {String} n Name of the item.
+         * @param {Object} v Hashtable object to set as item.
+         */
+        setHash: function (n, v) {
+            this.set(n, JSON.stringify(v));
+        },
+
+        /**
+         * Gets the raw data of an item by name.
+         *
+         * @method get
+         * @param {String} n Name of item to retrive.
+         * @return {String} Item data string.
+         */
+        get: function (n) {
+            if (!window.sessionStorage) {
+                return null;
+            }
+
+            var val = sessionStorage.getItem(n);
+
+            if (val === "true") {
+                return true;
+            }
+
+            if (val === "false") {
+                return false;
+            }
+
+            if (val === "null") {
+                return null;
+            }
+
+            return val;
+        },
+
+        /**
+         * Sets a raw cookie string.
+         *
+         * @method set
+         * @param {String} n Name of the cookie.
+         * @param {String} v Raw cookie data.
+         */
+        set: function (n, v) {
+            if (!window.sessionStorage) {
+                return;
+            }
+
+            sessionStorage.setItem(n, v);
+        }
+    });
+
+    tinymce.create('static tinymce.util.Cookie', {
+        getHash: function (n) {
+            return tinymce.util.Storage.getHash(n);
+        },
+
+        setHash: function (n, v) {
+            return tinymce.util.Storage.setHash(n, v);
+        },
+
+        get: function (n, s) {
+            return tinymce.util.Storage.get(n, s);
+        },
+
+        set: function (n, v) {
+            return tinymce.util.Storage.set(n, v);
+        }
+    });
+})(tinymce);
