@@ -29,7 +29,7 @@
 	 * if (tinymce.isIE)
 	 *   console.log("IE");
 	 */
-	tinymce = {
+	var tinymce = {
 		/**
 		 * Major version of TinyMCE build.
 		 *
@@ -521,20 +521,16 @@
 		 *     }
 		 * });
 		 */
-		 create: function (s, p, root) {
+		create: function (s, p, root) {
 			var self = this,
-				sp, ns, cn, scn, c, de = 0, cls;
+				sp, ns, cn, scn, c, de = 0;
 
 			// Parse : <prefix> <class>:<super class>
 			s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
-
-			cls = s[3].split('.'), root = cls.shift();//, cls = cls.join('.');//.replace(/\.\w+$/, '');
-			cls = cls.join('.');
-
-			cn = cls.match(/(^|\.)(\w+)$/i)[2]; // Class name
+			cn = s[3].match(/(^|\.)(\w+)$/i)[2]; // Class name
 
 			// Create namespace for new class
-			ns = self.createNS(cls.replace(/\.\w+$/, ''), tinymce);
+			ns = self.createNS(s[3].replace(/\.\w+$/, ''), root);
 
 			// Class already exists
 			if (ns[cn]) {
@@ -546,7 +542,7 @@
 				ns[cn] = p;
 
 				if (this.onCreate) {
-					this.onCreate(s[2], cls, ns[cn]);
+					this.onCreate(s[2], s[3], ns[cn]);
 				}
 
 				return;
@@ -564,15 +560,11 @@
 
 			// Extend
 			if (s[5]) {
-				cls = s[5].split('.'), root = cls.shift();
-				cls = cls.join('.');
-
-				sp = self.resolve(cls, tinymce).prototype;
-				scn = cls.match(/\.(\w+)$/i)[1]; // Class name
+				sp = self.resolve(s[5]).prototype;
+				scn = s[5].match(/\.(\w+)$/i)[1]; // Class name
 
 				// Extend constructor
 				c = ns[cn];
-
 				if (de) {
 					// Add passthrough constructor
 					ns[cn] = function () {
@@ -617,44 +609,6 @@
 		},
 
 		/**
-		 * Creates a namespace on a specific object.
-		 *
-		 * @method createNS
-		 * @param {String} n Namespace to create for example a.b.c.doc.
-		 * @param {Object} o Optional object to add namespace to, defaults to window.
-		 * @return {Object} New namespace object the last item in path.
-		 * @example
-		 * // Create some namespace
-		 * tinymce.createNS('tinymce.somepackage.subpackage');
-		 *
-		 * // Add a singleton
-		 * var tinymce.somepackage.subpackage.SomeSingleton = {
-		 *     method : function() {
-		 *         // Some method
-		 *     }
-		 * };
-		 */
-		 createNS: function (n, o) {
-			var i, v;
-
-			o = o || win;
-
-			n = n.split('.');
-
-			for (i = 0; i < n.length; i++) {
-				v = n[i];
-
-				if (!o[v]) {
-					o[v] = {};
-				}
-
-				o = o[v];
-			}
-
-			return o;
-		},
-
-		/**
 		 * Executed the specified function for each item in a object tree.
 		 *
 		 * @method walk
@@ -679,6 +633,44 @@
 					tinymce.walk(o, f, n, s);
 				});
 			}
+		},
+
+		/**
+		 * Creates a namespace on a specific object.
+		 *
+		 * @method createNS
+		 * @param {String} n Namespace to create for example a.b.c.doc.
+		 * @param {Object} o Optional object to add namespace to, defaults to window.
+		 * @return {Object} New namespace object the last item in path.
+		 * @example
+		 * // Create some namespace
+		 * tinymce.createNS('tinymce.somepackage.subpackage');
+		 *
+		 * // Add a singleton
+		 * var tinymce.somepackage.subpackage.SomeSingleton = {
+		 *     method : function() {
+		 *         // Some method
+		 *     }
+		 * };
+		 */
+		createNS: function (n, o) {
+			var i, v;
+
+			o = o || win;
+
+			n = n.split('.');
+
+			for (i = 0; i < n.length; i++) {
+				v = n[i];
+
+				if (!o[v]) {
+					o[v] = {};
+				}
+
+				o = o[v];
+			}
+
+			return o;
 		},
 
 		/**
@@ -891,7 +883,7 @@
 	tinymce._init();
 
 	// Expose tinymce namespace to the global namespace (window)
-	//win.tinymce = win.tinyMCE = tinymce;
+	win.tinymce = win.tinyMCE = tinymce;
 
 	// Describe the different namespaces
 
