@@ -30,3 +30,4 @@ build-utils
 nbproject/project.xml
 
 nbproject/project.properties
+jscripts/tiny_mce/rollup.config.js
