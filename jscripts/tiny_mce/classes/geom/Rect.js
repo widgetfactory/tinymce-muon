@@ -215,6 +215,6 @@
     clamp: clamp,
     create: create,
     fromClientRect: fromClientRect
-  }
+  };
 
 })(tinymce);

@@ -1011,6 +1011,6 @@
       hideFakeCaret: hideFakeCaret,
       destroy: destroy
     };
-  }
+  };
 
 })(tinymce);

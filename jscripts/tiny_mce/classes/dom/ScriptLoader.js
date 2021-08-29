@@ -11,7 +11,7 @@
 /*eslint no-console:1 */
 
 (function (tinymce) {
-	/**
+  /**
 	 * This class handles asynchronous/synchronous loading of JavaScript files it will execute callbacks when various items gets loaded. This class is useful to load external JavaScript files.
 	 *
 	 * @class tinymce.dom.ScriptLoader
@@ -35,18 +35,18 @@
 	 *    alert('All scripts are now loaded.');
 	 * });
 	 */
-	tinymce.dom.ScriptLoader = function () {
-		var QUEUED = 0,
-			LOADING = 1,
-			LOADED = 2,
-			states = {},
-			queue = [],
-			scriptLoadedCallbacks = {},
-			queueLoadedCallbacks = [],
-			loading = 0,
-			undef;
+  tinymce.dom.ScriptLoader = function () {
+    var QUEUED = 0,
+      LOADING = 1,
+      LOADED = 2,
+      states = {},
+      queue = [],
+      scriptLoadedCallbacks = {},
+      queueLoadedCallbacks = [],
+      loading = 0,
+      undef;
 
-		/**
+    /**
 		 * Loads a specific script directly without adding it to the load queue.
 		 *
 		 * @method load
@@ -54,101 +54,101 @@
 		 * @param {function} callback Optional callback function to execute ones this script gets loaded.
 		 * @param {Object} scope Optional scope to execute callback in.
 		 */
-		function loadScript(url, callback) {
-			var dom = tinymce.DOM,
-				elm, id;
+    function loadScript(url, callback) {
+      var dom = tinymce.DOM,
+        elm, id;
 
-			// Execute callback when script is loaded
-			function done() {
-				dom.remove(id);
+      // Execute callback when script is loaded
+      function done() {
+        dom.remove(id);
 
-				if (elm) {
-					elm.onreadystatechange = elm.onload = elm = null;
-				}
+        if (elm) {
+          elm.onreadystatechange = elm.onload = elm = null;
+        }
 
-				callback();
-			}
+        callback();
+      }
 
-			function error() {
-				// Report the error so it's easier for people to spot loading errors
-				if (typeof (console) !== "undefined" && console.log) {
-					console.log("Failed to load: " + url);
-				}
+      function error() {
+        // Report the error so it's easier for people to spot loading errors
+        if (typeof (console) !== "undefined" && console.log) {
+          console.log("Failed to load: " + url);
+        }
 
-				// We can't mark it as done if there is a load error since
-				// A) We don't want to produce 404 errors on the server and
-				// B) the onerror event won't fire on all browsers.
-				// done();
-			}
+        // We can't mark it as done if there is a load error since
+        // A) We don't want to produce 404 errors on the server and
+        // B) the onerror event won't fire on all browsers.
+        // done();
+      }
 
-			id = dom.uniqueId();
+      id = dom.uniqueId();
 
-			// Create new script element
-			elm = document.createElement('script');
-			// prevent cloudflare rocket-loader caching
-			elm.setAttribute('data-cfasync', false);
+      // Create new script element
+      elm = document.createElement('script');
+      // prevent cloudflare rocket-loader caching
+      elm.setAttribute('data-cfasync', false);
 
-			elm.id = id;
-			elm.type = 'text/javascript';
-			elm.src = tinymce._addVer(url);
+      elm.id = id;
+      elm.type = 'text/javascript';
+      elm.src = tinymce._addVer(url);
 
-			// Add onload listener for non IE browsers since IE9
-			// fires onload event before the script is parsed and executed
-			if (!tinymce.isIE || tinymce.isIE11) {
-				elm.onload = done;
-			}
+      // Add onload listener for non IE browsers since IE9
+      // fires onload event before the script is parsed and executed
+      if (!tinymce.isIE || tinymce.isIE11) {
+        elm.onload = done;
+      }
 
-			// Add onerror event will get fired on some browsers but not all of them
-			elm.onerror = error;
+      // Add onerror event will get fired on some browsers but not all of them
+      elm.onerror = error;
 
-			// Opera 9.60 doesn't seem to fire the onreadystate event at correctly
-			if (!tinymce.isOpera) {
-				elm.onreadystatechange = function () {
-					var state = elm.readyState;
+      // Opera 9.60 doesn't seem to fire the onreadystate event at correctly
+      if (!tinymce.isOpera) {
+        elm.onreadystatechange = function () {
+          var state = elm.readyState;
 
-					// Loaded state is passed on IE 6 however there
-					// are known issues with this method but we can't use
-					// XHR in a cross domain loading
-					if (state == 'complete' || state == 'loaded') {
-						done();
-					}
-				};
-			}
+          // Loaded state is passed on IE 6 however there
+          // are known issues with this method but we can't use
+          // XHR in a cross domain loading
+          if (state == 'complete' || state == 'loaded') {
+            done();
+          }
+        };
+      }
 
-			// Most browsers support this feature so we report errors
-			// for those at least to help users track their missing plugins etc
-			// todo: Removed since it produced error if the document is unloaded by navigating away, re-add it as an option
-			/*elm.onerror = function() {
+      // Most browsers support this feature so we report errors
+      // for those at least to help users track their missing plugins etc
+      // todo: Removed since it produced error if the document is unloaded by navigating away, re-add it as an option
+      /*elm.onerror = function() {
 				alert('Failed to load: ' + url);
 			};*/
 
-			// Add script to document
-			(document.getElementsByTagName('head')[0] || document.body).appendChild(elm);
-		}
+      // Add script to document
+      (document.getElementsByTagName('head')[0] || document.body).appendChild(elm);
+    }
 
-		/**
+    /**
 		 * Returns true/false if a script has been loaded or not.
 		 *
 		 * @method isDone
 		 * @param {String} url URL to check for.
 		 * @return [Boolean} true/false if the URL is loaded.
 		 */
-		this.isDone = function (url) {
-			return states[url] == LOADED;
-		};
+    this.isDone = function (url) {
+      return states[url] == LOADED;
+    };
 
-		/**
+    /**
 		 * Marks a specific script to be loaded. This can be useful if a script got loaded outside
 		 * the script loader or to skip it from loading some script.
 		 *
 		 * @method markDone
 		 * @param {string} u Absolute URL to the script to mark as loaded.
 		 */
-		this.markDone = function (url) {
-			states[url] = LOADED;
-		};
+    this.markDone = function (url) {
+      states[url] = LOADED;
+    };
 
-		/**
+    /**
 		 * Adds a specific script to the load queue of the script loader.
 		 *
 		 * @method add
@@ -156,40 +156,40 @@
 		 * @param {function} callback Optional callback function to execute ones this script gets loaded.
 		 * @param {Object} scope Optional scope to execute callback in.
 		 */
-		this.add = this.load = function (url, callback, scope) {
-			var state = states[url];
+    this.add = this.load = function (url, callback, scope) {
+      var state = states[url];
 
-			// Add url to load queue
-			if (state == undef) {
-				queue.push(url);
-				states[url] = QUEUED;
-			}
+      // Add url to load queue
+      if (state == undef) {
+        queue.push(url);
+        states[url] = QUEUED;
+      }
 
-			if (callback) {
-				// Store away callback for later execution
-				if (!scriptLoadedCallbacks[url]) {
-					scriptLoadedCallbacks[url] = [];
-				}
+      if (callback) {
+        // Store away callback for later execution
+        if (!scriptLoadedCallbacks[url]) {
+          scriptLoadedCallbacks[url] = [];
+        }
 
-				scriptLoadedCallbacks[url].push({
-					func: callback,
-					scope: scope || this
-				});
-			}
-		};
+        scriptLoadedCallbacks[url].push({
+          func: callback,
+          scope: scope || this
+        });
+      }
+    };
 
-		/**
+    /**
 		 * Starts the loading of the queue.
 		 *
 		 * @method loadQueue
 		 * @param {function} callback Optional callback to execute when all queued items are loaded.
 		 * @param {Object} scope Optional scope to execute the callback in.
 		 */
-		this.loadQueue = function (callback, scope) {
-			this.loadScripts(queue, callback, scope);
-		};
+    this.loadQueue = function (callback, scope) {
+      this.loadScripts(queue, callback, scope);
+    };
 
-		/**
+    /**
 		 * Loads the specified queue of files and executes the callback ones they are loaded.
 		 * This method is generally not used outside this class but it might be useful in some scenarios.
 		 *
@@ -198,68 +198,68 @@
 		 * @param {function} callback Optional callback to execute ones all items are loaded.
 		 * @param {Object} scope Optional scope to execute callback in.
 		 */
-		this.loadScripts = function (scripts, callback, scope) {
-			var loadScripts;
+    this.loadScripts = function (scripts, callback, scope) {
+      var loadScripts;
 
-			function execScriptLoadedCallbacks(url) {
-				// Execute URL callback functions
-				tinymce.each(scriptLoadedCallbacks[url], function (callback) {
-					callback.func.call(callback.scope);
-				});
+      function execScriptLoadedCallbacks(url) {
+        // Execute URL callback functions
+        tinymce.each(scriptLoadedCallbacks[url], function (callback) {
+          callback.func.call(callback.scope);
+        });
 
-				scriptLoadedCallbacks[url] = undef;
-			}
+        scriptLoadedCallbacks[url] = undef;
+      }
 
-			queueLoadedCallbacks.push({
-				func: callback,
-				scope: scope || this
-			});
+      queueLoadedCallbacks.push({
+        func: callback,
+        scope: scope || this
+      });
 
-			loadScripts = function () {
-				var loadingScripts = tinymce.grep(scripts);
+      loadScripts = function () {
+        var loadingScripts = tinymce.grep(scripts);
 
-				// Current scripts has been handled
-				scripts.length = 0;
+        // Current scripts has been handled
+        scripts.length = 0;
 
-				// Load scripts that needs to be loaded
-				tinymce.each(loadingScripts, function (url) {
-					// Script is already loaded then execute script callbacks directly
-					if (states[url] == LOADED) {
-						execScriptLoadedCallbacks(url);
-						return;
-					}
+        // Load scripts that needs to be loaded
+        tinymce.each(loadingScripts, function (url) {
+          // Script is already loaded then execute script callbacks directly
+          if (states[url] == LOADED) {
+            execScriptLoadedCallbacks(url);
+            return;
+          }
 
-					// Is script not loading then start loading it
-					if (states[url] != LOADING) {
-						states[url] = LOADING;
-						loading++;
+          // Is script not loading then start loading it
+          if (states[url] != LOADING) {
+            states[url] = LOADING;
+            loading++;
 
-						loadScript(url, function () {
-							states[url] = LOADED;
-							loading--;
+            loadScript(url, function () {
+              states[url] = LOADED;
+              loading--;
 
-							execScriptLoadedCallbacks(url);
+              execScriptLoadedCallbacks(url);
 
-							// Load more scripts if they where added by the recently loaded script
-							loadScripts();
-						});
-					}
-				});
+              // Load more scripts if they where added by the recently loaded script
+              loadScripts();
+            });
+          }
+        });
 
-				// No scripts are currently loading then execute all pending queue loaded callbacks
-				if (!loading) {
-					tinymce.each(queueLoadedCallbacks, function (callback) {
-						callback.func.call(callback.scope);
-					});
+        // No scripts are currently loading then execute all pending queue loaded callbacks
+        if (!loading) {
+          tinymce.each(queueLoadedCallbacks, function (callback) {
+            callback.func.call(callback.scope);
+          });
 
-					queueLoadedCallbacks.length = 0;
-				}
-			};
+          queueLoadedCallbacks.length = 0;
+        }
+      };
 
-			loadScripts();
-		};
-	};
+      loadScripts();
+    };
+  };
 
-	// Global script loader
-	tinymce.ScriptLoader = new tinymce.dom.ScriptLoader();
+  // Global script loader
+  tinymce.ScriptLoader = new tinymce.dom.ScriptLoader();
 })(tinymce);

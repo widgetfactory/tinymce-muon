@@ -8,13 +8,13 @@
  * other free or open source software licenses.
  */
 (function (tinymce) {
-    var DOM = tinymce.DOM,
-        Event = tinymce.dom.Event,
-        each = tinymce.each,
-        Dispatcher = tinymce.util.Dispatcher;
+  var DOM = tinymce.DOM,
+    Event = tinymce.dom.Event,
+    each = tinymce.each,
+    Dispatcher = tinymce.util.Dispatcher;
 
-    tinymce.create('tinymce.ui.Panel:tinymce.ui.Container', {
-        /**
+  tinymce.create('tinymce.ui.Panel:tinymce.ui.Container', {
+    /**
          * Constructs a new panel container instance.
          *
          * @constructor
@@ -23,282 +23,282 @@
          * @param {Object} s Optional name/value settings object.
          * @param {Editor} ed Optional the editor instance this button is for.
          */
-        Panel: function (id, s, ed) {
-            this.parent(id, s, ed);
+    Panel: function (id, s, ed) {
+      this.parent(id, s, ed);
 
-            this.settings = s = tinymce.extend({
-                content: '',
-                buttons: []
-            }, this.settings);
+      this.settings = s = tinymce.extend({
+        content: '',
+        buttons: []
+      }, this.settings);
 
-            this.editor = ed;
+      this.editor = ed;
 
-            this.classPrefix = 'mcePanel';
+      this.classPrefix = 'mcePanel';
 
-            /**
+      /**
              * Fires when the menu is rendered.
              *
              * @event onRenderMenu
              */
-            this.onRenderPanel = new Dispatcher(this);
-        },
-        /**
+      this.onRenderPanel = new Dispatcher(this);
+    },
+    /**
          * Shows the menu.
          *
          * @method showMenu
          */
-        showPanel: function (elm) {
-            var self = this,
-                s = this.settings,
-                pos, x, y, mx, my;
+    showPanel: function (elm) {
+      var self = this,
+        s = this.settings,
+        pos, x, y, mx, my;
 
-            this.storeSelection();
+      this.storeSelection();
 
-            if (!self.isPanelRendered) {
-                self.renderPanel();
-            }
+      if (!self.isPanelRendered) {
+        self.renderPanel();
+      }
 
-            if (self.isPanelVisible) {
-                return self.hidePanel();
-            }
+      if (self.isPanelVisible) {
+        return self.hidePanel();
+      }
 
-            vp = DOM.getViewPort();
+      vp = DOM.getViewPort();
 
-            var panel = DOM.get(self.id);
+      var panel = DOM.get(self.id);
 
-            if (!panel) {
-                return;
-            }
+      if (!panel) {
+        return;
+      }
 
-            DOM.show(panel);
+      DOM.show(panel);
 
-            if (s.url) {
-                var iframe = DOM.get(self.id + '_iframe');
-                iframe.src = s.url;
-            }
+      if (s.url) {
+        var iframe = DOM.get(self.id + '_iframe');
+        iframe.src = s.url;
+      }
 
-            // get position of the target element
-            pos = DOM.getPos(elm);
+      // get position of the target element
+      pos = DOM.getPos(elm);
 
-            // Move inside viewport if not submenu
-			w = panel.clientWidth;
-				h = panel.clientHeight;
-				mx = vp.x + vp.w;
-				my = vp.y + vp.h;
+      // Move inside viewport if not submenu
+      w = panel.clientWidth;
+      h = panel.clientHeight;
+      mx = vp.x + vp.w;
+      my = vp.y + vp.h;
 
-				if ((x + w) > mx) {
-					x = px ? px - w : Math.max(0, mx - w);
-				}
+      if ((x + w) > mx) {
+        x = px ? px - w : Math.max(0, mx - w);
+      }
 
-				if ((y + h) > my) {
-					y = Math.max(0, my - h);
-				}
+      if ((y + h) > my) {
+        y = Math.max(0, my - h);
+      }
 
-            x = pos.x;
-            y = pos.y;
+      x = pos.x;
+      y = pos.y;
 
-            DOM.setStyles(self.id, {
-                left: x,
-                top: y + elm.clientHeight + 5,
-                zIndex: 200000
-            });
+      DOM.setStyles(self.id, {
+        left: x,
+        top: y + elm.clientHeight + 5,
+        zIndex: 200000
+      });
 
-            self.isPanelVisible = 1;
+      self.isPanelVisible = 1;
 
-            Event.add(DOM.doc, 'mousedown', function(e) {
-                if (DOM.getParents(e.target, '.mcePanel').length) {
-                    return;
-                }
+      Event.add(DOM.doc, 'mousedown', function (e) {
+        if (DOM.getParents(e.target, '.mcePanel').length) {
+          return;
+        }
 
-                self.hidePanel();
-            });
-        },
+        self.hidePanel();
+      });
+    },
 
-        storeSelection: function () {
-            // Store bookmark
-            if (tinymce.isIE) {
-                this.editor.focus();
-                this.bookmark = this.editor.selection.getBookmark(1);
-            }
-        },
+    storeSelection: function () {
+      // Store bookmark
+      if (tinymce.isIE) {
+        this.editor.focus();
+        this.bookmark = this.editor.selection.getBookmark(1);
+      }
+    },
 
-        restoreSelection: function () {
-            if (this.bookmark) {
-                this.editor.selection.moveToBookmark(this.bookmark);
-                this.editor.focus();
-            }
+    restoreSelection: function () {
+      if (this.bookmark) {
+        this.editor.selection.moveToBookmark(this.bookmark);
+        this.editor.focus();
+      }
 
-            this.bookmark = 0;
-        },
+      this.bookmark = 0;
+    },
 
-        /**
+    /**
          * Renders the menu to the DOM.
          *
          * @method renderMenu
          */
-        renderPanel: function () {
-            var self = this, s = this.settings, prefix = this.classPrefix;
+    renderPanel: function () {
+      var self = this, s = this.settings, prefix = this.classPrefix;
 
-            var panel = DOM.add(DOM.doc.body, 'div', {
-                role: 'presentation',
-                id: self.id,
-                class: s.class || 'defaultSkin',
-                style: 'position:absolute;left:0;top:-1000px;'
+      var panel = DOM.add(DOM.doc.body, 'div', {
+        role: 'presentation',
+        id: self.id,
+        class: s["class"] || 'defaultSkin',
+        style: 'position:absolute;left:0;top:-1000px;'
+      });
+
+      panel = DOM.add(panel, 'div', { 'class': prefix });
+
+      var content = DOM.add(panel, 'div', {
+        'class': prefix + 'Content'
+      });
+
+      if (s.width) {
+        DOM.setStyle(panel, 'width', s.width);
+      }
+
+      var html = [];
+
+      if (s.html) {
+        // html string, eg: '<div></div>';
+        if (typeof s.html === 'string') {
+          html.push(s.html);
+          // html node
+        } else {
+          html.push(DOM.createHTML(s.html));
+        }
+      }
+
+      if (s.controls) {
+        each(s.controls, function (ctrl) {
+          html.push(ctrl.renderHTML());
+
+          ctrl.postRender();
+
+          setTimeout(function () {
+            if (ctrl.controls) {
+              each(ctrl.controls, function (c) {
+                c.postRender();
+              });
+            }
+          }, 0);
+        });
+      }
+
+      DOM.setHTML(content, html.join(''));
+
+      if (s.url) {
+        DOM.add(panelContent, 'iframe', {
+          'id': self.id + '_iframe',
+          'src': s.url,
+          style: {
+            'border': 0,
+            'width': '100%',
+            'height': '100%'
+          },
+          onload: function () {
+            self.isPanelRendered = true;
+            self.onRenderPanel.dispatch(self);
+          }
+        });
+      }
+
+      if (s.buttons.length) {
+        var footer = DOM.add(panel, 'div', {
+          'class': prefix + 'Footer'
+        });
+
+        each(s.buttons, function (o) {
+          var btn = DOM.add(footer, 'button', {
+            'type': 'button',
+            'class': 'mceButton',
+            'id': self.id + '_button_' + o.id
+          }, o.title || '');
+
+          if (o.classes) {
+            DOM.addClass(btn, o.classes);
+          }
+
+          if (o.onclick) {
+            Event.add(btn, 'click', function (e) {
+              e.preventDefault();
+
+              self.restoreSelection();
+
+              var s = o.onclick.call(o.scope || self, e);
+
+              if (s) {
+                self.hidePanel();
+              }
             });
+          }
+        });
+      }
 
-            panel = DOM.add(panel, 'div', { 'class': prefix });
+      var navItems = tinymce.grep(DOM.select('input, select, button, textarea', panel), function (elm) {
+        return elm.getAttribute('tabindex') >= 0 && elm.className.indexOf('Disabled') === -1;
+      });
 
-            var content = DOM.add(panel, 'div', {
-                'class': prefix + 'Content'
-            });
-
-            if (s.width) {
-                DOM.setStyle(panel, 'width', s.width);
+      if (navItems.length) {
+        Event.add(panel, 'keydown', function (e) {
+          if (e.keyCode === 9) {
+            if (e.target === navItems[navItems.length - 1]) {
+              e.preventDefault();
+              navItems[0].focus();
             }
+          }
+        });
+      }
 
-            var html = [];
+      Event.add(panel, 'keyup', function (e) {
+        if (e.keyCode === 13) {
+          if (self.settings.onsubmit) {
+            e.preventDefault();
+            self.settings.onsubmit();
+          }
+        }
+      });
 
-            if (s.html) {
-                // html string, eg: '<div></div>';
-                if (typeof s.html === 'string') {
-                    html.push(s.html);
-                    // html node
-                } else {
-                    html.push(DOM.createHTML(s.html));
-                }
-            }
+      if (!s.url) {
+        self.isPanelRendered = true;
+        self.onRenderPanel.dispatch(self);
+      }
 
-            if (s.controls) {
-                each(s.controls, function (ctrl) {
-                    html.push(ctrl.renderHTML());
+      return panel;
+    },
 
-                    ctrl.postRender();
-
-                    setTimeout(function() {
-                        if (ctrl.controls) {
-                            each(ctrl.controls, function(c) {
-                                c.postRender();
-                            });
-                        }
-                    }, 0);
-                });
-            }
-
-            DOM.setHTML(content, html.join(''));
-
-            if (s.url) {
-                DOM.add(panelContent, 'iframe', {
-                    'id': self.id + '_iframe',
-                    'src': s.url,
-                    style: {
-                        'border': 0,
-                        'width': '100%',
-                        'height': '100%'
-                    },
-                    onload: function () {
-                        self.isPanelRendered = true;
-                        self.onRenderPanel.dispatch(self);
-                    }
-                });
-            }
-
-            if (s.buttons.length) {
-                var footer = DOM.add(panel, 'div', {
-                    'class': prefix + 'Footer'
-                });
-
-                each(s.buttons, function (o) {
-                    var btn = DOM.add(footer, 'button', {
-                        'type': 'button',
-                        'class': 'mceButton',
-                        'id': self.id + '_button_' + o.id
-                    }, o.title || '');
-
-                    if (o.classes) {
-                        DOM.addClass(btn, o.classes);
-                    }
-
-                    if (o.onclick) {
-                        Event.add(btn, 'click', function (e) {
-                            e.preventDefault();
-
-                            self.restoreSelection();
-
-                            var s = o.onclick.call(o.scope || self, e);
-
-                            if (s) {
-                                self.hidePanel();
-                            }
-                        });
-                    }
-                });
-            }
-
-            var navItems = tinymce.grep(DOM.select('input, select, button, textarea', panel), function (elm) {
-                return elm.getAttribute('tabindex') >= 0 && elm.className.indexOf('Disabled') === -1;
-            });
-
-            if (navItems.length) {
-                Event.add(panel, 'keydown', function (e) {
-                    if (e.keyCode === 9) {
-                        if (e.target === navItems[navItems.length - 1]) {
-                            e.preventDefault();
-                            navItems[0].focus();
-                        }
-                    }
-                });
-            }
-
-            Event.add(panel, 'keyup', function (e) {
-                if (e.keyCode === 13) {
-                    if (self.settings.onsubmit) {
-                        e.preventDefault();
-                        self.settings.onsubmit();
-                    }
-                }
-            });
-
-            if (!s.url) {
-                self.isPanelRendered = true;
-                self.onRenderPanel.dispatch(self);
-            }
-
-            return panel;
-        },
-
-        /**
+    /**
          * Hides the menu. The optional event parameter is used to check where the event occured so it
          * doesn't close them menu if it was a event inside the menu.
          *
          * @method hideMenu
          * @param {Event} e Optional event object.
          */
-        hidePanel: function (e) {
-            var self = this;
+    hidePanel: function (e) {
+      var self = this;
 
-            DOM.hide(self.id);
-            self.isPanelVisible = 0;
-        },
+      DOM.hide(self.id);
+      self.isPanelVisible = 0;
+    },
 
-        setButtonDisabled: function (button, state) {
-            var id = this.id + '_button_' + button;
+    setButtonDisabled: function (button, state) {
+      var id = this.id + '_button_' + button;
 
-            if (state) {
-                DOM.addClass(id, 'disabled');
-            } else {
-                DOM.removeClass(id, 'disabled');
-            }
-        },
+      if (state) {
+        DOM.addClass(id, 'disabled');
+      } else {
+        DOM.removeClass(id, 'disabled');
+      }
+    },
 
-        setButtonLabel: function (button, label) {
-            DOM.setHTML(this.id + '_button_' + button, label);
-        },
+    setButtonLabel: function (button, label) {
+      DOM.setHTML(this.id + '_button_' + button, label);
+    },
 
-        destroy: function () {
-            this.parent();
+    destroy: function () {
+      this.parent();
 
-            Event.clear(this.id);
-            DOM.remove(this.id);
-        }
-    });
+      Event.clear(this.id);
+      DOM.remove(this.id);
+    }
+  });
 })(tinymce);

@@ -8,12 +8,12 @@
  * other free or open source software licenses.
  */
 (function (tinymce) {
-    var DOM = tinymce.DOM,
-        Event = tinymce.dom.Event,
-        Dispatcher = tinymce.util.Dispatcher;
+  var DOM = tinymce.DOM,
+    Event = tinymce.dom.Event,
+    Dispatcher = tinymce.util.Dispatcher;
 
-    tinymce.create('tinymce.ui.ButtonDialog:tinymce.ui.PanelButton', {
-        /**
+  tinymce.create('tinymce.ui.ButtonDialog:tinymce.ui.PanelButton', {
+    /**
          * Constructs a new split button control instance.
          *
          * @constructor
@@ -22,38 +22,38 @@
          * @param {Object} s Optional name/value settings object.
          * @param {Editor} ed Optional the editor instance this button is for.
          */
-        ButtonDialog: function (id, s, ed) {
-            if (s.content) {
-                s.html = s.content;
-            }
+    ButtonDialog: function (id, s, ed) {
+      if (s.content) {
+        s.html = s.content;
+      }
 
-            if (s.buttons) {
-                tinymce.each(s.buttons, function (btn) {
-                    btn.onclick = btn.click || function(){};
-                });
-            }
+      if (s.buttons) {
+        tinymce.each(s.buttons, function (btn) {
+          btn.onclick = btn.click || function () {};
+        });
+      }
 
-            this.onShowDialog = new Dispatcher(this);
-            this.onHideDialog = new Dispatcher(this);
-            
-            this.parent(id, s, ed);
-        },
+      this.onShowDialog = new Dispatcher(this);
+      this.onHideDialog = new Dispatcher(this);
 
-        showDialog: function () {
-            this.showPanel();
-            this.onShowDialog.dispatch(this);
-        },
+      this.parent(id, s, ed);
+    },
 
-        /**
+    showDialog: function () {
+      this.showPanel();
+      this.onShowDialog.dispatch(this);
+    },
+
+    /**
          * Hides the menu. The optional event parameter is used to check where the event occured so it
          * doesn't close them menu if it was a event inside the menu.
          *
          * @method hideMenu
          * @param {Event} e Optional event object.
          */
-        hideDialog: function (e) {
-            this.hidePanel(e);
-            this.onHideDialog.dispatch(this);
-        }
-    });
+    hideDialog: function (e) {
+      this.hidePanel(e);
+      this.onHideDialog.dispatch(this);
+    }
+  });
 })(tinymce);

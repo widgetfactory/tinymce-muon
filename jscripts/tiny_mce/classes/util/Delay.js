@@ -14,95 +14,95 @@
  * @class tinymce.util.Delay
  */
 (function (tinymce) {
-    var requestAnimationFramePromise;
+  var requestAnimationFramePromise;
 
-    function requestAnimationFrame(callback, element) {
-        var i, requestAnimationFrameFunc = window.requestAnimationFrame,
-            vendors = ['ms', 'moz', 'webkit'];
+  function requestAnimationFrame(callback, element) {
+    var i, requestAnimationFrameFunc = window.requestAnimationFrame,
+      vendors = ['ms', 'moz', 'webkit'];
 
-        function featurefill(callback) {
-            window.setTimeout(callback, 0);
-        }
-
-        for (i = 0; i < vendors.length && !requestAnimationFrameFunc; i++) {
-            requestAnimationFrameFunc = window[vendors[i] + 'RequestAnimationFrame'];
-        }
-
-        if (!requestAnimationFrameFunc) {
-            requestAnimationFrameFunc = featurefill;
-        }
-
-        requestAnimationFrameFunc(callback, element);
+    function featurefill(callback) {
+      window.setTimeout(callback, 0);
     }
 
-    function wrappedSetTimeout(callback, time) {
-        if (typeof time != 'number') {
-            time = 0;
-        }
-
-        return setTimeout(callback, time);
+    for (i = 0; i < vendors.length && !requestAnimationFrameFunc; i++) {
+      requestAnimationFrameFunc = window[vendors[i] + 'RequestAnimationFrame'];
     }
 
-    function wrappedSetInterval(callback, time) {
-        if (typeof time != 'number') {
-            time = 1; // IE 8 needs it to be > 0
-        }
-
-        return setInterval(callback, time);
+    if (!requestAnimationFrameFunc) {
+      requestAnimationFrameFunc = featurefill;
     }
 
-    function wrappedClearTimeout(id) {
-        return clearTimeout(id);
+    requestAnimationFrameFunc(callback, element);
+  }
+
+  function wrappedSetTimeout(callback, time) {
+    if (typeof time != 'number') {
+      time = 0;
     }
 
-    function wrappedClearInterval(id) {
-        return clearInterval(id);
+    return setTimeout(callback, time);
+  }
+
+  function wrappedSetInterval(callback, time) {
+    if (typeof time != 'number') {
+      time = 1; // IE 8 needs it to be > 0
     }
 
-    function debounce(callback, time) {
-        var timer, func;
+    return setInterval(callback, time);
+  }
 
-        func = function () {
-            var args = arguments;
+  function wrappedClearTimeout(id) {
+    return clearTimeout(id);
+  }
 
-            clearTimeout(timer);
+  function wrappedClearInterval(id) {
+    return clearInterval(id);
+  }
 
-            timer = wrappedSetTimeout(function () {
-                callback.apply(this, args);
-            }, time);
-        };
+  function debounce(callback, time) {
+    var timer, func;
 
-        func.stop = function () {
-            clearTimeout(timer);
-        };
+    func = function () {
+      var args = arguments;
 
-        return func;
-    }
+      clearTimeout(timer);
 
-    tinymce.util.Delay = {
-        /**
+      timer = wrappedSetTimeout(function () {
+        callback.apply(this, args);
+      }, time);
+    };
+
+    func.stop = function () {
+      clearTimeout(timer);
+    };
+
+    return func;
+  }
+
+  tinymce.util.Delay = {
+    /**
          * Requests an animation frame and fallbacks to a timeout on older browsers.
          *
          * @method requestAnimationFrame
          * @param {function} callback Callback to execute when a new frame is available.
          * @param {DOMElement} element Optional element to scope it to.
          */
-        requestAnimationFrame: function (callback, element) {
-            if (requestAnimationFramePromise) {
-                requestAnimationFramePromise.then(callback);
-                return;
-            }
+    requestAnimationFrame: function (callback, element) {
+      if (requestAnimationFramePromise) {
+        requestAnimationFramePromise.then(callback);
+        return;
+      }
 
-            requestAnimationFramePromise = new Promise(function (resolve) {
-                if (!element) {
-                    element = document.body;
-                }
+      requestAnimationFramePromise = new Promise(function (resolve) {
+        if (!element) {
+          element = document.body;
+        }
 
-                requestAnimationFrame(resolve, element);
-            }).then(callback);
-        },
+        requestAnimationFrame(resolve, element);
+      }).then(callback);
+    },
 
-        /**
+    /**
          * Sets a timer in ms and executes the specified callback when the timer runs out.
          *
          * @method setTimeout
@@ -110,9 +110,9 @@
          * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
          * @return {Number} Timeout id number.
          */
-        setTimeout: wrappedSetTimeout,
+    setTimeout: wrappedSetTimeout,
 
-        /**
+    /**
          * Sets an interval timer in ms and executes the specified callback at every interval of that time.
          *
          * @method setInterval
@@ -120,9 +120,9 @@
          * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
          * @return {Number} Timeout id number.
          */
-        setInterval: wrappedSetInterval,
+    setInterval: wrappedSetInterval,
 
-        /**
+    /**
          * Sets an editor timeout it's similar to setTimeout except that it checks if the editor instance is
          * still alive when the callback gets executed.
          *
@@ -132,15 +132,15 @@
          * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
          * @return {Number} Timeout id number.
          */
-        setEditorTimeout: function (editor, callback, time) {
-            return wrappedSetTimeout(function () {
-                if (!editor.removed) {
-                    callback();
-                }
-            }, time);
-        },
+    setEditorTimeout: function (editor, callback, time) {
+      return wrappedSetTimeout(function () {
+        if (!editor.removed) {
+          callback();
+        }
+      }, time);
+    },
 
-        /**
+    /**
          * Sets an interval timer it's similar to setInterval except that it checks if the editor instance is
          * still alive when the callback gets executed.
          *
@@ -149,21 +149,21 @@
          * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
          * @return {Number} Timeout id number.
          */
-        setEditorInterval: function (editor, callback, time) {
-            var timer;
+    setEditorInterval: function (editor, callback, time) {
+      var timer;
 
-            timer = wrappedSetInterval(function () {
-                if (!editor.removed) {
-                    callback();
-                } else {
-                    clearInterval(timer);
-                }
-            }, time);
+      timer = wrappedSetInterval(function () {
+        if (!editor.removed) {
+          callback();
+        } else {
+          clearInterval(timer);
+        }
+      }, time);
 
-            return timer;
-        },
+      return timer;
+    },
 
-        /**
+    /**
          * Creates debounced callback function that only gets executed once within the specified time.
          *
          * @method debounce
@@ -171,25 +171,25 @@
          * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
          * @return {Function} debounced function callback.
          */
-        debounce: debounce,
+    debounce: debounce,
 
-        // Throttle needs to be debounce due to backwards compatibility.
-        throttle: debounce,
+    // Throttle needs to be debounce due to backwards compatibility.
+    throttle: debounce,
 
-        /**
+    /**
          * Clears an interval timer so it won't execute.
          *
          * @method clearInterval
          * @param {Number} Interval timer id number.
          */
-        clearInterval: wrappedClearInterval,
+    clearInterval: wrappedClearInterval,
 
-        /**
+    /**
          * Clears an timeout timer so it won't execute.
          *
          * @method clearTimeout
          * @param {Number} Timeout timer id number.
          */
-        clearTimeout: wrappedClearTimeout
-    };
+    clearTimeout: wrappedClearTimeout
+  };
 })(tinymce);

@@ -8,12 +8,12 @@
  * other free or open source software licenses.
  */
 (function (tinymce) {
-    var DOM = tinymce.DOM,
-        Event = tinymce.dom.Event,
-        Dispatcher = tinymce.util.Dispatcher;
+  var DOM = tinymce.DOM,
+    Event = tinymce.dom.Event,
+    Dispatcher = tinymce.util.Dispatcher;
 
-    tinymce.create('tinymce.ui.PanelButton:tinymce.ui.Button', {
-        /**
+  tinymce.create('tinymce.ui.PanelButton:tinymce.ui.Button', {
+    /**
          * Constructs a new split button control instance.
          *
          * @constructor
@@ -22,126 +22,126 @@
          * @param {Object} s Optional name/value settings object.
          * @param {Editor} ed Optional the editor instance this button is for.
          */
-        PanelButton: function (id, s, ed) {
-            this.parent(id, s, ed);
+    PanelButton: function (id, s, ed) {
+      this.parent(id, s, ed);
 
-            this.settings = s = tinymce.extend({
-            }, this.settings);
+      this.settings = s = tinymce.extend({
+      }, this.settings);
 
-            this.editor = ed;
-            this.classPrefix = 'mcePanelButton';
+      this.editor = ed;
+      this.classPrefix = 'mcePanelButton';
 
-            this.onShowPanel = new Dispatcher(this);
-            this.onHidePanel = new Dispatcher(this);
-            this.onRenderPanel = new Dispatcher(this);
-        },
+      this.onShowPanel = new Dispatcher(this);
+      this.onHidePanel = new Dispatcher(this);
+      this.onRenderPanel = new Dispatcher(this);
+    },
 
-        showPanel: function () {
-            var self = this;
+    showPanel: function () {
+      var self = this;
 
-            if (self.isDisabled()) {
-                return;
-            }
+      if (self.isDisabled()) {
+        return;
+      }
 
-            // get the target
-            var elm = DOM.get(this.id);
-            // show at target
-            self.panel.showPanel(elm);
+      // get the target
+      var elm = DOM.get(this.id);
+      // show at target
+      self.panel.showPanel(elm);
 
-            self.onShowPanel.dispatch(self);
+      self.onShowPanel.dispatch(self);
 
-            self.setState('Selected', 1);
-            self.setAriaProperty('expanded', true);
-        },
+      self.setState('Selected', 1);
+      self.setAriaProperty('expanded', true);
+    },
 
-        /**
+    /**
          * Hides the menu. The optional event parameter is used to check where the event occured so it
          * doesn't close them menu if it was a event inside the menu.
          *
          * @method hideMenu
          * @param {Event} e Optional event object.
          */
-        hidePanel: function (e) {
-            var self = this;
+    hidePanel: function (e) {
+      var self = this;
 
-            if (!self.panel) {
-                return;
-            }
+      if (!self.panel) {
+        return;
+      }
 
-            // Prevent double toogles by canceling the mouse click event to the button
-            if (e && e.type == "mousedown" && DOM.getParent(e.target, function (e) {
-                return e.id === self.id || e.id === self.id + '_open';
-            })) {
-                return;
-            }
+      // Prevent double toogles by canceling the mouse click event to the button
+      if (e && e.type == "mousedown" && DOM.getParent(e.target, function (e) {
+        return e.id === self.id || e.id === self.id + '_open';
+      })) {
+        return;
+      }
 
-            if (!e || !DOM.getParent(e.target, '.mcePanel')) {
-                self.setState('Selected', 0);
-                Event.remove(DOM.doc, 'mousedown', self.hidePanel, self);
+      if (!e || !DOM.getParent(e.target, '.mcePanel')) {
+        self.setState('Selected', 0);
+        Event.remove(DOM.doc, 'mousedown', self.hidePanel, self);
 
-                self.panel.hidePanel();
-                self.onHidePanel.dispatch(self);
+        self.panel.hidePanel();
+        self.onHidePanel.dispatch(self);
 
-                self.setAriaProperty('expanded', false);
-            }
-        },
+        self.setAriaProperty('expanded', false);
+      }
+    },
 
-        /**
+    /**
          * Post render handler. This function will be called after the UI has been
          * rendered so that events can be added.
          *
          * @method postRender
          */
-        postRender: function () {
-            var self = this,
-                s = self.settings;
+    postRender: function () {
+      var self = this,
+        s = self.settings;
 
-            DOM.addClass(self.id, 'mceButton');
+      DOM.addClass(self.id, 'mceButton');
 
-            Event.add(self.id, 'click', function (evt) {
-                if (!self.isDisabled()) {
+      Event.add(self.id, 'click', function (evt) {
+        if (!self.isDisabled()) {
 
-                    if (s.onclick) {
-                        s.onclick(self.value);
-                    }
+          if (s.onclick) {
+            s.onclick(self.value);
+          }
 
-                    self.showPanel();
-                }
-
-                Event.cancel(evt);
-            });
-
-            Event.add(self.id, 'focus', function () {
-                self._focused = 1;
-            });
-
-            Event.add(self.id, 'blur', function () {
-                self._focused = 0;
-            });
-
-            if (!self.panel) {
-                self.panel = self.editor.controlManager.createPanel(self.id + '_panel', self.settings);
-                self.editor.onMouseDown.add(self.hidePanel, self);
-            }
-
-            self.panel.onRenderPanel.add(function () {
-                self.onRenderPanel.dispatch(self);
-            });
-
-            self.setAriaProperty('expanded', false);
-        },
-
-        restoreSelection: function() {
-            if (self.panel) {
-                self.panel.restoreSelection();
-            }
-        },  
-
-        destroy: function () {
-            this.parent();
-
-            Event.clear(this.id + '_panel');
-            DOM.remove(this.id + '_panel');
+          self.showPanel();
         }
-    });
+
+        Event.cancel(evt);
+      });
+
+      Event.add(self.id, 'focus', function () {
+        self._focused = 1;
+      });
+
+      Event.add(self.id, 'blur', function () {
+        self._focused = 0;
+      });
+
+      if (!self.panel) {
+        self.panel = self.editor.controlManager.createPanel(self.id + '_panel', self.settings);
+        self.editor.onMouseDown.add(self.hidePanel, self);
+      }
+
+      self.panel.onRenderPanel.add(function () {
+        self.onRenderPanel.dispatch(self);
+      });
+
+      self.setAriaProperty('expanded', false);
+    },
+
+    restoreSelection: function () {
+      if (self.panel) {
+        self.panel.restoreSelection();
+      }
+    },
+
+    destroy: function () {
+      this.parent();
+
+      Event.clear(this.id + '_panel');
+      DOM.remove(this.id + '_panel');
+    }
+  });
 })(tinymce);

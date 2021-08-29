@@ -9,10 +9,10 @@
  */
 
 (function (tinymce) {
-	var DOM = tinymce.DOM,
-		Event = tinymce.dom.Event;
+  var DOM = tinymce.DOM,
+    Event = tinymce.dom.Event;
 
-	/**
+  /**
 	 * This class is used to create a UI button. A button is basically a link
 	 * that is styled to look like a button or icon.
 	 *
@@ -49,8 +49,8 @@
 	 *     }
 	 * });
 	 */
-	tinymce.create('tinymce.ui.MenuButton:tinymce.ui.Button', {
-		/**
+  tinymce.create('tinymce.ui.MenuButton:tinymce.ui.Button', {
+    /**
 		 * Constructs a new split button control instance.
 		 *
 		 * @constructor
@@ -59,135 +59,135 @@
 		 * @param {Object} s Optional name/value settings object.
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
-		MenuButton: function (id, s, ed) {
-			this.parent(id, s, ed);
+    MenuButton: function (id, s, ed) {
+      this.parent(id, s, ed);
 
-			/**
+      /**
 			 * Fires when the menu is rendered.
 			 *
 			 * @event onRenderMenu
 			 */
-			this.onRenderMenu = new tinymce.util.Dispatcher(this);
+      this.onRenderMenu = new tinymce.util.Dispatcher(this);
 
-			s.menu_container = s.menu_container || DOM.doc.body;
-		},
+      s.menu_container = s.menu_container || DOM.doc.body;
+    },
 
-		/**
+    /**
 		 * Shows the menu.
 		 *
 		 * @method showMenu
 		 */
-		showMenu: function () {
-			var self = this,
-				pos, e = DOM.get(self.id),
-				m;
+    showMenu: function () {
+      var self = this,
+        pos, e = DOM.get(self.id),
+        m;
 
-			if (self.isDisabled()) {
-				return;
-			}
+      if (self.isDisabled()) {
+        return;
+      }
 
-			if (!self.isMenuRendered) {
-				self.renderMenu();
-				self.isMenuRendered = true;
-			}
+      if (!self.isMenuRendered) {
+        self.renderMenu();
+        self.isMenuRendered = true;
+      }
 
-			if (self.isMenuVisible) {
-				return self.hideMenu();
-			}
+      if (self.isMenuVisible) {
+        return self.hideMenu();
+      }
 
-			pos = DOM.getPos(e);
+      pos = DOM.getPos(e);
 
-			m = self.menu;
-			m.settings.offset_x = pos.x;
-			m.settings.offset_y = pos.y;
-			m.settings.vp_offset_x = pos.x;
-			m.settings.vp_offset_y = pos.y;
-			m.settings.keyboard_focus = self._focused;
-			m.showMenu(0, e.firstChild.clientHeight);
+      m = self.menu;
+      m.settings.offset_x = pos.x;
+      m.settings.offset_y = pos.y;
+      m.settings.vp_offset_x = pos.x;
+      m.settings.vp_offset_y = pos.y;
+      m.settings.keyboard_focus = self._focused;
+      m.showMenu(0, e.firstChild.clientHeight);
 
-			Event.add(DOM.doc, 'mousedown', self.hideMenu, self);
-			self.setState('Selected', 1);
+      Event.add(DOM.doc, 'mousedown', self.hideMenu, self);
+      self.setState('Selected', 1);
 
-			self.isMenuVisible = 1;
+      self.isMenuVisible = 1;
 
-			self.setAriaProperty('expanded', true);
-		},
+      self.setAriaProperty('expanded', true);
+    },
 
-		/**
+    /**
 		 * Renders the menu to the DOM.
 		 *
 		 * @method renderMenu
 		 */
-		renderMenu: function () {
-			var self = this,
-				m;
+    renderMenu: function () {
+      var self = this,
+        m;
 
-			m = self.settings.control_manager.createDropMenu(self.id + '_menu', {
-				class: this.classPrefix + 'Menu',
-				icons: self.settings.icons,
-				max_width: this.settings.max_width,
-				max_height: this.settings.max_height,
-				keyboard_focus: true,
-				onselect: this.settings.onselect
-			});
+      m = self.settings.control_manager.createDropMenu(self.id + '_menu', {
+        class: this.classPrefix + 'Menu',
+        icons: self.settings.icons,
+        max_width: this.settings.max_width,
+        max_height: this.settings.max_height,
+        keyboard_focus: true,
+        onselect: this.settings.onselect
+      });
 
-			m.onHideMenu.add(function () {
-				self.hideMenu();
-				self.focus();
-			});
+      m.onHideMenu.add(function () {
+        self.hideMenu();
+        self.focus();
+      });
 
-			self.onRenderMenu.dispatch(self, m);
-			self.menu = m;
-		},
+      self.onRenderMenu.dispatch(self, m);
+      self.menu = m;
+    },
 
-		/**
+    /**
 		 * Hides the menu. The optional event parameter is used to check where the event occurred so it
 		 * doesn'self close them menu if it was a event inside the menu.
 		 *
 		 * @method hideMenu
 		 * @param {Event} e Optional event object.
 		 */
-		hideMenu: function (e) {
-			var self = this;
+    hideMenu: function (e) {
+      var self = this;
 
-			// Prevent double toogles by canceling the mouse click event to the button
-			if (e && e.type == "mousedown" && DOM.getParent(e.target, function (e) {
-					return e.id === self.id || e.id === self.id + '_open';
-				})) {
-				return;
-			}
+      // Prevent double toogles by canceling the mouse click event to the button
+      if (e && e.type == "mousedown" && DOM.getParent(e.target, function (e) {
+        return e.id === self.id || e.id === self.id + '_open';
+      })) {
+        return;
+      }
 
-			if (!e || !DOM.getParent(e.target, '.mceMenu')) {
-				self.setState('Selected', 0);
-				Event.remove(DOM.doc, 'mousedown', self.hideMenu, self);
-				if (self.menu) {
-					self.menu.hideMenu();
-				}
-			}
+      if (!e || !DOM.getParent(e.target, '.mceMenu')) {
+        self.setState('Selected', 0);
+        Event.remove(DOM.doc, 'mousedown', self.hideMenu, self);
+        if (self.menu) {
+          self.menu.hideMenu();
+        }
+      }
 
-			self.isMenuVisible = 0;
-			self.setAriaProperty('expanded', false);
-		},
+      self.isMenuVisible = 0;
+      self.setAriaProperty('expanded', false);
+    },
 
-		/**
+    /**
 		 * Post render handler. This function will be called after the UI has been
 		 * rendered so that events can be added.
 		 *
 		 * @method postRender
 		 */
-		postRender: function () {
-			var self = this,
-				s = self.settings;
+    postRender: function () {
+      var self = this,
+        s = self.settings;
 
-			Event.add(self.id, 'click', function () {
-				if (!self.isDisabled()) {
-					if (s.onclick) {
-						s.onclick(self.value);
-					}
+      Event.add(self.id, 'click', function () {
+        if (!self.isDisabled()) {
+          if (s.onclick) {
+            s.onclick(self.value);
+          }
 
-					self.showMenu();
-				}
-			});
-		}
-	});
+          self.showMenu();
+        }
+      });
+    }
+  });
 })(tinymce);

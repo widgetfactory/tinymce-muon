@@ -9,12 +9,12 @@
  */
 
 (function (win) {
-	var whiteSpaceRe = /^\s*|\s*$/g,
-		undef, isRegExpBroken = 'B'.replace(/A(.)|B/, '$1') === '$1';
+  var whiteSpaceRe = /^\s*|\s*$/g,
+    undef, isRegExpBroken = 'B'.replace(/A(.)|B/, '$1') === '$1';
 
-	var slice = [].slice;
+  var slice = [].slice;
 
-	/**
+  /**
 	 * Core namespace with core functionality for the TinyMCE API all sub classes will be added to this namespace/object.
 	 *
 	 * @static
@@ -29,60 +29,60 @@
 	 * if (tinymce.isIE)
 	 *   console.log("IE");
 	 */
-	var tinymce = {
-		/**
+  var tinymce = {
+    /**
 		 * Major version of TinyMCE build.
 		 *
 		 * @property majorVersion
 		 * @type String
 		 */
-		majorVersion: '@@tinymce_major_version@@',
+    majorVersion: '@@tinymce_major_version@@',
 
-		/**
+    /**
 		 * Major version of TinyMCE build.
 		 *
 		 * @property minorVersion
 		 * @type String
 		 */
-		minorVersion: '@@tinymce_minor_version@@',
+    minorVersion: '@@tinymce_minor_version@@',
 
-		/**
+    /**
 		 * Release date of TinyMCE build.
 		 *
 		 * @property releaseDate
 		 * @type String
 		 */
-		releaseDate: '@@tinymce_release_date@@',
+    releaseDate: '@@tinymce_release_date@@',
 
-		/**
+    /**
 		 * Initializes the TinyMCE global namespace this will setup browser detection and figure out where TinyMCE is running from.
 		 */
-		_init: function () {
-			var self = this,
-				doc = document,
-				na = navigator,
-				ua = na.userAgent,
-				i, nl, n, base, p, v;
+    _init: function () {
+      var self = this,
+        doc = document,
+        na = navigator,
+        ua = na.userAgent,
+        i, nl, n, base, p, v;
 
-			/**
+      /**
 			 * Constant that is true if the browser is Opera.
 			 *
 			 * @property isOpera
 			 * @type Boolean
 			 * @final
 			 */
-			self.isOpera = (win.opera && win.opera.buildNumber) || false;
+      self.isOpera = (win.opera && win.opera.buildNumber) || false;
 
-			/**
+      /**
 			 * Constant that is true if the browser is WebKit (Safari/Chrome).
 			 *
 			 * @property isWebKit
 			 * @type Boolean
 			 * @final
 			 */
-			self.isWebKit = /WebKit/.test(ua);
+      self.isWebKit = /WebKit/.test(ua);
 
-			/**
+      /**
 			 * Constant that is true if the browser is IE.
 			 *
 			 * @property isIE
@@ -90,148 +90,148 @@
 			 * @final
 			 */
 
-			// IE
-			var isIE = !self.isWebKit && !self.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName);
+      // IE
+      var isIE = !self.isWebKit && !self.isOpera && (/MSIE/gi).test(ua) && (/Explorer/gi).test(na.appName);
 
-			// IE version number
-			isIE = isIE && /MSIE (\w+)\./.exec(ua)[1];
+      // IE version number
+      isIE = isIE && /MSIE (\w+)\./.exec(ua)[1];
 
-			// IE 11
-			self.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1) ? 11 : false;
+      // IE 11
+      self.isIE11 = ua.indexOf('Trident/') != -1 && (ua.indexOf('rv:') != -1 || na.appName.indexOf('Netscape') != -1) ? 11 : false;
 
-			// IE
-			self.isIE = isIE || self.isIE11;
+      // IE
+      self.isIE = isIE || self.isIE11;
 
-			// IE 12 / Edge
-			self.isIE12 = (ua.indexOf('Edge/') != -1 && !self.isIE) ? 12 : false;
+      // IE 12 / Edge
+      self.isIE12 = (ua.indexOf('Edge/') != -1 && !self.isIE) ? 12 : false;
 
-			// Remove webkit flag
-			if (self.isIE12) {
-				self.isWebKit = false;
-			}
+      // Remove webkit flag
+      if (self.isIE12) {
+        self.isWebKit = false;
+      }
 
-			/**
+      /**
 			 * Constant that is true if the browser is Gecko.
 			 *
 			 * @property isGecko
 			 * @type Boolean
 			 * @final
 			 */
-			self.isGecko = !self.isWebKit && !self.isIE11 && /Gecko/.test(ua);
+      self.isGecko = !self.isWebKit && !self.isIE11 && /Gecko/.test(ua);
 
-			/**
+      /**
 			 * Constant that is true if the os is Mac OS.
 			 *
 			 * @property isMac
 			 * @type Boolean
 			 * @final
 			 */
-			self.isMac = ua.indexOf('Mac') != -1;
+      self.isMac = ua.indexOf('Mac') != -1;
 
-			/**
+      /**
 			 * Constant that is true if the runtime is Adobe Air.
 			 *
 			 * @property isAir
 			 * @type Boolean
 			 * @final
 			 */
-			self.isAir = /adobeair/i.test(ua);
+      self.isAir = /adobeair/i.test(ua);
 
-			/**
+      /**
 			 * Constant that tells if the current browser is an iPhone or iPad.
 			 *
 			 * @property isIDevice
 			 * @type Boolean
 			 * @final
 			 */
-			self.isIDevice = /(iPad|iPhone)/.test(ua);
+      self.isIDevice = /(iPad|iPhone)/.test(ua);
 
-			/**
+      /**
 			 * Constant that is true if the os is iOS.
 			 *
 			 * @property iOS
 			 * @type Boolean
 			 * @final
 			 */
-			self.isIOS = self.isIDevice;
+      self.isIOS = self.isIDevice;
 
-			/**
+      /**
 			 * Constant that is true if the current browser is running on iOS 5 or greater.
 			 *
 			 * @property isIOS5
 			 * @type Boolean
 			 * @final
 			 */
-			self.isIOS5 = self.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1] >= 534;
+      self.isIOS5 = self.isIDevice && ua.match(/AppleWebKit\/(\d*)/)[1] >= 534;
 
-			// Get suffix and base
-			self.suffix = '';
+      // Get suffix and base
+      self.suffix = '';
 
-			// If base element found, add that infront of baseURL
-			nl = doc.getElementsByTagName('base');
+      // If base element found, add that infront of baseURL
+      nl = doc.getElementsByTagName('base');
 
-			for (i = 0; i < nl.length; i++) {
-				v = nl[i].href;
-				if (v) {
-					// Host only value like http://site.com or http://site.com:8008
-					if (/^https?:\/\/[^\/]+$/.test(v)) {
-						v += '/';
-					}
+      for (i = 0; i < nl.length; i++) {
+        v = nl[i].href;
+        if (v) {
+          // Host only value like http://site.com or http://site.com:8008
+          if (/^https?:\/\/[^\/]+$/.test(v)) {
+            v += '/';
+          }
 
-					base = v ? v.match(/.*\//)[0] : ''; // Get only directory
-				}
-			}
+          base = v ? v.match(/.*\//)[0] : ''; // Get only directory
+        }
+      }
 
-			function getBase(n) {
-				if (n.src && /tiny_mce(|_gzip|_jquery|_prototype|_full)(_dev|_src)?.js/.test(n.src)) {
-					if (/_(src|dev)\.js/g.test(n.src)) {
-						self.suffix = '_src';
-					}
+      function getBase(n) {
+        if (n.src && /tiny_mce(|_gzip|_jquery|_prototype|_full)(_dev|_src)?.js/.test(n.src)) {
+          if (/_(src|dev)\.js/g.test(n.src)) {
+            self.suffix = '_src';
+          }
 
-					if ((p = n.src.indexOf('?')) != -1) {
-						self.query = n.src.substring(p + 1);
-					}
+          if ((p = n.src.indexOf('?')) != -1) {
+            self.query = n.src.substring(p + 1);
+          }
 
-					self.baseURL = n.src.substring(0, n.src.lastIndexOf('/'));
+          self.baseURL = n.src.substring(0, n.src.lastIndexOf('/'));
 
-					// If path to script is relative and a base href was found add that one infront
-					// the src property will always be an absolute one on non IE browsers and IE 8
-					// so this logic will basically only be executed on older IE versions
-					if (base && self.baseURL.indexOf('://') == -1 && self.baseURL.indexOf('/') !== 0) {
-						self.baseURL = base + self.baseURL;
-					}
+          // If path to script is relative and a base href was found add that one infront
+          // the src property will always be an absolute one on non IE browsers and IE 8
+          // so this logic will basically only be executed on older IE versions
+          if (base && self.baseURL.indexOf('://') == -1 && self.baseURL.indexOf('/') !== 0) {
+            self.baseURL = base + self.baseURL;
+          }
 
-					return self.baseURL;
-				}
+          return self.baseURL;
+        }
 
-				return null;
-			}
+        return null;
+      }
 
-			// Check document
-			nl = doc.getElementsByTagName('script');
+      // Check document
+      nl = doc.getElementsByTagName('script');
 
-			for (i = 0; i < nl.length; i++) {
-				if (getBase(nl[i])) {
-					return;
-				}
-			}
+      for (i = 0; i < nl.length; i++) {
+        if (getBase(nl[i])) {
+          return;
+        }
+      }
 
-			// Check head
-			n = doc.getElementsByTagName('head')[0];
+      // Check head
+      n = doc.getElementsByTagName('head')[0];
 
-			if (n) {
-				nl = n.getElementsByTagName('script');
-				for (i = 0; i < nl.length; i++) {
-					if (getBase(nl[i])) {
-						return;
-					}
-				}
-			}
+      if (n) {
+        nl = n.getElementsByTagName('script');
+        for (i = 0; i < nl.length; i++) {
+          if (getBase(nl[i])) {
+            return;
+          }
+        }
+      }
 
-			return;
-		},
+      return;
+    },
 
-		/**
+    /**
 		 * Checks if a object is of a specific type for example an array.
 		 *
 		 * @method is
@@ -239,29 +239,29 @@
 		 * @param {string} t Optional type to check for.
 		 * @return {Boolean} true/false if the object is of the specified type.
 		 */
-		is: function (o, t) {
-			if (!t) {
-				return o !== undef;
-			}
+    is: function (o, t) {
+      if (!t) {
+        return o !== undef;
+      }
 
-			if (t == 'array' && tinymce.isArray(o)) {
-				return true;
-			}
-			return typeof (o) == t;
-		},
+      if (t == 'array' && tinymce.isArray(o)) {
+        return true;
+      }
+      return typeof (o) == t;
+    },
 
-		/**
+    /**
 		 * Returns true/false if the object is an array or not.
 		 *
 		 * @method isArray
 		 * @param {Object} obj Object to check.
 		 * @return {boolean} true/false state if the object is an array or not.
 		 */
-		isArray: Array.isArray || function (obj) {
-			return Object.prototype.toString.call(obj) === "[object Array]";
-		},
+    isArray: Array.isArray || function (obj) {
+      return Object.prototype.toString.call(obj) === "[object Array]";
+    },
 
-		/**
+    /**
 		 * Makes a name/object map out of an array with names.
 		 *
 		 * @method makeMap
@@ -270,28 +270,28 @@
 		 * @param {Object} map Optional map to add items to.
 		 * @return {Object} Name/value map of items.
 		 */
-		makeMap: function (items, delim, map) {
-			var i;
+    makeMap: function (items, delim, map) {
+      var i;
 
-			items = items || [];
-			delim = delim || ',';
+      items = items || [];
+      delim = delim || ',';
 
-			if (typeof (items) == "string") {
-				items = items.split(delim);
-			}
+      if (typeof (items) == "string") {
+        items = items.split(delim);
+      }
 
-			map = map || {};
+      map = map || {};
 
-			i = items.length;
+      i = items.length;
 
-			while (i--) {
-				map[items[i]] = {};
-			}
+      while (i--) {
+        map[items[i]] = {};
+      }
 
-			return map;
-		},
+      return map;
+    },
 
-		/**
+    /**
 		 * Performs an iteration of all items in a collection such as an object or array. This method will execure the
 		 * callback function for each item in the collection, if the callback returns false the iteration will terminate.
 		 * The callback has the following format: cb(value, key_or_index).
@@ -311,39 +311,39 @@
 		 *     console.debug("Value: " + v + ", Key: " + k);
 		 * });
 		 */
-		each: function (o, cb, s) {
-			var n, l;
+    each: function (o, cb, s) {
+      var n, l;
 
-			if (!o) {
-				return 0;
-			}
+      if (!o) {
+        return 0;
+      }
 
-			s = s || o;
+      s = s || o;
 
-			if (o.length !== undef) {
-				// Indexed arrays, needed for Safari
-				for (n = 0, l = o.length; n < l; n++) {
-					if (cb.call(s, o[n], n, o) === false) {
-						return 0;
-					}
-				}
-			} else {
-				// Hashtables
-				for (n in o) {
-					if (o.hasOwnProperty(n)) {
-						if (cb.call(s, o[n], n, o) === false) {
-							return 0;
-						}
-					}
-				}
-			}
+      if (o.length !== undef) {
+        // Indexed arrays, needed for Safari
+        for (n = 0, l = o.length; n < l; n++) {
+          if (cb.call(s, o[n], n, o) === false) {
+            return 0;
+          }
+        }
+      } else {
+        // Hashtables
+        for (n in o) {
+          if (o.hasOwnProperty(n)) {
+            if (cb.call(s, o[n], n, o) === false) {
+              return 0;
+            }
+          }
+        }
+      }
 
-			return 1;
-		},
+      return 1;
+    },
 
-		// #ifndef jquery
+    // #ifndef jquery
 
-		/**
+    /**
 		 * Creates a new array by the return value of each iteration function call. This enables you to convert
 		 * one array list into another.
 		 *
@@ -352,17 +352,17 @@
 		 * @param {function} f Function to call for each item. It's return value will be the new value.
 		 * @return {Array} Array with new values based on function return values.
 		 */
-		map: function (a, f) {
-			var o = [];
+    map: function (a, f) {
+      var o = [];
 
-			tinymce.each(a, function (v) {
-				o.push(f(v));
-			});
+      tinymce.each(a, function (v) {
+        o.push(f(v));
+      });
 
-			return o;
-		},
+      return o;
+    },
 
-		/**
+    /**
 		 * Filters out items from the input array by calling the specified function for each item.
 		 * If the function returns false the item will be excluded if it returns true it will be included.
 		 *
@@ -374,19 +374,19 @@
 		 * // Filter out some items, this will return an array with 4 and 5
 		 * var items = tinymce.grep([1,2,3,4,5], function(v) {return v > 3;});
 		 */
-		grep: function (a, f) {
-			var o = [];
+    grep: function (a, f) {
+      var o = [];
 
-			tinymce.each(a, function (v) {
-				if (!f || f(v)) {
-					o.push(v);
-				}
-			});
+      tinymce.each(a, function (v) {
+        if (!f || f(v)) {
+          o.push(v);
+        }
+      });
 
-			return o;
-		},
+      return o;
+    },
 
-		/**
+    /**
 		 * Returns the index of a value in an array, this method will return -1 if the item wasn't found.
 		 *
 		 * @method inArray
@@ -397,35 +397,35 @@
 		 * // Get index of value in array this will alert 1 since 2 is at that index
 		 * alert(tinymce.inArray([1,2,3], 2));
 		 */
-		inArray: function (a, v) {
-			var i, l;
+    inArray: function (a, v) {
+      var i, l;
 
-			if (a) {
-				for (i = 0, l = a.length; i < l; i++) {
-					if (a[i] === v) {
-						return i;
-					}
-				}
-			}
+      if (a) {
+        for (i = 0, l = a.length; i < l; i++) {
+          if (a[i] === v) {
+            return i;
+          }
+        }
+      }
 
-			return -1;
-		},
+      return -1;
+    },
 
-		toArray: function (obj) {
-			var array = obj,
-				i, l;
+    toArray: function (obj) {
+      var array = obj,
+        i, l;
 
-			if (!tinymce.isArray(obj)) {
-				array = [];
-				for (i = 0, l = obj.length; i < l; i++) {
-					array[i] = obj[i];
-				}
-			}
+      if (!tinymce.isArray(obj)) {
+        array = [];
+        for (i = 0, l = obj.length; i < l; i++) {
+          array[i] = obj[i];
+        }
+      }
 
-			return array;
-		},
+      return array;
+    },
 
-		/**
+    /**
 		 * Extends an object with the specified other object(s).
 		 *
 		 * @method extend
@@ -442,40 +442,40 @@
 		 * // Extends obj with obj2 and obj3
 		 * tinymce.extend(obj, obj2, obj3);
 		 */
-		extend: function (obj, ext) {
-			var i, l, name, args = arguments,
-				value;
+    extend: function (obj, ext) {
+      var i, l, name, args = arguments,
+        value;
 
-			for (i = 1, l = args.length; i < l; i++) {
-				ext = args[i];
-				for (name in ext) {
-					if (ext.hasOwnProperty(name)) {
-						value = ext[name];
+      for (i = 1, l = args.length; i < l; i++) {
+        ext = args[i];
+        for (name in ext) {
+          if (ext.hasOwnProperty(name)) {
+            value = ext[name];
 
-						if (value !== undef) {
-							obj[name] = value;
-						}
-					}
-				}
-			}
+            if (value !== undef) {
+              obj[name] = value;
+            }
+          }
+        }
+      }
 
-			return obj;
-		},
+      return obj;
+    },
 
-		// #endif
+    // #endif
 
-		/**
+    /**
 		 * Removes whitespace from the beginning and end of a string.
 		 *
 		 * @method trim
 		 * @param {String} s String to remove whitespace from.
 		 * @return {String} New string with removed whitespace.
 		 */
-		trim: function (s) {
-			return (s ? '' + s : '').replace(whiteSpaceRe, '');
-		},
+    trim: function (s) {
+      return (s ? '' + s : '').replace(whiteSpaceRe, '');
+    },
 
-		/**
+    /**
 		 * Creates a class, subclass or static singleton.
 		 * More details on this method can be found in the Wiki.
 		 *
@@ -521,94 +521,94 @@
 		 *     }
 		 * });
 		 */
-		create: function (s, p, root) {
-			var self = this,
-				sp, ns, cn, scn, c, de = 0;
+    create: function (s, p, root) {
+      var self = this,
+        sp, ns, cn, scn, c, de = 0;
 
-			// Parse : <prefix> <class>:<super class>
-			s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
-			cn = s[3].match(/(^|\.)(\w+)$/i)[2]; // Class name
+      // Parse : <prefix> <class>:<super class>
+      s = /^((static) )?([\w.]+)(:([\w.]+))?/.exec(s);
+      cn = s[3].match(/(^|\.)(\w+)$/i)[2]; // Class name
 
-			// Create namespace for new class
-			ns = self.createNS(s[3].replace(/\.\w+$/, ''), root);
+      // Create namespace for new class
+      ns = self.createNS(s[3].replace(/\.\w+$/, ''), root);
 
-			// Class already exists
-			if (ns[cn]) {
-				return;
-			}
+      // Class already exists
+      if (ns[cn]) {
+        return;
+      }
 
-			// Make pure static class
-			if (s[2] == 'static') {
-				ns[cn] = p;
+      // Make pure static class
+      if (s[2] == 'static') {
+        ns[cn] = p;
 
-				if (this.onCreate) {
-					this.onCreate(s[2], s[3], ns[cn]);
-				}
+        if (this.onCreate) {
+          this.onCreate(s[2], s[3], ns[cn]);
+        }
 
-				return;
-			}
+        return;
+      }
 
-			// Create default constructor
-			if (!p[cn]) {
-				p[cn] = function () { };
-				de = 1;
-			}
+      // Create default constructor
+      if (!p[cn]) {
+        p[cn] = function () { };
+        de = 1;
+      }
 
-			// Add constructor and methods
-			ns[cn] = p[cn];
-			self.extend(ns[cn].prototype, p);
+      // Add constructor and methods
+      ns[cn] = p[cn];
+      self.extend(ns[cn].prototype, p);
 
-			// Extend
-			if (s[5]) {
-				sp = self.resolve(s[5]).prototype;
-				scn = s[5].match(/\.(\w+)$/i)[1]; // Class name
+      // Extend
+      if (s[5]) {
+        sp = self.resolve(s[5]).prototype;
+        scn = s[5].match(/\.(\w+)$/i)[1]; // Class name
 
-				// Extend constructor
-				c = ns[cn];
-				if (de) {
-					// Add passthrough constructor
-					ns[cn] = function () {
-						return sp[scn].apply(this, arguments);
-					};
-				} else {
-					// Add inherit constructor
-					ns[cn] = function () {
-						this.parent = sp[scn];
-						return c.apply(this, arguments);
-					};
-				}
-				ns[cn].prototype[cn] = ns[cn];
+        // Extend constructor
+        c = ns[cn];
+        if (de) {
+          // Add passthrough constructor
+          ns[cn] = function () {
+            return sp[scn].apply(this, arguments);
+          };
+        } else {
+          // Add inherit constructor
+          ns[cn] = function () {
+            this.parent = sp[scn];
+            return c.apply(this, arguments);
+          };
+        }
+        ns[cn].prototype[cn] = ns[cn];
 
-				// Add super methods
-				self.each(sp, function (f, n) {
-					ns[cn].prototype[n] = sp[n];
-				});
+        // Add super methods
+        self.each(sp, function (f, n) {
+          ns[cn].prototype[n] = sp[n];
+        });
 
-				// Add overridden methods
-				self.each(p, function (f, n) {
-					// Extend methods if needed
-					if (sp[n]) {
-						ns[cn].prototype[n] = function () {
-							this.parent = sp[n];
-							return f.apply(this, arguments);
-						};
-					} else {
-						if (n != cn) {
-							ns[cn].prototype[n] = f;
-						}
-					}
-				});
-			}
+        // Add overridden methods
+        self.each(p, function (f, n) {
+          // Extend methods if needed
+          if (sp[n]) {
+            ns[cn].prototype[n] = function () {
+              this.parent = sp[n];
+              return f.apply(this, arguments);
+            };
+          } else {
+            if (n != cn) {
+              ns[cn].prototype[n] = f;
+            }
+          }
+        });
+      }
 
-			// Add static methods
-			/*jshint sub:true*/
-			/*eslint dot-notation:0*/
-			self.each(p['static'], function (f, n) {
-				ns[cn][n] = f;
-			});
-		},
+      // Add static methods
+      /*jshint sub:true*/
+      /*eslint dot-notation:0*/
+      self.each(p['static'], function (f, n) {
+        ns[cn][n] = f;
+      });
+    },
 
-		/**
+    /**
 		 * Executed the specified function for each item in a object tree.
 		 *
 		 * @method walk
@@ -617,25 +617,25 @@
 		 * @param {String} n Optional name of collection inside the objects to walk for example childNodes.
 		 * @param {String} s Optional scope to execute the function in.
 		 */
-		walk: function (o, f, n, s) {
-			s = s || this;
+    walk: function (o, f, n, s) {
+      s = s || this;
 
-			if (o) {
-				if (n) {
-					o = o[n];
-				}
+      if (o) {
+        if (n) {
+          o = o[n];
+        }
 
-				tinymce.each(o, function (o, i) {
-					if (f.call(s, o, i, n) === false) {
-						return false;
-					}
+        tinymce.each(o, function (o, i) {
+          if (f.call(s, o, i, n) === false) {
+            return false;
+          }
 
-					tinymce.walk(o, f, n, s);
-				});
-			}
-		},
+          tinymce.walk(o, f, n, s);
+        });
+      }
+    },
 
-		/**
+    /**
 		 * Creates a namespace on a specific object.
 		 *
 		 * @method createNS
@@ -653,27 +653,27 @@
 		 *     }
 		 * };
 		 */
-		createNS: function (n, o) {
-			var i, v;
+    createNS: function (n, o) {
+      var i, v;
 
-			o = o || win;
+      o = o || win;
 
-			n = n.split('.');
+      n = n.split('.');
 
-			for (i = 0; i < n.length; i++) {
-				v = n[i];
+      for (i = 0; i < n.length; i++) {
+        v = n[i];
 
-				if (!o[v]) {
-					o[v] = {};
-				}
+        if (!o[v]) {
+          o[v] = {};
+        }
 
-				o = o[v];
-			}
+        o = o[v];
+      }
 
-			return o;
-		},
+      return o;
+    },
 
-		/**
+    /**
 		 * Resolves a string and returns the object from a specific structure.
 		 *
 		 * @method resolve
@@ -684,24 +684,24 @@
 		 * // Resolve a path into an object reference
 		 * var obj = tinymce.resolve('a.b.c.d');
 		 */
-		resolve: function (n, o) {
-			var i, l;
+    resolve: function (n, o) {
+      var i, l;
 
-			o = o || win;
+      o = o || win;
 
-			n = n.split('.');
-			for (i = 0, l = n.length; i < l; i++) {
-				o = o[n[i]];
+      n = n.split('.');
+      for (i = 0, l = n.length; i < l; i++) {
+        o = o[n[i]];
 
-				if (!o) {
-					break;
-				}
-			}
+        if (!o) {
+          break;
+        }
+      }
 
-			return o;
-		},
+      return o;
+    },
 
-		/**
+    /**
 		 * Adds an unload handler to the document. This handler will be executed when the document gets unloaded.
 		 * This method is useful for dealing with browser memory leaks where it might be vital to remove DOM references etc.
 		 *
@@ -716,120 +716,120 @@
 		 *     someObject.someElement = null;
 		 * });
 		 */
-		addUnload: function (f, s) {
-			var unload;
+    addUnload: function (f, s) {
+      var unload;
 
-			unload = function () {
-				var li = self.unloads,
-					o, n;
+      unload = function () {
+        var li = self.unloads,
+          o, n;
 
-				if (li) {
-					// Call unload handlers
-					for (n in li) {
-						o = li[n];
+        if (li) {
+          // Call unload handlers
+          for (n in li) {
+            o = li[n];
 
-						if (o && o.func) {
-							o.func.call(o.scope, 1);
-						} // Send in one arg to distinct unload and user destroy
-					}
+            if (o && o.func) {
+              o.func.call(o.scope, 1);
+            } // Send in one arg to distinct unload and user destroy
+          }
 
-					// Detach unload function
-					if (win.detachEvent) {
-						win.detachEvent('onbeforeunload', fakeUnload);
-						win.detachEvent('onunload', unload);
-					} else if (win.removeEventListener) {
-						win.removeEventListener('unload', unload, false);
-					}
+          // Detach unload function
+          if (win.detachEvent) {
+            win.detachEvent('onbeforeunload', fakeUnload);
+            win.detachEvent('onunload', unload);
+          } else if (win.removeEventListener) {
+            win.removeEventListener('unload', unload, false);
+          }
 
-					// Destroy references
-					self.unloads = o = li = unload = 0;
+          // Destroy references
+          self.unloads = o = li = unload = 0;
 
-					// Run garbarge collector on IE
-					if (win.CollectGarbage) {
-						CollectGarbage();
-					}
-				}
-			};
+          // Run garbarge collector on IE
+          if (win.CollectGarbage) {
+            CollectGarbage();
+          }
+        }
+      };
 
-			function fakeUnload() {
-				var doc = document;
+      function fakeUnload() {
+        var doc = document;
 
-				function stop() {
-					// Prevent memory leak
-					doc.detachEvent('onstop', stop);
+        function stop() {
+          // Prevent memory leak
+          doc.detachEvent('onstop', stop);
 
-					// Call unload handler
-					if (unload) {
-						unload();
-					}
+          // Call unload handler
+          if (unload) {
+            unload();
+          }
 
-					doc = 0;
-				}
+          doc = 0;
+        }
 
-				// Is there things still loading, then do some magic
-				if (doc.readyState == 'interactive') {
-					// Fire unload when the currently loading page is stopped
-					if (doc) {
-						doc.attachEvent('onstop', stop);
-					}
+        // Is there things still loading, then do some magic
+        if (doc.readyState == 'interactive') {
+          // Fire unload when the currently loading page is stopped
+          if (doc) {
+            doc.attachEvent('onstop', stop);
+          }
 
-					// Remove onstop listener after a while to prevent the unload function
-					// to execute if the user presses cancel in an onbeforeunload
-					// confirm dialog and then presses the browser stop button
-					win.setTimeout(function () {
-						if (doc) {
-							doc.detachEvent('onstop', stop);
-						}
-					}, 0);
-				}
-			}
+          // Remove onstop listener after a while to prevent the unload function
+          // to execute if the user presses cancel in an onbeforeunload
+          // confirm dialog and then presses the browser stop button
+          win.setTimeout(function () {
+            if (doc) {
+              doc.detachEvent('onstop', stop);
+            }
+          }, 0);
+        }
+      }
 
-			f = {
-				func: f,
-				scope: s || this
-			};
+      f = {
+        func: f,
+        scope: s || this
+      };
 
-			if (!self.unloads) {
-				// Attach unload handler
-				if (win.attachEvent) {
-					win.attachEvent('onunload', unload);
-					win.attachEvent('onbeforeunload', fakeUnload);
-				} else if (win.addEventListener) {
-					win.addEventListener('unload', unload, false);
-				}
+      if (!self.unloads) {
+        // Attach unload handler
+        if (win.attachEvent) {
+          win.attachEvent('onunload', unload);
+          win.attachEvent('onbeforeunload', fakeUnload);
+        } else if (win.addEventListener) {
+          win.addEventListener('unload', unload, false);
+        }
 
-				// Setup initial unload handler array
-				self.unloads = [f];
-			} else {
-				self.unloads.push(f);
-			}
+        // Setup initial unload handler array
+        self.unloads = [f];
+      } else {
+        self.unloads.push(f);
+      }
 
-			return f;
-		},
+      return f;
+    },
 
-		/**
+    /**
 		 * Removes the specified function form the unload handler list.
 		 *
 		 * @method removeUnload
 		 * @param {function} f Function to remove from unload handler list.
 		 * @return {function} Removed function name or null if it wasn't found.
 		 */
-		removeUnload: function (f) {
-			var u = this.unloads,
-				r = null;
+    removeUnload: function (f) {
+      var u = this.unloads,
+        r = null;
 
-			tinymce.each(u, function (o, i) {
-				if (o && o.func == f) {
-					u.splice(i, 1);
-					r = f;
-					return false;
-				}
-			});
+      tinymce.each(u, function (o, i) {
+        if (o && o.func == f) {
+          u.splice(i, 1);
+          r = f;
+          return false;
+        }
+      });
 
-			return r;
-		},
+      return r;
+    },
 
-		/**
+    /**
 		 * Splits a string but removes the whitespace before and after each value.
 		 *
 		 * @method explode
@@ -839,117 +839,117 @@
 		 * // Split a string into an array with a,b,c
 		 * var arr = tinymce.explode('a, b,   c');
 		 */
-		explode: function (s, d) {
-			if (!s || tinymce.is(s, 'array')) {
-				return s;
-			}
+    explode: function (s, d) {
+      if (!s || tinymce.is(s, 'array')) {
+        return s;
+      }
 
-			return tinymce.map(s.split(d || ','), tinymce.trim);
-		},
+      return tinymce.map(s.split(d || ','), tinymce.trim);
+    },
 
-		curry: function (fn) {
-			var args = slice.call(arguments);
+    curry: function (fn) {
+      var args = slice.call(arguments);
 
-			if (args.length - 1 >= fn.length) {
-				return fn.apply(this, args.slice(1));
-			}
+      if (args.length - 1 >= fn.length) {
+        return fn.apply(this, args.slice(1));
+      }
 
-			return function () {
-				var tempArgs = args.concat([].slice.call(arguments));
-				return tinymce.curry.apply(this, tempArgs);
-			};
-		},
+      return function () {
+        var tempArgs = args.concat([].slice.call(arguments));
+        return tinymce.curry.apply(this, tempArgs);
+      };
+    },
 
-		_addVer: function (u) {
-			var v;
+    _addVer: function (u) {
+      var v;
 
-			if (!this.query) {
-				return u;
-			}
+      if (!this.query) {
+        return u;
+      }
 
-			v = (u.indexOf('?') == -1 ? '?' : '&') + this.query;
+      v = (u.indexOf('?') == -1 ? '?' : '&') + this.query;
 
-			if (u.indexOf('#') == -1) {
-				return u + v;
-			}
+      if (u.indexOf('#') == -1) {
+        return u + v;
+      }
 
-			return u.replace('#', v + '#');
-		}
+      return u.replace('#', v + '#');
+    }
 
-		/**#@-*/
-	};
+    /**#@-*/
+  };
 
-	// Initialize the API
-	tinymce._init();
+  // Initialize the API
+  tinymce._init();
 
-	// Expose tinymce namespace to the global namespace (window)
-	win.tinymce = win.tinyMCE = tinymce;
+  // Expose tinymce namespace to the global namespace (window)
+  win.tinymce = win.tinyMCE = tinymce;
 
-	// Describe the different namespaces
+  // Describe the different namespaces
 
-	/**
+  /**
 	 * Root level namespace this contains classes directly releated to the TinyMCE editor.
 	 *
 	 * @namespace tinymce
 	 */
 
-	/**
+  /**
 	 * Contains classes for handling the browsers DOM.
 	 *
 	 * @namespace tinymce.dom
 	 */
 
-	tinymce.dom = {};
+  tinymce.dom = {};
 
-	/**
+  /**
 	 * Contains various tools for rect/position calculation.
 	 *
 	 * @namespace tinymce.geom
 	 */
 
-	tinymce.geom = {};
+  tinymce.geom = {};
 
-	/**
+  /**
 	 * Contains various tools for characters and zero width space.
 	 *
 	 * @namespace tinymce.text
 	 */
 
-	tinymce.text = {};
+  tinymce.text = {};
 
-	/**
+  /**
 	 * Contains various tools for carets.
 	 *
 	 * @namespace tinymce.caret
 	 */
 
-	tinymce.caret = {};
+  tinymce.caret = {};
 
-	/**
+  /**
 	 * Contains html parser and serializer logic.
 	 *
 	 * @namespace tinymce.html
 	 */
 
-	tinymce.html = {};
+  tinymce.html = {};
 
-	/**
+  /**
 	 * Contains the different UI types such as buttons, listboxes etc.
 	 *
 	 * @namespace tinymce.ui
 	 */
 
-	tinymce.ui = {};
+  tinymce.ui = {};
 
-	/**
+  /**
 	 * Contains various utility classes such as json parser, cookies etc.
 	 *
 	 * @namespace tinymce.util
 	 */
 
-	tinymce.util = {};
+  tinymce.util = {};
 
-	/**
+  /**
 	 * Contains plugin classes.
 	 *
 	 * @namespace tinymce.plugins

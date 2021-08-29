@@ -8,27 +8,31 @@
  * other free or open source software licenses.
  */
 (function (tinymce) {
-    var DOM = tinymce.DOM,
-        Event = tinymce.dom.Event;
+  var DOM = tinymce.DOM,
+    Event = tinymce.dom.Event;
 
-    function debounce(func, wait, immediate) {
-        var timeout;
-        return function () {
-            var context = this,
-                args = arguments;
-            var later = function () {
-                timeout = null;
-                if (!immediate) func.apply(context, args);
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) func.apply(context, args);
-        };
-    }
+  function debounce(func, wait, immediate) {
+    var timeout;
+    return function () {
+      var context = this,
+        args = arguments;
+      var later = function () {
+        timeout = null;
+        if (!immediate) {
+          func.apply(context, args);
+        }
+      };
+      var callNow = immediate && !timeout;
+      clearTimeout(timeout);
+      timeout = setTimeout(later, wait);
+      if (callNow) {
+        func.apply(context, args);
+      }
+    };
+  }
 
-    tinymce.create('tinymce.ui.ContextPanel:tinymce.ui.Panel', {
-        /**
+  tinymce.create('tinymce.ui.ContextPanel:tinymce.ui.Panel', {
+    /**
          * Constructs a new panel container instance.
          *
          * @constructor
@@ -37,115 +41,115 @@
          * @param {Object} s Optional name/value settings object.
          * @param {Editor} ed Optional the editor instance this button is for.
          */
-        ContextPanel: function (id, s, ed) {
-            this.parent(id, s, ed);
+    ContextPanel: function (id, s, ed) {
+      this.parent(id, s, ed);
 
-            this.settings = s = tinymce.extend({
-                content: '',
-                buttons: []
-            }, this.settings);
+      this.settings = s = tinymce.extend({
+        content: '',
+        buttons: []
+      }, this.settings);
 
-            this.editor = ed;
-        },
+      this.editor = ed;
+    },
 
-        renderPanel: function () {
-            var self = this;
+    renderPanel: function () {
+      var self = this;
 
-            this.parent();
+      this.parent();
 
-            DOM.addClass(DOM.select('.mcePanel', DOM.get(this.id)), 'mceContextPanel');
+      DOM.addClass(DOM.select('.mcePanel', DOM.get(this.id)), 'mceContextPanel');
 
-            var scrollFunc = debounce(function () {
-                if (self.isPanelVisible) {
-                    self.positionPanel();
-                }
-            }, 60);
+      var scrollFunc = debounce(function () {
+        if (self.isPanelVisible) {
+          self.positionPanel();
+        }
+      }, 60);
 
-            self.scrollFunc = Event.add(this.editor.getWin(), 'scroll', scrollFunc);
+      self.scrollFunc = Event.add(this.editor.getWin(), 'scroll', scrollFunc);
 
-            this.editor.onHide.add(function () {
-                self.hidePanel();
-            });
-        },
+      this.editor.onHide.add(function () {
+        self.hidePanel();
+      });
+    },
 
-        /**
+    /**
          * Shows the panel.
          *
          * @method showPanel
          */
-        showPanel: function (elm) {
-            this.parent(elm);
+    showPanel: function (elm) {
+      this.parent(elm);
 
-            this.target = elm;
+      this.target = elm;
 
-            this.positionPanel();
-        },
+      this.positionPanel();
+    },
 
-        positionPanel: function () {
-            var self = this, x, y;
+    positionPanel: function () {
+      var self = this, x, y;
 
-            var panel = DOM.get(self.id);
+      var panel = DOM.get(self.id);
 
-            if (!panel) {
-                return;
-            }
+      if (!panel) {
+        return;
+      }
 
-            var elm = this.target;
+      var elm = this.target;
 
-            // get editor container position
-            var offset = DOM.getRect(this.editor.getContentAreaContainer());
+      // get editor container position
+      var offset = DOM.getRect(this.editor.getContentAreaContainer());
 
-            DOM.removeClass(panel, 'mceArrowDown');
+      DOM.removeClass(panel, 'mceArrowDown');
 
-            // get position of the target element
-            pos = DOM.getPos(elm);
+      // get position of the target element
+      pos = DOM.getPos(elm);
 
-            if (pos.y < 0) {
-                self.hidePanel();
-                return;
-            }
+      if (pos.y < 0) {
+        self.hidePanel();
+        return;
+      }
 
-            var win = this.editor.getWin();
+      var win = this.editor.getWin();
 
-            var sy = win.scrollY;
-            var wh = sy + win.innerHeight;
+      var sy = win.scrollY;
+      var wh = sy + win.innerHeight;
 
-            if (pos.y > wh - elm.clientHeight) {
-                self.hidePanel();
-                return;
-            }
+      if (pos.y > wh - elm.clientHeight) {
+        self.hidePanel();
+        return;
+      }
 
-            DOM.show(panel);
-            self.isPanelVisible = 1;
+      DOM.show(panel);
+      self.isPanelVisible = 1;
 
-            x = pos.x + offset.x + elm.clientWidth / 2;
-            y = pos.y + offset.y;
+      x = pos.x + offset.x + elm.clientWidth / 2;
+      y = pos.y + offset.y;
 
-            w = panel.clientWidth;
-            h = panel.clientHeight;
+      w = panel.clientWidth;
+      h = panel.clientHeight;
 
-            // position to center of target
-            x = x - w / 2;
+      // position to center of target
+      x = x - w / 2;
 
-            // add height of target and arrow
-            y = y + elm.clientHeight + 10;
+      // add height of target and arrow
+      y = y + elm.clientHeight + 10;
 
-            if (y > offset.y + offset.h) {
-                y -= (elm.clientHeight + panel.clientHeight + 10);
+      if (y > offset.y + offset.h) {
+        y -= (elm.clientHeight + panel.clientHeight + 10);
 
-                DOM.addClass(panel, 'mceArrowDown');
-            }
+        DOM.addClass(panel, 'mceArrowDown');
+      }
 
-            DOM.setStyles(self.id, {
-                left: x,
-                top: y,
-                zIndex: 200000
-            });
-        },
+      DOM.setStyles(self.id, {
+        left: x,
+        top: y,
+        zIndex: 200000
+      });
+    },
 
-        destroy: function () {
-            Event.remove(this.editor.getWin(), 'scroll', self.scrollFunc);
-            this.parent();
-        }
-    });
+    destroy: function () {
+      Event.remove(this.editor.getWin(), 'scroll', self.scrollFunc);
+      this.parent();
+    }
+  });
 })(tinymce);

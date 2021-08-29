@@ -13,41 +13,41 @@
  * This file includes fixes for various browser quirks it's made to make it easy to add/remove browser specific fixes.
  */
 tinymce.util.Quirks = function (editor) {
-	var VK = tinymce.VK,
-		BACKSPACE = VK.BACKSPACE,
-		DELETE = VK.DELETE,
-		dom = editor.dom,
-		selection = editor.selection,
-		settings = editor.settings,
-		parser = editor.parser,
-		each = tinymce.each,
-		RangeUtils = tinymce.dom.RangeUtils,
-		TreeWalker = tinymce.dom.TreeWalker;
+  var VK = tinymce.VK,
+    BACKSPACE = VK.BACKSPACE,
+    DELETE = VK.DELETE,
+    dom = editor.dom,
+    selection = editor.selection,
+    settings = editor.settings,
+    parser = editor.parser,
+    each = tinymce.each,
+    RangeUtils = tinymce.dom.RangeUtils,
+    TreeWalker = tinymce.dom.TreeWalker;
 
-	var mceInternalUrlPrefix = 'data:text/mce-internal,';
-	var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
-	/**
+  var mceInternalUrlPrefix = 'data:text/mce-internal,';
+  var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
+  /**
 	 * Executes a command with a specific state this can be to enable/disable browser editing features.
 	 */
-	function setEditorCommandState(cmd, state) {
-		try {
-			editor.getDoc().execCommand(cmd, false, state);
-		} catch (ex) {
-			// Ignore
-		}
-	}
+  function setEditorCommandState(cmd, state) {
+    try {
+      editor.getDoc().execCommand(cmd, false, state);
+    } catch (ex) {
+      // Ignore
+    }
+  }
 
-	/**
+  /**
 	 * Returns true/false if the event is prevented or not.
 	 *
 	 * @param {Event} e Event object.
 	 * @return {Boolean} true/false if the event is prevented or not.
 	 */
-	function isDefaultPrevented(e) {
-		return e.isDefaultPrevented();
-	}
+  function isDefaultPrevented(e) {
+    return e.isDefaultPrevented();
+  }
 
-	/**
+  /**
 	 * Sets Text/URL data on the event's dataTransfer object to a special data:text/mce-internal url.
 	 * This is to workaround the inability to set custom contentType on IE and Safari.
 	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
@@ -55,25 +55,25 @@ tinymce.util.Quirks = function (editor) {
 	 * @private
 	 * @param {DragEvent} e Event object
 	 */
-	function setMceInternalContent(e) {
-		var selectionHtml, internalContent;
+  function setMceInternalContent(e) {
+    var selectionHtml, internalContent;
 
-		if (e.dataTransfer) {
-			if (editor.selection.isCollapsed() && e.target.tagName == 'IMG') {
-				selection.select(e.target);
-			}
+    if (e.dataTransfer) {
+      if (editor.selection.isCollapsed() && e.target.tagName == 'IMG') {
+        selection.select(e.target);
+      }
 
-			selectionHtml = editor.selection.getContent();
+      selectionHtml = editor.selection.getContent();
 
-			// Safari/IE doesn't support custom dataTransfer items so we can only use URL and Text
-			if (selectionHtml.length > 0) {
-				internalContent = mceInternalUrlPrefix + escape(editor.id) + ',' + escape(selectionHtml);
-				e.dataTransfer.setData(mceInternalDataType, internalContent);
-			}
-		}
-	}
+      // Safari/IE doesn't support custom dataTransfer items so we can only use URL and Text
+      if (selectionHtml.length > 0) {
+        internalContent = mceInternalUrlPrefix + escape(editor.id) + ',' + escape(selectionHtml);
+        e.dataTransfer.setData(mceInternalDataType, internalContent);
+      }
+    }
+  }
 
-	/**
+  /**
 	 * Gets content of special data:text/mce-internal url on the event's dataTransfer object.
 	 * This is to workaround the inability to set custom contentType on IE and Safari.
 	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
@@ -82,43 +82,43 @@ tinymce.util.Quirks = function (editor) {
 	 * @param {DragEvent} e Event object
 	 * @returns {String} mce-internal content
 	 */
-	function getMceInternalContent(e) {
-		var internalContent;
+  function getMceInternalContent(e) {
+    var internalContent;
 
-		if (e.dataTransfer) {
-			internalContent = e.dataTransfer.getData(mceInternalDataType);
+    if (e.dataTransfer) {
+      internalContent = e.dataTransfer.getData(mceInternalDataType);
 
-			if (internalContent && internalContent.indexOf(mceInternalUrlPrefix) >= 0) {
-				internalContent = internalContent.substr(mceInternalUrlPrefix.length).split(',');
+      if (internalContent && internalContent.indexOf(mceInternalUrlPrefix) >= 0) {
+        internalContent = internalContent.substr(mceInternalUrlPrefix.length).split(',');
 
-				return {
-					id: unescape(internalContent[0]),
-					html: unescape(internalContent[1])
-				};
-			}
-		}
+        return {
+          id: unescape(internalContent[0]),
+          html: unescape(internalContent[1])
+        };
+      }
+    }
 
-		return null;
-	}
+    return null;
+  }
 
-	/**
+  /**
 	 * Inserts contents using the paste clipboard command if it's available if it isn't it will fallback
 	 * to the core command.
 	 *
 	 * @private
 	 * @param {String} content Content to insert at selection.
 	 */
-	function insertClipboardContents(content) {
-		if (editor.queryCommandSupported('mceInsertClipboardContent')) {
-			editor.execCommand('mceInsertClipboardContent', false, {
-				content: content
-			});
-		} else {
-			editor.execCommand('mceInsertContent', false, content);
-		}
-	}
+  function insertClipboardContents(content) {
+    if (editor.queryCommandSupported('mceInsertClipboardContent')) {
+      editor.execCommand('mceInsertClipboardContent', false, {
+        content: content
+      });
+    } else {
+      editor.execCommand('mceInsertContent', false, content);
+    }
+  }
 
-	/**
+  /**
 	 * Fixes a WebKit bug when deleting contents using backspace or delete key.
 	 * WebKit will produce a span element if you delete across two block elements.
 	 *
@@ -145,509 +145,509 @@ tinymce.util.Quirks = function (editor) {
 	 * This code is a ugly hack since writing full custom delete logic for just this bug
 	 * fix seemed like a huge task. I hope we can remove this before the year 2030.
 	 */
-	function cleanupStylesWhenDeleting() {
-		var doc = editor.getDoc(),
-			dom = editor.dom,
-			selection = editor.selection;
-		var MutationObserver = window.MutationObserver,
-			dragStartRng;
+  function cleanupStylesWhenDeleting() {
+    var doc = editor.getDoc(),
+      dom = editor.dom,
+      selection = editor.selection;
+    var MutationObserver = window.MutationObserver,
+      dragStartRng;
 
-		function isTrailingBr(node) {
-			var blockElements = dom.schema.getBlockElements(),
-				rootNode = editor.getBody();
+    function isTrailingBr(node) {
+      var blockElements = dom.schema.getBlockElements(),
+        rootNode = editor.getBody();
 
-			if (node.nodeName != 'BR') {
-				return false;
-			}
+      if (node.nodeName != 'BR') {
+        return false;
+      }
 
-			for (; node != rootNode && !blockElements[node.nodeName]; node = node.parentNode) {
-				if (node.nextSibling) {
-					return false;
-				}
-			}
+      for (; node != rootNode && !blockElements[node.nodeName]; node = node.parentNode) {
+        if (node.nextSibling) {
+          return false;
+        }
+      }
 
-			return true;
-		}
+      return true;
+    }
 
-		function isSiblingsIgnoreWhiteSpace(node1, node2) {
-			var node;
+    function isSiblingsIgnoreWhiteSpace(node1, node2) {
+      var node;
 
-			for (node = node1.nextSibling; node && node != node2; node = node.nextSibling) {
-				if (node.nodeType == 3 && tinymce.trim(node.data).length === 0) {
-					continue;
-				}
+      for (node = node1.nextSibling; node && node != node2; node = node.nextSibling) {
+        if (node.nodeType == 3 && tinymce.trim(node.data).length === 0) {
+          continue;
+        }
 
-				if (node !== node2) {
-					return false;
-				}
-			}
+        if (node !== node2) {
+          return false;
+        }
+      }
 
-			return node === node2;
-		}
+      return node === node2;
+    }
 
-		function findCaretNode(node, forward, startNode) {
-			var walker, current, nonEmptyElements;
+    function findCaretNode(node, forward, startNode) {
+      var walker, current, nonEmptyElements;
 
-			// Protect against the possibility we are asked to find a caret node relative
-			// to a node that is no longer in the DOM tree. In this case attempting to
-			// select on any match leads to a scenario where selection is completely removed
-			// from the editor. This scenario is met in real world at a minimum on
-			// WebKit browsers when selecting all and Cmd-X cutting to delete content.
-			if (!dom.isChildOf(node, editor.getBody())) {
-				return;
-			}
+      // Protect against the possibility we are asked to find a caret node relative
+      // to a node that is no longer in the DOM tree. In this case attempting to
+      // select on any match leads to a scenario where selection is completely removed
+      // from the editor. This scenario is met in real world at a minimum on
+      // WebKit browsers when selecting all and Cmd-X cutting to delete content.
+      if (!dom.isChildOf(node, editor.getBody())) {
+        return;
+      }
 
-			nonEmptyElements = dom.schema.getNonEmptyElements();
+      nonEmptyElements = dom.schema.getNonEmptyElements();
 
-			walker = new TreeWalker(startNode || node, node);
+      walker = new TreeWalker(startNode || node, node);
 
-			while ((current = walker[forward ? 'next' : 'prev']())) {
-				if (nonEmptyElements[current.nodeName] && !isTrailingBr(current)) {
-					return current;
-				}
+      while ((current = walker[forward ? 'next' : 'prev']())) {
+        if (nonEmptyElements[current.nodeName] && !isTrailingBr(current)) {
+          return current;
+        }
 
-				if (current.nodeType == 3 && current.data.length > 0) {
-					return current;
-				}
-			}
-		}
+        if (current.nodeType == 3 && current.data.length > 0) {
+          return current;
+        }
+      }
+    }
 
-		function deleteRangeBetweenTextBlocks(rng) {
-			var startBlock, endBlock, caretNodeBefore, caretNodeAfter, textBlockElements;
+    function deleteRangeBetweenTextBlocks(rng) {
+      var startBlock, endBlock, caretNodeBefore, caretNodeAfter, textBlockElements;
 
-			if (rng.collapsed) {
-				return;
-			}
+      if (rng.collapsed) {
+        return;
+      }
 
-			startBlock = dom.getParent(RangeUtils.getNode(rng.startContainer, rng.startOffset), dom.isBlock);
-			endBlock = dom.getParent(RangeUtils.getNode(rng.endContainer, rng.endOffset), dom.isBlock);
-			textBlockElements = editor.schema.getTextBlockElements();
+      startBlock = dom.getParent(RangeUtils.getNode(rng.startContainer, rng.startOffset), dom.isBlock);
+      endBlock = dom.getParent(RangeUtils.getNode(rng.endContainer, rng.endOffset), dom.isBlock);
+      textBlockElements = editor.schema.getTextBlockElements();
 
-			if (startBlock == endBlock) {
-				return;
-			}
+      if (startBlock == endBlock) {
+        return;
+      }
 
-			if (!textBlockElements[startBlock.nodeName] || !textBlockElements[endBlock.nodeName]) {
-				return;
-			}
+      if (!textBlockElements[startBlock.nodeName] || !textBlockElements[endBlock.nodeName]) {
+        return;
+      }
 
-			if (dom.getContentEditable(startBlock) === "false" || dom.getContentEditable(endBlock) === "false") {
-				return;
-			}
+      if (dom.getContentEditable(startBlock) === "false" || dom.getContentEditable(endBlock) === "false") {
+        return;
+      }
 
-			rng.deleteContents();
+      rng.deleteContents();
 
-			caretNodeBefore = findCaretNode(startBlock, false);
-			caretNodeAfter = findCaretNode(endBlock, true);
+      caretNodeBefore = findCaretNode(startBlock, false);
+      caretNodeAfter = findCaretNode(endBlock, true);
 
-			// backspace from the beginning of one block element into the previous block element...
-			if (caretNodeBefore && caretNodeAfter) {
-				if (!dom.isEmpty(endBlock)) {
-					var nodes = tinymce.toArray(endBlock.childNodes);
+      // backspace from the beginning of one block element into the previous block element...
+      if (caretNodeBefore && caretNodeAfter) {
+        if (!dom.isEmpty(endBlock)) {
+          var nodes = tinymce.toArray(endBlock.childNodes);
 
-					each(nodes, function (node) {
-						if (node && node.nodeType) {
-							startBlock.appendChild(node);
-						}
-					});
-				}
+          each(nodes, function (node) {
+            if (node && node.nodeType) {
+              startBlock.appendChild(node);
+            }
+          });
+        }
 
-				dom.remove(endBlock);
-			}
+        dom.remove(endBlock);
+      }
 
-			// remove block elment only if it is empty
-			each([startBlock, endBlock], function (node) {
-				if (dom.isEmpty(node)) {
-					dom.remove(node);
-				}
-			});
+      // remove block elment only if it is empty
+      each([startBlock, endBlock], function (node) {
+        if (dom.isEmpty(node)) {
+          dom.remove(node);
+        }
+      });
 
-			if (caretNodeBefore) {
-				if (caretNodeBefore.nodeType == 1) {
-					if (caretNodeBefore.nodeName == "BR") {
-						rng.setStartBefore(caretNodeBefore);
-						rng.setEndBefore(caretNodeBefore);
-					} else {
-						rng.setStartAfter(caretNodeBefore);
-						rng.setEndAfter(caretNodeBefore);
-					}
-				} else {
-					rng.setStart(caretNodeBefore, caretNodeBefore.data.length);
-					rng.setEnd(caretNodeBefore, caretNodeBefore.data.length);
-				}
-			} else if (caretNodeAfter) {
-				if (caretNodeAfter.nodeType == 1) {
-					rng.setStartBefore(caretNodeAfter);
-					rng.setEndBefore(caretNodeAfter);
-				} else {
-					rng.setStart(caretNodeAfter, 0);
-					rng.setEnd(caretNodeAfter, 0);
-				}
-			}
+      if (caretNodeBefore) {
+        if (caretNodeBefore.nodeType == 1) {
+          if (caretNodeBefore.nodeName == "BR") {
+            rng.setStartBefore(caretNodeBefore);
+            rng.setEndBefore(caretNodeBefore);
+          } else {
+            rng.setStartAfter(caretNodeBefore);
+            rng.setEndAfter(caretNodeBefore);
+          }
+        } else {
+          rng.setStart(caretNodeBefore, caretNodeBefore.data.length);
+          rng.setEnd(caretNodeBefore, caretNodeBefore.data.length);
+        }
+      } else if (caretNodeAfter) {
+        if (caretNodeAfter.nodeType == 1) {
+          rng.setStartBefore(caretNodeAfter);
+          rng.setEndBefore(caretNodeAfter);
+        } else {
+          rng.setStart(caretNodeAfter, 0);
+          rng.setEnd(caretNodeAfter, 0);
+        }
+      }
 
-			selection.setRng(rng);
+      selection.setRng(rng);
 
-			return true;
-		}
+      return true;
+    }
 
-		function expandBetweenBlocks(rng, isForward) {
-			var caretNode, targetCaretNode, textBlock, targetTextBlock, container, offset;
+    function expandBetweenBlocks(rng, isForward) {
+      var caretNode, targetCaretNode, textBlock, targetTextBlock, container, offset;
 
-			if (!rng.collapsed) {
-				return rng;
-			}
+      if (!rng.collapsed) {
+        return rng;
+      }
 
-			container = rng.startContainer;
-			offset = rng.startOffset;
+      container = rng.startContainer;
+      offset = rng.startOffset;
 
-			if (container.nodeType == 3) {
-				if (isForward) {
-					if (offset < container.data.length) {
-						return rng;
-					}
-				} else {
-					if (offset > 0) {
-						return rng;
-					}
-				}
-			}
+      if (container.nodeType == 3) {
+        if (isForward) {
+          if (offset < container.data.length) {
+            return rng;
+          }
+        } else {
+          if (offset > 0) {
+            return rng;
+          }
+        }
+      }
 
-			caretNode = RangeUtils.getNode(container, offset);
-			textBlock = dom.getParent(caretNode, dom.isBlock);
-			targetCaretNode = findCaretNode(editor.getBody(), isForward, caretNode);
-			targetTextBlock = dom.getParent(targetCaretNode, dom.isBlock);
-			var isAfter = container.nodeType === 1 && offset > container.childNodes.length - 1;
+      caretNode = RangeUtils.getNode(container, offset);
+      textBlock = dom.getParent(caretNode, dom.isBlock);
+      targetCaretNode = findCaretNode(editor.getBody(), isForward, caretNode);
+      targetTextBlock = dom.getParent(targetCaretNode, dom.isBlock);
+      var isAfter = container.nodeType === 1 && offset > container.childNodes.length - 1;
 
-			if (!caretNode || !targetCaretNode) {
-				return rng;
-			}
+      if (!caretNode || !targetCaretNode) {
+        return rng;
+      }
 
-			if (targetTextBlock && textBlock != targetTextBlock) {
-				if (!isForward) {
-					if (!isSiblingsIgnoreWhiteSpace(targetTextBlock, textBlock)) {
-						return rng;
-					}
+      if (targetTextBlock && textBlock != targetTextBlock) {
+        if (!isForward) {
+          if (!isSiblingsIgnoreWhiteSpace(targetTextBlock, textBlock)) {
+            return rng;
+          }
 
-					if (targetCaretNode.nodeType == 1) {
-						if (targetCaretNode.nodeName == "BR") {
-							rng.setStartBefore(targetCaretNode);
-						} else {
-							rng.setStartAfter(targetCaretNode);
-						}
-					} else {
-						rng.setStart(targetCaretNode, targetCaretNode.data.length);
-					}
+          if (targetCaretNode.nodeType == 1) {
+            if (targetCaretNode.nodeName == "BR") {
+              rng.setStartBefore(targetCaretNode);
+            } else {
+              rng.setStartAfter(targetCaretNode);
+            }
+          } else {
+            rng.setStart(targetCaretNode, targetCaretNode.data.length);
+          }
 
-					if (caretNode.nodeType == 1) {
-						if (isAfter) {
-							rng.setEndAfter(caretNode);
-						} else {
-							rng.setEndBefore(caretNode);
-						}
-					} else {
-						rng.setEndBefore(caretNode);
-					}
-				} else {
-					if (!isSiblingsIgnoreWhiteSpace(textBlock, targetTextBlock)) {
-						return rng;
-					}
+          if (caretNode.nodeType == 1) {
+            if (isAfter) {
+              rng.setEndAfter(caretNode);
+            } else {
+              rng.setEndBefore(caretNode);
+            }
+          } else {
+            rng.setEndBefore(caretNode);
+          }
+        } else {
+          if (!isSiblingsIgnoreWhiteSpace(textBlock, targetTextBlock)) {
+            return rng;
+          }
 
-					if (caretNode.nodeType == 1) {
-						if (caretNode.nodeName == "BR") {
-							rng.setStartBefore(caretNode);
-						} else {
-							rng.setStartAfter(caretNode);
-						}
-					} else {
-						rng.setStart(caretNode, caretNode.data.length);
-					}
+          if (caretNode.nodeType == 1) {
+            if (caretNode.nodeName == "BR") {
+              rng.setStartBefore(caretNode);
+            } else {
+              rng.setStartAfter(caretNode);
+            }
+          } else {
+            rng.setStart(caretNode, caretNode.data.length);
+          }
 
-					if (targetCaretNode.nodeType == 1) {
-						rng.setEnd(targetCaretNode, 0);
-					} else {
-						rng.setEndBefore(targetCaretNode);
-					}
-				}
-			}
+          if (targetCaretNode.nodeType == 1) {
+            rng.setEnd(targetCaretNode, 0);
+          } else {
+            rng.setEndBefore(targetCaretNode);
+          }
+        }
+      }
 
-			return rng;
-		}
+      return rng;
+    }
 
-		function handleTextBlockMergeDelete(isForward) {
-			var rng = selection.getRng();
+    function handleTextBlockMergeDelete(isForward) {
+      var rng = selection.getRng();
 
-			rng = expandBetweenBlocks(rng, isForward);
+      rng = expandBetweenBlocks(rng, isForward);
 
-			if (deleteRangeBetweenTextBlocks(rng)) {
-				return true;
-			}
-		}
+      if (deleteRangeBetweenTextBlocks(rng)) {
+        return true;
+      }
+    }
 
-		/**
+    /**
 		 * This retains the formatting if the last character is to be deleted.
 		 *
 		 * Backspace on this: <p><b><i>a|</i></b></p> would become <p>|</p> in WebKit.
 		 * With this patch: <p><b><i>|<br></i></b></p>
 		 */
-		function handleLastBlockCharacterDelete(isForward, rng) {
-			var path, blockElm, newBlockElm, clonedBlockElm, sibling,
-				container, offset, br, currentFormatNodes;
+    function handleLastBlockCharacterDelete(isForward, rng) {
+      var path, blockElm, newBlockElm, clonedBlockElm, sibling,
+        container, offset, br, currentFormatNodes;
 
-			function cloneTextBlockWithFormats(blockElm, node) {
-				currentFormatNodes = dom.getParents(node, function (n) {
-					return !!editor.schema.getTextInlineElements()[n.nodeName];
-				});
+      function cloneTextBlockWithFormats(blockElm, node) {
+        currentFormatNodes = dom.getParents(node, function (n) {
+          return !!editor.schema.getTextInlineElements()[n.nodeName];
+        });
 
-				newBlockElm = blockElm.cloneNode(false);
+        newBlockElm = blockElm.cloneNode(false);
 
-				currentFormatNodes = tinymce.map(currentFormatNodes, function (formatNode) {
-					formatNode = formatNode.cloneNode(false);
+        currentFormatNodes = tinymce.map(currentFormatNodes, function (formatNode) {
+          formatNode = formatNode.cloneNode(false);
 
-					if (newBlockElm.hasChildNodes()) {
-						formatNode.appendChild(newBlockElm.firstChild);
-						newBlockElm.appendChild(formatNode);
-					} else {
-						newBlockElm.appendChild(formatNode);
-					}
+          if (newBlockElm.hasChildNodes()) {
+            formatNode.appendChild(newBlockElm.firstChild);
+            newBlockElm.appendChild(formatNode);
+          } else {
+            newBlockElm.appendChild(formatNode);
+          }
 
-					newBlockElm.appendChild(formatNode);
+          newBlockElm.appendChild(formatNode);
 
-					return formatNode;
-				});
+          return formatNode;
+        });
 
-				if (currentFormatNodes.length) {
-					br = dom.create('br');
-					currentFormatNodes[0].appendChild(br);
-					dom.replace(newBlockElm, blockElm);
+        if (currentFormatNodes.length) {
+          br = dom.create('br');
+          currentFormatNodes[0].appendChild(br);
+          dom.replace(newBlockElm, blockElm);
 
-					rng.setStartBefore(br);
-					rng.setEndBefore(br);
-					editor.selection.setRng(rng);
+          rng.setStartBefore(br);
+          rng.setEndBefore(br);
+          editor.selection.setRng(rng);
 
-					return br;
-				}
+          return br;
+        }
 
-				return null;
-			}
+        return null;
+      }
 
-			function isTextBlock(node) {
-				return node && editor.schema.getTextBlockElements()[node.tagName];
-			}
+      function isTextBlock(node) {
+        return node && editor.schema.getTextBlockElements()[node.tagName];
+      }
 
-			function NodePathCreate(rootNode, targetNode, normalized) {
-				var path = [];
+      function NodePathCreate(rootNode, targetNode, normalized) {
+        var path = [];
 
-				for (; targetNode && targetNode != rootNode; targetNode = targetNode.parentNode) {
-					path.push(tinymce.DOM.nodeIndex(targetNode, normalized));
-				}
+        for (; targetNode && targetNode != rootNode; targetNode = targetNode.parentNode) {
+          path.push(tinymce.DOM.nodeIndex(targetNode, normalized));
+        }
 
-				return path;
-			}
+        return path;
+      }
 
-			function NodePathResolve(rootNode, path) {
-				var i, node, children;
+      function NodePathResolve(rootNode, path) {
+        var i, node, children;
 
-				for (node = rootNode, i = path.length - 1; i >= 0; i--) {
-					children = node.childNodes;
+        for (node = rootNode, i = path.length - 1; i >= 0; i--) {
+          children = node.childNodes;
 
-					if (path[i] > children.length - 1) {
-						return null;
-					}
+          if (path[i] > children.length - 1) {
+            return null;
+          }
 
-					node = children[path[i]];
-				}
+          node = children[path[i]];
+        }
 
-				return node;
-			}
+        return node;
+      }
 
-			if (!rng.collapsed) {
-				return;
-			}
+      if (!rng.collapsed) {
+        return;
+      }
 
-			container = rng.startContainer;
-			offset = rng.startOffset;
-			blockElm = dom.getParent(container, dom.isBlock);
-			if (!isTextBlock(blockElm)) {
-				return;
-			}
+      container = rng.startContainer;
+      offset = rng.startOffset;
+      blockElm = dom.getParent(container, dom.isBlock);
+      if (!isTextBlock(blockElm)) {
+        return;
+      }
 
-			if (container.nodeType == 1) {
-				container = container.childNodes[offset];
-				if (container && container.tagName != 'BR') {
-					return;
-				}
+      if (container.nodeType == 1) {
+        container = container.childNodes[offset];
+        if (container && container.tagName != 'BR') {
+          return;
+        }
 
-				if (isForward) {
-					sibling = blockElm.nextSibling;
-				} else {
-					sibling = blockElm.previousSibling;
-				}
+        if (isForward) {
+          sibling = blockElm.nextSibling;
+        } else {
+          sibling = blockElm.previousSibling;
+        }
 
-				if (dom.isEmpty(blockElm) && isTextBlock(sibling) && dom.isEmpty(sibling)) {
-					if (cloneTextBlockWithFormats(blockElm, container)) {
-						dom.remove(sibling);
-						return true;
-					}
-				}
-			} else if (container.nodeType == 3) {
-				path = NodePathCreate(blockElm, container);
-				clonedBlockElm = blockElm.cloneNode(true);
-				container = NodePathResolve(clonedBlockElm, path);
+        if (dom.isEmpty(blockElm) && isTextBlock(sibling) && dom.isEmpty(sibling)) {
+          if (cloneTextBlockWithFormats(blockElm, container)) {
+            dom.remove(sibling);
+            return true;
+          }
+        }
+      } else if (container.nodeType == 3) {
+        path = NodePathCreate(blockElm, container);
+        clonedBlockElm = blockElm.cloneNode(true);
+        container = NodePathResolve(clonedBlockElm, path);
 
-				if (isForward) {
-					if (offset >= container.data.length) {
-						return;
-					}
+        if (isForward) {
+          if (offset >= container.data.length) {
+            return;
+          }
 
-					container.deleteData(offset, 1);
-				} else {
-					if (offset <= 0) {
-						return;
-					}
+          container.deleteData(offset, 1);
+        } else {
+          if (offset <= 0) {
+            return;
+          }
 
-					container.deleteData(offset - 1, 1);
-				}
+          container.deleteData(offset - 1, 1);
+        }
 
-				if (dom.isEmpty(clonedBlockElm)) {
-					return cloneTextBlockWithFormats(blockElm, container);
-				}
-			}
-		}
+        if (dom.isEmpty(clonedBlockElm)) {
+          return cloneTextBlockWithFormats(blockElm, container);
+        }
+      }
+    }
 
-		function customDelete(isForward) {
-			var mutationObserver, rng, caretElement;
+    function customDelete(isForward) {
+      var mutationObserver, rng, caretElement;
 
-			if (handleTextBlockMergeDelete(isForward)) {
-				return;
-			}
+      if (handleTextBlockMergeDelete(isForward)) {
+        return;
+      }
 
-			tinymce.each(editor.getBody().getElementsByTagName('*'), function (elm) {
-				// Mark existing spans
-				if (elm.tagName == 'SPAN') {
-					elm.setAttribute('mce-data-marked', 1);
-				}
+      tinymce.each(editor.getBody().getElementsByTagName('*'), function (elm) {
+        // Mark existing spans
+        if (elm.tagName == 'SPAN') {
+          elm.setAttribute('mce-data-marked', 1);
+        }
 
-				// Make sure all elements has a data-mce-style attribute
-				if (!elm.hasAttribute('data-mce-style') && elm.hasAttribute('style')) {
-					editor.dom.setAttrib(elm, 'style', editor.dom.getAttrib(elm, 'style'));
-				}
-			});
+        // Make sure all elements has a data-mce-style attribute
+        if (!elm.hasAttribute('data-mce-style') && elm.hasAttribute('style')) {
+          editor.dom.setAttrib(elm, 'style', editor.dom.getAttrib(elm, 'style'));
+        }
+      });
 
-			// Observe added nodes and style attribute changes
-			mutationObserver = new MutationObserver(function () { });
-			mutationObserver.observe(editor.getDoc(), {
-				childList: true,
-				attributes: true,
-				subtree: true,
-				attributeFilter: ['style']
-			});
+      // Observe added nodes and style attribute changes
+      mutationObserver = new MutationObserver(function () { });
+      mutationObserver.observe(editor.getDoc(), {
+        childList: true,
+        attributes: true,
+        subtree: true,
+        attributeFilter: ['style']
+      });
 
-			editor.getDoc().execCommand(isForward ? 'ForwardDelete' : 'Delete', false, null);
+      editor.getDoc().execCommand(isForward ? 'ForwardDelete' : 'Delete', false, null);
 
-			rng = editor.selection.getRng();
-			caretElement = rng.startContainer.parentNode;
+      rng = editor.selection.getRng();
+      caretElement = rng.startContainer.parentNode;
 
-			tinymce.each(mutationObserver.takeRecords(), function (record) {
-				if (!dom.isChildOf(record.target, editor.getBody())) {
-					return;
-				}
+      tinymce.each(mutationObserver.takeRecords(), function (record) {
+        if (!dom.isChildOf(record.target, editor.getBody())) {
+          return;
+        }
 
-				// Restore style attribute to previous value
-				if (record.attributeName == "style") {
-					var oldValue = record.target.getAttribute('data-mce-style');
+        // Restore style attribute to previous value
+        if (record.attributeName == "style") {
+          var oldValue = record.target.getAttribute('data-mce-style');
 
-					if (oldValue) {
-						record.target.setAttribute("style", oldValue);
-					} else {
-						record.target.removeAttribute("style");
-					}
-				}
+          if (oldValue) {
+            record.target.setAttribute("style", oldValue);
+          } else {
+            record.target.removeAttribute("style");
+          }
+        }
 
-				// Remove all spans that aren't marked and retain selection
-				tinymce.each(record.addedNodes, function (node) {					
-					if (node.nodeType !== 1) {
-						return true;
-					}
-					
-					// remove new runtime style attributes on addedNodes
-					if (node.getAttribute('style') && !node.getAttribute('data-mce-style')) {
-						node.removeAttribute("style");
-					}
+        // Remove all spans that aren't marked and retain selection
+        tinymce.each(record.addedNodes, function (node) {
+          if (node.nodeType !== 1) {
+            return true;
+          }
 
-					if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
-						var offset, container;
+          // remove new runtime style attributes on addedNodes
+          if (node.getAttribute('style') && !node.getAttribute('data-mce-style')) {
+            node.removeAttribute("style");
+          }
 
-						if (node == caretElement) {
-							offset = rng.startOffset;
-							container = node.firstChild;
-						}
+          if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
+            var offset, container;
 
-						dom.remove(node, true);
+            if (node == caretElement) {
+              offset = rng.startOffset;
+              container = node.firstChild;
+            }
 
-						if (container) {
-							rng.setStart(container, offset);
-							rng.setEnd(container, offset);
-							editor.selection.setRng(rng);
-						}
-					}
-				});
-			});
+            dom.remove(node, true);
 
-			mutationObserver.disconnect();
+            if (container) {
+              rng.setStart(container, offset);
+              rng.setEnd(container, offset);
+              editor.selection.setRng(rng);
+            }
+          }
+        });
+      });
 
-			// Remove any left over marks
-			tinymce.each(editor.dom.select('span[mce-data-marked]'), function (span) {
-				span.removeAttribute('mce-data-marked');
-			});
-		}
+      mutationObserver.disconnect();
 
-		function transactCustomDelete(isForward) {
-			customDelete(isForward);
-			editor.undoManager.add();
-		}
+      // Remove any left over marks
+      tinymce.each(editor.dom.select('span[mce-data-marked]'), function (span) {
+        span.removeAttribute('mce-data-marked');
+      });
+    }
 
-		editor.onKeyDown.add(function (editor, e) {
-			var isForward = e.keyCode == DELETE,
-				isMetaOrCtrl = e.ctrlKey || e.metaKey;
+    function transactCustomDelete(isForward) {
+      customDelete(isForward);
+      editor.undoManager.add();
+    }
 
-			if (!isDefaultPrevented(e) && (isForward || e.keyCode == BACKSPACE)) {
-				var rng = editor.selection.getRng(),
-					container = rng.startContainer,
-					offset = rng.startOffset;
+    editor.onKeyDown.add(function (editor, e) {
+      var isForward = e.keyCode == DELETE,
+        isMetaOrCtrl = e.ctrlKey || e.metaKey;
 
-				/*if (editor.settings.forced_root_block === false) {
+      if (!isDefaultPrevented(e) && (isForward || e.keyCode == BACKSPACE)) {
+        var rng = editor.selection.getRng(),
+          container = rng.startContainer,
+          offset = rng.startOffset;
+
+        /*if (editor.settings.forced_root_block === false) {
 					return;
 				}*/
 
-				// Shift+Delete is cut
-				if (isForward && e.shiftKey) {
-					return;
-				}
+        // Shift+Delete is cut
+        if (isForward && e.shiftKey) {
+          return;
+        }
 
-				if (handleLastBlockCharacterDelete(isForward, rng)) {
-					e.preventDefault();
-					return;
-				}
+        if (handleLastBlockCharacterDelete(isForward, rng)) {
+          e.preventDefault();
+          return;
+        }
 
-				// Ignore non meta delete in the where there is text before/after the caret
-				if (!isMetaOrCtrl && rng.collapsed && container.nodeType == 3) {
-					if (isForward ? offset < container.data.length : offset > 0) {
-						return;
-					}
-				}
+        // Ignore non meta delete in the where there is text before/after the caret
+        if (!isMetaOrCtrl && rng.collapsed && container.nodeType == 3) {
+          if (isForward ? offset < container.data.length : offset > 0) {
+            return;
+          }
+        }
 
-				e.preventDefault();
+        e.preventDefault();
 
-				if (isMetaOrCtrl) {
-					editor.selection.getSel().modify("extend", isForward ? "forward" : "backward", e.metaKey ? "lineboundary" : "word");
-				}
+        if (isMetaOrCtrl) {
+          editor.selection.getSel().modify("extend", isForward ? "forward" : "backward", e.metaKey ? "lineboundary" : "word");
+        }
 
-				customDelete(isForward);
-			}
-		});
+        customDelete(isForward);
+      }
+    });
 
-		// Handle case where text is deleted by typing over
-		/*editor.onKeyPress.add(function (editor, e) {
+    // Handle case where text is deleted by typing over
+    /*editor.onKeyPress.add(function (editor, e) {
 			if (!isDefaultPrevented(e) && !selection.isCollapsed() && e.charCode > 31 && !VK.metaKeyPressed(e)) {
 				var rng, currentFormatNodes, fragmentNode, blockParent, caretNode, charText;
 
@@ -709,83 +709,83 @@ tinymce.util.Quirks = function (editor) {
 			}
 		});*/
 
-		editor.addCommand('Delete', function () {
-			customDelete();
-		});
+    editor.addCommand('Delete', function () {
+      customDelete();
+    });
 
-		editor.addCommand('ForwardDelete', function () {
-			customDelete(true);
-		});
+    editor.addCommand('ForwardDelete', function () {
+      customDelete(true);
+    });
 
-		editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
-			dragStartRng = selection.getRng();
-			setMceInternalContent(e);
-		});
+    editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+      dragStartRng = selection.getRng();
+      setMceInternalContent(e);
+    });
 
-		editor.dom.bind(editor.getBody(), 'drop', function (e) {
-			if (!isDefaultPrevented(e)) {
-				var internalContent = getMceInternalContent(e);
+    editor.dom.bind(editor.getBody(), 'drop', function (e) {
+      if (!isDefaultPrevented(e)) {
+        var internalContent = getMceInternalContent(e);
 
-				if (internalContent) {
-					e.preventDefault();
+        if (internalContent) {
+          e.preventDefault();
 
-					// Safari has a weird issue where drag/dropping images sometimes
-					// produces a green plus icon. When this happens the caretRangeFromPoint
-					// will return "null" even though the x, y coordinate is correct.
-					// But if we detach the insert from the drop event we will get a proper range
-					setTimeout(function () {
-						var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
+          // Safari has a weird issue where drag/dropping images sometimes
+          // produces a green plus icon. When this happens the caretRangeFromPoint
+          // will return "null" even though the x, y coordinate is correct.
+          // But if we detach the insert from the drop event we will get a proper range
+          setTimeout(function () {
+            var pointRng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, doc);
 
-						if (dragStartRng) {
-							selection.setRng(dragStartRng);
-							dragStartRng = null;
-							transactCustomDelete();
-						}
+            if (dragStartRng) {
+              selection.setRng(dragStartRng);
+              dragStartRng = null;
+              transactCustomDelete();
+            }
 
-						selection.setRng(pointRng);
-						insertClipboardContents(internalContent.html);
-					}, 0);
-				}
-			}
-		});
-	}
+            selection.setRng(pointRng);
+            insertClipboardContents(internalContent.html);
+          }, 0);
+        }
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Remove runtime styles from Chrome / Safari, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
 	 */
-	function cleanupRuntimeStyles() {
-		function removeRuntimeStyle(node) {
-			var style = node.attr('style');
+  function cleanupRuntimeStyles() {
+    function removeRuntimeStyle(node) {
+      var style = node.attr('style');
 
-			if (style) {
-				style = style.replace(/\s/g, '');
+      if (style) {
+        style = style.replace(/\s/g, '');
 
-				if (style === 'color:inherit;font-family:inherit;font-size:1rem;') {
-					node.unwrap();
-				}
-			}
-		}
+        if (style === 'color:inherit;font-family:inherit;font-size:1rem;') {
+          node.unwrap();
+        }
+      }
+    }
 
-		editor.parser.addNodeFilter('span', function (nodes, name) {
-			var i = nodes.length,
-				node;
-			while (i--) {
-				node = nodes[i];
-				removeRuntimeStyle(node);
-			}
-		});
+    editor.parser.addNodeFilter('span', function (nodes, name) {
+      var i = nodes.length,
+        node;
+      while (i--) {
+        node = nodes[i];
+        removeRuntimeStyle(node);
+      }
+    });
 
-		editor.serializer.addNodeFilter('span', function (nodes, name) {
-			var i = nodes.length,
-				node;
-			while (i--) {
-				node = nodes[i];
-				removeRuntimeStyle(node);
-			}
-		});
-	}
+    editor.serializer.addNodeFilter('span', function (nodes, name) {
+      var i = nodes.length,
+        node;
+      while (i--) {
+        node = nodes[i];
+        removeRuntimeStyle(node);
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Makes sure that the editor body becomes empty when backspace or delete is pressed in empty editors.
 	 *
 	 * For example:
@@ -797,84 +797,84 @@ tinymce.util.Quirks = function (editor) {
 	 * Or:
 	 * [<h1></h1>]
 	 */
-	function emptyEditorWhenDeleting() {
-		function serializeRng(rng) {
-			var body = dom.create("body");
-			var contents = rng.cloneContents();
-			body.appendChild(contents);
-			return selection.serializer.serialize(body, {
-				format: 'html'
-			});
-		}
+  function emptyEditorWhenDeleting() {
+    function serializeRng(rng) {
+      var body = dom.create("body");
+      var contents = rng.cloneContents();
+      body.appendChild(contents);
+      return selection.serializer.serialize(body, {
+        format: 'html'
+      });
+    }
 
-		function allContentsSelected(rng) {
-			if (!rng.setStart) {
-				if (rng.item) {
-					return false;
-				}
+    function allContentsSelected(rng) {
+      if (!rng.setStart) {
+        if (rng.item) {
+          return false;
+        }
 
-				var bodyRng = rng.duplicate();
-				bodyRng.moveToElementText(editor.getBody());
-				return RangeUtils.compareRanges(rng, bodyRng);
-			}
+        var bodyRng = rng.duplicate();
+        bodyRng.moveToElementText(editor.getBody());
+        return RangeUtils.compareRanges(rng, bodyRng);
+      }
 
-			var selection = serializeRng(rng);
+      var selection = serializeRng(rng);
 
-			var allRng = dom.createRng();
-			allRng.selectNode(editor.getBody());
+      var allRng = dom.createRng();
+      allRng.selectNode(editor.getBody());
 
-			var allSelection = serializeRng(allRng);
-			return selection === allSelection;
-		}
+      var allSelection = serializeRng(allRng);
+      return selection === allSelection;
+    }
 
-		editor.onKeyDown.add(function (editor, e) {
-			var keyCode = e.keyCode,
-				isCollapsed, body;
+    editor.onKeyDown.add(function (editor, e) {
+      var keyCode = e.keyCode,
+        isCollapsed, body;
 
-			// Empty the editor if it's needed for example backspace at <p><b>|</b></p>
-			if (!isDefaultPrevented(e) && (keyCode == DELETE || keyCode == BACKSPACE)) {
-				isCollapsed = editor.selection.isCollapsed();
-				body = editor.getBody();
+      // Empty the editor if it's needed for example backspace at <p><b>|</b></p>
+      if (!isDefaultPrevented(e) && (keyCode == DELETE || keyCode == BACKSPACE)) {
+        isCollapsed = editor.selection.isCollapsed();
+        body = editor.getBody();
 
-				// Selection is collapsed but the editor isn't empty
-				if (isCollapsed && !dom.isEmpty(body)) {
-					return;
-				}
+        // Selection is collapsed but the editor isn't empty
+        if (isCollapsed && !dom.isEmpty(body)) {
+          return;
+        }
 
-				// Selection isn't collapsed but not all the contents is selected
-				if (!isCollapsed && !allContentsSelected(editor.selection.getRng())) {
-					return;
-				}
+        // Selection isn't collapsed but not all the contents is selected
+        if (!isCollapsed && !allContentsSelected(editor.selection.getRng())) {
+          return;
+        }
 
-				// Manually empty the editor
-				e.preventDefault();
-				editor.setContent('');
+        // Manually empty the editor
+        e.preventDefault();
+        editor.setContent('');
 
-				if (body.firstChild && dom.isBlock(body.firstChild)) {
-					editor.selection.setCursorLocation(body.firstChild, 0);
-				} else {
-					editor.selection.setCursorLocation(body, 0);
-				}
+        if (body.firstChild && dom.isBlock(body.firstChild)) {
+          editor.selection.setCursorLocation(body.firstChild, 0);
+        } else {
+          editor.selection.setCursorLocation(body, 0);
+        }
 
-				editor.nodeChanged();
-			}
-		});
-	}
+        editor.nodeChanged();
+      }
+    });
+  }
 
-	/**
+  /**
 	 * WebKit doesn't select all the nodes in the body when you press Ctrl+A.
 	 * This selects the whole body so that backspace/delete logic will delete everything
 	 */
-	function selectAll() {
-		editor.onKeyDown.add(function (editor, e) {
-			if (!isDefaultPrevented(e) && e.keyCode == 65 && VK.metaKeyPressed(e)) {
-				e.preventDefault();
-				editor.execCommand('SelectAll');
-			}
-		});
-	}
+  function selectAll() {
+    editor.onKeyDown.add(function (editor, e) {
+      if (!isDefaultPrevented(e) && e.keyCode == 65 && VK.metaKeyPressed(e)) {
+        e.preventDefault();
+        editor.execCommand('SelectAll');
+      }
+    });
+  }
 
-	/**
+  /**
 	 * WebKit has a weird issue where it some times fails to properly convert keypresses to input method keystrokes.
 	 * The IME on Mac doesn't initialize when it doesn't fire a proper focus event.
 	 *
@@ -885,40 +885,40 @@ tinymce.util.Quirks = function (editor) {
 	 *
 	 * See: https://bugs.webkit.org/show_bug.cgi?id=83566
 	 */
-	function inputMethodFocus() {
-		if (!editor.settings.content_editable) {
-			// Case 1 IME doesn't initialize if you focus the document
-			// Disabled since it was interferring with the cE=false logic
-			// Also coultn't reproduce the issue on Safari 9
-			/*dom.bind(editor.getDoc(), 'focusin', function() {
+  function inputMethodFocus() {
+    if (!editor.settings.content_editable) {
+      // Case 1 IME doesn't initialize if you focus the document
+      // Disabled since it was interferring with the cE=false logic
+      // Also coultn't reproduce the issue on Safari 9
+      /*dom.bind(editor.getDoc(), 'focusin', function() {
 				selection.setRng(selection.getRng());
 			});*/
 
-			// Case 2 IME doesn't initialize if you click the documentElement it also doesn't properly fire the focusin event
-			// Needs to be both down/up due to weird rendering bug on Chrome Windows
-			dom.bind(editor.getDoc(), 'mousedown mouseup', function (e) {
-				var rng;
+      // Case 2 IME doesn't initialize if you click the documentElement it also doesn't properly fire the focusin event
+      // Needs to be both down/up due to weird rendering bug on Chrome Windows
+      dom.bind(editor.getDoc(), 'mousedown mouseup', function (e) {
+        var rng;
 
-				if (e.target == editor.getDoc().documentElement) {
-					rng = selection.getRng();
-					editor.getBody().focus();
+        if (e.target == editor.getDoc().documentElement) {
+          rng = selection.getRng();
+          editor.getBody().focus();
 
-					if (e.type == 'mousedown') {
-						/*if (CaretContainer.isCaretContainer(rng.startContainer)) {
+          if (e.type == 'mousedown') {
+            /*if (CaretContainer.isCaretContainer(rng.startContainer)) {
 							return;
 						}*/
 
-						// Edge case for mousedown, drag select and mousedown again within selection on Chrome Windows to render caret
-						selection.placeCaretAt(e.clientX, e.clientY);
-					} else {
-						selection.setRng(rng);
-					}
-				}
-			});
-		}
-	}
+            // Edge case for mousedown, drag select and mousedown again within selection on Chrome Windows to render caret
+            selection.placeCaretAt(e.clientX, e.clientY);
+          } else {
+            selection.setRng(rng);
+          }
+        }
+      });
+    }
+  }
 
-	/**
+  /**
 	 * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
 	 * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
 	 * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
@@ -927,34 +927,34 @@ tinymce.util.Quirks = function (editor) {
 	 *
 	 * It also fixes a bug on Firefox where it's impossible to delete HR elements.
 	 */
-	function removeHrOnBackspace() {
-		editor.onKeyDown.add(function (editor, e) {
-			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
-				// Check if there is any HR elements this is faster since getRng on IE 7 & 8 is slow
-				if (!editor.getBody().getElementsByTagName('hr').length) {
-					return;
-				}
+  function removeHrOnBackspace() {
+    editor.onKeyDown.add(function (editor, e) {
+      if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
+        // Check if there is any HR elements this is faster since getRng on IE 7 & 8 is slow
+        if (!editor.getBody().getElementsByTagName('hr').length) {
+          return;
+        }
 
-				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
-					var node = selection.getNode();
-					var previousSibling = node.previousSibling;
+        if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
+          var node = selection.getNode();
+          var previousSibling = node.previousSibling;
 
-					if (node.nodeName == 'HR') {
-						dom.remove(node);
-						e.preventDefault();
-						return;
-					}
+          if (node.nodeName == 'HR') {
+            dom.remove(node);
+            e.preventDefault();
+            return;
+          }
 
-					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "hr") {
-						dom.remove(previousSibling);
-						e.preventDefault();
-					}
-				}
-			}
-		});
-	}
+          if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "hr") {
+            dom.remove(previousSibling);
+            e.preventDefault();
+          }
+        }
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Fixes a Gecko bug where the style attribute gets added to the wrong element when deleting between two block elements.
 	 *
 	 * Fixes do backspace/delete on this:
@@ -966,58 +966,58 @@ tinymce.util.Quirks = function (editor) {
 	 * Instead of:
 	 * <p style="color:red">bla|ed</p>
 	 */
-	function removeStylesWhenDeletingAcrossBlockElements() {
-		function getAttributeApplyFunction() {
-			var template = dom.getAttribs(selection.getStart().cloneNode(false));
+  function removeStylesWhenDeletingAcrossBlockElements() {
+    function getAttributeApplyFunction() {
+      var template = dom.getAttribs(selection.getStart().cloneNode(false));
 
-			return function () {
-				var target = selection.getStart();
+      return function () {
+        var target = selection.getStart();
 
-				if (target !== editor.getBody()) {
-					dom.setAttrib(target, "style", null);
+        if (target !== editor.getBody()) {
+          dom.setAttrib(target, "style", null);
 
-					each(template, function (attr) {
-						target.setAttributeNode(attr.cloneNode(true));
-					});
-				}
-			};
-		}
+          each(template, function (attr) {
+            target.setAttributeNode(attr.cloneNode(true));
+          });
+        }
+      };
+    }
 
-		function isSelectionAcrossElements() {
-			return !selection.isCollapsed() &&
+    function isSelectionAcrossElements() {
+      return !selection.isCollapsed() &&
 				dom.getParent(selection.getStart(), dom.isBlock) != dom.getParent(selection.getEnd(), dom.isBlock);
-		}
+    }
 
-		editor.onKeyPress.add(function (editor, e) {
-			var applyAttributes;
+    editor.onKeyPress.add(function (editor, e) {
+      var applyAttributes;
 
-			if (!isDefaultPrevented(e) && (e.keyCode == 8 || e.keyCode == 46) && isSelectionAcrossElements()) {
-				applyAttributes = getAttributeApplyFunction();
-				editor.getDoc().execCommand('delete', false, null);
-				applyAttributes();
-				e.preventDefault();
-				return false;
-			}
-		});
+      if (!isDefaultPrevented(e) && (e.keyCode == 8 || e.keyCode == 46) && isSelectionAcrossElements()) {
+        applyAttributes = getAttributeApplyFunction();
+        editor.getDoc().execCommand('delete', false, null);
+        applyAttributes();
+        e.preventDefault();
+        return false;
+      }
+    });
 
-		dom.bind(editor.getDoc(), 'cut', function (e) {
-			var applyAttributes;
+    dom.bind(editor.getDoc(), 'cut', function (e) {
+      var applyAttributes;
 
-			if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
-				applyAttributes = getAttributeApplyFunction();
+      if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
+        applyAttributes = getAttributeApplyFunction();
 
-				setTimeout(editor, function () {
-					applyAttributes();
-				}, 0);
-			}
-		});
-	}
+        setTimeout(editor, function () {
+          applyAttributes();
+        }, 0);
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Fire a nodeChanged when the selection is changed on WebKit this fixes selection issues on iOS5. It only fires the nodeChange
 	 * event every 50ms since it would other wise update the UI when you type and it hogs the CPU.
 	 */
-	/*function selectionChangeNodeChanged() {
+  /*function selectionChangeNodeChanged() {
 		var lastRng, selectionTimer;
 
 		dom.bind(editor.getDoc(), 'selectionchange', function () {
@@ -1038,25 +1038,25 @@ tinymce.util.Quirks = function (editor) {
 		});
 	}*/
 
-	/**
+  /**
 	 * Backspacing into a table behaves differently depending upon browser type.
 	 * Therefore, disable Backspace when cursor immediately follows a table.
 	 */
-	function disableBackspaceIntoATable() {
-		editor.onKeyDown.add(function (editor, e) {
-			if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
-				if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
-					var previousSibling = selection.getNode().previousSibling;
-					if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "table") {
-						e.preventDefault();
-						return false;
-					}
-				}
-			}
-		});
-	}
+  function disableBackspaceIntoATable() {
+    editor.onKeyDown.add(function (editor, e) {
+      if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
+        if (selection.isCollapsed() && selection.getRng(true).startOffset === 0) {
+          var previousSibling = selection.getNode().previousSibling;
+          if (previousSibling && previousSibling.nodeName && previousSibling.nodeName.toLowerCase() === "table") {
+            e.preventDefault();
+            return false;
+          }
+        }
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Backspace or delete on WebKit will combine all visual styles in a span if the last character is deleted.
 	 *
 	 * For example backspace on:
@@ -1070,7 +1070,7 @@ tinymce.util.Quirks = function (editor) {
 	 *
 	 * See: https://bugs.webkit.org/show_bug.cgi?id=81656
 	 */
-	/*function keepInlineElementOnDeleteBackspace() {
+  /*function keepInlineElementOnDeleteBackspace() {
 		editor.onKeyDown.add(function (editor, e) {
 			var isDelete, rng, container, offset, brElm, sibling, collapsed;
 
@@ -1118,7 +1118,7 @@ tinymce.util.Quirks = function (editor) {
 		});
 	}*/
 
-	/**
+  /**
 	 * Removes a blockquote when backspace is pressed at the beginning of it.
 	 *
 	 * For example:
@@ -1127,63 +1127,63 @@ tinymce.util.Quirks = function (editor) {
 	 * Becomes:
 	 * <p>|x</p>
 	 */
-	function removeBlockQuoteOnBackSpace() {
-		// Add block quote deletion handler
-		editor.onKeyDown.add(function (editor, e) {
-			var rng, container, offset, root, parent;
+  function removeBlockQuoteOnBackSpace() {
+    // Add block quote deletion handler
+    editor.onKeyDown.add(function (editor, e) {
+      var rng, container, offset, root, parent;
 
-			if (isDefaultPrevented(e) || e.keyCode != VK.BACKSPACE) {
-				return;
-			}
+      if (isDefaultPrevented(e) || e.keyCode != VK.BACKSPACE) {
+        return;
+      }
 
-			rng = selection.getRng();
-			container = rng.startContainer;
-			offset = rng.startOffset;
-			root = dom.getRoot();
-			parent = container;
+      rng = selection.getRng();
+      container = rng.startContainer;
+      offset = rng.startOffset;
+      root = dom.getRoot();
+      parent = container;
 
-			if (!rng.collapsed || offset !== 0) {
-				return;
-			}
+      if (!rng.collapsed || offset !== 0) {
+        return;
+      }
 
-			while (parent && parent.parentNode && parent.parentNode.firstChild == parent && parent.parentNode != root) {
-				parent = parent.parentNode;
-			}
+      while (parent && parent.parentNode && parent.parentNode.firstChild == parent && parent.parentNode != root) {
+        parent = parent.parentNode;
+      }
 
-			// Is the cursor at the beginning of a blockquote?
-			if (parent.tagName === 'BLOCKQUOTE') {
-				// Remove the blockquote
-				editor.formatter.toggle('blockquote', null, parent);
+      // Is the cursor at the beginning of a blockquote?
+      if (parent.tagName === 'BLOCKQUOTE') {
+        // Remove the blockquote
+        editor.formatter.toggle('blockquote', null, parent);
 
-				// Move the caret to the beginning of container
-				rng = dom.createRng();
-				rng.setStart(container, 0);
-				rng.setEnd(container, 0);
-				selection.setRng(rng);
-			}
-		});
-	}
+        // Move the caret to the beginning of container
+        rng = dom.createRng();
+        rng.setStart(container, 0);
+        rng.setEnd(container, 0);
+        selection.setRng(rng);
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Sets various Gecko editing options on mouse down and before a execCommand to disable inline table editing that is broken etc.
 	 */
-	function setGeckoEditingOptions() {
-		function setOpts() {
-			setEditorCommandState("StyleWithCSS", false);
-			setEditorCommandState("enableInlineTableEditing", false);
+  function setGeckoEditingOptions() {
+    function setOpts() {
+      setEditorCommandState("StyleWithCSS", false);
+      setEditorCommandState("enableInlineTableEditing", false);
 
-			if (!settings.object_resizing) {
-				setEditorCommandState("enableObjectResizing", false);
-			}
-		}
+      if (!settings.object_resizing) {
+        setEditorCommandState("enableObjectResizing", false);
+      }
+    }
 
-		if (!settings.readonly) {
-			editor.onBeforeExecCommand.add(setOpts);
-			editor.onMouseDown.add(setOpts);
-		}
-	}
+    if (!settings.readonly) {
+      editor.onBeforeExecCommand.add(setOpts);
+      editor.onMouseDown.add(setOpts);
+    }
+  }
 
-	/**
+  /**
 	 * Fixes a gecko link bug, when a link is placed at the end of block elements there is
 	 * no way to move the caret behind the link. This fix adds a bogus br element after the link.
 	 *
@@ -1193,78 +1193,78 @@ tinymce.util.Quirks = function (editor) {
 	 * Becomes this:
 	 * <p><b><a href="#">x</a></b><br></p>
 	 */
-	function addBrAfterLastLinks() {
-		function fixLinks() {
-			each(dom.select('a'), function (node) {
-				var parentNode = node.parentNode,
-					root = dom.getRoot();
+  function addBrAfterLastLinks() {
+    function fixLinks() {
+      each(dom.select('a'), function (node) {
+        var parentNode = node.parentNode,
+          root = dom.getRoot();
 
-				if (parentNode.lastChild === node) {
-					while (parentNode && !dom.isBlock(parentNode)) {
-						if (parentNode.parentNode.lastChild !== parentNode || parentNode === root) {
-							return;
-						}
+        if (parentNode.lastChild === node) {
+          while (parentNode && !dom.isBlock(parentNode)) {
+            if (parentNode.parentNode.lastChild !== parentNode || parentNode === root) {
+              return;
+            }
 
-						parentNode = parentNode.parentNode;
-					}
+            parentNode = parentNode.parentNode;
+          }
 
-					dom.add(parentNode, 'br', {
-						'data-mce-bogus': 1
-					});
-				}
-			});
-		}
+          dom.add(parentNode, 'br', {
+            'data-mce-bogus': 1
+          });
+        }
+      });
+    }
 
-		editor.onExecCommand.add(function (editor, cmd) {
-			if (cmd === 'mceInsertLink') {
-				fixLinks(editor);
-			}
-		});
+    editor.onExecCommand.add(function (editor, cmd) {
+      if (cmd === 'mceInsertLink') {
+        fixLinks(editor);
+      }
+    });
 
-		editor.onSetContent.add(selection.onSetContent.add(fixLinks));
-	}
+    editor.onSetContent.add(selection.onSetContent.add(fixLinks));
+  }
 
-	/**
+  /**
 	 * WebKit will produce DIV elements here and there by default. But since TinyMCE uses paragraphs by
 	 * default we want to change that behavior.
 	 */
-	function setDefaultBlockType() {
-		if (settings.forced_root_block) {
-			editor.onInit.add(function () {
-				setEditorCommandState('DefaultParagraphSeparator', settings.forced_root_block);
-			});
-		}
-	}
+  function setDefaultBlockType() {
+    if (settings.forced_root_block) {
+      editor.onInit.add(function () {
+        setEditorCommandState('DefaultParagraphSeparator', settings.forced_root_block);
+      });
+    }
+  }
 
-	/**
+  /**
 	 * Forces Gecko to render a broken image icon if it fails to load an image.
 	 */
-	function showBrokenImageIcon() {
-		editor.contentStyles.push(
-			'img:-moz-broken {' +
+  function showBrokenImageIcon() {
+    editor.contentStyles.push(
+      'img:-moz-broken {' +
 			'-moz-force-broken-image-icon:1;' +
 			'min-width:24px;' +
 			'min-height:24px' +
 			'}'
-		);
-	}
+    );
+  }
 
-	/**
+  /**
 	 * iOS has a bug where it's impossible to type if the document has a touchstart event
 	 * bound and the user touches the document while having the on screen keyboard visible.
 	 *
 	 * The touch event moves the focus to the parent document while having the caret inside the iframe
 	 * this fix moves the focus back into the iframe document.
 	 */
-	function restoreFocusOnKeyDown() {
-		editor.onKeyDown.add(function () {
-			if (document.activeElement == document.body) {
-				editor.getWin().focus();
-			}
-		});
-	}
+  function restoreFocusOnKeyDown() {
+    editor.onKeyDown.add(function () {
+      if (document.activeElement == document.body) {
+        editor.getWin().focus();
+      }
+    });
+  }
 
-	/**
+  /**
 	 * IE 11 has an annoying issue where you can't move focus into the editor
 	 * by clicking on the white area HTML element. We used to be able to to fix this with
 	 * the fixCaretSelectionOfDocumentElementOnIe fix. But since M$ removed the selection
@@ -1273,79 +1273,79 @@ tinymce.util.Quirks = function (editor) {
 	 * we simply move the focus into the first paragraph. Not ideal since you loose the
 	 * positioning of the caret but good enough for most cases.
 	 */
-	function bodyHeight() {
-		if (!editor.inline) {
-			editor.contentStyles.push('body {min-height: 150px}');
-			editor.onClick.add(function (editor, e) {
-				var rng;
+  function bodyHeight() {
+    if (!editor.inline) {
+      editor.contentStyles.push('body {min-height: 150px}');
+      editor.onClick.add(function (editor, e) {
+        var rng;
 
-				if (e.target.nodeName == 'HTML') {
-					// Edge seems to only need focus if we set the range
-					// the caret will become invisible and moved out of the iframe!!
-					if (tinymce.isIE12) {
-						editor.getBody().focus();
-						return;
-					}
+        if (e.target.nodeName == 'HTML') {
+          // Edge seems to only need focus if we set the range
+          // the caret will become invisible and moved out of the iframe!!
+          if (tinymce.isIE12) {
+            editor.getBody().focus();
+            return;
+          }
 
-					// Need to store away non collapsed ranges since the focus call will mess that up see #7382
-					rng = editor.selection.getRng();
-					editor.getBody().focus();
-					editor.selection.setRng(rng);
-					editor.selection.normalize();
-					editor.nodeChanged();
-				}
-			});
-		}
-	}
+          // Need to store away non collapsed ranges since the focus call will mess that up see #7382
+          rng = editor.selection.getRng();
+          editor.getBody().focus();
+          editor.selection.setRng(rng);
+          editor.selection.normalize();
+          editor.nodeChanged();
+        }
+      });
+    }
+  }
 
-	/**
+  /**
 	 * Firefox on Mac OS will move the browser back to the previous page if you press CMD+Left arrow.
 	 * You might then loose all your work so we need to block that behavior and replace it with our own.
 	 */
-	function blockCmdArrowNavigation() {
-		if (tinymce.isMac) {
-			editor.onKeyDown.add(function (editor, e) {
-				if (VK.metaKeyPressed(e) && !e.shiftKey && (e.keyCode == 37 || e.keyCode == 39)) {
-					e.preventDefault();
-					editor.selection.getSel().modify('move', e.keyCode == 37 ? 'backward' : 'forward', 'lineboundary');
-				}
-			});
-		}
-	}
+  function blockCmdArrowNavigation() {
+    if (tinymce.isMac) {
+      editor.onKeyDown.add(function (editor, e) {
+        if (VK.metaKeyPressed(e) && !e.shiftKey && (e.keyCode == 37 || e.keyCode == 39)) {
+          e.preventDefault();
+          editor.selection.getSel().modify('move', e.keyCode == 37 ? 'backward' : 'forward', 'lineboundary');
+        }
+      });
+    }
+  }
 
-	/**
+  /**
 	 * Disables the autolinking in IE 9+ this is then re-enabled by the autolink plugin.
 	 */
-	function disableAutoUrlDetect() {
-		setEditorCommandState("AutoUrlDetect", false);
-	}
+  function disableAutoUrlDetect() {
+    setEditorCommandState("AutoUrlDetect", false);
+  }
 
-	/**
+  /**
 	 * iOS 7.1 introduced two new bugs:
 	 * 1) It's possible to open links within a contentEditable area by clicking on them.
 	 * 2) If you hold down the finger it will display the link/image touch callout menu.
 	 */
-	function tapLinksAndImages() {
-		editor.onClick.add(function (editor, e) {
-			var elm = e.target;
+  function tapLinksAndImages() {
+    editor.onClick.add(function (editor, e) {
+      var elm = e.target;
 
-			do {
-				if (elm.tagName === 'A') {
-					e.preventDefault();
-					return;
-				}
-			} while ((elm = elm.parentNode));
-		});
+      do {
+        if (elm.tagName === 'A') {
+          e.preventDefault();
+          return;
+        }
+      } while ((elm = elm.parentNode));
+    });
 
-		editor.contentStyles.push('.mce-content-body {-webkit-touch-callout: none}');
-	}
+    editor.contentStyles.push('.mce-content-body {-webkit-touch-callout: none}');
+  }
 
-	/**
+  /**
 	 * iOS Safari and possible other browsers have a bug where it won't fire
 	 * a click event when a contentEditable is focused. This function fakes click events
 	 * by using touchstart/touchend and measuring the time and distance travelled.
 	 */
-	/*
+  /*
 	function touchClickEvent() {
 		editor.on('touchstart', function(e) {
 			var elm, time, startTouch, changedTouches;
@@ -1397,19 +1397,19 @@ tinymce.util.Quirks = function (editor) {
 	}
 	*/
 
-	/**
+  /**
 	 * WebKit has a bug where it will allow forms to be submitted if they are inside a contentEditable element.
 	 * For example this: <form><button></form>
 	 */
-	function blockFormSubmitInsideEditor() {
-		editor.onInit.add(function () {
-			editor.dom.bind(editor.getBody(), 'submit', function (e) {
-				e.preventDefault();
-			});
-		});
-	}
+  function blockFormSubmitInsideEditor() {
+    editor.onInit.add(function () {
+      editor.dom.bind(editor.getBody(), 'submit', function (e) {
+        e.preventDefault();
+      });
+    });
+  }
 
-	/**
+  /**
 	 * Sometimes WebKit/Blink generates BR elements with the Apple-interchange-newline class.
 	 *
 	 * Scenario:
@@ -1417,227 +1417,227 @@ tinymce.util.Quirks = function (editor) {
 	 *  2) Select and copy cells A2-B2.
 	 *  3) Paste and it will add BR element to table cell.
 	 */
-	function removeAppleInterchangeBrs() {
-		parser.addNodeFilter('br', function (nodes) {
-			var i = nodes.length;
+  function removeAppleInterchangeBrs() {
+    parser.addNodeFilter('br', function (nodes) {
+      var i = nodes.length;
 
-			while (i--) {
-				if (nodes[i].attr('class') == 'Apple-interchange-newline') {
-					nodes[i].remove();
-				}
-			}
-		});
-	}
+      while (i--) {
+        if (nodes[i].attr('class') == 'Apple-interchange-newline') {
+          nodes[i].remove();
+        }
+      }
+    });
+  }
 
-	/**
+  /**
 	 * IE cannot set custom contentType's on drag events, and also does not properly drag/drop between
 	 * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
 	 */
-	function ieInternalDragAndDrop() {
-		editor.dom.bind('dragstart', function (e) {
-			setMceInternalContent(e);
-		});
+  function ieInternalDragAndDrop() {
+    editor.dom.bind('dragstart', function (e) {
+      setMceInternalContent(e);
+    });
 
-		editor.dom.bind('dragstart', function (e) {
-			if (!isDefaultPrevented(e)) {
-				var internalContent = getMceInternalContent(e);
+    editor.dom.bind('dragstart', function (e) {
+      if (!isDefaultPrevented(e)) {
+        var internalContent = getMceInternalContent(e);
 
-				if (internalContent && internalContent.id != editor.id) {
-					e.preventDefault();
+        if (internalContent && internalContent.id != editor.id) {
+          e.preventDefault();
 
-					var rng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, editor.getDoc());
-					selection.setRng(rng);
-					insertClipboardContents(internalContent.html);
-				}
-			}
-		});
-	}
+          var rng = RangeUtils.getCaretRangeFromPoint(e.x, e.y, editor.getDoc());
+          selection.setRng(rng);
+          insertClipboardContents(internalContent.html);
+        }
+      }
+    });
+  }
 
-	function imageFloatLinkBug() {
-		editor.onBeforeExecCommand.add(function (ed, cmd) {
-			// remove img styles
-			if (cmd == 'mceInsertLink') {
-				var se = ed.selection,
-					n = se.getNode();
+  function imageFloatLinkBug() {
+    editor.onBeforeExecCommand.add(function (ed, cmd) {
+      // remove img styles
+      if (cmd == 'mceInsertLink') {
+        var se = ed.selection,
+          n = se.getNode();
 
-				// store class and style
-				if (n && n.nodeName == 'IMG') {
-					ed.dom.setAttrib(n, 'data-mce-style', n.style.cssText);
-					n.style.cssText = null;
-				}
-			}
-		});
+        // store class and style
+        if (n && n.nodeName == 'IMG') {
+          ed.dom.setAttrib(n, 'data-mce-style', n.style.cssText);
+          n.style.cssText = null;
+        }
+      }
+    });
 
-		editor.onExecCommand.add(function (ed, cmd) {
-			// restore img styles
-			if (cmd == 'mceInsertLink') {
-				var se = ed.selection,
-					n = se.getNode();
+    editor.onExecCommand.add(function (ed, cmd) {
+      // restore img styles
+      if (cmd == 'mceInsertLink') {
+        var se = ed.selection,
+          n = se.getNode();
 
-				tinymce.each(ed.dom.select('img[data-mce-style]', n), function (el) {
-					if (el.parentNode.nodeName == 'A' && !el.style.cssText) {
-						el.style.cssText = ed.dom.getAttrib(el, 'data-mce-style');
-					}
-				});
-			}
-		});
-	}
+        tinymce.each(ed.dom.select('img[data-mce-style]', n), function (el) {
+          if (el.parentNode.nodeName == 'A' && !el.style.cssText) {
+            el.style.cssText = ed.dom.getAttrib(el, 'data-mce-style');
+          }
+        });
+      }
+    });
+  }
 
-	/**
+  /**
 	 * WebKit has a bug where it isn't possible to select image, hr or anchor elements
 	 * by clicking on them so we need to fake that.
 	 */
-	function selectControlElements() {
-		editor.onClick.add(function (editor, e) {
-			var target = e.target;
+  function selectControlElements() {
+    editor.onClick.add(function (editor, e) {
+      var target = e.target;
 
-			function selectElm(e) {
-				e.preventDefault();
-				selection.select(target);
-				editor.nodeChanged();
-			}
+      function selectElm(e) {
+        e.preventDefault();
+        selection.select(target);
+        editor.nodeChanged();
+      }
 
-			// Workaround for bug, http://bugs.webkit.org/show_bug.cgi?id=12250
-			// WebKit can't even do simple things like selecting an image
-			if (/^(IMG|HR)$/.test(target.nodeName)) {
-				selectElm(e);
-			}
+      // Workaround for bug, http://bugs.webkit.org/show_bug.cgi?id=12250
+      // WebKit can't even do simple things like selecting an image
+      if (/^(IMG|HR)$/.test(target.nodeName)) {
+        selectElm(e);
+      }
 
-			if (target.nodeName == 'A' && dom.hasClass(target, 'mce-item-anchor')) {
-				selectElm(e);
-			}
-		});
-	}
+      if (target.nodeName == 'A' && dom.hasClass(target, 'mce-item-anchor')) {
+        selectElm(e);
+      }
+    });
+  }
 
-	/**
+  /**
 	 * Fixes selection issues where the caret can be placed between two inline elements like <b>a</b>|<b>b</b>
 	 * this fix will lean the caret right into the closest inline element.
 	 */
-	function normalizeSelection() {
-		var normalize = function (e) {
-			if (e.keyCode != 65 || !VK.metaKeyPressed(e)) {
-				selection.normalize();
-			}
-		};
+  function normalizeSelection() {
+    var normalize = function (e) {
+      if (e.keyCode != 65 || !VK.metaKeyPressed(e)) {
+        selection.normalize();
+      }
+    };
 
-		// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
-		editor.onKeyUp.add(normalize);
-		editor.onMouseUp.add(normalize);
-	}
+    // Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
+    editor.onKeyUp.add(normalize);
+    editor.onMouseUp.add(normalize);
+  }
 
-	function inlineBoundary() {
-		function isBoundaryNode(node) {
-			return node && node.nodeName === 'A';
-		}
+  function inlineBoundary() {
+    function isBoundaryNode(node) {
+      return node && node.nodeName === 'A';
+    }
 
-		function isLastChildOf(node) {
-			return node.parentNode && node.parentNode.lastChild === node;
-		}
+    function isLastChildOf(node) {
+      return node.parentNode && node.parentNode.lastChild === node;
+    }
 
-		editor.onNodeChange.add(function () {
-			// remove existing selections
-			dom.removeAttrib(dom.select('a'), 'data-mce-selected');
-			
-			var node = editor.selection.getNode(), node = dom.getParent(node, 'a');
+    editor.onNodeChange.add(function () {
+      // remove existing selections
+      dom.removeAttrib(dom.select('a'), 'data-mce-selected');
 
-			if (isBoundaryNode(node)) {
-				node.setAttribute('data-mce-selected', 'inline-boundary');
-			}
-		});
+      var node = editor.selection.getNode(), node = dom.getParent(node, 'a');
 
-		/**
+      if (isBoundaryNode(node)) {
+        node.setAttribute('data-mce-selected', 'inline-boundary');
+      }
+    });
+
+    /**
 		 * Attempt to move caret after a container element like <a> or <code>
 		 */
-		editor.onKeyDown.addToTop(function (editor, e) {
-			if (e.keyCode == VK.RIGHT) {
-				var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
+    editor.onKeyDown.addToTop(function (editor, e) {
+      if (e.keyCode == VK.RIGHT) {
+        var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
-				if (!node || node === editor.getBody()) {
-					return;
-				}
+        if (!node || node === editor.getBody()) {
+          return;
+        }
 
-				node = dom.getParent(node, 'a');
+        node = dom.getParent(node, 'a');
 
-				if (!isBoundaryNode(node) || !isLastChildOf(node)) {
-					return;
-				}
+        if (!isBoundaryNode(node) || !isLastChildOf(node)) {
+          return;
+        }
 
-				if (container.nodeType === 3 && node) {
-					var text = container.data;
+        if (container.nodeType === 3 && node) {
+          var text = container.data;
 
-					if (text && text.length && rng.startOffset == text.length) {
-						var marker = dom.add(node.parentNode, 'span', { 'data-mce-type': "bookmark" }, '\uFEFF');
+          if (text && text.length && rng.startOffset == text.length) {
+            var marker = dom.add(node.parentNode, 'span', { 'data-mce-type': "bookmark" }, '\uFEFF');
 
-						// Move the caret to the end of the marker
-						rng = dom.createRng();
-						rng.setStart(marker, 0);
-						rng.setEnd(marker, 0);
-						selection.setRng(rng);
+            // Move the caret to the end of the marker
+            rng = dom.createRng();
+            rng.setStart(marker, 0);
+            rng.setEnd(marker, 0);
+            selection.setRng(rng);
 
-						// remove marker
-						dom.remove(marker);
+            // remove marker
+            dom.remove(marker);
 
-						editor.nodeChanged();
-						e.preventDefault();
-					}
-				}
-			}
-		});
-	}
+            editor.nodeChanged();
+            e.preventDefault();
+          }
+        }
+      }
+    });
+  }
 
-	// All browsers
-	normalizeSelection();
+  // All browsers
+  normalizeSelection();
 
-	removeBlockQuoteOnBackSpace();
-	emptyEditorWhenDeleting();
+  removeBlockQuoteOnBackSpace();
+  emptyEditorWhenDeleting();
 
-	//inlineBoundary();
+  //inlineBoundary();
 
-	// WebKit
-	if (tinymce.isWebKit) {
-		cleanupStylesWhenDeleting();
-		inputMethodFocus();
-		setDefaultBlockType();
-		blockFormSubmitInsideEditor();
-		disableBackspaceIntoATable();
-		removeAppleInterchangeBrs();
-		imageFloatLinkBug();
-		selectControlElements();
-		//touchClickEvent();
+  // WebKit
+  if (tinymce.isWebKit) {
+    cleanupStylesWhenDeleting();
+    inputMethodFocus();
+    setDefaultBlockType();
+    blockFormSubmitInsideEditor();
+    disableBackspaceIntoATable();
+    removeAppleInterchangeBrs();
+    imageFloatLinkBug();
+    selectControlElements();
+    //touchClickEvent();
 
-		cleanupRuntimeStyles();
+    cleanupRuntimeStyles();
 
-		// iOS
-		if (tinymce.isIOS) {
-			restoreFocusOnKeyDown();
-			bodyHeight();
-			tapLinksAndImages();
-		} else {
-			selectAll();
-		}
-	}
+    // iOS
+    if (tinymce.isIOS) {
+      restoreFocusOnKeyDown();
+      bodyHeight();
+      tapLinksAndImages();
+    } else {
+      selectAll();
+    }
+  }
 
-	if (tinymce.isIE) {
-		bodyHeight();
-		selectAll();
-		disableAutoUrlDetect();
-		ieInternalDragAndDrop();
-	}
+  if (tinymce.isIE) {
+    bodyHeight();
+    selectAll();
+    disableAutoUrlDetect();
+    ieInternalDragAndDrop();
+  }
 
-	if (tinymce.isIE >= 11) {
-		disableBackspaceIntoATable();
-	}
+  if (tinymce.isIE >= 11) {
+    disableBackspaceIntoATable();
+  }
 
-	// Gecko
-	if (tinymce.isGecko) {
-		removeHrOnBackspace();
-		removeStylesWhenDeletingAcrossBlockElements();
-		setGeckoEditingOptions();
-		addBrAfterLastLinks();
-		showBrokenImageIcon();
-		blockCmdArrowNavigation();
-		disableBackspaceIntoATable();
-		// added for gecko selection bug on images with a style of display:block
-		selectControlElements();
-	}
+  // Gecko
+  if (tinymce.isGecko) {
+    removeHrOnBackspace();
+    removeStylesWhenDeletingAcrossBlockElements();
+    setGeckoEditingOptions();
+    addBrAfterLastLinks();
+    showBrokenImageIcon();
+    blockCmdArrowNavigation();
+    disableBackspaceIntoATable();
+    // added for gecko selection bug on images with a style of display:block
+    selectControlElements();
+  }
 };

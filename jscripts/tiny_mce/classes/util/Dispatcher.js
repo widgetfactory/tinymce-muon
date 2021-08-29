@@ -21,23 +21,23 @@
  * this.onSomething.dispatch('some string');
  */
 tinymce.create('tinymce.util.Dispatcher', {
-    scope: null,
-    listeners: null,
-    inDispatch: false,
+  scope: null,
+  listeners: null,
+  inDispatch: false,
 
-    /**
+  /**
      * Constructs a new event dispatcher object.
      *
      * @constructor
      * @method Dispatcher
      * @param {Object} scope Optional default execution scope for all observer functions.
      */
-    Dispatcher: function (scope) {
-        this.scope = scope || this;
-        this.listeners = [];
-    },
+  Dispatcher: function (scope) {
+    this.scope = scope || this;
+    this.listeners = [];
+  },
 
-    /**
+  /**
      * Add an observer function to be executed when a dispatch call is done.
      *
      * @method add
@@ -45,16 +45,16 @@ tinymce.create('tinymce.util.Dispatcher', {
      * @param {Object} s Optional execution scope, defaults to the one specified in the class constructor.
      * @return {function} Returns the same function as the one passed on.
      */
-    add: function (callback, scope) {
-        this.listeners.push({
-            cb: callback,
-            scope: scope || this.scope
-        });
+  add: function (callback, scope) {
+    this.listeners.push({
+      cb: callback,
+      scope: scope || this.scope
+    });
 
-        return callback;
-    },
+    return callback;
+  },
 
-    /**
+  /**
      * Add an observer function to be executed to the top of the list of observers.
      *
      * @method addToTop
@@ -62,75 +62,75 @@ tinymce.create('tinymce.util.Dispatcher', {
      * @param {Object} scope Optional execution scope, defaults to the one specified in the class constructor.
      * @return {function} Returns the same function as the one passed on.
      */
-    addToTop: function (callback, scope) {
-        var self = this,
-            listener = {
-                cb: callback,
-                scope: scope || self.scope
-            };
+  addToTop: function (callback, scope) {
+    var self = this,
+      listener = {
+        cb: callback,
+        scope: scope || self.scope
+      };
 
-        // Create new listeners if addToTop is executed in a dispatch loop
-        if (self.inDispatch) {
-            self.listeners = [listener].concat(self.listeners);
-        } else {
-            self.listeners.unshift(listener);
-        }
+    // Create new listeners if addToTop is executed in a dispatch loop
+    if (self.inDispatch) {
+      self.listeners = [listener].concat(self.listeners);
+    } else {
+      self.listeners.unshift(listener);
+    }
 
-        return callback;
-    },
+    return callback;
+  },
 
-    /**
+  /**
      * Removes an observer function.
      *
      * @method remove
      * @param {function} callback Observer function to remove.
      * @return {function} The same function that got passed in or null if it wasn't found.
      */
-    remove: function (callback) {
-        var listeners = this.listeners,
-            output = null;
+  remove: function (callback) {
+    var listeners = this.listeners,
+      output = null;
 
-        tinymce.each(listeners, function (listener, i) {
-            if (callback == listener.cb) {
-                output = listener;
-                listeners.splice(i, 1);
-                return false;
-            }
-        });
+    tinymce.each(listeners, function (listener, i) {
+      if (callback == listener.cb) {
+        output = listener;
+        listeners.splice(i, 1);
+        return false;
+      }
+    });
 
-        return output;
-    },
+    return output;
+  },
 
-    /**
+  /**
      * Dispatches an event to all observers/listeners.
      *
      * @method dispatch
      * @param {Object} .. Any number of arguments to dispatch.
      * @return {Object} Last observer functions return value.
      */
-    dispatch: function () {
-        var self = this,
-            returnValue, args = arguments,
-            i, listeners = self.listeners,
-            listener;
+  dispatch: function () {
+    var self = this,
+      returnValue, args = arguments,
+      i, listeners = self.listeners,
+      listener;
 
-        self.inDispatch = true;
+    self.inDispatch = true;
 
-        // Needs to be a real loop since the listener count might change while looping
-        // And this is also more efficient
-        for (i = 0; i < listeners.length; i++) {
-            listener = listeners[i];
-            returnValue = listener.cb.apply(listener.scope, args.length > 0 ? args : [listener.scope]);
+    // Needs to be a real loop since the listener count might change while looping
+    // And this is also more efficient
+    for (i = 0; i < listeners.length; i++) {
+      listener = listeners[i];
+      returnValue = listener.cb.apply(listener.scope, args.length > 0 ? args : [listener.scope]);
 
-            if (returnValue === false) {
-                break;
-            }
-        }
-
-        self.inDispatch = false;
-
-        return returnValue;
+      if (returnValue === false) {
+        break;
+      }
     }
 
-    /**#@-*/
+    self.inDispatch = false;
+
+    return returnValue;
+  }
+
+  /**#@-*/
 });
