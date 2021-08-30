@@ -10,7 +10,7 @@
 
 (function (win) {
   var whiteSpaceRe = /^\s*|\s*$/g,
-    undef, isRegExpBroken = 'B'.replace(/A(.)|B/, '$1') === '$1';
+    undef;
 
   var slice = [].slice;
 

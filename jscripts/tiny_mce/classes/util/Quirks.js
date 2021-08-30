@@ -766,7 +766,7 @@ tinymce.util.Quirks = function (editor) {
       }
     }
 
-    editor.parser.addNodeFilter('span', function (nodes, name) {
+    editor.parser.addNodeFilter('span', function (nodes) {
       var i = nodes.length,
         node;
       while (i--) {
@@ -775,7 +775,7 @@ tinymce.util.Quirks = function (editor) {
       }
     });
 
-    editor.serializer.addNodeFilter('span', function (nodes, name) {
+    editor.serializer.addNodeFilter('span', function (nodes) {
       var i = nodes.length,
         node;
       while (i--) {
@@ -1525,7 +1525,7 @@ tinymce.util.Quirks = function (editor) {
     editor.onMouseUp.add(normalize);
   }
 
-  function inlineBoundary() {
+  /*function inlineBoundary() {
     function isBoundaryNode(node) {
       return node && node.nodeName === 'A';
     }
@@ -1545,9 +1545,7 @@ tinymce.util.Quirks = function (editor) {
       }
     });
 
-    /**
-		 * Attempt to move caret after a container element like <a> or <code>
-		 */
+		// Attempt to move caret after a container element like <a> or <code>
     editor.onKeyDown.addToTop(function (editor, e) {
       if (e.keyCode == VK.RIGHT) {
         var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
@@ -1566,7 +1564,7 @@ tinymce.util.Quirks = function (editor) {
           var text = container.data;
 
           if (text && text.length && rng.startOffset == text.length) {
-            var marker = dom.add(node.parentNode, 'span', { 'data-mce-type': "bookmark" }, '\uFEFF');
+            var marker = dom.add(node.parentNode, 'span', {'data-mce-type': "bookmark"}, '\uFEFF');
 
             // Move the caret to the end of the marker
             rng = dom.createRng();
@@ -1583,7 +1581,7 @@ tinymce.util.Quirks = function (editor) {
         }
       }
     });
-  }
+  }*/
 
   // All browsers
   normalizeSelection();

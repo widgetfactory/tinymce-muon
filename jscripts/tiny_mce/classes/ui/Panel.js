@@ -50,7 +50,7 @@
     showPanel: function (elm) {
       var self = this,
         s = this.settings,
-        pos, x, y, mx, my;
+        pos, x, y, mx, my, w, h, vp, panel, px = 0;
 
       this.storeSelection();
 
@@ -64,7 +64,7 @@
 
       vp = DOM.getViewPort();
 
-      var panel = DOM.get(self.id);
+      panel = DOM.get(self.id);
 
       if (!panel) {
         return;
@@ -146,7 +146,7 @@
         style: 'position:absolute;left:0;top:-1000px;'
       });
 
-      panel = DOM.add(panel, 'div', { 'class': prefix });
+      panel = DOM.add(panel, 'div', {'class': prefix});
 
       var content = DOM.add(panel, 'div', {
         'class': prefix + 'Content'
@@ -187,7 +187,7 @@
       DOM.setHTML(content, html.join(''));
 
       if (s.url) {
-        DOM.add(panelContent, 'iframe', {
+        DOM.add(content, 'iframe', {
           'id': self.id + '_iframe',
           'src': s.url,
           style: {
@@ -273,7 +273,7 @@
          * @method hideMenu
          * @param {Event} e Optional event object.
          */
-    hidePanel: function (e) {
+    hidePanel: function () {
       var self = this;
 
       DOM.hide(self.id);

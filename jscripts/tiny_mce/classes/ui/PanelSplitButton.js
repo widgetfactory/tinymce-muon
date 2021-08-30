@@ -35,7 +35,7 @@
     renderHTML: function () {
       var html = '',
         self = this,
-        s = self.settings;
+        s = self.settings, icon;
 
       if (s.image) {
         icon = DOM.createHTML('img ', {
@@ -85,7 +85,7 @@
       var self = this,
         s = self.settings;
 
-      activate = function (evt) {
+      var activate = function (evt) {
         if (!self.isDisabled()) {
           s.onclick(self.value);
           Event.cancel(evt);

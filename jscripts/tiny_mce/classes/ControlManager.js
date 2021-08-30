@@ -163,7 +163,7 @@
     createDropMenu: function (id, s, cc) {
       var self = this,
         ed = self.editor,
-        c, bm, cls, bm;
+        c, bm, cls;
 
       s = extend({
         'class': 'mceDropDown',
@@ -312,7 +312,7 @@
           return;
         }
 
-        each(ed.settings.importcss_classes, function (item, idx) {
+        each(ed.settings.importcss_classes, function (item) {
           // Parse simple element.class1, .class1
           var selector = /^(?:([a-z0-9\-_]+))?(\.[a-z0-9_\-\.]+)$/i.exec(item.selector || item);
 
@@ -331,7 +331,7 @@
           each(classes, function (cls) {
             ctrl.add(cls, cls, {
               style: function () {
-                return tinymce.util.PreviewCss(ed, { classes: cls });
+                return tinymce.util.PreviewCss(ed, {classes: cls});
               }
             });
           });
@@ -427,7 +427,7 @@
     createSplitButton: function (id, s, cc) {
       var self = this,
         ed = self.editor,
-        c, cls, bm;
+        c, cls;
 
       if (self.get(id)) {
         return null;
@@ -569,7 +569,7 @@
       return self.add(c);
     },
 
-    createUrlBox: function (id, s, cc) {
+    createUrlBox: function (id, s) {
       var ed = this.editor;
 
       s.upload_label = ed.getLang(s.upload_label, 'Upload');
@@ -578,7 +578,7 @@
       return this.createTextBox(id, s, tinymce.ui.UrlBox);
     },
 
-    createCheckBox: function (id, s, cc) {
+    createCheckBox: function (id, s) {
       var self = this,
         ed = self.editor,
         c, cls;
@@ -634,7 +634,7 @@
       return self.add(c);
     },
 
-    createContextPanel: function (id, s, cc) {
+    createContextPanel: function (id, s) {
       var cc = tinymce.ui.ContextPanel;
       return this.createPanel(id, s, cc);
     },

@@ -7,29 +7,10 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses.
  */
-(function (tinymce) {
+(function () {
   var DOM = tinymce.DOM,
-    Event = tinymce.dom.Event;
-
-  function debounce(func, wait, immediate) {
-    var timeout;
-    return function () {
-      var context = this,
-        args = arguments;
-      var later = function () {
-        timeout = null;
-        if (!immediate) {
-          func.apply(context, args);
-        }
-      };
-      var callNow = immediate && !timeout;
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-      if (callNow) {
-        func.apply(context, args);
-      }
-    };
-  }
+    Event = tinymce.dom.Event,
+    Delay = tinymce.util.Delay;
 
   tinymce.create('tinymce.ui.ContextPanel:tinymce.ui.Panel', {
     /**
@@ -59,7 +40,7 @@
 
       DOM.addClass(DOM.select('.mcePanel', DOM.get(this.id)), 'mceContextPanel');
 
-      var scrollFunc = debounce(function () {
+      var scrollFunc = Delay.debounce(function () {
         if (self.isPanelVisible) {
           self.positionPanel();
         }
@@ -86,7 +67,7 @@
     },
 
     positionPanel: function () {
-      var self = this, x, y;
+      var self = this, x, y, pos, w;
 
       var panel = DOM.get(self.id);
 
@@ -126,7 +107,6 @@
       y = pos.y + offset.y;
 
       w = panel.clientWidth;
-      h = panel.clientHeight;
 
       // position to center of target
       x = x - w / 2;
@@ -152,4 +132,4 @@
       this.parent();
     }
   });
-})(tinymce);
+})();

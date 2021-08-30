@@ -19,7 +19,6 @@
     CaretContainer = tinymce.caret.CaretContainer,
     CaretPosition = tinymce.caret.CaretPosition,
     RangeUtils = tinymce.dom.RangeUtils,
-    NodeType = tinymce.dom.NodeType,
     Zwsp = tinymce.text.Zwsp,
     Arr = tinymce.util.Arr;
 

@@ -150,6 +150,8 @@
 		 * });
 		 */
     init: function (settings) {
+      /*eslint no-unused-vars:0*/
+
       var self = this,
         result;
 

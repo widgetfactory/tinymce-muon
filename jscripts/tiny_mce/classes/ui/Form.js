@@ -9,7 +9,7 @@
  */
 (function (tinymce) {
   // Shorten class names
-  var dom = tinymce.DOM, each = tinymce.each;
+  var dom = tinymce.DOM;
   /**
 	 * This class is used to create layouts. A layout is a container for other controls like buttons etc.
 	 *

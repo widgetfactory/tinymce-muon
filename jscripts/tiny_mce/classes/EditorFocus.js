@@ -17,7 +17,7 @@
     });
   };
 
-  var normalizeSelection = function (editor, rng) {
+  var normalizeSelection = function (editor) {
     editor.selection.normalize();
   };
 
@@ -34,7 +34,7 @@
       body.focus();
     }
   };
-
+  /*eslint no-unused-vars:0*/
   var focusEditor = function (editor) {
     var controlElm, contentEditableHost, rng, doc = editor.getDoc(),
       body = editor.getBody(),

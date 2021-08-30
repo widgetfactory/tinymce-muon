@@ -398,7 +398,7 @@
         }
 
         // Nodes needs to be attached to something in WebKit/Opera
-        		// This fix will make DOM ranges and make Sizzle happy!
+        // This fix will make DOM ranges and make Sizzle happy!
         impl = document.implementation;
         if (impl.createHTMLDocument) {
           // Create an empty HTML document

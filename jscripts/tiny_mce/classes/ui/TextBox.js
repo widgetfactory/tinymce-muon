@@ -6,8 +6,7 @@
   var DOM = tinymce.DOM,
     Event = tinymce.dom.Event,
     each = tinymce.each,
-    Dispatcher = tinymce.util.Dispatcher,
-    undef;
+    Dispatcher = tinymce.util.Dispatcher;
 
   /**
 	 * This class is used to create text / input boxes.
@@ -115,7 +114,7 @@
         this.onChange.add(s.onchange);
       }
 
-      Event.add(this.id, 'change', function (e) {
+      Event.add(this.id, 'change', function () {
         self.onChange.dispatch(this, DOM.get(self.id));
       });
 

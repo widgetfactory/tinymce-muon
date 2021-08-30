@@ -686,9 +686,6 @@
         updateTableRect(editor, e);
       });
 
-    		// Hide rect on focusout since it would float on top of windows otherwise
-    		//editor.onFocusOut.add(hideResizeRect);
-
       editor.onBlur.add(hideResizeRect);
       editor.onHide.add(hideResizeRect);
     });

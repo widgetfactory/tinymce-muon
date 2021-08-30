@@ -9,7 +9,7 @@
  */
 
 // Some global instances
-var tinymce, tinyMCE;
+var tinymce;
 
 /**
  * TinyMCE popup/dialog helper class. This gives you easy access to the
@@ -239,7 +239,7 @@ var tinyMCEPopup = {
 	 *
 	 * @method close
 	 */
-	close: function () {	
+	close: function () {
 		if (this.editor) {
 			this.editor.windowManager.close(window);
 

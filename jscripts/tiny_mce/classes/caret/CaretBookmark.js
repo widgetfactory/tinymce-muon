@@ -28,7 +28,7 @@
  */
 (function (tinymce) {
   var NodeType = tinymce.dom.NodeType, DOMUtils = tinymce.DOM;
-  var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
+  var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr, CaretPosition = tinymce.caret.CaretPosition;
 
   var isText = NodeType.isText,
     isBogus = NodeType.isBogus,

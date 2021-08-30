@@ -613,7 +613,7 @@
         }
 
         if (keep_children) {
-          while (child = node.firstChild) {
+          while ((child = node.firstChild)) {
             // IE 8 will crash if you don't remove completely empty text nodes
             if (!tinymce.isIE || child.nodeType !== 3 || child.nodeValue) {
               parent.insertBefore(child, node);

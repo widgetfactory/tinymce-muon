@@ -81,8 +81,8 @@
 
   tinymce.util.Delay = {
     /**
-         * Requests an animation frame and fallbacks to a timeout on older browsers.
-         *
+     * Requests an animation frame and fallbacks to a timeout on older browsers.
+     *
          * @method requestAnimationFrame
          * @param {function} callback Callback to execute when a new frame is available.
          * @param {DOMElement} element Optional element to scope it to.
@@ -185,11 +185,11 @@
     clearInterval: wrappedClearInterval,
 
     /**
-         * Clears an timeout timer so it won't execute.
-         *
-         * @method clearTimeout
-         * @param {Number} Timeout timer id number.
-         */
+           * Clears an timeout timer so it won't execute.
+           *
+           * @method clearTimeout
+           * @param {Number} Timeout timer id number.
+           */
     clearTimeout: wrappedClearTimeout
   };
 })(tinymce);

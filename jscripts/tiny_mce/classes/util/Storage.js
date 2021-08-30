@@ -9,8 +9,6 @@
  */
 
 (function (tinymce) {
-  var each = tinymce.each;
-
   /**
      * This class contains simple storage manangement functions.
      *
@@ -41,7 +39,9 @@
       if (v) {
         try {
           h = JSON.parse(v);
-        } catch (e) { }
+        } catch (e) {
+          /* error */
+        }
       }
 
       return h;

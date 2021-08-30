@@ -8,9 +8,7 @@
  * other free or open source software licenses.
  */
 (function (tinymce) {
-  var DOM = tinymce.DOM,
-    Event = tinymce.dom.Event,
-    Dispatcher = tinymce.util.Dispatcher;
+  var Dispatcher = tinymce.util.Dispatcher;
 
   tinymce.create('tinymce.ui.ButtonDialog:tinymce.ui.PanelButton', {
     /**
@@ -29,7 +27,7 @@
 
       if (s.buttons) {
         tinymce.each(s.buttons, function (btn) {
-          btn.onclick = btn.click || function () {};
+          btn.onclick = btn.click || function () { };
         });
       }
 

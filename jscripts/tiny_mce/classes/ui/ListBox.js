@@ -83,8 +83,6 @@
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
     ListBox: function (id, s, ed) {
-      var self = this;
-
       this.parent(id, s, ed);
 
       /**
@@ -193,7 +191,7 @@
 		 * @param {String} idx Index to select, pass -1 to select menu/title of select box.
 		 */
     selectByIndex: function (idx) {
-      var elm, item, label;
+      var elm, item;
 
       this.marked = {};
 

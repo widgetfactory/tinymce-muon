@@ -121,10 +121,10 @@
     });
 
     // Add onBeforeSetContent with cleanup
-    self.onBeforeSetContent.add(function (self, args) {
+    self.onBeforeSetContent.add(function (e, args) {
       if (args.format !== 'raw') {
-        var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
-        args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
+        var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, {isRootContent: true, forced_root_block: false}));
+        args.content = new tinymce.html.Serializer({validate: editor.settings.validate}, editor.schema).serialize(node);
       }
     });
 
@@ -305,8 +305,7 @@
     setContent: function (content, args) {
       var self = this,
         rng = self.getRng(),
-        caretNode, doc = self.win.document,
-        frag, temp;
+        caretNode, doc = self.win.document;
 
       args = args || {
         format: 'html'
@@ -565,7 +564,7 @@
 
             return;
           }
-        } while (node = (start ? walker.next() : walker.prev()));
+        } while ((node = (start ? walker.next() : walker.prev())));
       }
 
       if (node) {
@@ -710,7 +709,7 @@
         // IE throws unspecified error here if TinyMCE is placed in a frame/iframe
       }
 
-      var evt = { range: rng };
+      evt = {range: rng};
 
       self.onGetSelectionRange.dispatch(self, evt);
 
@@ -800,7 +799,7 @@
 
       sel = self.getSel();
 
-      var evt = { range: rng };
+      var evt = {range: rng};
 
       self.onSetSelectionRange.dispatch(self, evt);
 
@@ -1056,7 +1055,7 @@
         function hasBrBeforeAfter(node, left) {
           var walker = new TreeWalker(node, dom.getParent(node.parentNode, dom.isBlock) || body);
 
-          while (node = walker[left ? 'prev' : 'next']()) {
+          while ((node = walker[left ? 'prev' : 'next']())) {
             if (node.nodeName === "BR") {
               return true;
             }
@@ -1072,7 +1071,7 @@
           walker = new TreeWalker(startNode, dom.getParent(startNode.parentNode, dom.isBlock) || body);
 
           // Walk left until we hit a text node we can move to or a block/br/img
-          while (node = walker[left ? 'prev' : 'next']()) {
+          while ((node = walker[left ? 'prev' : 'next']())) {
             // Found text node that has a length
             if (node.nodeType === 3 && node.nodeValue.length > 0) {
               container = node;
@@ -1152,7 +1151,7 @@
                   normalized = true;
                   break;
                 }
-              } while (node = (start ? walker.next() : walker.prev()));
+              } while ((node = (start ? walker.next() : walker.prev())));
             }
           }
         }

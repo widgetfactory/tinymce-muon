@@ -26,7 +26,7 @@
   var CaretWalker = tinymce.caret.CaretWalker, CaretPosition = tinymce.caret.CaretPosition, CaretContainer = tinymce.caret.CaretContainer, CaretUtils = tinymce.caret.CaretUtils,
     CaretContainerRemove = tinymce.caret.CaretContainerRemove, FakeCaret = tinymce.caret.FakeCaret, LineWalker = tinymce.caret.LineWalker, LineUtils = tinymce.caret.LineUtils;
 
-  var NodeType = tinymce.dom.NodeType, RangeUtils = tinymce.dom.RangeUtils, ClientRect = tinymce.geom.ClientRect;
+  var NodeType = tinymce.dom.NodeType, RangeUtils = tinymce.dom.RangeUtils;
   var VK = tinymce.VK, Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
 
   var Dispatcher = tinymce.util.Dispatcher;
@@ -553,7 +553,7 @@
         return null;
       }
 
-      function isXYWithinRange(clientX, clientY, range) {
+      /*function isXYWithinRange(clientX, clientY, range) {
         if (range.collapsed) {
           return false;
         }
@@ -561,7 +561,7 @@
         return Arr.reduce(range.getClientRects(), function (state, rect) {
           return state || ClientRect.containsXY(rect, clientX, clientY);
         }, false);
-      }
+      }*/
 
       // Some browsers (Chrome) lets you place the caret after a cE=false
       // Make sure we render the caret container in this case
@@ -607,7 +607,7 @@
       function handleTouchSelect(editor) {
         var moved = false;
 
-        editor.dom.bind(editor.getBody(), 'touchstart', function (e) {
+        editor.dom.bind(editor.getBody(), 'touchstart', function () {
           moved = false;
         });
 
@@ -893,7 +893,7 @@
       var node,
         dom = editor.dom,
         $realSelectionContainer, sel,
-        startContainer, startOffset, endOffset, e, caretPosition, targetClone, origTargetClone;
+        startContainer, startOffset, endOffset, caretPosition, targetClone;
 
       if (!range) {
         return null;
@@ -938,7 +938,7 @@
         return null;
       }
 
-      targetClone = origTargetClone = node.cloneNode(true);
+      targetClone = node.cloneNode(true);
 
       var evt = {
         node: node,
@@ -954,7 +954,7 @@
       $realSelectionContainer = dom.get(realSelectionId);
 
       if (!$realSelectionContainer) {
-        $realSelectionContainer = dom.create('div', { 'data-mce-bogus': 'all', 'class': 'mce-offscreen-selection', 'id': realSelectionId });
+        $realSelectionContainer = dom.create('div', {'data-mce-bogus': 'all', 'class': 'mce-offscreen-selection', 'id': realSelectionId});
         dom.add(editor.getBody(), $realSelectionContainer);
       }
 

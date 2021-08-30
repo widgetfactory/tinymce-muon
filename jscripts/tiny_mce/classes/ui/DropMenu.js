@@ -280,7 +280,7 @@
     addFilterTag: function (item) {
       var self = this, value = item.settings.title;
 
-      var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', { 'class': 'mceButton', 'value': value }, '<label>' + value + '</label>');
+      var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', {'class': 'mceButton', 'value': value}, '<label>' + value + '</label>');
       DOM.insertBefore(btn, filter.lastChild);
 
       Event.add(btn, 'click', function (evt) {
@@ -357,7 +357,7 @@
       self.isMenuVisible = 1;
 
       self.mouseClickFunc = Event.add(co, 'click', function (e) {
-        var m, n;
+        var n;
 
         n = e.target;
 
@@ -774,7 +774,8 @@
           nodes.reverse();
         }
 
-        var endIndex = Math.max(0, nodes.length - 1), tabIndex = nodeIndex(nodes, evt.target);
+        var endIndex = Math.max(0, nodes.length - 1);
+        tabIndex = nodeIndex(nodes, evt.target);
 
         tabIndex++;
 

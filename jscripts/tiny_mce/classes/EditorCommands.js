@@ -189,29 +189,12 @@
       },
 
       'Cut,Copy,Paste': function (command) {
-        var doc = editor.getDoc(),
-          failed;
-
         // Try executing the native command
         try {
           execNativeCommand(command);
         } catch (ex) {
           // Command failed
-          failed = TRUE;
         }
-
-        // Present alert message about clipboard access not being available
-        /*if (failed || !doc.queryCommandSupported(command)) {
-					if (tinymce.isGecko) {
-						editor.windowManager.confirm(editor.getLang('clipboard_msg'), function (state) {
-							if (state) {
-								open('http://www.mozilla.org/editor/midasdemo/securityprefs.html', '_blank');
-							}
-						});
-					} else {
-						editor.windowManager.alert(editor.getLang('clipboard_no_support'));
-					}
-				}*/
       },
 
       // Override unlink command
@@ -866,11 +849,7 @@
       'InsertUnorderedList,InsertOrderedList': function (command) {
         var list = dom.getParent(selection.getNode(), 'ul,ol,dl');
 
-        return list &&
-					(
-					  command === 'insertunorderedlist' && list.tagName === 'UL' ||
-						command === 'insertorderedlist' && list.tagName === 'OL'
-					);
+        return list && (command === 'insertunorderedlist' && list.tagName === 'UL' || command === 'insertorderedlist' && list.tagName === 'OL');
       }
     }, 'state');
 

@@ -1803,7 +1803,7 @@
 
         // Walk the nodes inside the block
         walker = new TreeWalker(container, dom.getParent(container, isBlock) || ed.getBody());
-        while (node = walker[start ? 'prev' : 'next']()) {
+        while ((node = walker[start ? 'prev' : 'next']())) {
           if (node.nodeType === 3) {
             lastTextNode = node;
             pos = findSpace(node);

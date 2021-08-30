@@ -7,6 +7,7 @@
  * is derivative of works licensed under the GNU General Public License or
  * other free or open source software licenses.
  */
+
 (function (tinymce) {
   var each = tinymce.each;
 
@@ -24,18 +25,22 @@
           val += val;
         }
 
-        values = parseInt(val, 16);
+        r = parseInt(val.substring(0, 2), 16);
+        g = parseInt(val.substring(2, 4), 16);
+        b = parseInt(val.substring(4, 6), 16);
 
-        r = (values >> 16) & 0xFF;
-        g = (values >> 8) & 0xFF;
-        b = (values >> 0) & 0xFF;
-        a = (values >> 24) & 0xFF;
+        if (val.length > 6) {
+          a = parseInt(val.substring(6, 8), 16);
+          a = +(a / 255).toFixed(2);
+        }
+
       } else {
         // remove spaces
         val = val.replace(/\s/g, '');
+        match = /^(?:rgb|rgba)\(([^\)]*)\)$/.exec(val);
 
-        if (match = /^(?:rgb|rgba)\(([^\)]*)\)$/.exec(val)) {
-          values = match[1].split(',').map(function (x, i) {
+        if (match) {
+          values = match[1].split(',').map(function (x) {
             return parseFloat(x);
           });
         }
@@ -51,7 +56,7 @@
         }
       }
 
-      rgba[val] = { r: r, g: g, b: b, a: a };
+      rgba[val] = {r: r, g: g, b: b, a: a};
     }
 
     return rgba[val];
@@ -174,25 +179,21 @@
 
     ed.getBody().appendChild(previewElm);
 
-    // Get parent container font size so we can compute px values out of em/% for older IE:s
-    var parentFontSize = dom.getStyle(ed.getBody(), 'fontSize', true);
-    var parentFontSize = /px$/.test(parentFontSize) ? parseInt(parentFontSize, 10) : 0;
-
     // get body background color and element background color
     var bodybg = dom.getStyle(ed.getBody(), 'background-color', true), elmbg = dom.getStyle(previewElm, 'background-color', true);
 
     var styles = previewStyles.split(' ');
 
     for (var i = 0, len = styles.length; i < len; i++) {
-      var name = styles[i], value = dom.getStyle(previewElm, name, true);
+      var key = styles[i], value = dom.getStyle(previewElm, key, true);
 
       // skip if already added
-      if (name == 'background-color' && previewCss[name]) {
+      if (key == 'background-color' && previewCss[key]) {
         continue;
       }
 
       // If text color is white and the background color is white or transparent, override with default color
-      if (name == 'color') {
+      if (key == 'color') {
         // default to white if transparent
         if (/transparent|rgba\s*\([^)]+,\s*0\)/.test(elmbg)) {
           elmbg = white;
@@ -210,11 +211,11 @@
       }
 
       // set to default if value is 0
-      if (name == 'font-size' && parseInt(value) === 0) {
+      if (key == 'font-size' && parseInt(value) === 0) {
         value = 'inherit';
       }
 
-      previewCss[name] = value;
+      previewCss[key] = value;
     }
 
     dom.remove(previewElm);

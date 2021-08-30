@@ -386,7 +386,7 @@
       var self = this,
         s = self.settings,
         w, h, mh, e = self.getElement(),
-        o, url, bi, bc, re, i, initializedPlugins = [];
+        o, url, bi, bc, re, initializedPlugins = [];
 
       tinymce.add(self);
 
@@ -1268,8 +1268,7 @@
 		 * @return {Boolean} true/false state if the shortcut was added or not.
 		 */
     addShortcut: function (pattern, desc, cmdFunc, scope) {
-      var self = this,
-        c;
+      var self = this;
 
       if (self.settings.custom_shortcuts === false) {
         return false;
@@ -2188,10 +2187,8 @@
 
     setMode: function (disabled) {
       // It will not steal focus while setting contentEditable
-      body = self.getBody();
-
+      var body = self.getBody();
       body.contentEditable = disabled;
-
       body.disabled = disabled;
     },
 

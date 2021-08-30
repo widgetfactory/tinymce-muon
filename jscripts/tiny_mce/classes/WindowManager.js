@@ -30,6 +30,16 @@
     }
   }
 
+  function nodeIndex(nodes, node) {
+    for (var i = 0; i < nodes.length; i++) {
+      if (nodes[i] === node) {
+        return i;
+      }
+    }
+
+    return -1;
+  }
+
   /**
      * This class handles the creation of native windows and dialogs. This class can be extended to provide for example inline dialogs.
      *
@@ -100,8 +110,8 @@
 
       id = DOM.uniqueId("mce_window_"); // Use a prefix so this can't conflict with other ids
 
-      f = extend({ width: 0, height: 0 }, f || {});
-      p = extend({ mce_window_id: id }, p || {});
+      f = extend({width: 0, height: 0}, f || {});
+      p = extend({mce_window_id: id}, p || {});
 
       // Only store selection if the type is a normal window
       if (!f.type) {
@@ -130,14 +140,14 @@
 
       // create modal
       if (!modal.length) {
-        modal = DOM.add(DOM.doc.body, 'div', { 'class': ed.settings.skin_class + ' mceModal', role: 'dialog', 'aria-labelledby': id + '_title' }, '');
+        modal = DOM.add(DOM.doc.body, 'div', {'class': ed.settings.skin_class + ' mceModal', role: 'dialog', 'aria-labelledby': id + '_title'}, '');
 
         if (f.overlay !== false) {
-          DOM.add(modal, 'div', { 'class': 'mceModalOverlay' });
+          DOM.add(modal, 'div', {'class': 'mceModalOverlay'});
         }
       }
 
-      DOM.add(modal, 'div', { 'class': 'mceModalFrame', id: id + '_frame' }, html);
+      DOM.add(modal, 'div', {'class': 'mceModalFrame', id: id + '_frame'}, html);
 
       if (!f.fixed) {
         DOM.addClass(DOM.select('.mceModalHeader', modal), 'mceModalMove');
@@ -161,7 +171,7 @@
 
         DOM.addClass(id + '_content', 'mceModalContentIframe');
 
-        var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label': 'Dialog Content Iframe' });
+        var iframe = DOM.add(id + '_content', 'iframe', {id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label': 'Dialog Content Iframe'});
         DOM.setAttrib(iframe, 'src', url);
 
         Event.add(iframe, 'load', function () {
@@ -185,14 +195,14 @@
 
         if (f.buttons.length) {
           // add footer
-          DOM.add(DOM.select('.mceModalContainer', id), 'div', { 'class': 'mceModalFooter', id: id + '_footer' });
+          DOM.add(DOM.select('.mceModalContainer', id), 'div', {'class': 'mceModalFooter', id: id + '_footer'});
 
           // add buttons
           each(f.buttons, function (button) {
 
             // patch in close function for cancel button
             if (button.id === 'cancel') {
-              button.onclick = function (e) {
+              button.onclick = function () {
                 self.close(null, id);
               };
             }
@@ -212,7 +222,7 @@
             var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
 
             if (button.icon) {
-              DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
+              DOM.add(btn, 'span', {'class': 'mceIcon mce_' + button.icon, 'role': 'presentation'});
             }
 
             each(tinymce.explode(button.classes), function (cls) {
@@ -274,16 +284,6 @@
           });
         }
 
-        function nodeIndex(nodes, node) {
-          for (var i = 0; i < nodes.length; i++) {
-            if (nodes[i] === node) {
-              return i;
-            }
-          }
-
-          return -1;
-        }
-
         // restrict tabbing to within the form elements of the dialog
         Event.add(id, 'keydown', function (e) {
           var tabIndex = 0;
@@ -305,8 +305,9 @@
               nodes.reverse();
             }
 
-            var endIndex = Math.max(0, nodes.length - 1), tabIndex = nodeIndex(nodes, e.target);
+            var endIndex = Math.max(0, nodes.length - 1);
 
+            tabIndex = nodeIndex(nodes, e.target);
             tabIndex++;
 
             tabIndex = Math.max(tabIndex, 0);
@@ -453,7 +454,7 @@
          * @param {String} id Id of window to close.
          */
     close: function (win, id) {
-      var self = this, id;
+      var self = this;
 
       id = self._findId(id || win);
 
@@ -530,7 +531,7 @@
          *       tinymce.activeEditor.windowManager.alert("Cancel");
          * });
          */
-    confirm: function (txt, cb, s) {
+    confirm: function (txt, cb) {
       var self = this;
 
       self.open({
@@ -568,7 +569,7 @@
          * // Displays an alert box using the active editors window manager instance
          * tinymce.activeEditor.windowManager.alert('Hello world!');
          */
-    alert: function (txt, cb, s) {
+    alert: function (txt, cb) {
       var self = this;
 
       self.open({
@@ -596,17 +597,18 @@
     },
 
     /**
-         * Resizes the specified window or id.
-         *
-         * @param {Number} dw Delta width.
-         * @param {Number} dh Delta height.
-         * @param {window/id} win Window if the dialog isn't inline. Id if the dialog is inline.
-         */
+     * Resizes the specified window or id.
+     *
+     * @param {Number} dw Delta width.
+     * @param {Number} dh Delta height.
+     * @param {window/id} win Window if the dialog isn't inline. Id if the dialog is inline.
+     */
+    /*eslint no-unused-vars:0*/
     resizeBy: function (dw, dh, id) {
     },
 
     moveTo: function (id, x, y) {
-      DOM.setStyles(id, { 'left': x, 'top': y });
+      DOM.setStyles(id, {'left': x, 'top': y});
     },
 
     position: function (id) {
@@ -616,7 +618,7 @@
       var top = Math.round(Math.max(vp.y + 10, vp.y + (vp.h / 2.0) - (p.h / 2.0)));
       var left = Math.round(Math.max(vp.x + 10, vp.x + (vp.w / 2.0) - (p.w / 2.0)));
 
-      DOM.setStyles(id, { 'left': left, 'top': top });
+      DOM.setStyles(id, {'left': left, 'top': top});
     },
 
     focus: function (id) {
@@ -657,9 +659,9 @@
     },
 
     // Internal functions
-    _startDrag: function (id, se, ac) {
+    _startDrag: function (id, se) {
       var mu, mm, d = DOM.doc,
-        sx, sy, p, vp, cp, dx, dy;
+        sx, sy, p, vp, dx, dy;
 
       if (DOM.hasClass(id, 'dragging')) {
         end();
@@ -670,9 +672,6 @@
 
       p = DOM.getRect(id);
       vp = DOM.getViewPort();
-
-      // Get positons and sizes
-      cp = { x: 0, y: 0 };
 
       // Reduce viewport size to avoid scrollbars while dragging
       vp.w -= 2;
@@ -711,7 +710,7 @@
         dx = Math.max(p.x + x, 10);
         dy = Math.max(p.y + y, 10);
 
-        DOM.setStyles(id, { 'left': dx, 'top': dy });
+        DOM.setStyles(id, {'left': dx, 'top': dy});
 
         return Event.cancel(e);
       });

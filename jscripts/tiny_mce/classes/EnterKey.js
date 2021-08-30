@@ -320,7 +320,7 @@
           }
         }
 
-        while (node = walker.current()) {
+        while ((node = walker.current())) {
           if (node.nodeType === 1) {
             // Ignore bogus elements
             if (!node.getAttribute('data-mce-bogus')) {
