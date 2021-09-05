@@ -44,65 +44,65 @@
   };
 
   /**
-	 * This class is used to create drop menus, a drop menu can be a
-	 * context menu, or a menu for a list box or a menu bar.
-	 *
-	 * @class tinymce.ui.DropMenu
-	 * @extends tinymce.ui.Menu
-	 * @example
-	 * // Adds a menu to the currently active editor instance
-	 * var dm = tinymce.activeEditor.controlManager.createDropMenu('somemenu');
-	 *
-	 * // Add some menu items
-	 * dm.add({title : 'Menu 1', onclick : function() {
-	 *     alert('Item 1 was clicked.');
-	 * }});
-	 *
-	 * dm.add({title : 'Menu 2', onclick : function() {
-	 *     alert('Item 2 was clicked.');
-	 * }});
-	 *
-	 * // Adds a submenu
-	 * var sub1 = dm.addMenu({title : 'Menu 3'});
-	 * sub1.add({title : 'Menu 1.1', onclick : function() {
-	 *     alert('Item 1.1 was clicked.');
-	 * }});
-	 *
-	 * // Adds a horizontal separator
-	 * sub1.addSeparator();
-	 *
-	 * sub1.add({title : 'Menu 1.2', onclick : function() {
-	 *     alert('Item 1.2 was clicked.');
-	 * }});
-	 *
-	 * // Adds a submenu to the submenu
-	 * var sub2 = sub1.addMenu({title : 'Menu 1.3'});
-	 *
-	 * // Adds items to the sub sub menu
-	 * sub2.add({title : 'Menu 1.3.1', onclick : function() {
-	 *     alert('Item 1.3.1 was clicked.');
-	 * }});
-	 *
-	 * sub2.add({title : 'Menu 1.3.2', onclick : function() {
-	 *     alert('Item 1.3.2 was clicked.');
-	 * }});
-	 *
-	 * dm.add({title : 'Menu 4', onclick : function() {
-	 *     alert('Item 3 was clicked.');
-	 * }});
-	 *
-	 * // Display the menu at position 100, 100
-	 * dm.showMenu(100, 100);
-	 */
+   * This class is used to create drop menus, a drop menu can be a
+   * context menu, or a menu for a list box or a menu bar.
+   *
+   * @class tinymce.ui.DropMenu
+   * @extends tinymce.ui.Menu
+   * @example
+   * // Adds a menu to the currently active editor instance
+   * var dm = tinymce.activeEditor.controlManager.createDropMenu('somemenu');
+   *
+   * // Add some menu items
+   * dm.add({title : 'Menu 1', onclick : function() {
+   *     alert('Item 1 was clicked.');
+   * }});
+   *
+   * dm.add({title : 'Menu 2', onclick : function() {
+   *     alert('Item 2 was clicked.');
+   * }});
+   *
+   * // Adds a submenu
+   * var sub1 = dm.addMenu({title : 'Menu 3'});
+   * sub1.add({title : 'Menu 1.1', onclick : function() {
+   *     alert('Item 1.1 was clicked.');
+   * }});
+   *
+   * // Adds a horizontal separator
+   * sub1.addSeparator();
+   *
+   * sub1.add({title : 'Menu 1.2', onclick : function() {
+   *     alert('Item 1.2 was clicked.');
+   * }});
+   *
+   * // Adds a submenu to the submenu
+   * var sub2 = sub1.addMenu({title : 'Menu 1.3'});
+   *
+   * // Adds items to the sub sub menu
+   * sub2.add({title : 'Menu 1.3.1', onclick : function() {
+   *     alert('Item 1.3.1 was clicked.');
+   * }});
+   *
+   * sub2.add({title : 'Menu 1.3.2', onclick : function() {
+   *     alert('Item 1.3.2 was clicked.');
+   * }});
+   *
+   * dm.add({title : 'Menu 4', onclick : function() {
+   *     alert('Item 3 was clicked.');
+   * }});
+   *
+   * // Display the menu at position 100, 100
+   * dm.showMenu(100, 100);
+   */
   tinymce.create('tinymce.ui.DropMenu:tinymce.ui.Menu', {
     /**
-		 * Constructs a new drop menu control instance.
-		 *
-		 * @constructor
-		 * @method DropMenu
-		 * @param {String} id Button control id for the button.
-		 * @param {Object} s Optional name/value settings object.
-		 */
+     * Constructs a new drop menu control instance.
+     *
+     * @constructor
+     * @method DropMenu
+     * @param {String} id Button control id for the button.
+     * @param {Object} s Optional name/value settings object.
+     */
     DropMenu: function (id, s) {
       s = s || {};
       s.container = s.container || DOM.doc.body;
@@ -121,12 +121,12 @@
     },
 
     /**
-		 * Created a new sub menu for the drop menu control.
-		 *
-		 * @method createMenu
-		 * @param {Object} s Optional name/value settings object.
-		 * @return {tinymce.ui.DropMenu} New drop menu instance.
-		 */
+     * Created a new sub menu for the drop menu control.
+     *
+     * @method createMenu
+     * @param {Object} s Optional name/value settings object.
+     * @return {tinymce.ui.DropMenu} New drop menu instance.
+     */
     createMenu: function (s) {
       var self = this,
         cs = self.settings,
@@ -154,10 +154,10 @@
     },
 
     /**
-		 * Repaints the menu after new items have been added dynamically.
-		 *
-		 * @method update
-		 */
+     * Repaints the menu after new items have been added dynamically.
+     *
+     * @method update
+     */
     update: function () {
       var self = this,
         s = self.settings,
@@ -280,7 +280,7 @@
     addFilterTag: function (item) {
       var self = this, value = item.settings.title;
 
-      var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', {'class': 'mceButton', 'value': value}, '<label>' + value + '</label>');
+      var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', { 'class': 'mceButton', 'value': value }, '<label>' + value + '</label>');
       DOM.insertBefore(btn, filter.lastChild);
 
       Event.add(btn, 'click', function (evt) {
@@ -295,13 +295,13 @@
     },
 
     /**
-		 * Displays the menu at the specified cordinate.
-		 *
-		 * @method showMenu
-		 * @param {Number} x Horizontal position of the menu.
-		 * @param {Number} y Vertical position of the menu.
-		 * @param {Numner} px Optional parent X position used when menus are cascading.
-		 */
+     * Displays the menu at the specified cordinate.
+     *
+     * @method showMenu
+     * @param {Number} x Horizontal position of the menu.
+     * @param {Number} y Vertical position of the menu.
+     * @param {Numner} px Optional parent X position used when menus are cascading.
+     */
     showMenu: function (x, y, px, py) {
       var self = this,
         s = self.settings,
@@ -450,10 +450,10 @@
     },
 
     /**
-		 * Hides the displayed menu.
-		 *
-		 * @method hideMenu
-		 */
+     * Hides the displayed menu.
+     *
+     * @method hideMenu
+     */
     hideMenu: function (c) {
       var self = this,
         co = DOM.get('menu_' + self.id),
@@ -496,12 +496,12 @@
     },
 
     /**
-		 * Adds a new menu, menu item or sub classes of them to the drop menu.
-		 *
-		 * @method add
-		 * @param {tinymce.ui.Control} o Menu or menu item to add to the drop menu.
-		 * @return {tinymce.ui.Control} Same as the input control, the menu or menu item.
-		 */
+     * Adds a new menu, menu item or sub classes of them to the drop menu.
+     *
+     * @method add
+     * @param {tinymce.ui.Control} o Menu or menu item to add to the drop menu.
+     * @return {tinymce.ui.Control} Same as the input control, the menu or menu item.
+     */
     add: function (o) {
       var self = this,
         co;
@@ -516,23 +516,23 @@
     },
 
     /**
-		 * Collapses the menu, this will hide the menu and all menu items.
-		 *
-		 * @method collapse
-		 * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
-		 */
+     * Collapses the menu, this will hide the menu and all menu items.
+     *
+     * @method collapse
+     * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
+     */
     collapse: function (d) {
       this.parent(d);
       this.hideMenu(1);
     },
 
     /**
-		 * Removes a specific sub menu or menu item from the drop menu.
-		 *
-		 * @method remove
-		 * @param {tinymce.ui.Control} o Menu item or menu to remove from drop menu.
-		 * @return {tinymce.ui.Control} Control instance or null if it wasn't found.
-		 */
+     * Removes a specific sub menu or menu item from the drop menu.
+     *
+     * @method remove
+     * @param {tinymce.ui.Control} o Menu item or menu to remove from drop menu.
+     * @return {tinymce.ui.Control} Control instance or null if it wasn't found.
+     */
     remove: function (o) {
       DOM.remove(o.id);
       this.destroy();
@@ -541,10 +541,10 @@
     },
 
     /**
-		 * Destroys the menu. This will remove the menu from the DOM and any events added to it etc.
-		 *
-		 * @method destroy
-		 */
+     * Destroys the menu. This will remove the menu from the DOM and any events added to it etc.
+     *
+     * @method destroy
+     */
     destroy: function () {
       var self = this,
         co = DOM.get('menu_' + self.id);
@@ -563,11 +563,11 @@
     },
 
     /**
-		 * Renders the specified menu node to the dom.
-		 *
-		 * @method renderNode
-		 * @return {Element} Container element for the drop menu.
-		 */
+     * Renders the specified menu node to the dom.
+     *
+     * @method renderNode
+     * @return {Element} Container element for the drop menu.
+     */
     renderNode: function () {
       var self = this,
         s = self.settings, menu, items;

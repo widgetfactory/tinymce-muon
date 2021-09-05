@@ -104,7 +104,7 @@
         clientRect = getAbsoluteClientRect(node, before);
         DOM.setStyle(caretContainerNode, 'top', clientRect.top);
 
-        $lastVisualCaret = DOM.add(rootNode, 'div', {'class': 'mce-visual-caret', 'data-mce-bogus': 'all', 'style': clientRect});
+        $lastVisualCaret = DOM.add(rootNode, 'div', { 'class': 'mce-visual-caret', 'data-mce-bogus': 'all', 'style': clientRect });
 
         if (before) {
           DOM.addClass($lastVisualCaret, 'mce-visual-caret-before');

@@ -146,7 +146,7 @@
         style: 'position:absolute;left:0;top:-1000px;'
       });
 
-      panel = DOM.add(panel, 'div', {'class': prefix});
+      panel = DOM.add(panel, 'div', { 'class': prefix });
 
       var content = DOM.add(panel, 'div', {
         'class': prefix + 'Content'

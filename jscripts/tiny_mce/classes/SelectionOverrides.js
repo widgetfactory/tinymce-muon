@@ -954,7 +954,7 @@
       $realSelectionContainer = dom.get(realSelectionId);
 
       if (!$realSelectionContainer) {
-        $realSelectionContainer = dom.create('div', {'data-mce-bogus': 'all', 'class': 'mce-offscreen-selection', 'id': realSelectionId});
+        $realSelectionContainer = dom.create('div', { 'data-mce-bogus': 'all', 'class': 'mce-offscreen-selection', 'id': realSelectionId });
         dom.add(editor.getBody(), $realSelectionContainer);
       }
 

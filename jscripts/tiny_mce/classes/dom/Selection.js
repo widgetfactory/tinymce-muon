@@ -24,23 +24,23 @@
   }
 
   /**
-	 * This class handles text and control selection it's an crossbrowser utility class.
-	 * Consult the TinyMCE Wiki API for more details and examples on how to use this class.
-	 *
-	 * @class tinymce.dom.Selection
-	 * @example
-	 * // Getting the currently selected node for the active editor
-	 * alert(tinymce.activeEditor.selection.getNode().nodeName);
-	 */
+   * This class handles text and control selection it's an crossbrowser utility class.
+   * Consult the TinyMCE Wiki API for more details and examples on how to use this class.
+   *
+   * @class tinymce.dom.Selection
+   * @example
+   * // Getting the currently selected node for the active editor
+   * alert(tinymce.activeEditor.selection.getNode().nodeName);
+   */
   /**
-		 * Constructs a new selection instance.
-		 *
-		 * @constructor
-		 * @method Selection
-		 * @param {tinymce.dom.DOMUtils} dom DOMUtils object reference.
-		 * @param {Window} win Window to bind the selection object to.
-		 * @param {tinymce.dom.Serializer} serializer DOM serialization class to use for getContent.
-		 */
+     * Constructs a new selection instance.
+     *
+     * @constructor
+     * @method Selection
+     * @param {tinymce.dom.DOMUtils} dom DOMUtils object reference.
+     * @param {Window} win Window to bind the selection object to.
+     * @param {tinymce.dom.Serializer} serializer DOM serialization class to use for getContent.
+     */
   tinymce.dom.Selection = function (dom, win, serializer, editor) {
     var self = this;
 
@@ -55,66 +55,66 @@
     // Add events
     each([
       /**
-			 * This event gets executed before contents is extracted from the selection.
-			 *
-			 * @event onBeforeSetContent
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be returned.
-			 */
+       * This event gets executed before contents is extracted from the selection.
+       *
+       * @event onBeforeSetContent
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be returned.
+       */
       'onBeforeSetContent',
 
       /**
-			 * This event gets executed before contents is inserted into selection.
-			 *
-			 * @event onBeforeGetContent
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be inserted.
-			 */
+       * This event gets executed before contents is inserted into selection.
+       *
+       * @event onBeforeGetContent
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be inserted.
+       */
       'onBeforeGetContent',
 
       /**
-			 * This event gets executed when contents is inserted into selection.
-			 *
-			 * @event onSetContent
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be inserted.
-			 */
+       * This event gets executed when contents is inserted into selection.
+       *
+       * @event onSetContent
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be inserted.
+       */
       'onSetContent',
 
       /**
-			 * This event gets executed when contents is extracted from the selection.
-			 *
-			 * @event onGetContent
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be returned.
-			 */
+       * This event gets executed when contents is extracted from the selection.
+       *
+       * @event onGetContent
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be returned.
+       */
       'onGetContent',
 
       /**
-			 * This event gets executed when a range is extracted from the selection.
-			 *
-			 * @event onSetSelectionRange
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be returned.
-			 */
+       * This event gets executed when a range is extracted from the selection.
+       *
+       * @event onSetSelectionRange
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be returned.
+       */
       'onGetSelectionRange',
 
       /**
-			 * This event gets executed when a selection range is set.
-			 *
-			 * @event onSetSelectionRange
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be returned.
-			 */
+       * This event gets executed when a selection range is set.
+       *
+       * @event onSetSelectionRange
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be returned.
+       */
       'onSetSelectionRange',
 
       /**
-			 * This event gets executed after a selection range is set.
-			 *
-			 * @event onAfterSetSelectionRange
-			 * @param {tinymce.dom.Selection} selection Selection object that fired the event.
-			 * @param {Object} args Contains things like the contents that will be returned.
-			 */
+       * This event gets executed after a selection range is set.
+       *
+       * @event onAfterSetSelectionRange
+       * @param {tinymce.dom.Selection} selection Selection object that fired the event.
+       * @param {Object} args Contains things like the contents that will be returned.
+       */
       'onAfterSetSelectionRange'
     ], function (e) {
       self[e] = new tinymce.util.Dispatcher(self);
@@ -123,14 +123,14 @@
     // Add onBeforeSetContent with cleanup
     self.onBeforeSetContent.add(function (e, args) {
       if (args.format !== 'raw') {
-        var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, {isRootContent: true, forced_root_block: false}));
-        args.content = new tinymce.html.Serializer({validate: editor.settings.validate}, editor.schema).serialize(node);
+        var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
+        args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
       }
     });
 
     /*if (tinymce.isIE && !tinymce.isIE11 && dom.boxModel) {
-			this._fixIESelection();
-		}*/
+      this._fixIESelection();
+    }*/
 
     // Prevent leaks
     tinymce.addUnload(self.destroy, self);
@@ -139,10 +139,10 @@
   tinymce.dom.Selection.prototype = {
 
     /**
-		 * Move the selection cursor range to the specified node and offset.
-		 * @param node Node to put the cursor in.
-		 * @param offset Offset from the start of the node to put the cursor at.
-		 */
+     * Move the selection cursor range to the specified node and offset.
+     * @param node Node to put the cursor in.
+     * @param offset Offset from the start of the node to put the cursor at.
+     */
     setCursorLocation: function (node, offset) {
       var self = this;
       var r = self.dom.createRng();
@@ -220,18 +220,18 @@
     },
 
     /**
-		 * Returns the selected contents using the DOM serializer passed in to this class.
-		 *
-		 * @method getContent
-		 * @param {Object} s Optional settings class with for example output format text or html.
-		 * @return {String} Selected contents in for example HTML format.
-		 * @example
-		 * // Alerts the currently selected contents
-		 * alert(tinymce.activeEditor.selection.getContent());
-		 *
-		 * // Alerts the currently selected contents as plain text
-		 * alert(tinymce.activeEditor.selection.getContent({format : 'text'}));
-		 */
+     * Returns the selected contents using the DOM serializer passed in to this class.
+     *
+     * @method getContent
+     * @param {Object} s Optional settings class with for example output format text or html.
+     * @return {String} Selected contents in for example HTML format.
+     * @example
+     * // Alerts the currently selected contents
+     * alert(tinymce.activeEditor.selection.getContent());
+     *
+     * // Alerts the currently selected contents as plain text
+     * alert(tinymce.activeEditor.selection.getContent({format : 'text'}));
+     */
     getContent: function (s) {
       var self = this,
         r = self.getRng(),
@@ -291,17 +291,17 @@
     },
 
     /**
-		 * Sets the current selection to the specified content. If any contents is selected it will be replaced
-		 * with the contents passed in to this function. If there is no selection the contents will be inserted
-		 * where the caret is placed in the editor/page.
-		 *
-		 * @method setContent
-		 * @param {String} content HTML contents to set could also be other formats depending on settings.
-		 * @param {Object} args Optional settings object with for example data format.
-		 * @example
-		 * // Inserts some HTML contents at the current selection
-		 * tinymce.activeEditor.selection.setContent('<strong>Some contents</strong>');
-		 */
+     * Sets the current selection to the specified content. If any contents is selected it will be replaced
+     * with the contents passed in to this function. If there is no selection the contents will be inserted
+     * where the caret is placed in the editor/page.
+     *
+     * @method setContent
+     * @param {String} content HTML contents to set could also be other formats depending on settings.
+     * @param {Object} args Optional settings object with for example data format.
+     * @example
+     * // Inserts some HTML contents at the current selection
+     * tinymce.activeEditor.selection.setContent('<strong>Some contents</strong>');
+     */
     setContent: function (content, args) {
       var self = this,
         rng = self.getRng(),
@@ -378,13 +378,13 @@
     },
 
     /**
-	   * Returns the start element of a selection range. If the start is in a text
-	   * node the parent element will be returned.
-	   *
-	   * @method getStart
-	   * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
-	   * @return {Element} Start element of selection range.
-	   */
+     * Returns the start element of a selection range. If the start is in a text
+     * node the parent element will be returned.
+     *
+     * @method getStart
+     * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
+     * @return {Element} Start element of selection range.
+     */
     getStart: function (real) {
       var self = this,
         rng = self.getRng(),
@@ -435,13 +435,13 @@
     },
 
     /**
-		 * Returns the end element of a selection range. If the end is in a text
-		 * node the parent element will be returned.
-		 *
-		 * @method getEnd
-		 * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
-		 * @return {Element} End element of selection range.
-		 */
+     * Returns the end element of a selection range. If the end is in a text
+     * node the parent element will be returned.
+     *
+     * @method getEnd
+     * @param {Boolean} real Optional state to get the real parent when the selection is collapsed not the closest element.
+     * @return {Element} End element of selection range.
+     */
     getEnd: function (real) {
       var self = this,
         rng = self.getRng(),
@@ -483,56 +483,56 @@
     },
 
     /**
-		 * Returns a bookmark location for the current selection. This bookmark object
-		 * can then be used to restore the selection after some content modification to the document.
-		 *
-		 * @method getBookmark
-		 * @param {Number} type Optional state if the bookmark should be simple or not. Default is complex.
-		 * @param {Boolean} normalized Optional state that enables you to get a position that it would be after normalization.
-		 * @return {Object} Bookmark object, use moveToBookmark with this object to restore the selection.
-		 * @example
-		 * // Stores a bookmark of the current selection
-		 * var bm = tinymce.activeEditor.selection.getBookmark();
-		 *
-		 * tinymce.activeEditor.setContent(tinymce.activeEditor.getContent() + 'Some new content');
-		 *
-		 * // Restore the selection bookmark
-		 * tinymce.activeEditor.selection.moveToBookmark(bm);
-		 */
+     * Returns a bookmark location for the current selection. This bookmark object
+     * can then be used to restore the selection after some content modification to the document.
+     *
+     * @method getBookmark
+     * @param {Number} type Optional state if the bookmark should be simple or not. Default is complex.
+     * @param {Boolean} normalized Optional state that enables you to get a position that it would be after normalization.
+     * @return {Object} Bookmark object, use moveToBookmark with this object to restore the selection.
+     * @example
+     * // Stores a bookmark of the current selection
+     * var bm = tinymce.activeEditor.selection.getBookmark();
+     *
+     * tinymce.activeEditor.setContent(tinymce.activeEditor.getContent() + 'Some new content');
+     *
+     * // Restore the selection bookmark
+     * tinymce.activeEditor.selection.moveToBookmark(bm);
+     */
     getBookmark: function (type, normalized) {
       return this.bookmarkManager.getBookmark(type, normalized);
     },
 
     /**
-		 * Restores the selection to the specified bookmark.
-		 *
-		 * @method moveToBookmark
-		 * @param {Object} bookmark Bookmark to restore selection from.
-		 * @return {Boolean} true/false if it was successful or not.
-		 * @example
-		 * // Stores a bookmark of the current selection
-		 * var bm = tinymce.activeEditor.selection.getBookmark();
-		 *
-		 * tinymce.activeEditor.setContent(tinymce.activeEditor.getContent() + 'Some new content');
-		 *
-		 * // Restore the selection bookmark
-		 * tinymce.activeEditor.selection.moveToBookmark(bm);
-		 */
+     * Restores the selection to the specified bookmark.
+     *
+     * @method moveToBookmark
+     * @param {Object} bookmark Bookmark to restore selection from.
+     * @return {Boolean} true/false if it was successful or not.
+     * @example
+     * // Stores a bookmark of the current selection
+     * var bm = tinymce.activeEditor.selection.getBookmark();
+     *
+     * tinymce.activeEditor.setContent(tinymce.activeEditor.getContent() + 'Some new content');
+     *
+     * // Restore the selection bookmark
+     * tinymce.activeEditor.selection.moveToBookmark(bm);
+     */
     moveToBookmark: function (bookmark) {
       return this.bookmarkManager.moveToBookmark(bookmark);
     },
 
     /**
-		 * Selects the specified element. This will place the start and end of the selection range around the element.
-		 *
-		 * @method select
-		 * @param {Element} node HMTL DOM element to select.
-		 * @param {Boolean} content Optional bool state if the contents should be selected or not on non IE browser.
-		 * @return {Element} Selected element the same element as the one that got passed in.
-		 * @example
-		 * // Select the first paragraph in the active editor
-		 * tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select('p')[0]);
-		 */
+     * Selects the specified element. This will place the start and end of the selection range around the element.
+     *
+     * @method select
+     * @param {Element} node HMTL DOM element to select.
+     * @param {Boolean} content Optional bool state if the contents should be selected or not on non IE browser.
+     * @return {Element} Selected element the same element as the one that got passed in.
+     * @example
+     * // Select the first paragraph in the active editor
+     * tinymce.activeEditor.selection.select(tinymce.activeEditor.dom.select('p')[0]);
+     */
     select: function (node, content) {
       var self = this,
         dom = self.dom,
@@ -589,11 +589,11 @@
     },
 
     /**
-		 * Returns true/false if the selection range is collapsed or not. Collapsed means if it's a caret or a larger selection.
-		 *
-		 * @method isCollapsed
-		 * @return {Boolean} true/false state if the selection range is collapsed or not. Collapsed means if it's a caret or a larger selection.
-		 */
+     * Returns true/false if the selection range is collapsed or not. Collapsed means if it's a caret or a larger selection.
+     *
+     * @method isCollapsed
+     * @return {Boolean} true/false state if the selection range is collapsed or not. Collapsed means if it's a caret or a larger selection.
+     */
     isCollapsed: function () {
       var self = this,
         r = self.getRng(),
@@ -611,11 +611,11 @@
     },
 
     /**
-		 * Collapse the selection to start or end of range.
-		 *
-		 * @method collapse
-		 * @param {Boolean} to_start Optional boolean state if to collapse to end or not. Defaults to start.
-		 */
+     * Collapse the selection to start or end of range.
+     *
+     * @method collapse
+     * @param {Boolean} to_start Optional boolean state if to collapse to end or not. Defaults to start.
+     */
     collapse: function (to_start) {
       var self = this,
         rng = self.getRng(),
@@ -633,11 +633,11 @@
     },
 
     /**
-		 * Returns the browsers internal selection object.
-		 *
-		 * @method getSel
-		 * @return {Selection} Internal browser selection object.
-		 */
+     * Returns the browsers internal selection object.
+     *
+     * @method getSel
+     * @return {Selection} Internal browser selection object.
+     */
     getSel: function () {
       var w = this.win;
 
@@ -645,14 +645,14 @@
     },
 
     /**
-	   * Returns the browsers internal range object.
-	   *
-	   * @method getRng
-	   * @param {Boolean} w3c Forces a compatible W3C range on IE.
-	   * @return {Range} Internal browser range object.
-	   * @see http://www.quirksmode.org/dom/range_intro.html
-	   * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
-	   */
+     * Returns the browsers internal range object.
+     *
+     * @method getRng
+     * @param {Boolean} w3c Forces a compatible W3C range on IE.
+     * @return {Range} Internal browser range object.
+     * @see http://www.quirksmode.org/dom/range_intro.html
+     * @see http://www.dotvoid.com/2001/03/using-the-range-object-in-mozilla/
+     */
     getRng: function (w3c) {
       var self = this,
         selection, rng, elm, doc, ieRng, evt;
@@ -709,7 +709,7 @@
         // IE throws unspecified error here if TinyMCE is placed in a frame/iframe
       }
 
-      evt = {range: rng};
+      evt = { range: rng };
 
       self.onGetSelectionRange.dispatch(self, evt);
 
@@ -756,7 +756,7 @@
 
       if (self.selectedRange && self.explicitRange) {
         if (tryCompareBoundaryPoints(rng.START_TO_START, rng, self.selectedRange) === 0 &&
-					tryCompareBoundaryPoints(rng.END_TO_END, rng, self.selectedRange) === 0) {
+          tryCompareBoundaryPoints(rng.END_TO_END, rng, self.selectedRange) === 0) {
           // Safari, Opera and Chrome only ever select text which causes the range to change.
           // This lets us use the originally set range if the selection hasn't been changed by the user.
           rng = self.explicitRange;
@@ -770,12 +770,12 @@
     },
 
     /**
-	   * Changes the selection to the specified DOM range.
-	   *
-	   * @method setRng
-	   * @param {Range} rng Range to select.
-	   * @param {Boolean} forward Optional boolean if the selection is forwards or backwards.
-	   */
+     * Changes the selection to the specified DOM range.
+     *
+     * @method setRng
+     * @param {Range} rng Range to select.
+     * @param {Boolean} forward Optional boolean if the selection is forwards or backwards.
+     */
     setRng: function (rng, forward) {
       var self = this,
         sel, node;
@@ -799,7 +799,7 @@
 
       sel = self.getSel();
 
-      var evt = {range: rng};
+      var evt = { range: rng };
 
       self.onSetSelectionRange.dispatch(self, evt);
 
@@ -856,15 +856,15 @@
     },
 
     /**
-		 * Sets the current selection to the specified DOM element.
-		 *
-		 * @method setNode
-		 * @param {Element} n Element to set as the contents of the selection.
-		 * @return {Element} Returns the element that got passed in.
-		 * @example
-		 * // Inserts a DOM node at current selection/caret location
-		 * tinymce.activeEditor.selection.setNode(tinymce.activeEditor.dom.create('img', {src : 'some.gif', title : 'some title'}));
-		 */
+     * Sets the current selection to the specified DOM element.
+     *
+     * @method setNode
+     * @param {Element} n Element to set as the contents of the selection.
+     * @return {Element} Returns the element that got passed in.
+     * @example
+     * // Inserts a DOM node at current selection/caret location
+     * tinymce.activeEditor.selection.setNode(tinymce.activeEditor.dom.create('img', {src : 'some.gif', title : 'some title'}));
+     */
     setNode: function (n) {
       var self = this;
 
@@ -874,14 +874,14 @@
     },
 
     /**
-		 * Returns the currently selected element or the common ancestor element for both start and end of the selection.
-		 *
-		 * @method getNode
-		 * @return {Element} Currently selected element or common ancestor element.
-		 * @example
-		 * // Alerts the currently selected elements node name
-		 * alert(tinymce.activeEditor.selection.getNode().nodeName);
-		 */
+     * Returns the currently selected element or the common ancestor element for both start and end of the selection.
+     *
+     * @method getNode
+     * @return {Element} Currently selected element or common ancestor element.
+     * @example
+     * // Alerts the currently selected elements node name
+     * alert(tinymce.activeEditor.selection.getNode().nodeName);
+     */
     getNode: function () {
       var self = this,
         rng = self.getRng(),
@@ -1218,12 +1218,12 @@
     },
 
     /**
-		 * Executes callback of the current selection matches the specified selector or not and passes the state and args to the callback.
-		 *
-		 * @method selectorChanged
-		 * @param {String} selector CSS selector to check for.
-		 * @param {function} callback Callback with state and args when the selector is matches or not.
-		 */
+     * Executes callback of the current selection matches the specified selector or not and passes the state and args to the callback.
+     *
+     * @method selectorChanged
+     * @param {String} selector CSS selector to check for.
+     * @param {function} callback Callback with state and args when the selector is matches or not.
+     */
     selectorChanged: function (selector, callback) {
       var self = this,
         currentSelectors;

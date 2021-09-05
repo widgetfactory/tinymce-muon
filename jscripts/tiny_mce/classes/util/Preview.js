@@ -56,7 +56,7 @@
         }
       }
 
-      rgba[val] = {r: r, g: g, b: b, a: a};
+      rgba[val] = { r: r, g: g, b: b, a: a };
     }
 
     return rgba[val];
@@ -211,7 +211,7 @@
       }
 
       // set to default if value is 0
-      if (key == 'font-size' && parseInt(value) === 0) {
+      if (key == 'font-size' && parseInt(value, 10) === 0) {
         value = 'inherit';
       }
 

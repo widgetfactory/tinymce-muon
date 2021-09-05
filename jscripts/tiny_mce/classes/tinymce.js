@@ -8,6 +8,8 @@
  * Contributing: http://www.tinymce.com/contributing
  */
 
+/* global CollectGarbage */
+
 (function (win) {
   var whiteSpaceRe = /^\s*|\s*$/g,
     undef;
