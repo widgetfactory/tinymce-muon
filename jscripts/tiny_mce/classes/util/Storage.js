@@ -26,12 +26,12 @@
      */
   tinymce.create('static tinymce.util.Storage', {
     /**
-         * Parses the specified query string into an name/value object.
-         *
-         * @method getHash
-         * @param {String} n String to parse into a n Hashtable object.
-         * @return {Object} Name/Value object with items parsed from querystring.
-         */
+      * Parses the specified query string into an name/value object.
+      *
+      * @method getHash
+      * @param {String} n String to parse into a n Hashtable object.
+      * @return {Object} Name/Value object with items parsed from querystring.
+      */
     getHash: function (n) {
       var v = this.get(n),
         h;
@@ -48,29 +48,35 @@
     },
 
     /**
-         * Sets a hashtable name/value object to a sessionStorage item.
-         *
-         * @method setHash
-         * @param {String} n Name of the item.
-         * @param {Object} v Hashtable object to set as item.
-         */
+      * Sets a hashtable name/value object to a sessionStorage item.
+      *
+      * @method setHash
+      * @param {String} n Name of the item.
+      * @param {Object} v Hashtable object to set as item.
+      */
     setHash: function (n, v) {
       this.set(n, JSON.stringify(v));
     },
 
     /**
-         * Gets the raw data of an item by name.
-         *
-         * @method get
-         * @param {String} n Name of item to retrive.
-         * @return {String} Item data string.
-         */
-    get: function (n) {
+      * Gets the raw data of an item by name.
+      *
+      * @method get
+      * @param {String} n Name of item to retrive.
+      * @param {String} s Default value to return.
+      * @return {String} Item data string.
+      */
+    get: function (n, s) {
       if (!window.sessionStorage) {
         return null;
       }
 
       var val = sessionStorage.getItem(n);
+
+      // return default
+      if (!tinymce.is(val) || val == null) {
+        return s;
+      }
 
       if (val === "true") {
         return true;
@@ -88,12 +94,12 @@
     },
 
     /**
-         * Sets a raw cookie string.
-         *
-         * @method set
-         * @param {String} n Name of the cookie.
-         * @param {String} v Raw cookie data.
-         */
+      * Sets a raw cookie string.
+      *
+      * @method set
+      * @param {String} n Name of the cookie.
+      * @param {String} v Raw cookie data.
+      */
     set: function (n, v) {
       if (!window.sessionStorage) {
         return;
