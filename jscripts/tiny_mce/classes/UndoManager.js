@@ -88,6 +88,12 @@
     editor.onKeyUp.add(function (editor, e) {
       var keyCode = e.keyCode;
 
+      // If key is prevented then don't add undo level
+      // This would happen on keyboard shortcuts for example
+      if (e.isDefaultPrevented()) {
+        return;
+      }
+
       if ((keyCode >= 33 && keyCode <= 36) || (keyCode >= 37 && keyCode <= 40) || keyCode == 45 || keyCode == 13 || e.ctrlKey) {
         addNonTypingUndoLevel();
       }
@@ -95,6 +101,12 @@
 
     editor.onKeyDown.add(function (editor, e) {
       var keyCode = e.keyCode;
+
+      // If key is prevented then don't add undo level
+      // This would happen on keyboard shortcuts for example
+      if (e.isDefaultPrevented()) {
+        return;
+      }
 
       // Is caracter positon keys left,right,up,down,home,end,pgdown,pgup,enter
       if ((keyCode >= 33 && keyCode <= 36) || (keyCode >= 37 && keyCode <= 40) || keyCode == 45) {
@@ -105,8 +117,9 @@
         return;
       }
 
-      // If key isn't shift,ctrl,alt,capslock,metakey
-      if ((keyCode < 16 || keyCode > 20) && keyCode != 224 && keyCode != 91 && !um.typing) {
+      // If key isn't Ctrl+Alt/AltGr
+      var modKey = (e.ctrlKey && !e.altKey) || e.metaKey;
+      if ((keyCode < 16 || keyCode > 20) && keyCode !== 224 && keyCode !== 91 && !um.typing && !modKey) {
         um.beforeChange();
         um.typing = true;
         um.add();
