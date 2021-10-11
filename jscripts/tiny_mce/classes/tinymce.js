@@ -952,6 +952,14 @@
   tinymce.util = {};
 
   /**
+	 * Contains various file classes.
+	 *
+	 * @namespace tinymce.file
+	 */
+
+   tinymce.file = {};
+
+  /**
 	 * Contains plugin classes.
 	 *
 	 * @namespace tinymce.plugins
