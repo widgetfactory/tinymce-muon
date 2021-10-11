@@ -619,6 +619,41 @@
       });
     },
 
+    prompt: function (txt, cb, s) {
+      var self = this;
+
+      var html = '<div class="mceModalRow">' +
+        '   <div class="mceModalControl">' +
+        '       <input type="text" id="' + self.editor.id + '_prompt_input" autofocus />' +
+        '   </div>' +
+        '</div>';
+
+      self.open({
+        title: '',
+        type: 'prompt',
+        buttons: [
+          {
+            title: self.editor.getLang('cancel', 'Cancel'),
+            id: 'cancel'
+          },
+          {
+            title: self.editor.getLang('ok', 'Ok'),
+            id: 'ok',
+            classes: 'primary',
+            autofocus: true,
+            onsubmit: function () {
+              var value = DOM.getValue(self.editor.id + '_prompt_input');
+
+              if (cb) {
+                cb.call(s || self, value);
+              }
+            }
+          }
+        ],
+        content: html
+      });
+    },
+
     /**
      * Resizes the specified window or id.
      *
