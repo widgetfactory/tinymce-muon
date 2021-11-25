@@ -321,7 +321,7 @@
       // to parse and process the parent it's inserted into
 
       // Insert bookmark node and get the parent
-      selection.setContent(bookmarkHtml);
+      selection.setContent(bookmarkHtml, { no_events : true });
       parentNode = selection.getNode();
       rootNode = editor.getBody();
 
