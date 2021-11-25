@@ -1006,7 +1006,7 @@ tinymce.util.Quirks = function (editor) {
       if (!isDefaultPrevented(e) && isSelectionAcrossElements()) {
         applyAttributes = getAttributeApplyFunction();
 
-        setTimeout(editor, function () {
+        setTimeout(function () {
           applyAttributes();
         }, 0);
       }
