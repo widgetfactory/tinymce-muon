@@ -142,7 +142,7 @@
       }
 
       if ($lastVisualCaret) {
-        $lastVisualCaret.remove();
+        DOM.remove($lastVisualCaret);
         $lastVisualCaret = null;
       }
 
