@@ -847,6 +847,10 @@
           hideFakeCaret();
         }
 
+        if (rng.startContainer.parentNode == rootNode) {
+          return;
+        }
+
         if (!isFakeSelectionElement(rng.startContainer.parentNode)) {
           removeContentEditableSelection();
         }
