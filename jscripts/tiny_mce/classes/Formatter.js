@@ -677,6 +677,10 @@
           function process(node) {
             var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
 
+            if (isBogusBr(node) || isCaretNode(node)) {
+              return;
+            }
+
             lastContentEditable = contentEditable;
             nodeName = node.nodeName.toLowerCase();
             parentName = node.parentNode.nodeName.toLowerCase();
