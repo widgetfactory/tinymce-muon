@@ -299,8 +299,10 @@
         ed = self.editor;
 
       s = tinymce.extend({
-        filter: true,
-        max_height: 384
+        max_height: 384,
+        combobox: true,
+        multiple: true,
+        seperator: ' '
       }, s || {});
 
       function loadClasses(ctrl) {
