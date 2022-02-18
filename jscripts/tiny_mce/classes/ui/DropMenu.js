@@ -468,11 +468,6 @@
         self.clearFilterInput(true);
       }
 
-      // destroy keyboard nav
-      if (self.keyboardNav) {
-        self.keyboardNav.destroy();
-      }
-
       Event.remove(co, 'click', self.mouseClickFunc);
       Event.remove(co, 'keydown', self._keyDownHandler);
       Event.remove(co, 'keyup', self._keyUpHandler);
