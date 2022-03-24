@@ -521,7 +521,7 @@
 
       if (formatList) {
         for (var i = 0; i < formatList.length; i++) {
-          if (formatList[i].inherit === false && dom.is(node, formatList[i].selector)) {
+          if (formatList[i].inherit === false && formatList[i].selector && dom.is(node, formatList[i].selector)) {
             return true;
           }
         }
@@ -900,9 +900,9 @@
         node = selection.getNode();
 
         for (var i = 0, l = formatList.length; i < l; i++) {
-          if ((formatList[i].ceFalseOverride) && dom.is(node, formatList[i].selector)) {
+          if ((formatList[i].ceFalseOverride) && formatList[i].selector && dom.is(node, formatList[i].selector)) {
             setElementFormat(node, formatList[i]);
-            return;
+            return true;
           }
         }
 
