@@ -2046,6 +2046,13 @@
         self.hasVisual = settings.visual;
       }
 
+      // add visualaid class to editor body
+      if (self.hasVisual) {
+        dom.addClass(self.getBody(), 'mce-visualaid');
+      } else {
+        dom.removeClass(self.getBody(), 'mce-visualaid');
+      }
+
       each(dom.select('table,a', elm), function (elm) {
         var value;
 
