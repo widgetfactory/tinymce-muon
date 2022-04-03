@@ -922,56 +922,6 @@
 			}
 		}
 
-		var timer;
-
-		function nodeChanged(ed, e) {
-			if (timer) {
-				clearTimeout(timer);
-			}
-
-			// Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
-			if (e.keyCode != 65 || !tinymce.VK.metaKeyPressed(e)) {
-				self.selection.normalize();
-			}
-
-			self.nodeChanged();
-		}
-
-		var lastPath = [];
-
-		/**
-		 * Returns true/false if the current element path has been changed or not.
-		 *
-		 * @private
-		 * @return {Boolean} True if the element path is the same false if it's not.
-		 */
-		function isSameElementPath(ed, startElm) {
-			var i, currentPath;
-
-			currentPath = ed.dom.getParents(startElm, '*', ed.getBody());
-
-			if (tinymce.inArray(currentPath, startElm) === -1) {
-				currentPath.push(startElm);
-			}
-
-			if (currentPath.length === lastPath.length) {
-				for (i = currentPath.length; i >= 0; i--) {
-					if (currentPath[i] !== lastPath[i]) {
-						break;
-					}
-				}
-
-				if (i === -1) {
-					lastPath = currentPath;
-					return true;
-				}
-			}
-
-			lastPath = currentPath;
-
-			return false;
-		}
-
 		// Add DOM events
 		each(nativeToDispatcherMap, function (dispatcherName, nativeName) {
 			var root = settings.content_editable ? self.getBody() : self.getDoc();
@@ -1013,44 +963,6 @@
 		dom.bind(getFocusTarget(), 'focus', function () {
 			self.focus(true);
 		});
-
-		// Selection change is delayed ~200ms on IE when you click inside the current range
-		self.onSelectionChange.add(function (ed, e) {
-			var startElm = ed.selection.getStart(true);
-
-			// it seems to be necessary to prefill this value with the current element before checking isSameElementPath...?
-			//lastPath = [startElm];
-
-			if (!isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
-				nodeChanged(ed, e);
-			}
-		});
-
-		// Fire an extra nodeChange on mouseup for compatibility reasons
-		self.onMouseUp.add(function (ed, e) {
-			if (!e.isDefaultPrevented()) {
-				// Delay nodeChanged call for WebKit edge case issue where the range
-				// isn't updated until after you click outside a selected image
-				if (ed.selection.getNode().nodeName == 'IMG') {
-					timer = setTimeout(function () {
-						nodeChanged(ed, e);
-					}, 0);
-				} else {
-					nodeChanged(ed, e);
-				}
-			}
-		});
-
-		// Add node change handler
-		//self.onMouseUp.add(nodeChanged);
-
-		/*self.onKeyUp.add(function (ed, e) {
-				var keyCode = e.keyCode;
-	
-				if ((keyCode >= 33 && keyCode <= 36) || (keyCode >= 37 && keyCode <= 40) || keyCode == 13 || keyCode == 45 || keyCode == 46 || keyCode == 8 || (tinymce.isMac && (keyCode == 91 || keyCode == 93)) || e.ctrlKey) {
-					nodeChanged(ed, e);
-				}
-			});*/
 
 		// Add reset handler
 		self.onReset.add(function () {
