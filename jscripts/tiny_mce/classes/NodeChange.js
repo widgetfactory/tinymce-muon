@@ -64,11 +64,11 @@
     }
 
     tinymce.NodeChange = function (editor) {
+
         // Selection change is delayed ~200ms on IE when you click inside the current range
         editor.onSelectionChange.add(function (ed, e) {
             var startElm = ed.selection.getStart(true);
 
-            // prefill this value with the current element before checking isSameElementPath
             lastPath = [startElm];
 
             if (!isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
