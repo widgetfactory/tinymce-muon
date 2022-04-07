@@ -1577,21 +1577,17 @@ tinymce.util.Quirks = function (editor) {
     function isBr(node) {
       return node && node.nodeType == 1 && node.nodeName == 'BR';
     }
+
+    function isRootNode(node) {
+      return node == editor.getBody() || isFakeRoot(node);
+    }
     
-    function isOnlyChild(node) {
+    function isLastChild(node) {
       var parent = node.parentNode;
 
-      if (parent == editor.getBody() || isFakeRoot(parent)) {
+      if (isRootNode(parent)) {
         return true;
       }
-
-      /*if (parent.firstChild == parent.lastChild) {
-        return true;
-      }
-
-      if (parent.firstChild == node && isBr(parent.lastChild)) {
-        return true;
-      }*/
 
       if (node == parent.lastChild) {
         return true;
@@ -1602,6 +1598,14 @@ tinymce.util.Quirks = function (editor) {
       }
 
       return false;
+    }
+
+    function isEmpty(node) {
+      if (!node) {
+        return false;
+      }
+      // is linebreak or empty whitespace text node
+      return isBr(node) || (node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
     }
 
     function moveCursorToEnd(e) {
@@ -1617,7 +1621,7 @@ tinymce.util.Quirks = function (editor) {
         return;
       }
 
-      if (!isOnlyChild(node) && !isBr(node.nextSibling)) {
+      if (!isLastChild(node) && !isEmpty(node.nextSibling)) {
         return;
       }
 
@@ -1627,10 +1631,14 @@ tinymce.util.Quirks = function (editor) {
         if (text && text.length && rng.startOffset == text.length) {
           var marker = dom.create('span', { 'data-mce-type': "bookmark" }, '\uFEFF');
 
-          if (dom.isBlock(node.parentNode) && isOnlyChild(node)) {
-            dom.add(node.parentNode, marker);
+          if (dom.isBlock(node.parentNode) && isLastChild(node)) {
+            node.parentNode.appendChild(marker);
           } else {
-            dom.insertAfter(marker, node);
+            // edge case for forced_root_block:false - some text <a href="link.html">link</a><br />
+            if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
+              node = node.nextSibling;
+            }
+            node.insertAdjacentElement('afterend', marker);
           }
 
           // Move the caret to the end of the marker
