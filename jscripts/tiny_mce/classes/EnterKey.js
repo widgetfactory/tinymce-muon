@@ -350,6 +350,7 @@
 
         // Not in a block element or in a table cell or caption
         parentBlock = dom.getParent(container, dom.isBlock);
+
         if (!parentBlock || !canSplitBlock(parentBlock)) {
           parentBlock = parentBlock || editableRoot;
 
@@ -506,9 +507,15 @@
         var root = dom.getRoot(),
           parent, editableRoot;
 
+          if (!editor.settings.forced_root_block && editor.settings.fake_root_block) {
+            root = dom.get(editor.settings.fake_root_block) || root;
+          }
+
         // Get all parents until we hit a non editable parent or the root
         parent = node;
-        while (parent !== root && dom.getContentEditable(parent) !== "false") {
+
+        while (parent && parent !== root && dom.getContentEditable(parent) !== "false") {
+          
           if (dom.getContentEditable(parent) === "true") {
             editableRoot = parent;
           }
