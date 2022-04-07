@@ -22,12 +22,12 @@
   }
 
   /**
-     * Builds a schema lookup table
-     *
-     * @private
-     * @param {String} type html4, html5 or html5-strict schema type.
-     * @return {Object} Schema lookup table.
-     */
+   * Builds a schema lookup table
+   *
+   * @private
+   * @param {String} type html4, html5 or html5-strict schema type.
+   * @return {Object} Schema lookup table.
+   */
   function compileSchema(type) {
     var schema = {},
       globalAttributes, blockContent;
@@ -107,16 +107,16 @@
 
     // global event attributes
     eventAttributes = split("onclick ondblclick onmousedown " +
-            "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup");
+      "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup");
 
     // html5 mouse events
     if (type != "html4") {
       eventAttributes.push.apply(eventAttributes, split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
-                "ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
-                "onerror onfocus oninput oninvalid onload onloadeddata onloadedmetadata onloadstart " +
-                "onmouseenter onmouseleave onmousewheel onpause onplay onplaying onprogress onratechange " +
-                "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
-                "onwaiting onwheel"));
+        "ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
+        "onerror onfocus oninput oninvalid onload onloadeddata onloadedmetadata onloadstart " +
+        "onmouseenter onmouseleave onmousewheel onpause onplay onplaying onprogress onratechange " +
+        "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
+        "onwaiting onwheel"));
     }
 
     // Event attributes can be opt-in/opt-out
@@ -136,17 +136,17 @@
     // Phrasing content elements from the HTML5 spec (inline)
     phrasingContent = split(
       "a abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
-            "label map noscript object q s samp script select small span strong sub sup " +
-            "textarea u var link style #text #comment"
+      "label map noscript object q s samp script select small span strong sub sup " +
+      "textarea u var link style #text #comment"
     );
 
     // Add HTML5 items to globalAttributes, blockContent, phrasingContent
     if (type != "html4") {
       globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
-                "hidden spellcheck translate"));
-      blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
+        "hidden spellcheck translate"));
+      blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav main"));
       phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
-                "progress time wbr video ruby bdi keygen"));
+        "progress time wbr video ruby bdi keygen"));
     }
 
     // Add HTML4 elements unless it's html5-strict
@@ -174,6 +174,8 @@
     // Flow content elements from the HTML5 spec (block+inline)
     flowContent = flowContent || [].concat(blockContent, phrasingContent);
 
+    var bodyContent = [].concat(flowContent, ['main']);
+
     // HTML4 base schema TODO: Move HTML5 specific attributes to HTML5 specific if statement
     // Schema items <element name>, <specific attributes>, <children ..>
     add("html", "manifest", "head body");
@@ -185,8 +187,8 @@
     add("style", "media type scoped");
     add("script", "src async defer type charset");
     add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
-            "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
-            "onpopstate onresize onscroll onstorage onunload", flowContent);
+      "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
+      "onpopstate onresize onscroll onstorage onunload", bodyContent);
     add("address dt dd div caption", "", flowContent);
     add("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", phrasingContent);
     add("blockquote", "cite", flowContent);
@@ -215,7 +217,7 @@
     add("fieldset", "disabled form name", flowContent, "legend");
     add("label", "form for", phrasingContent);
     add("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate " +
-            "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
+      "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
     );
     add("button", "disabled form formaction formenctype formmethod formnovalidate formtarget name type value",
       type == "html4" ? flowContent : phrasingContent);
@@ -226,6 +228,8 @@
     add("menu", "type label", flowContent, "li");
     add("noscript", "", flowContent);
 
+    add("main", "", flowContent);
+
     // Extend with HTML5 elements
     if (type != "html4") {
       add("wbr");
@@ -234,7 +238,7 @@
       add("mark rt rp summary bdi", "", phrasingContent);
       add("canvas", "width height", flowContent);
       add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-                "muted controls width height buffered controlslist playsinline", flowContent, "track source");
+        "muted controls width height buffered controlslist playsinline", flowContent, "track source");
       add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
       add("picture", "", "img source");
       add("source", "src srcset type media sizes");
@@ -316,9 +320,9 @@
 
       // media events
       addAttrs("video audio", "onabort oncanplay oncanplaythrough ondurationchange onemptied onended " +
-                "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
-                "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
-                "onvolumechange onwaiting");
+        "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
+        "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
+        "onvolumechange onwaiting");
     }
 
     // Special: iframe, ruby, video, audio, label
@@ -371,12 +375,12 @@
   }
 
   /**
-     * Constructs a new Schema instance.
-     *
-     * @constructor
-     * @method Schema
-     * @param {Object} settings Name/value settings object.
-     */
+   * Constructs a new Schema instance.
+   *
+   * @constructor
+   * @method Schema
+   * @param {Object} settings Name/value settings object.
+   */
   tinymce.html.Schema = function (settings) {
     var self = this,
       elements = {},
@@ -426,19 +430,19 @@
     whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object');
     selfClosingElementsMap = createLookupTable('self_closing_elements', 'colgroup dd dt li option p td tfoot th thead tr');
     shortEndedElementsMap = createLookupTable('short_ended_elements', 'area base basefont br col frame hr img input isindex link ' +
-            'meta param embed source wbr track');
+      'meta param embed source wbr track');
     boolAttrMap = createLookupTable('boolean_attributes', 'async checked compact declare defer disabled ismap multiple nohref noresize ' +
-            'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen');
+      'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen');
 
     nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script pre code', shortEndedElementsMap);
     moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
     textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
-            'blockquote center dir fieldset header footer article section hgroup aside nav figure');
+      'blockquote center dir fieldset header footer article section hgroup aside nav figure');
     blockElementsMap = createLookupTable('block_elements', 'hr table tbody thead tfoot ' +
-            'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
-            'datalist select optgroup', textBlockElementsMap);
+      'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
+      'datalist select optgroup', textBlockElementsMap);
     textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
-            'dfn code mark q sup sub samp');
+      'dfn code mark q sup sub samp');
 
     each((settings.special || 'script noscript iframe noframes noembed title style textarea xmp').split(' '), function (name) {
       specialElements[name] = new RegExp('<\/' + name + '[^>]*>', 'gi');
@@ -754,7 +758,7 @@
       });
 
       // Padd these by default
-      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
+      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption main'), function (name) {
         elements[name].paddEmpty = true;
       });
 
@@ -797,160 +801,160 @@
     }
 
     /**
-         * Name/value map object with valid parents and children to those parents.
-         *
-         * @example
-         * children = {
-         *    div:{p:{}, h1:{}}
-         * };
-         * @field children
-         * @type Object
-         */
+     * Name/value map object with valid parents and children to those parents.
+     *
+     * @example
+     * children = {
+     *    div:{p:{}, h1:{}}
+     * };
+     * @field children
+     * @type Object
+     */
     self.children = children;
 
     /**
-         * Name/value map object with valid styles for each element.
-         *
-         * @method getValidStyles
-         * @type Object
-         */
+     * Name/value map object with valid styles for each element.
+     *
+     * @method getValidStyles
+     * @type Object
+     */
     self.getValidStyles = function () {
       return validStyles;
     };
 
     /**
-         * Name/value map object with valid styles for each element.
-         *
-         * @method getInvalidStyles
-         * @type Object
-         */
+     * Name/value map object with valid styles for each element.
+     *
+     * @method getInvalidStyles
+     * @type Object
+     */
     self.getInvalidStyles = function () {
       return invalidStyles;
     };
 
     /**
-         * Name/value map object with valid classes for each element.
-         *
-         * @method getValidClasses
-         * @type Object
-         */
+     * Name/value map object with valid classes for each element.
+     *
+     * @method getValidClasses
+     * @type Object
+     */
     self.getValidClasses = function () {
       return validClasses;
     };
 
     /**
-         * Returns a map with boolean attributes.
-         *
-         * @method getBoolAttrs
-         * @return {Object} Name/value lookup map for boolean attributes.
-         */
+     * Returns a map with boolean attributes.
+     *
+     * @method getBoolAttrs
+     * @return {Object} Name/value lookup map for boolean attributes.
+     */
     self.getBoolAttrs = function () {
       return boolAttrMap;
     };
 
     /**
-         * Returns a map with block elements.
-         *
-         * @method getBlockElements
-         * @return {Object} Name/value lookup map for block elements.
-         */
+     * Returns a map with block elements.
+     *
+     * @method getBlockElements
+     * @return {Object} Name/value lookup map for block elements.
+     */
     self.getBlockElements = function () {
       return blockElementsMap;
     };
 
     /**
-         * Returns a map with text block elements. Such as: p,h1-h6,div,address
-         *
-         * @method getTextBlockElements
-         * @return {Object} Name/value lookup map for block elements.
-         */
+     * Returns a map with text block elements. Such as: p,h1-h6,div,address
+     *
+     * @method getTextBlockElements
+     * @return {Object} Name/value lookup map for block elements.
+     */
     self.getTextBlockElements = function () {
       return textBlockElementsMap;
     };
 
     /**
-         * Returns a map of inline text format nodes for example strong/span or ins.
-         *
-         * @method getTextInlineElements
-         * @return {Object} Name/value lookup map for text format elements.
-         */
+     * Returns a map of inline text format nodes for example strong/span or ins.
+     *
+     * @method getTextInlineElements
+     * @return {Object} Name/value lookup map for text format elements.
+     */
     self.getTextInlineElements = function () {
       return textInlineElementsMap;
     };
 
     /**
-         * Returns a map with short ended elements such as BR or IMG.
-         *
-         * @method getShortEndedElements
-         * @return {Object} Name/value lookup map for short ended elements.
-         */
+     * Returns a map with short ended elements such as BR or IMG.
+     *
+     * @method getShortEndedElements
+     * @return {Object} Name/value lookup map for short ended elements.
+     */
     self.getShortEndedElements = function () {
       return shortEndedElementsMap;
     };
 
     /**
-         * Returns a map with self closing tags such as <li>.
-         *
-         * @method getSelfClosingElements
-         * @return {Object} Name/value lookup map for self closing tags elements.
-         */
+     * Returns a map with self closing tags such as <li>.
+     *
+     * @method getSelfClosingElements
+     * @return {Object} Name/value lookup map for self closing tags elements.
+     */
     self.getSelfClosingElements = function () {
       return selfClosingElementsMap;
     };
 
     /**
-         * Returns a map with elements that should be treated as contents regardless if it has text
-         * content in them or not such as TD, VIDEO or IMG.
-         *
-         * @method getNonEmptyElements
-         * @return {Object} Name/value lookup map for non empty elements.
-         */
+     * Returns a map with elements that should be treated as contents regardless if it has text
+     * content in them or not such as TD, VIDEO or IMG.
+     *
+     * @method getNonEmptyElements
+     * @return {Object} Name/value lookup map for non empty elements.
+     */
     self.getNonEmptyElements = function () {
       return nonEmptyElementsMap;
     };
 
     /**
-         * Returns a map with elements that the caret should be moved in front of after enter is
-         * pressed
-         *
-         * @method getMoveCaretBeforeOnEnterElements
-         * @return {Object} Name/value lookup map for elements to place the caret in front of.
-         */
+     * Returns a map with elements that the caret should be moved in front of after enter is
+     * pressed
+     *
+     * @method getMoveCaretBeforeOnEnterElements
+     * @return {Object} Name/value lookup map for elements to place the caret in front of.
+     */
     self.getMoveCaretBeforeOnEnterElements = function () {
       return moveCaretBeforeOnEnterElementsMap;
     };
 
     /**
-         * Returns a map with elements where white space is to be preserved like PRE or SCRIPT.
-         *
-         * @method getWhiteSpaceElements
-         * @return {Object} Name/value lookup map for white space elements.
-         */
+     * Returns a map with elements where white space is to be preserved like PRE or SCRIPT.
+     *
+     * @method getWhiteSpaceElements
+     * @return {Object} Name/value lookup map for white space elements.
+     */
     self.getWhiteSpaceElements = function () {
       return whiteSpaceElementsMap;
     };
 
     /**
-         * Returns a map with special elements. These are elements that needs to be parsed
-         * in a special way such as script, style, textarea etc. The map object values
-         * are regexps used to find the end of the element.
-         *
-         * @method getSpecialElements
-         * @return {Object} Name/value lookup map for special elements.
-         */
+     * Returns a map with special elements. These are elements that needs to be parsed
+     * in a special way such as script, style, textarea etc. The map object values
+     * are regexps used to find the end of the element.
+     *
+     * @method getSpecialElements
+     * @return {Object} Name/value lookup map for special elements.
+     */
     self.getSpecialElements = function () {
       return specialElements;
     };
 
     /**
-         * Returns true/false if the specified element and it's child is valid or not
-         * according to the schema.
-         *
-         * @method isValidChild
-         * @param {String} name Element name to check for.
-         * @param {String} child Element child to verify.
-         * @return {Boolean} True/false if the element is a valid child of the specified parent.
-         */
+     * Returns true/false if the specified element and it's child is valid or not
+     * according to the schema.
+     *
+     * @method isValidChild
+     * @param {String} name Element name to check for.
+     * @param {String} child Element child to verify.
+     * @return {Boolean} True/false if the element is a valid child of the specified parent.
+     */
     self.isValidChild = function (name, child) {
       var parent = children[name];
 
@@ -958,14 +962,14 @@
     };
 
     /**
-         * Returns true/false if the specified element name and optional attribute is
-         * valid according to the schema.
-         *
-         * @method isValid
-         * @param {String} name Name of element to check.
-         * @param {String} attr Optional attribute name to check for.
-         * @return {Boolean} True/false if the element and attribute is valid.
-         */
+     * Returns true/false if the specified element name and optional attribute is
+     * valid according to the schema.
+     *
+     * @method isValid
+     * @param {String} name Name of element to check.
+     * @param {String} attr Optional attribute name to check for.
+     * @return {Boolean} True/false if the element and attribute is valid.
+     */
     self.isValid = function (name, attr) {
       var attrPatterns, i, rule = getElementRule(name);
 
@@ -997,60 +1001,60 @@
     };
 
     /**
-         * Returns true/false if the specified element is valid or not
-         * according to the schema.
-         *
-         * @method getElementRule
-         * @param {String} name Element name to check for.
-         * @return {Object} Element object or undefined if the element isn't valid.
-         */
+     * Returns true/false if the specified element is valid or not
+     * according to the schema.
+     *
+     * @method getElementRule
+     * @param {String} name Element name to check for.
+     * @return {Object} Element object or undefined if the element isn't valid.
+     */
     self.getElementRule = getElementRule;
 
     /**
-         * Returns an map object of all custom elements.
-         *
-         * @method getCustomElements
-         * @return {Object} Name/value map object of all custom elements.
-         */
+     * Returns an map object of all custom elements.
+     *
+     * @method getCustomElements
+     * @return {Object} Name/value map object of all custom elements.
+     */
     self.getCustomElements = function () {
       return customElementsMap;
     };
 
     /**
-         * Parses a valid elements string and adds it to the schema. The valid elements
-         * format is for example "element[attr=default|otherattr]".
-         * Existing rules will be replaced with the ones specified, so this extends the schema.
-         *
-         * @method addValidElements
-         * @param {String} valid_elements String in the valid elements format to be parsed.
-         */
+     * Parses a valid elements string and adds it to the schema. The valid elements
+     * format is for example "element[attr=default|otherattr]".
+     * Existing rules will be replaced with the ones specified, so this extends the schema.
+     *
+     * @method addValidElements
+     * @param {String} valid_elements String in the valid elements format to be parsed.
+     */
     self.addValidElements = addValidElements;
 
     /**
-         * Parses a valid elements string and sets it to the schema. The valid elements
-         * format is for example "element[attr=default|otherattr]".
-         * Existing rules will be replaced with the ones specified, so this extends the schema.
-         *
-         * @method setValidElements
-         * @param {String} valid_elements String in the valid elements format to be parsed.
-         */
+     * Parses a valid elements string and sets it to the schema. The valid elements
+     * format is for example "element[attr=default|otherattr]".
+     * Existing rules will be replaced with the ones specified, so this extends the schema.
+     *
+     * @method setValidElements
+     * @param {String} valid_elements String in the valid elements format to be parsed.
+     */
     self.setValidElements = setValidElements;
 
     /**
-         * Adds custom non HTML elements to the schema.
-         *
-         * @method addCustomElements
-         * @param {String} custom_elements Comma separated list of custom elements to add.
-         */
+     * Adds custom non HTML elements to the schema.
+     *
+     * @method addCustomElements
+     * @param {String} custom_elements Comma separated list of custom elements to add.
+     */
     self.addCustomElements = addCustomElements;
 
     /**
-         * Parses a valid children string and adds them to the schema structure. The valid children
-         * format is for example: "element[child1|child2]".
-         *
-         * @method addValidChildren
-         * @param {String} valid_children Valid children elements string to parse
-         */
+     * Parses a valid children string and adds them to the schema structure. The valid children
+     * format is for example: "element[child1|child2]".
+     *
+     * @method addValidChildren
+     * @param {String} valid_children Valid children elements string to parse
+     */
     self.addValidChildren = addValidChildren;
 
     self.elements = elements;
