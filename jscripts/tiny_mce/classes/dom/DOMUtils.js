@@ -160,7 +160,7 @@
       var self = this,
         s = self.settings;
 
-      return (s && self.get(s.root_element)) || self.doc.body;
+        return (s && self.get(s.root_element)) || self.doc.body;
     },
 
     /**
@@ -2225,7 +2225,7 @@
       var contentEditable;
 
       // Check type
-      if (node.nodeType != 1) {
+      if (!node || node.nodeType != 1) {
         return null;
       }
 
