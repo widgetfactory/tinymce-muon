@@ -833,7 +833,9 @@
 
       var item = DOM.add(menu, 'div', {
         id: o.id,
-        'class': cp + 'Item ' + cp + 'ItemEnabled'
+        'class': cp + 'Item ' + cp + 'ItemEnabled',
+        title: o.settings.title,
+        'aria-label': o.settings.title
       });
 
       if (s.html) {
@@ -865,8 +867,7 @@
 
         var txt = DOM.add(item, s.element || 'span', {
           'class': 'mceText',
-          title: o.settings.title,
-          'aria-label': o.settings.title
+          role: 'presentation'
         }, o.settings.title);
 
         if (o.settings.style) {
