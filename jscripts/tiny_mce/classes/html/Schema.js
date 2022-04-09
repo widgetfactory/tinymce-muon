@@ -144,7 +144,7 @@
     if (type != "html4") {
       globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
         "hidden spellcheck translate"));
-      blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav main"));
+      blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
       phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
         "progress time wbr video ruby bdi keygen"));
     }
@@ -174,8 +174,6 @@
     // Flow content elements from the HTML5 spec (block+inline)
     flowContent = flowContent || [].concat(blockContent, phrasingContent);
 
-    var bodyContent = [].concat(flowContent, ['main']);
-
     // HTML4 base schema TODO: Move HTML5 specific attributes to HTML5 specific if statement
     // Schema items <element name>, <specific attributes>, <children ..>
     add("html", "manifest", "head body");
@@ -188,7 +186,7 @@
     add("script", "src async defer type charset");
     add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
       "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
-      "onpopstate onresize onscroll onstorage onunload", bodyContent);
+      "onpopstate onresize onscroll onstorage onunload", flowContent);
     add("address dt dd div caption", "", flowContent);
     add("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", phrasingContent);
     add("blockquote", "cite", flowContent);
@@ -227,8 +225,6 @@
     add("textarea", "cols dirname disabled form maxlength name readonly required rows wrap");
     add("menu", "type label", flowContent, "li");
     add("noscript", "", flowContent);
-
-    add("main", "", flowContent);
 
     // Extend with HTML5 elements
     if (type != "html4") {
@@ -758,7 +754,7 @@
       });
 
       // Padd these by default
-      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption main'), function (name) {
+      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
         elements[name].paddEmpty = true;
       });
 
