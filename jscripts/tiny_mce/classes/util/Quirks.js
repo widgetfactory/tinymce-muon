@@ -27,9 +27,6 @@ tinymce.util.Quirks = function (editor) {
   var mceInternalUrlPrefix = 'data:text/mce-internal,';
   var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
 
-  function isFakeRoot(node) {
-    return node.nodeType == 1 && node.hasAttribute('data-mce-root');
-  }
   /**
    * Executes a command with a specific state this can be to enable/disable browser editing features.
    */
@@ -839,11 +836,11 @@ tinymce.util.Quirks = function (editor) {
         // Selection is collapsed but the editor isn't empty
         if (isCollapsed && !dom.isEmpty(body)) {
 
-          if (!isFakeRoot(body.firstChild)) {
+          if (!tinymce.util.isFakeRoot(body.firstChild)) {
             return;
           }
 
-          if (isFakeRoot(body.firstChild) && !dom.isEmpty(body.firstChild)) {
+          if (tinymce.util.isFakeRoot(body.firstChild) && !dom.isEmpty(body.firstChild)) {
             return;
           }
         }
@@ -1532,46 +1529,6 @@ tinymce.util.Quirks = function (editor) {
     editor.onMouseUp.add(normalize);
   }
 
-  function fakeRootBlock() {
-    settings.fake_root_block = 'rootblock';
-
-    editor.onBeforeSetContent.add(function (editor, o) {
-      if (!o.content) {
-        o.content = '<br data-mce-bogus="1">';
-      }
-
-      o.content = '<main id="' + settings.fake_root_block + '" data-mce-root="1">' + o.content + '</main>';
-    });
-
-    editor.onSetContent.add(function () {
-      var root = dom.get(settings.fake_root_block), rng;
-
-      if (root) {
-        // Move the caret to the end of the marker
-        rng = dom.createRng();
-        rng.setStart(root, 0);
-        rng.setEnd(root, 0);
-        selection.setRng(rng);
-      }
-    });
-
-    editor.serializer.addAttributeFilter('data-mce-root', function (nodes) {
-      var i = nodes.length;
-
-      while (i--) {
-        nodes[i].unwrap();
-      }
-    });
-
-    editor.serializer.addAttributeFilter('data-mce-bogus', function (nodes) {
-      var i = nodes.length;
-
-      while (i--) {
-        nodes[i].remove();
-      }
-    });
-  }
-
   function inlineBoundary() {
 
     function isBr(node) {
@@ -1579,7 +1536,7 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function isRootNode(node) {
-      return node == editor.getBody() || isFakeRoot(node);
+      return node == editor.getBody() || tinymce.util.isFakeRoot(node);
     }
     
     function isLastChild(node) {
@@ -1601,17 +1558,14 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function isEmpty(node) {
-      if (!node) {
-        return false;
-      }
       // is linebreak or empty whitespace text node
-      return isBr(node) || (node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
+      return isBr(node) || (node && node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
     }
 
     function moveCursorToEnd(e) {
       var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
-      if (!node || node === editor.getBody()) {
+      if (!node || node == editor.getBody()) {
         return;
       }
 
@@ -1625,7 +1579,7 @@ tinymce.util.Quirks = function (editor) {
         return;
       }
 
-      if (container.nodeType === 3 && dom.isChildOf(container, node.lastChild)) {
+      if (container.nodeType == 3 && dom.isChildOf(container, node.lastChild)) {
         var text = container.data;
 
         if (text && text.length && rng.startOffset == text.length) {
@@ -1676,10 +1630,6 @@ tinymce.util.Quirks = function (editor) {
   emptyEditorWhenDeleting();
 
   inlineBoundary();
-
-  if (editor.settings.forced_root_block == false && editor.settings.fake_root_block != false) {
-    fakeRootBlock();
-  }
 
   // WebKit
   if (tinymce.isWebKit) {
