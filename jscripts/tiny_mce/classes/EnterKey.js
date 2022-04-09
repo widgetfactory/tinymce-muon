@@ -36,10 +36,10 @@
       // Returns true if the block can be split into two blocks or not
       function canSplitBlock(node) {
         return node &&
-                    dom.isBlock(node) &&
-                    !/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
-                    !/^(fixed|absolute)/i.test(node.style.position) &&
-                    dom.getContentEditable(node) !== "true";
+          dom.isBlock(node) &&
+          !/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
+          !/^(fixed|absolute)/i.test(node.style.position) &&
+          dom.getContentEditable(node) !== "true";
       }
 
       function isTableCell(node) {
@@ -354,7 +354,8 @@
         if (!parentBlock || !canSplitBlock(parentBlock)) {
           parentBlock = parentBlock || editableRoot;
 
-          if (parentBlock == editor.getBody() || isTableCell(parentBlock)) {
+          // check if parentBlock is root, ie: <body> or fake root
+          if (parentBlock == editableRoot || isTableCell(parentBlock)) {
             rootBlockName = parentBlock.nodeName.toLowerCase();
           } else {
             rootBlockName = parentBlock.parentNode.nodeName.toLowerCase();
@@ -507,15 +508,14 @@
         var root = dom.getRoot(),
           parent, editableRoot;
 
-          if (!editor.settings.forced_root_block && editor.settings.fake_root_block) {
-            root = dom.get(editor.settings.fake_root_block) || root;
-          }
+        // use optional editable root or body
+        root = dom.get(editor.settings.editable_root) || root;
 
         // Get all parents until we hit a non editable parent or the root
         parent = node;
 
         while (parent && parent !== root && dom.getContentEditable(parent) !== "false") {
-          
+
           if (dom.getContentEditable(parent) === "true") {
             editableRoot = parent;
           }
@@ -630,6 +630,7 @@
 
       // Find parent block and setup empty block paddings
       parentBlock = dom.getParent(container, dom.isBlock);
+
       containerBlock = parentBlock ? dom.getParent(parentBlock.parentNode, dom.isBlock) : null;
 
       // Setup block names
