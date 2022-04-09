@@ -744,7 +744,8 @@
               !isCaretNode(node) &&
               !isBogusBr(node) &&
               (!format.inline || !isBlock(node))) {
-              // Start wrapping
+                            
+                // Start wrapping
               if (!currentWrapElm) {
                 // Wrap the node
                 currentWrapElm = dom.clone(wrapElm, FALSE);
