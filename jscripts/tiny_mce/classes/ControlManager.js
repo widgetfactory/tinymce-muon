@@ -172,7 +172,10 @@
 
       s["class"] += ' ' + (ed.settings.skin_class || 'mceDefaultSkin');
 
-      id = self.prefix + id;
+      if (id.indexOf(self.prefix) == -1) {
+        id = self.prefix + id;
+      }
+
       cls = cc || self._cls.dropmenu || tinymce.ui.DropMenu;
       c = self.controls[id] = new cls(id, s);
 
