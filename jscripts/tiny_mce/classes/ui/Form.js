@@ -97,6 +97,13 @@
       }
 
       this.controls = [];
+      this.lookup = {};
+    },
+
+    add: function (ctrl) {
+      if (!this.get(ctrl.id)) {
+        this.parent(ctrl);
+      }
     },
 
     destroy: function () {
