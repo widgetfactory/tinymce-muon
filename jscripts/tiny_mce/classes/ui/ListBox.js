@@ -63,7 +63,7 @@
     17: 'ctrl',
     18: 'alt',
     27: 'esc',
-    32: 'space',
+    //32: 'space',
     37: 'left',
     39: 'right',
     13: 'enter',
@@ -142,6 +142,10 @@
       each(self.items, function (item) {
         item.selected = false;
       });
+
+      if (self.menu) {
+        self.menu.deselectAll();
+      }
     },
 
     /**
@@ -169,7 +173,7 @@
       }
 
       // used by fontselect etc.
-      if (values && typeof values == "function") {
+      if (typeof values == "function") {
         each(self.items, function (item, i) {
           if (values(item.value)) {
             self.selectByIndex(i);
@@ -195,9 +199,11 @@
       each(values, function (value) {
         var i = self.findItem(value);
 
-        // add a new custom combobox value
-        if (i == -1 && self.settings.combobox) {
-          i = self.add(value, value);
+        if (i == -1) {
+          // add a new custom combobox value
+          if (self.settings.combobox) {
+            i = self.add(value, value);
+          }
         }
 
         self.selectByIndex(i);
@@ -251,12 +257,18 @@
 
         if (item.selected) {
           this.selectedValue = item.value;
+        } else {
+          this.selectedValue = null;
         }
 
         if (!this.settings.combobox) {
           DOM.setHTML(elm, DOM.encode(item.title));
           DOM.removeClass(elm, 'mceTitle');
           DOM.setAttrib(this.id, 'aria-valuenow', item.title);
+        }
+
+        if (self.menu) {          
+          self.menu.selectItem(self.menu.items[item.id], item.selected);
         }
 
       } else {
@@ -392,9 +404,13 @@
     removeTag: function (btn) {
       var self = this;
 
-      each(self.items, function (item) {
+      each(self.items, function (item, i) {
         if (item.value === btn.value) {
           item.selected = false;
+
+          if (self.selectedValue == item.value) {
+            self.selectedValue = null;
+          }
         }
       });
 
@@ -422,7 +438,6 @@
         }
 
         self.removeTag(btn);
-
       });
     },
 
@@ -462,7 +477,7 @@
       // Select in menu
       each(this.items, function (item) {
         if (menu.items[item.id]) {
-          // deselect item
+          // deselect all items
           menu.items[item.id].setSelected(0);
 
           // select if value match or selected
@@ -524,6 +539,7 @@
         onselect: function (value) {
           if (self.settings.onselect(value) !== false) {
             self.select(value);
+            menu.close();
           }
         }
       });
@@ -547,22 +563,25 @@
           menu.add({
             title: item.title,
             role: "option",
-            onclick: function () {
+            onAction: function (e) {
               if (self.settings.onselect('') !== false) {
                 self.select('');
-              } // Must be run after
+              }
+
+              menu.close();
             }
           });
         } else {
           item.id = DOM.uniqueId();
           item.role = "option";
-          item.onclick = function () {
-            // execute onselect
-            var onselect = self.settings.onselect(item.value);
-
-            if (onselect !== false) {
+          item.onAction = function (e) {
+            if (self.settings.onselect(item.value) !== false) {
               self.select(item.value);
-            } // Must be run after
+            }
+
+            if (!self.settings.multiple && !self.settings.keepopen) {
+              menu.close();
+            }
           };
 
           menu.add(item);
@@ -617,14 +636,8 @@
 
       Event.add(this.id + '_input', 'keyup', function (evt) {
 
-        if (!self.menu || !self.menu.isMenuVisible) {
-          self.showMenu();
-        }
-
         setTimeout(function () {
           var value = evt.target.value;
-
-          evt.target.focus();
 
           if (!value) {
             Event.cancel(evt);
@@ -633,7 +646,13 @@
           }
 
           if (!specialKeyCodeMap[evt.keyCode]) {
-            self.menu.filterItems(evt.target.value);
+            if (!self.menu || !self.menu.isMenuVisible) {
+              self.showMenu();
+            }
+
+            evt.target.focus();
+
+            self.menu.filterItems(value);
           }
         }, 0);
       });
@@ -647,7 +666,10 @@
             if (this.value === "") {
               self.showMenu();
             } else {
-              self.settings.onselect(this.value);
+              if (self.settings.onselect(this.value) !== false) {
+                self.select(this.value);
+              }
+
               self.hideMenu();
 
               this.value = "";
@@ -666,7 +688,21 @@
               return;
             }
 
-            Event.cancel(evt);
+            var tags = DOM.select('button', evt.target.parentNode);
+
+            if (tags.length) {
+              var tag = tags.pop(), val = tag.value;
+
+              // remove tag
+              self.removeTag(tag);
+
+              Event.cancel(evt);
+
+              // update value with tag value and focus
+              this.value = val;
+              this.focus();
+            }
+
             break;
         }
       });

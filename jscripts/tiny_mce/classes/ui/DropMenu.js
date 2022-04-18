@@ -114,9 +114,10 @@
       this.parent(id, s);
       this.onShowMenu = new tinymce.util.Dispatcher(this);
       this.onHideMenu = new tinymce.util.Dispatcher(this);
+      this.onFilterInput = new tinymce.util.Dispatcher(this);
       this.classPrefix = 'mceMenu';
 
-      // array of selected elements
+      // array of selected items
       this.selected = [];
     },
 
@@ -161,7 +162,7 @@
     update: function () {
       var self = this,
         s = self.settings,
-        m = DOM.get('menu_' + self.id);
+        m = DOM.get(self.id);
 
       if (s.max_width) {
         DOM.setStyle(m, 'width', s.max_width);
@@ -177,57 +178,27 @@
       p.scrollTop = el.offsetTop;
     },
 
-    selectItem: function (e, node) {
-      var self = this, dm, item = self.items[node.id];
+    deselectAll: function () {
+      var self = this;
 
-      if (!item) {
-        return;
-      }
-
-      if (item.isDisabled()) {
-        return;
-      }
-
-      var idx = tinymce.inArray(self.selected, node);
-
-      if (idx >= 0) {
-        self.selected.splice(idx, 1);
+      each(self.items, function (item) {
         item.setSelected(0);
+      });
+    },
+
+    selectItem: function (item, state) {
+      var self = this;
+
+      item.setSelected(state);
+
+      if (state) {
+        self.selected.push(item);
       } else {
-        self.selected.push(node);
-        item.setSelected(1);
-      }
+        var idx = tinymce.inArray(self.selected, item);
 
-      // trigger click event
-      if (item.settings.onclick) {
-        item.settings.onclick(e);
-      }
-
-      // update tags
-      if (self.settings.filter) {
-        // clear input
-        self.clearFilterInput(true);
-
-        // add tags
-        tinymce.each(self.selected, function (el) {
-          var item = self.items[el.id];
-
-          if (item) {
-            self.addFilterTag(item);
-          }
-        });
-
-        return item;
-      }
-
-      dm = self;
-
-      while (dm) {
-        if (dm.hideMenu) {
-          dm.hideMenu();
+        if (idx >= 0) {
+          self.selected.splice(idx, 1);
         }
-
-        dm = dm.settings.parent;
       }
 
       return item;
@@ -248,50 +219,18 @@
       return found;
     },
 
-    clearFilterInput: function (removetags) {
-      var self = this, input = DOM.select('input', 'menu_filter_input_' + self.id)[0];
+    clearFilterInput: function () {
+      var self = this, filter = DOM.get(self.id + '_filter'), input = DOM.select('input', self.id + '_filter_input')[0];
+
+      if (!filter) {
+        return;
+      }
 
       // find and clear input element
       input.value = '';
       input.focus();
 
       self.clearFilteredItems();
-
-      if (removetags) {
-        DOM.remove(DOM.select('button', 'menu_filter_' + self.id));
-      }
-    },
-
-    removeFilterTag: function (tag, item) {
-      var self = this;
-
-      DOM.remove(tag);
-
-      if (!item) {
-        item = self.findItem(tag.value);
-      }
-
-      if (item) {
-        var node = DOM.get(item.id);
-        self.selectItem({}, node);
-      }
-    },
-
-    addFilterTag: function (item) {
-      var self = this, value = item.settings.title;
-
-      var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', { 'class': 'mceButton', 'value': value }, '<label>' + value + '</label>');
-      DOM.insertBefore(btn, filter.lastChild);
-
-      Event.add(btn, 'click', function (evt) {
-        evt.preventDefault();
-
-        if (evt.target.nodeName === 'LABEL') {
-          return;
-        }
-
-        self.removeFilterTag(btn);
-      });
     },
 
     /**
@@ -324,7 +263,7 @@
           o.postRender();
         });
       } else {
-        co = DOM.get('menu_' + self.id);
+        co = DOM.get(self.id);
       }
 
       DOM.show(co);
@@ -362,12 +301,23 @@
         n = e.target;
 
         // cancel on input click
-        if (n.nodeName === "INPUT") {
+        if (n.nodeName == "INPUT") {
           return;
         }
 
         if (n && (n = DOM.getParent(n, '.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
-          self.selectItem(e, n);
+          var item = self.items[n.id];
+
+          if (!item || item.isDisabled()) {
+            return false;
+          }
+
+          if (item.settings.onAction) {
+            item.settings.onAction(e);
+          }
+
+          self.clearFilterInput();
+
           return false; // Cancel to fix onbeforeunload problem
         }
       });
@@ -414,25 +364,18 @@
       // scroll to selected item
       each(self.items, function (o) {
         if (o.selected) {
-          if (self.settings.filter) {
-            self.addFilterTag(o);
-          }
-
-          var el = DOM.get(o.id);
-
-          if (el) {
-            if (tinymce.inArray(self.selected, el) === -1) {
-              self.selected.push(el);
-            }
+          if (tinymce.inArray(self.selected, o) === -1) {
+            self.selected.push(o);
           }
         }
       });
 
       if (self.selected.length) {
-        self.scrollTo(self.selected[0]);
+        var el = DOM.get(self.selected[0].id);
+        self.scrollTo(el);
       } else {
         // reset scroll position
-        DOM.get('menu_' + self.id + '_items').scrollTop = 0;
+        DOM.get(self.id + '_items').scrollTop = 0;
       }
 
       if (s.keyboard_focus) {
@@ -441,7 +384,7 @@
 
       if (s.filter) {
         // focus input
-        var input = DOM.select('input', 'menu_filter_input_' + self.id);
+        var input = DOM.select('input', self.id + '_filter_input');
 
         if (input) {
           input[0].focus();
@@ -456,7 +399,7 @@
      */
     hideMenu: function (c) {
       var self = this,
-        co = DOM.get('menu_' + self.id),
+        co = DOM.get(self.id),
         e;
 
       if (!self.isMenuVisible) {
@@ -503,7 +446,7 @@
 
       o = self.parent(o);
 
-      if (self.isRendered && (co = DOM.get('menu_' + self.id + '_items'))) {
+      if (self.isRendered && (co = DOM.get(self.id + '_items'))) {
         self._add(co, o);
       }
 
@@ -520,6 +463,18 @@
       this.parent(d);
       this.hideMenu(1);
     },
+
+    close: function () {
+      var self = this, dm = self;
+
+      while (dm) {
+        if (dm.hideMenu) {
+          dm.hideMenu();
+        }
+
+        dm = dm.settings.parent;
+      }
+    },  
 
     /**
      * Removes a specific sub menu or menu item from the drop menu.
@@ -542,7 +497,7 @@
      */
     destroy: function () {
       var self = this,
-        co = DOM.get('menu_' + self.id);
+        co = DOM.get(self.id);
 
       if (self.keyboardNav) {
         self.keyboardNav.destroy();
@@ -569,23 +524,23 @@
 
       menu = DOM.create('div', {
         role: 'menu',
-        id: 'menu_' + self.id,
+        id: self.id,
         'class': s['class'] + ' ' + self.classPrefix
       });
 
       if (self.settings.parent) {
-        DOM.setAttrib(menu, 'aria-parent', 'menu_' + self.settings.parent.id);
+        DOM.setAttrib(menu, 'aria-parent', self.settings.parent.id);
       }
 
       // create autocomplete filter
       if (s.filter) {
         var filter = DOM.add(menu, 'div', {
-          id: 'menu_filter_' + self.id,
+          id: self.id + '_filter',
           'class': self.classPrefix + 'Filter'
         }, '');
 
         var filterInput = DOM.add(filter, 'div', {
-          id: 'menu_filter_input_' + self.id,
+          id: self.id + '_filter_input',
           'class': self.classPrefix + 'FilterInput'
         }, '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="..." />');
 
@@ -596,7 +551,7 @@
 
       items = DOM.add(menu, 'div', {
         role: 'presentation',
-        id: 'menu_' + self.id + '_items',
+        id: self.id + '_items',
         'class': self.classPrefix + 'Items'
       });
 
@@ -609,21 +564,28 @@
       return menu;
     },
 
+    selectAndClear : function (value) {
+      var self = this;
+
+      self.settings.onselect(value);
+      self.clearFilterInput();
+    },
+
     // Internal functions
     _setupKeyboardNav: function () {
       var contextMenu, menuItems, self = this;
-      contextMenu = DOM.get('menu_' + self.id);
+      contextMenu = DOM.get(self.id);
 
-      menuItems = DOM.select('div[role="option"]', 'menu_' + self.id);
+      menuItems = DOM.select('div[role="option"]', self.id);
       menuItems.splice(0, 0, contextMenu);
 
       self.keyboardNav = new tinymce.ui.KeyboardNavigation({
-        root: 'menu_' + self.id,
+        root: self.id,
         items: menuItems,
         onCancel: function () {
           self.hideMenu();
         },
-        onAction: function (e, id) {
+        onAction: function (e, id) {          
           // process filter value
           if (menuItems.length > 1) {
             if (e.target && e.target.nodeName === "INPUT") {
@@ -636,36 +598,29 @@
                   id = item.id;
                 } else {
                   id = DOM.uniqueId();
-
-                  item = {
+                  
+                  item = self.add({
                     id: id,
                     role: 'option',
                     title: val,
                     onclick: function () {
-                      self.settings.onselect(this.title);
+                      self.selectAndClear(this.settings.value);
                     }
-                  };
-
-                  self.add(item);
+                  });
                 }
               }
 
               // clear input
               e.target.value = '';
             }
-
-            var n = DOM.get(id);
-
-            if (n) {
-              self.selectItem(e, n);
-            }
-
           } else {
-            if (self.settings.onselect) {
-              self.settings.onselect(e.target);
-            }
-
             self.hideMenu();
+          }
+
+          item = item || self.items[id];
+
+          if (item && item.settings.value) {
+            self.selectAndClear(item.settings.value);
           }
         },
         enableUpDown: true
@@ -721,39 +676,10 @@
     },
 
     _keyDownHandler: function (evt) {
-      var self = this;
+      var self = this, tabIndex = 0;
 
-      // backspace
-      if (evt.keyCode === 8) {
-        if (evt.target && evt.target.nodeName === "INPUT") {
-          var input = evt.target;
-
-          // keep normal behaviour while input has a value
-          if (input.value) {
-            return;
-          }
-
-          var tags = DOM.select('button', 'menu_filter_' + self.id);
-
-          if (tags.length) {
-            var tag = tags.pop(), val = DOM.getValue(tag);
-
-            // remove tag
-            self.removeFilterTag(tag);
-
-            evt.preventDefault();
-
-            // update value with tag value and focus
-            input.value = val;
-            input.focus();
-          }
-        }
-      }
-
-      var tabIndex = 0;
-
-      if (evt.keyCode === 9) {
-        var nodes = DOM.select('input, button, select, textarea', DOM.get('menu_' + self.id));
+      if (evt.keyCode == 9) {
+        var nodes = DOM.select('input, button, select, textarea', DOM.get(self.id));
 
         nodes = tinymce.grep(nodes, function (node) {
           return !node.disabled && !DOM.isHidden(node) && node.getAttribute('tabindex') >= 0;
@@ -799,11 +725,7 @@
             var item = self.findItem(input.value);
 
             if (item) {
-              var node = DOM.get(item.id);
-
-              if (node) {
-                self.selectItem(evt, node);
-              }
+              self.selectItem(item);
             }
 
             // clear input
@@ -813,6 +735,8 @@
           if (!specialKeyCodeMap[evt.keyCode]) {
             self.filterItems(input.value);
           }
+
+          self.onFilterInput.dispatch(self, evt);
         }, 0);
       }
     },
