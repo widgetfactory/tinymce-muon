@@ -317,7 +317,6 @@
           }
 
           if (item.settings.onclick) {
-            self.selectItem(item, !item.selected);
             item.settings.onclick(e);
             self.close();
           }
