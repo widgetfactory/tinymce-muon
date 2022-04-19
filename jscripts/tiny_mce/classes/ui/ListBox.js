@@ -680,6 +680,7 @@
           case 38:
             self.showMenu();
             Event.cancel(evt);
+            self.menu.focus();
             break;
           // backspace
           case 8:
