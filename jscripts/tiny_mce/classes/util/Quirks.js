@@ -1562,6 +1562,14 @@ tinymce.util.Quirks = function (editor) {
       return isBr(node) || (node && node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
     }
 
+    function isChildOf(container, node) {
+      if (node.lastChild && node.lastChild.nodeType == 1) {
+        node = node.lastChild;
+      }
+
+      return dom.isChildOf(container, node);
+    }
+
     function moveCursorToEnd(e) {
       var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
@@ -1579,9 +1587,9 @@ tinymce.util.Quirks = function (editor) {
         return;
       }
 
-      if (container.nodeType == 3 && dom.isChildOf(container, node.lastChild)) {
+      if (container.nodeType == 3 && isChildOf(container, node)) {
         var text = container.data;
-
+        
         if (text && text.length && rng.startOffset == text.length) {
           var marker = dom.create('span', { 'data-mce-type': "bookmark" }, '\uFEFF');
 
