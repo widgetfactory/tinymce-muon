@@ -128,7 +128,8 @@
         max_width: this.settings.max_width,
         max_height: this.settings.max_height,
         keyboard_focus: true,
-        onselect: this.settings.onselect
+        onselect: this.settings.onselect,
+        title: this.settings.title
       });
 
       m.onHideMenu.add(function () {

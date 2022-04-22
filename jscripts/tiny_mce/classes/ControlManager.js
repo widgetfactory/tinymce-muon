@@ -182,7 +182,9 @@
       c.onAddItem.add(function (c, o) {
         var s = o.settings;
 
-        s.title = ed.getLang(s.title, s.title);
+        if (s.title) {
+          s.title = ed.getLang(s.title, s.title);
+        }
 
         if (!s.onclick && s.cmd) {
           s.onclick = function () {

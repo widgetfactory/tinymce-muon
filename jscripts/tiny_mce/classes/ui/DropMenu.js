@@ -619,6 +619,10 @@
               e.target.value = '';
             }
           } else {
+            if (self.settings.onselect) {
+              self.settings.onselect(e.target);
+            }
+            
             self.hideMenu();
           }
 
@@ -763,8 +767,8 @@
       var item = DOM.add(menu, 'div', {
         id: o.id,
         'class': cp + 'Item ' + cp + 'ItemEnabled',
-        title: o.settings.title,
-        'aria-label': o.settings.title
+        title: o.settings.title || '',
+        'aria-label': o.settings.title || ''
       });
 
       if (s.html) {
