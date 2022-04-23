@@ -12,9 +12,10 @@ export default [
       globals: {
         wfe: 'wfe'
       },
-      intro: 'var tinymce = {};',
-      outro: 'window.tinymce = tinymce;'
-      //banner: '(function(){',
+      banner: '/* eslint disable */'
+      //intro: 'var tinymce = {};',
+      //outro: 'window.tinymce = tinymce;'
+      
       //footer: '})();'
     },
 

@@ -1,5 +1,6 @@
 import './classes/tinymce.js';
 // tinymce.util.*
+import './classes/util/Uuid';
 import './classes/util/Delay.js';
 import './classes/util/Dispatcher.js';
 import './classes/util/URI.js';
@@ -14,6 +15,10 @@ import './classes/util/Preview.js';
 
 import './classes/util/Arr.js';
 import './classes/util/Fun.js';
+
+// tinymce.file.*
+import './classes/file/BlobCache.js';
+import './classes/file/Conversions';
 
 // tinymce.html.*
 import './classes/html/Entities.js';
@@ -96,6 +101,7 @@ import './classes/ui/ButtonDialog.js';
 // tinymce.*
 import './classes/AddOnManager.js';
 import './classes/EditorManager.js';
+import './classes/NodeChange.js';
 import './classes/EditorFocus.js';
 import './classes/Editor.js';
 import './classes/Editor.Events.js';

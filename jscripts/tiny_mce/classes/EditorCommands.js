@@ -286,6 +286,11 @@
         formatter.remove(value.name, value.args || {}, value.node || null);
       },
 
+      ToggleFormat: function (command, ui, value) {
+        value = value || { name: command };
+        formatter.toggle(value.name, value.args || {}, value.node || null);
+      },
+
       mceBlockQuote: function () {
         toggleFormat('blockquote');
       },
