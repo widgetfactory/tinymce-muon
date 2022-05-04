@@ -677,7 +677,7 @@
           function process(node) {
             var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
 
-            if (isBogusBr(node) || isCaretNode(node)) {
+            if (isBogusBr(node) || isCaretNode(node) || isBookmarkNode(node)) {
               return;
             }
 
@@ -743,6 +743,7 @@
               !isBOM(node) &&
               !isCaretNode(node) &&
               !isBogusBr(node) &&
+              !isBookmarkNode(node) &&
               (!format.inline || !isBlock(node))) {
                             
                 // Start wrapping
@@ -911,6 +912,7 @@
       }
 
       if (format) {
+        
         if (node) {
           if (node.nodeType) {
             if (!applyNodeStyle(formatList, node)) {
@@ -1299,7 +1301,7 @@
         return format;
       }
 
-      if (formatList && node) {
+      if (formatList && node) {        
         // Check each format in list
         for (i = 0; i < formatList.length; i++) {
           format = formatList[i];
@@ -1308,7 +1310,7 @@
           if (matchName(node, format) && matchItems(node, format, 'attributes') && matchItems(node, format, 'styles')) {
             // Match classes
             if ((classes = format.classes)) {
-              for (i = 0; i < classes.length; i++) {
+              for (i = 0; i < classes.length; i++) {                
                 if (!dom.hasClass(node, classes[i])) {
                   return;
                 }
@@ -1360,12 +1362,14 @@
 
       // Check selected node
       node = selection.getNode();
+
       if (matchParents(node)) {
         return TRUE;
       }
 
       // Check start node if it's different
       startNode = selection.getStart();
+
       if (startNode != node) {
         if (matchParents(startNode)) {
           return TRUE;
