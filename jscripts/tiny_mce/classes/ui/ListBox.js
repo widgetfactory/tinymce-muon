@@ -546,10 +546,10 @@
 
       menu.onHideMenu.add(function () {
         self.hideMenu();
-        self.focus();
 
         if (self.settings.combobox) {
           menu.clearFilteredItems();
+          self.focus();
         }
 
       });
