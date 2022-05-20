@@ -1530,7 +1530,8 @@ tinymce.util.Quirks = function (editor) {
   }
 
   function inlineBoundary() {
-
+    var marker;
+    
     function isBr(node) {
       return node && node.nodeType == 1 && node.nodeName == 'BR';
     }
@@ -1591,7 +1592,7 @@ tinymce.util.Quirks = function (editor) {
         var text = container.data;
         
         if (text && text.length && rng.startOffset == text.length) {
-          var marker = dom.create('span', { 'data-mce-type': "bookmark" }, '\uFEFF');
+          marker = dom.create('span', { 'data-mce-type': "bookmark" }, '\uFEFF');
 
           if (dom.isBlock(node.parentNode) && isLastChild(node)) {
             node.parentNode.appendChild(marker);
@@ -1611,7 +1612,7 @@ tinymce.util.Quirks = function (editor) {
           selection.setRng(rng);
 
           // remove marker
-          dom.remove(marker);
+          //dom.remove(marker);
 
           e.preventDefault();
           editor.nodeChanged();
@@ -1621,12 +1622,16 @@ tinymce.util.Quirks = function (editor) {
 
     // Attempt to move caret after a container element like <a> or <code>
     editor.onKeyDown.add(function (editor, e) {
+      dom.remove(marker);
+
       if (e.keyCode == VK.RIGHT) {
         moveCursorToEnd(e);
       }
     });
 
     editor.onMouseDown.add(function (editor, e) {
+      dom.remove(marker);
+
       moveCursorToEnd(e);
     });
   }
