@@ -745,8 +745,8 @@
               !isBogusBr(node) &&
               !isBookmarkNode(node) &&
               (!format.inline || !isBlock(node))) {
-                            
-                // Start wrapping
+
+              // Start wrapping
               if (!currentWrapElm) {
                 // Wrap the node
                 currentWrapElm = dom.clone(wrapElm, FALSE);
@@ -912,7 +912,7 @@
       }
 
       if (format) {
-        
+
         if (node) {
           if (node.nodeType) {
             if (!applyNodeStyle(formatList, node)) {
@@ -1301,7 +1301,7 @@
         return format;
       }
 
-      if (formatList && node) {        
+      if (formatList && node) {
         // Check each format in list
         for (i = 0; i < formatList.length; i++) {
           format = formatList[i];
@@ -1310,7 +1310,7 @@
           if (matchName(node, format) && matchItems(node, format, 'attributes') && matchItems(node, format, 'styles')) {
             // Match classes
             if ((classes = format.classes)) {
-              for (i = 0; i < classes.length; i++) {                
+              for (i = 0; i < classes.length; i++) {
                 if (!dom.hasClass(node, classes[i])) {
                   return;
                 }
@@ -2755,7 +2755,7 @@
       var container = rng.startContainer,
         offset = rng.startOffset,
         isAtEndOfText,
-        walker, node, nodes, tmpNode;
+        walker, node, nodes;
 
       if (rng.startContainer == rng.endContainer) {
         if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
@@ -2784,18 +2784,9 @@
 
         for (node = walker.current(); node; node = walker.next()) {
           if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
-            // IE has a "neat" feature where it moves the start node into the closest element
-            // we can avoid this by inserting an element before it and then remove it after we set the selection
-            tmpNode = dom.create('a', {
-              'data-mce-bogus': 'all'
-            }, INVISIBLE_CHAR);
-            node.parentNode.insertBefore(tmpNode, node);
-
-            // Set selection and remove tmpNode
+            // Set selection
             rng.setStart(node, 0);
             selection.setRng(rng);
-            dom.remove(tmpNode);
-
             return;
           }
         }
