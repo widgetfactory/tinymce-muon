@@ -28,7 +28,7 @@
  */
 (function (tinymce) {
   var NodeType = tinymce.dom.NodeType, DOMUtils = tinymce.DOM;
-  var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr, CaretPosition = tinymce.caret.CaretPosition;
+  var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
 
   var isText = NodeType.isText,
     isBogus = NodeType.isBogus,
@@ -194,7 +194,7 @@
       offset = container.data.length;
     }
 
-    return new CaretPosition(container, offset);
+    return new tinymce.caret.CaretPosition(container, offset);
   }
 
   function resolve(rootNode, path) {
@@ -232,7 +232,7 @@
         offset = nodeIndex(container);
       }
 
-      return new CaretPosition(container.parentNode, offset);
+      return new tinymce.caret.CaretPosition(container.parentNode, offset);
     }
 
     return findTextPosition(container, parseInt(offset, 10));
