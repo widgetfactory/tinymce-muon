@@ -1597,7 +1597,7 @@ tinymce.util.Quirks = function (editor) {
           if (dom.isBlock(node.parentNode) && isLastChild(node)) {
             node.parentNode.appendChild(marker);
           } else {
-            // edge case for forced_root_block:false - some text <a href="link.html">link</a><br />
+            // edge case for - some text <a href="link.html">link</a><br />
             if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
               node = node.nextSibling;
             }
@@ -1610,9 +1610,6 @@ tinymce.util.Quirks = function (editor) {
           rng.setEnd(marker, 0);
           rng.collapse();
           selection.setRng(rng);
-
-          // remove marker
-          //dom.remove(marker);
 
           e.preventDefault();
           editor.nodeChanged();
