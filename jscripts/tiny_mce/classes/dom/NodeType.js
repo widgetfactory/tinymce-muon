@@ -82,6 +82,14 @@
     return isElement(node) && node.getAttribute('data-mce-type') == 'bookmark';
   }
 
+  function isCaret(node) {
+    return isElement(node) && node.id === '_mce_caret';
+  }
+
+  function isInternal(node) {
+    return isBogus(node) || isBookmark(node) || isCaret(node);
+  }
+
   function hasContentEditableState(value) {
     return function (node) {
       if (isElement(node)) {
@@ -119,7 +127,8 @@
     hasAttributeValue: hasAttributeValue,
     matchStyleValues: matchStyleValues,
     isBogus: isBogus,
-    isBookmark: isBookmark
+    isBookmark: isBookmark,
+    isInternal: isInternal
   };
 
 })(tinymce);
