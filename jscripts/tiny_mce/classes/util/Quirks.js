@@ -1617,8 +1617,8 @@ tinymce.util.Quirks = function (editor) {
       }
     }
 
-    // Attempt to move caret after a container element like <a> or <code>
-    editor.onKeyDown.add(function (editor, e) {
+    // Attempt to move caret after a container element like <a> or <code> (use addToTop to remove marker before EnterKey)
+    editor.onKeyDown.addToTop(function (editor, e) {
       dom.remove(marker);
 
       if (e.keyCode == VK.RIGHT) {
