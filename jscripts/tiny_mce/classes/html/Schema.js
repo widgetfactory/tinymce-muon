@@ -428,7 +428,7 @@
     shortEndedElementsMap = createLookupTable('short_ended_elements', 'area base basefont br col frame hr img input isindex link ' +
       'meta param embed source wbr track');
     boolAttrMap = createLookupTable('boolean_attributes', 'async checked compact declare defer disabled ismap multiple nohref noresize ' +
-      'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen');
+      'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen muted');
 
     nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script pre code', shortEndedElementsMap);
     moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
