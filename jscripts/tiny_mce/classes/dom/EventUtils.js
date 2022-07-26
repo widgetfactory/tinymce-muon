@@ -25,7 +25,8 @@ tinymce.dom = {};
     webkitMovementX: 1,
     webkitMovementY: 1,
     keyIdentifier: 1,
-    mozPressure: 1
+    mozPressure: 1,
+    path: 1
   };
 
   /**
