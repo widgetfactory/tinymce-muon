@@ -12,7 +12,8 @@
   // Shorten names
   var Event = tinymce.dom.Event,
     each = tinymce.each,
-    extend = tinymce.extend;
+    extend = tinymce.extend,
+    PreviewCss = tinymce.util.PreviewCss;
 
   tinymce.ControlManager = function (ed, s) {
     var self = this;
@@ -336,10 +337,11 @@
           each(classes, function (cls) {
             ctrl.add(cls, cls, {
               style: function () {
-                return tinymce.util.PreviewCss(ed, { classes: cls });
+                return item.style || PreviewCss(ed, { classes: cls });
               }
             });
           });
+
         });
 
         if (Array.isArray(ed.settings.importcss_classes)) {
