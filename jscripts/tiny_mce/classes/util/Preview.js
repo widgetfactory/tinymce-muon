@@ -9,9 +9,11 @@
  */
 
 (function (tinymce) {
-  var each = tinymce.each;
+  var each = tinymce.each, extend = tinymce.extend;
 
   var rgba = {}, luma = {}, white = 'rgb(255, 255, 255)';
+
+  var previewElm;
 
   function getRGBA(val) {
     if (!rgba[val]) {
@@ -118,108 +120,117 @@
   }
 
   tinymce.util.PreviewCss = function (ed, fmt) {
-    var name, previewElm, dom = ed.dom,
-      previewCss = {};
+      var name, dom = ed.dom,
+        previewCss = {};
 
-    var previewStyles = ed.settings.preview_styles;
+      fmt = extend({ styles: [], attributes: [], classes: '' }, fmt);
 
-    // No preview forced
-    if (previewStyles === false) {
-      return '';
-    }
+      var previewStyles = ed.settings.preview_styles;
 
-    // Default preview
-    if (!previewStyles) {
-      previewStyles = 'font-family font-size font-weight text-decoration text-transform background-color color';
-    }
-
-    // Removes any variables since these can't be previewed
-    function removeVars(val) {
-      if (val && typeof (val) === "string") {
-        val = val.replace(/%(\w+)/g, '');
+      // No preview forced
+      if (previewStyles === false) {
+        return '';
       }
 
-      return val;
-    }
-
-    // Create block/inline element to use for preview
-    name = fmt.block || fmt.inline || 'span';
-    previewElm = dom.create(name);
-
-    // Add format styles to preview element
-    each(fmt.styles, function (value, name) {
-      value = removeVars(value);
-
-      if (value) {
-        dom.setStyle(previewElm, name, value);
-      }
-    });
-
-    // Add attributes to preview element
-    each(fmt.attributes, function (value, name) {
-      value = removeVars(value);
-
-      if (value) {
-        dom.setAttrib(previewElm, name, value);
-      }
-    });
-
-    // Add classes to preview element
-    each(fmt.classes, function (value) {
-      value = removeVars(value);
-
-      dom.addClass(previewElm, value);
-    });
-
-    // Add the previewElm outside the visual area
-    dom.setStyles(previewElm, {
-      position: 'absolute',
-      left: -0xFFFF
-    });
-
-    ed.getBody().appendChild(previewElm);
-
-    // get body background color and element background color
-    var bodybg = dom.getStyle(ed.getBody(), 'background-color', true), elmbg = dom.getStyle(previewElm, 'background-color', true);
-
-    var styles = previewStyles.split(' ');
-
-    for (var i = 0, len = styles.length; i < len; i++) {
-      var key = styles[i], value = dom.getStyle(previewElm, key, true);
-
-      // skip if already added
-      if (key == 'background-color' && previewCss[key]) {
-        continue;
+      // Default preview
+      if (!previewStyles) {
+        previewStyles = 'font-family font-size font-weight text-decoration text-transform background-color color';
       }
 
-      // If text color is white and the background color is white or transparent, override with default color
-      if (key == 'color') {
-        // default to white if transparent
-        if (/transparent|rgba\s*\([^)]+,\s*0\)/.test(elmbg)) {
-          elmbg = white;
+      // Removes any variables since these can't be previewed
+      function removeVars(val) {
+        if (val && typeof (val) === "string") {
+          val = val.replace(/%(\w+)/g, '');
         }
 
-        // if background color produces unreadable text, try body background color
-        if (!isReadable(value, elmbg)) {
-          // use body background color
-          if (isReadable(value, bodybg)) {
-            previewCss['background-color'] = bodybg;
-          } else {
-            value = 'inherit';
+        return val;
+      }
+
+      // Create block/inline element to use for preview
+      name = fmt.block || fmt.inline || 'div';
+
+      if (!previewElm || previewElm.nodeName != name.toUpperCase()) {
+        previewElm = dom.create(name);
+        ed.getBody().appendChild(previewElm);
+      }
+
+      // clear preview element
+      dom.removeAllAttribs(previewElm);
+
+      // Add format styles to preview element
+      each(fmt.styles, function (value, name) {
+        value = removeVars(value);
+
+        if (value) {
+          dom.setStyle(previewElm, name, value);
+        }
+      });
+
+      // Add attributes to preview element
+      each(fmt.attributes, function (value, name) {
+        value = removeVars(value);
+
+        if (value) {
+          dom.setAttrib(previewElm, name, value);
+        }
+      });
+
+      // Add classes to preview element
+      each(fmt.classes, function (value) {
+        value = removeVars(value);
+
+        dom.addClass(previewElm, value);
+      });
+
+      // Add the previewElm outside the visual area
+      dom.setStyles(previewElm, {
+        position: 'absolute',
+        left: -0xFFFF
+      });
+
+      previewElm.setAttribute('data-mce-type', 'temp');
+
+      // get body background color and element background color
+      var bodybg = dom.getStyle(ed.getBody(), 'background-color', true), elmbg = dom.getStyle(previewElm, 'background-color', true);
+
+      var styles = previewStyles.split(' '), css = '';
+
+      for (var i = 0, len = styles.length; i < len; i++) {
+        var key = styles[i], value = dom.getStyle(previewElm, key, true);
+
+        // skip if already added
+        if (previewCss[key]) {
+          continue;
+        }
+
+        // If text color is white and the background color is white or transparent, override with default color
+        if (key == 'color') {
+          // default to white if transparent
+          if (/transparent|rgba\s*\([^)]+,\s*0\)/.test(elmbg)) {
+            elmbg = white;
+          }
+
+          // if background color produces unreadable text, try body background color
+          if (!isReadable(value, elmbg)) {
+            // use body background color
+            if (isReadable(value, bodybg)) {
+              value = bodybg;
+            } else {
+              value = 'inherit';
+            }
           }
         }
+
+        // set to default if value is 0
+        if (key == 'font-size' && parseInt(value, 10) === 0) {
+          value = 'inherit';
+        }
+
+        previewCss[key] = value;
+
+        css += key + ':' + value + ';';
       }
 
-      // set to default if value is 0
-      if (key == 'font-size' && parseInt(value, 10) === 0) {
-        value = 'inherit';
-      }
-
-      previewCss[key] = value;
-    }
-
-    dom.remove(previewElm);
-
-    return dom.serializeStyle(previewCss);
+      return css;
   };
 })(tinymce);
