@@ -10,20 +10,20 @@
 
 (function (tinymce) {
   /**
-	 * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
-	 *
-	 * @class tinymce.dom.Serializer
-	 */
+   * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
+   *
+   * @class tinymce.dom.Serializer
+   */
 
   /**
-	 * Constucts a new DOM serializer class.
-	 *
-	 * @constructor
-	 * @method Serializer
-	 * @param {Object} settings Serializer settings object.
-	 * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
-	 * @param {tinymce.html.Schema} schema Optional schema reference.
-	 */
+   * Constucts a new DOM serializer class.
+   *
+   * @constructor
+   * @method Serializer
+   * @param {Object} settings Serializer settings object.
+   * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
+   * @param {tinymce.html.Schema} schema Optional schema reference.
+   */
   tinymce.dom.Serializer = function (settings, dom, schema) {
     var self = this,
       onPreProcess, onPostProcess, isIE = tinymce.isIE,
@@ -42,14 +42,14 @@
     settings.remove_trailing_brs = "remove_trailing_brs" in settings ? settings.remove_trailing_brs : true;
 
     /**
-		 * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
-		 * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
-		 * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
-		 * but not as the lastChild of the body. So this fix simply removes the last two
-		 * BR elements at the end of the document.
-		 *
-		 * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
-		 */
+     * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
+     * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
+     * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
+     * but not as the lastChild of the body. So this fix simply removes the last two
+     * BR elements at the end of the document.
+     *
+     * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
+     */
     function trimTrailingBr(rootNode) {
       var brNode1, brNode2;
 
@@ -69,34 +69,34 @@
     }
 
     /**
-		 * This event gets executed before a HTML fragment gets serialized into a HTML string. This event enables you to do modifications to the DOM before the serialization occurs. It's important to know that the element that is getting serialized is cloned so it's not inside a document.
-		 *
-		 * @event onPreProcess
-		 * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
-		 * @param {Object} args Object containing things like the current node.
-		 * @example
-		 * // Adds an observer to the onPreProcess event
-		 * serializer.onPreProcess.add(function(se, o) {
-		 *     // Add a class to each paragraph
-		 *     se.dom.addClass(se.dom.select('p', o.node), 'myclass');
-		 * });
-		 */
+     * This event gets executed before a HTML fragment gets serialized into a HTML string. This event enables you to do modifications to the DOM before the serialization occurs. It's important to know that the element that is getting serialized is cloned so it's not inside a document.
+     *
+     * @event onPreProcess
+     * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
+     * @param {Object} args Object containing things like the current node.
+     * @example
+     * // Adds an observer to the onPreProcess event
+     * serializer.onPreProcess.add(function(se, o) {
+     *     // Add a class to each paragraph
+     *     se.dom.addClass(se.dom.select('p', o.node), 'myclass');
+     * });
+     */
     onPreProcess = new tinymce.util.Dispatcher(self);
 
     /**
-		 * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc.
-		 *
-		 * @event onPreProcess
-		 * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
-		 * @param {Object} args Object containing things like the current contents.
-		 * @example
-		 * // Adds an observer to the onPostProcess event
-		 * serializer.onPostProcess.add(function(se, o) {
-		 *    // Remove all paragraphs and replace with BR
-		 *    o.content = o.content.replace(/<p[^>]+>|<p>/g, '');
-		 *    o.content = o.content.replace(/<\/p>/g, '<br />');
-		 * });
-		 */
+     * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc.
+     *
+     * @event onPreProcess
+     * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
+     * @param {Object} args Object containing things like the current contents.
+     * @example
+     * // Adds an observer to the onPostProcess event
+     * serializer.onPostProcess.add(function(se, o) {
+     *    // Remove all paragraphs and replace with BR
+     *    o.content = o.content.replace(/<p[^>]+>|<p>/g, '');
+     *    o.content = o.content.replace(/<\/p>/g, '<br />');
+     * });
+     */
     onPostProcess = new tinymce.util.Dispatcher(self);
 
     htmlParser = new tinymce.html.DomParser(settings, schema);
@@ -164,13 +164,18 @@
       }
     });
 
-    // Remove bookmark elements
+    // Remove bookmark and temp elements
     htmlParser.addAttributeFilter('data-mce-type', function (nodes, name, args) {
       var i = nodes.length,
         node;
 
       while (i--) {
         node = nodes[i];
+
+        if (node.attributes.map['data-mce-type'] === 'temp') {
+          node.remove();
+          continue;
+        }
 
         if (node.attributes.map['data-mce-type'] === 'bookmark' && !args.cleanup) {
           node.remove();
@@ -180,16 +185,16 @@
 
     // Remove bogus elements
     /*htmlParser.addAttributeFilter('data-mce-bogus', function(nodes, name, args) {
-			var i = nodes.length, node;
+      var i = nodes.length, node;
 
-			while (i--) {
-				node = nodes[i];
+      while (i--) {
+        node = nodes[i];
 
-				if (node.attributes.map['data-mce-bogus'] === 'all' && !args.cleanup) {
-					node.remove();
-				}
-			}
-		});*/
+        if (node.attributes.map['data-mce-bogus'] === 'all' && !args.cleanup) {
+          node.remove();
+        }
+      }
+    });*/
 
     htmlParser.addNodeFilter('noscript', function (nodes) {
       var i = nodes.length,
@@ -301,8 +306,8 @@
     // Remove internal data attributes
     htmlParser.addAttributeFilter(
       'data-mce-src,data-mce-href,data-mce-style,' +
-			'data-mce-selected,data-mce-expando,' +
-			'data-mce-type,data-mce-resize,data-mce-new',
+      'data-mce-selected,data-mce-expando,' +
+      'data-mce-type,data-mce-resize,data-mce-new',
 
       function (nodes, name) {
         var i = nodes.length;
@@ -316,74 +321,74 @@
     // Return public methods
     return {
       /**
-			 * Schema instance that was used to when the Serializer was constructed.
-			 *
-			 * @field {tinymce.html.Schema} schema
-			 */
+       * Schema instance that was used to when the Serializer was constructed.
+       *
+       * @field {tinymce.html.Schema} schema
+       */
       schema: schema,
 
       /**
-			 * Adds a node filter function to the parser used by the serializer, the parser will collect the specified nodes by name
-			 * and then execute the callback ones it has finished parsing the document.
-			 *
-			 * @example
-			 * parser.addNodeFilter('p,h1', function(nodes, name) {
-			 *		for (var i = 0; i < nodes.length; i++) {
-			 *			console.log(nodes[i].name);
-			 *		}
-			 * });
-			 * @method addNodeFilter
-			 * @method {String} name Comma separated list of nodes to collect.
-			 * @param {function} callback Callback function to execute once it has collected nodes.
-			 */
+       * Adds a node filter function to the parser used by the serializer, the parser will collect the specified nodes by name
+       * and then execute the callback ones it has finished parsing the document.
+       *
+       * @example
+       * parser.addNodeFilter('p,h1', function(nodes, name) {
+       *		for (var i = 0; i < nodes.length; i++) {
+       *			console.log(nodes[i].name);
+       *		}
+       * });
+       * @method addNodeFilter
+       * @method {String} name Comma separated list of nodes to collect.
+       * @param {function} callback Callback function to execute once it has collected nodes.
+       */
       addNodeFilter: htmlParser.addNodeFilter,
 
       /**
-			 * Adds a attribute filter function to the parser used by the serializer, the parser will collect nodes that has the specified attributes
-			 * and then execute the callback ones it has finished parsing the document.
-			 *
-			 * @example
-			 * parser.addAttributeFilter('src,href', function(nodes, name) {
-			 *		for (var i = 0; i < nodes.length; i++) {
-			 *			console.log(nodes[i].name);
-			 *		}
-			 * });
-			 * @method addAttributeFilter
-			 * @method {String} name Comma separated list of nodes to collect.
-			 * @param {function} callback Callback function to execute once it has collected nodes.
-			 */
+       * Adds a attribute filter function to the parser used by the serializer, the parser will collect nodes that has the specified attributes
+       * and then execute the callback ones it has finished parsing the document.
+       *
+       * @example
+       * parser.addAttributeFilter('src,href', function(nodes, name) {
+       *		for (var i = 0; i < nodes.length; i++) {
+       *			console.log(nodes[i].name);
+       *		}
+       * });
+       * @method addAttributeFilter
+       * @method {String} name Comma separated list of nodes to collect.
+       * @param {function} callback Callback function to execute once it has collected nodes.
+       */
       addAttributeFilter: htmlParser.addAttributeFilter,
 
       /**
-			 * Fires when the Serializer does a preProcess on the contents.
-			 *
-			 * @event onPreProcess
-			 * @param {tinymce.Editor} sender Editor instance.
-			 * @param {Object} obj PreProcess object.
-			 * @option {Node} node DOM node for the item being serialized.
-			 * @option {String} format The specified output format normally "html".
-			 * @option {Boolean} get Is true if the process is on a getContent operation.
-			 * @option {Boolean} set Is true if the process is on a setContent operation.
-			 * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
-			 */
+       * Fires when the Serializer does a preProcess on the contents.
+       *
+       * @event onPreProcess
+       * @param {tinymce.Editor} sender Editor instance.
+       * @param {Object} obj PreProcess object.
+       * @option {Node} node DOM node for the item being serialized.
+       * @option {String} format The specified output format normally "html".
+       * @option {Boolean} get Is true if the process is on a getContent operation.
+       * @option {Boolean} set Is true if the process is on a setContent operation.
+       * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
+       */
       onPreProcess: onPreProcess,
 
       /**
-			 * Fires when the Serializer does a postProcess on the contents.
-			 *
-			 * @event onPostProcess
-			 * @param {tinymce.Editor} sender Editor instance.
-			 * @param {Object} obj PreProcess object.
-			 */
+       * Fires when the Serializer does a postProcess on the contents.
+       *
+       * @event onPostProcess
+       * @param {tinymce.Editor} sender Editor instance.
+       * @param {Object} obj PreProcess object.
+       */
       onPostProcess: onPostProcess,
 
       /**
-			 * Serializes the specified browser DOM node into a HTML string.
-			 *
-			 * @method serialize
-			 * @param {DOMNode} node DOM node to serialize.
-			 * @param {Object} args Arguments option that gets passed to event handlers.
-			 */
+       * Serializes the specified browser DOM node into a HTML string.
+       *
+       * @method serialize
+       * @param {DOMNode} node DOM node to serialize.
+       * @param {Object} args Arguments option that gets passed to event handlers.
+       */
       serialize: function (node, args) {
         var impl, doc, oldDoc, htmlSerializer, content, rootNode;
 
@@ -464,25 +469,25 @@
       },
 
       /**
-			 * Adds valid elements rules to the serializers schema instance this enables you to specify things
-			 * like what elements should be outputted and what attributes specific elements might have.
-			 * Consult the Wiki for more details on this format.
-			 *
-			 * @method addRules
-			 * @param {String} rules Valid elements rules string to add to schema.
-			 */
+       * Adds valid elements rules to the serializers schema instance this enables you to specify things
+       * like what elements should be outputted and what attributes specific elements might have.
+       * Consult the Wiki for more details on this format.
+       *
+       * @method addRules
+       * @param {String} rules Valid elements rules string to add to schema.
+       */
       addRules: function (rules) {
         schema.addValidElements(rules);
       },
 
       /**
-			 * Sets the valid elements rules to the serializers schema instance this enables you to specify things
-			 * like what elements should be outputted and what attributes specific elements might have.
-			 * Consult the Wiki for more details on this format.
-			 *
-			 * @method setRules
-			 * @param {String} rules Valid elements rules string.
-			 */
+       * Sets the valid elements rules to the serializers schema instance this enables you to specify things
+       * like what elements should be outputted and what attributes specific elements might have.
+       * Consult the Wiki for more details on this format.
+       *
+       * @method setRules
+       * @param {String} rules Valid elements rules string.
+       */
       setRules: function (rules) {
         schema.setValidElements(rules);
       }
