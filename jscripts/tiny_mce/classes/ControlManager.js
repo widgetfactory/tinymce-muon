@@ -337,9 +337,11 @@
           each(classes, function (cls) {
             ctrl.add(cls, cls, {
               style: function () {
-                return item.style || PreviewCss(ed, { classes: cls });
+                return item.style || PreviewCss.getCssText(ed, { classes: cls });
               }
             });
+
+            PreviewCss.reset();
           });
 
         });
