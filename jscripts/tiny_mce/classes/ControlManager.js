@@ -340,9 +340,9 @@
                 return item.style || PreviewCss.getCssText(ed, { classes: cls });
               }
             });
-
-            PreviewCss.reset();
           });
+
+          PreviewCss.reset();
 
         });
 
