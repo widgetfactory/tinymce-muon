@@ -501,12 +501,12 @@
 		 * tinymce.create('tinymce.somepackage.SomeSubClass:tinymce.somepackage.SomeClass', {
 		 *     SomeSubClass: function() {
 		 *         // Class constructor
-		 *         this.parent(); // Call parent constructor
+		 *         this._super(); // Call parent constructor
 		 *     },
 		 *
 		 *     method : function() {
 		 *         // Some method
-		 *         this.parent(); // Call parent method
+		 *         this._super(); // Call parent method
 		 *     },
 		 *
 		 *     'static' : {
@@ -575,7 +575,7 @@
         } else {
           // Add inherit constructor
           ns[cn] = function () {
-            this.parent = sp[scn];
+            this._super = sp[scn];
             return c.apply(this, arguments);
           };
         }
@@ -591,7 +591,7 @@
           // Extend methods if needed
           if (sp[n]) {
             ns[cn].prototype[n] = function () {
-              this.parent = sp[n];
+              this._super = sp[n];
               return f.apply(this, arguments);
             };
           } else {
