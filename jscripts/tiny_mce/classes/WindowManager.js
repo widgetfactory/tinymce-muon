@@ -286,14 +286,13 @@
           }
 
           each(f.items, function (ctrl) {
-            DOM.add(id + '_content', 'form', {}, ctrl.renderHTML());
-            ctrl.postRender();
+            var form = DOM.add(id + '_content', 'form');
+
+            ctrl.renderTo(form);
 
             // add onClose event to destroy controls
             self.onClose.add(function () {
-              if (this.id === id) {
-                ctrl.destroy();
-              }
+              ctrl.destroy();
             });
           });
         }
