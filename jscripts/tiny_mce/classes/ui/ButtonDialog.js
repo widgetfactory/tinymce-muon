@@ -34,7 +34,7 @@
       this.onShowDialog = new Dispatcher(this);
       this.onHideDialog = new Dispatcher(this);
 
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
     },
 
     showDialog: function () {

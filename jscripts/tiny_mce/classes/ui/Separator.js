@@ -24,7 +24,7 @@ tinymce.create('tinymce.ui.Separator:tinymce.ui.Control', {
      * @param {Object} s Optional name/value settings object.
      */
   Separator: function (id, s) {
-    this.parent(id, s);
+    this._super(id, s);
     this.classPrefix = 'mceSeparator';
     this.setDisabled(true);
   },

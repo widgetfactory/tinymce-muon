@@ -27,7 +27,7 @@
 		 */
     CheckBox: function (id, s, ed) {
 
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       if (typeof s.value === 'undefined') {
         s.value = '';
@@ -111,7 +111,7 @@
 
     /**
 		 * Post render event. This will be executed after the control has been rendered and can be used to
-		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
 		 *
 		 * @method postRender
 		 */
@@ -141,7 +141,7 @@
 		 * @param {Boolean} state Boolean state if the control should be disabled or not.
 		 */
     setDisabled: function (state) {
-      this.parent(state);
+      this._super(state);
       DOM.get(this.id).disabled = state;
     },
 
@@ -151,7 +151,7 @@
 		 * @method destroy
 		 */
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id);
     }

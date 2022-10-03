@@ -23,7 +23,7 @@
          * @param {Editor} ed Optional the editor instance this button is for.
          */
     ContextPanel: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       this.settings = s = tinymce.extend({
         content: '',
@@ -36,7 +36,7 @@
     renderPanel: function () {
       var self = this;
 
-      this.parent();
+      this._super();
 
       DOM.addClass(DOM.select('.mcePanel', DOM.get(this.id)), 'mceContextPanel');
 
@@ -59,7 +59,7 @@
          * @method showPanel
          */
     showPanel: function (elm) {
-      this.parent(elm);
+      this._super(elm);
 
       this.target = elm;
 
@@ -129,7 +129,7 @@
 
     destroy: function () {
       Event.remove(this.editor.getWin(), 'scroll', self.scrollFunc);
-      this.parent();
+      this._super();
     }
   });
 })();

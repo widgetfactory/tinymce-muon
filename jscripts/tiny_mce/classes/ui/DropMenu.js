@@ -111,7 +111,7 @@
       s.vp_offset_x = s.vp_offset_x || 0;
       s.vp_offset_y = s.vp_offset_y || 0;
 
-      this.parent(id, s);
+      this._super(id, s);
       this.onShowMenu = new tinymce.util.Dispatcher(this);
       this.onHideMenu = new tinymce.util.Dispatcher(this);
       this.onFilterInput = new tinymce.util.Dispatcher(this);
@@ -449,7 +449,7 @@
       var self = this,
         co;
 
-      o = self.parent(o);
+      o = self._super(o);
 
       if (self.isRendered && (co = DOM.get('menu_' + self.id + '_items'))) {
         self._add(co, o);
@@ -465,7 +465,7 @@
      * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
      */
     collapse: function (d) {
-      this.parent(d);
+      this._super(d);
       this.hideMenu(1);
     },
 
@@ -492,7 +492,7 @@
       DOM.remove(o.id);
       this.destroy();
 
-      return this.parent(o);
+      return this._super(o);
     },
 
     /**

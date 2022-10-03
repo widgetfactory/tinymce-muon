@@ -32,7 +32,7 @@
 		 * @param {Editor} editor The editor instance this button is for.
 		 */
     ColorSplitButton: function (id, settings, editor) {
-      this.parent(id, settings, editor);
+      this._super(id, settings, editor);
 
       /**
 			 * Settings object.
@@ -173,9 +173,9 @@
 		 */
     renderMenu: function () {
       var self = this,
-        menu, i = 0,
+        menu,
         settings = this.settings,
-        node, tb, tr, list, context;
+        node, list;
 
       list = DOM.add(settings.menu_container, 'div', {
         role: 'listbox',
@@ -184,76 +184,45 @@
       });
 
       menu = DOM.add(list, 'div', {
-        'class': settings['class']
-      });
-
-      node = DOM.add(menu, 'table', {
         role: 'presentation',
-        'class': 'mceColorSplitMenu'
+        'class': 'mceColorSplitMenu' + ' ' + settings['class']
       });
-
-      tb = DOM.add(node, 'tbody');
 
       // Generate color grid
-      i = 0;
-
       each(is(settings.colors, 'array') ? settings.colors : settings.colors.split(','), function (color) {
         color = color.replace(/^#/, '');
 
-        if (!i--) {
-          tr = DOM.add(tb, 'tr');
-          i = settings.grid_width - 1;
-        }
+        var val = '#' + color;
 
-        node = DOM.add(tr, 'td');
+        if (color.indexOf('--') == 0) {
+          val = 'var(' + color + ')';
+        }
 
         var args = {
           style: {
-            backgroundColor: '#' + color
+            backgroundColor: val
           },
-          'title': self.editor.getLang('colors.' + color, '#' + color),
-          'data-mce-color': '#' + color
+          'title': self.editor.getLang('colors.' + color, val),
+          'data-mce-color': val,
+          'class': 'mceColorButton'
         };
 
         // adding a proper ARIA role = button causes JAWS to read things incorrectly on IE.
         args.role = 'option';
 
-        node = DOM.add(node, 'button', args);
-
-        if (self.editor.forcedHighContrastMode) {
-          node = DOM.add(node, 'canvas', {
-            width: 16,
-            height: 16,
-            'aria-hidden': 'true'
-          });
-          if (node.getContext && (context = node.getContext("2d"))) {
-            context.fillStyle = '#' + color;
-            context.fillRect(0, 0, 16, 16);
-          } else {
-            // No point leaving a canvas element around if it'settings not supported for drawing on anyway.
-            DOM.remove(node);
-          }
-        }
+        node = DOM.add(menu, 'button', args);
       });
 
-      node = DOM.add(tr, 'td', {
-        'class': 'mceRemoveColor'
-      });
-
-      node = DOM.add(node, 'button', {
+      node = DOM.add(menu, 'button', {
         'title': this.editor.getLang('advanced.no_color', 'No Colour'),
         'data-mce-color': '',
-        role: 'option'
-      });
+        role: 'option',
+        'class': 'mceRemoveColor'
+      }, '&cross;');
 
       if (settings.more_colors_func) {
-        node = DOM.add(tb, 'tr');
-        node = DOM.add(node, 'td', {
-          colspan: settings.grid_width,
-          'class': 'mceMoreColors'
-        });
 
-        node = DOM.add(node, 'button', {
+        node = DOM.add(menu, 'button', {
           role: 'option',
           id: this.id + '_more',
           'class': 'mceMoreColors'
@@ -274,7 +243,7 @@
       });
 
       Event.add(this.id + '_menu', 'click', function (e) {
-        var elm = DOM.getParent(e.target, 'button', tb);
+        var elm = DOM.getParent(e.target, 'button', menu);
 
         var color = elm.getAttribute('data-mce-color');
 
@@ -314,12 +283,12 @@
 
     /**
 		 * Post render event. This will be executed after the control has been rendered and can be used to
-		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
 		 *
 		 * @method postRender
 		 */
     postRender: function () {
-      this.parent();
+      this._super();
 
       DOM.add(this.id + '_action', 'span', {
         id: this.id + '_preview',
@@ -337,7 +306,7 @@
 		 * @method destroy
 		 */
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id + '_menu');
       Event.clear(this.id + '_more');

@@ -29,7 +29,7 @@
 
       s["class"] = 'mceUrlBox';
 
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
     },
 
     /**
@@ -40,7 +40,7 @@
      * @return {String} HTML for the text control element.
      */
     renderHTML: function () {
-      var html = this.parent(),
+      var html = this._super(),
         s = this.settings;
 
       if (s.picker) {
@@ -83,20 +83,20 @@
      * @param {Boolean} state Boolean state if the control should be disabled or not.
      */
     setDisabled: function (state) {
-      this.parent(state);
+      this._super(state);
       DOM.get(this.id + '_upload').disabled = state;
     },
 
     /**
      * Post render event. This will be executed after the control has been rendered and can be used to
-     * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+     * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
      *
      * @method postRender
      */
     postRender: function () {
       var self = this, s = this.settings;
 
-      this.parent();
+      this._super();
 
       if (s.picker) {
         DOM.addClass(this.id, 'mceUrlBoxPicker');

@@ -153,14 +153,15 @@
 		 * @param {Element} n HTML DOM element to add control to.
 		 */
     renderTo: function (n) {
-      DOM.setHTML(n, this.renderHTML());
+      var frag = DOM.createFragment(this.renderHTML());
+      n.appendChild(frag);
 
       this.postRender();
     },
 
     /**
 		 * Post render event. This will be executed after the control has been rendered and can be used to
-		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
 		 *
 		 * @method postRender
 		 */
@@ -179,6 +180,16 @@
         this.active = -1;
         this.setActive(state);
       }
+
+      this._elm = DOM.get(this.id);
+    },
+
+    parent: function (ctrl) {
+      if (!ctrl) {
+        return this._parent || null;
+      }
+      
+      this._parent = ctrl;
     },
 
     /**
@@ -188,8 +199,9 @@
 		 * @method remove
 		 */
     remove: function () {
-      DOM.remove(this.id);
       this.destroy();
+
+      DOM.remove(this.id);
     },
 
     /**
@@ -197,7 +209,7 @@
 		 *
 		 * @method destroy
 		 */
-    destroy: function () {
+     destroy: function () {
       tinymce.dom.Event.clear(this.id);
     }
   });

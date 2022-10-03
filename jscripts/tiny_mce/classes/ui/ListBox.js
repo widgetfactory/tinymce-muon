@@ -83,7 +83,7 @@
      * @param {Editor} ed Optional the editor instance this button is for.
      */
     ListBox: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       /**
        * Array of ListBox items.
@@ -594,7 +594,7 @@
 
     /**
      * Post render event. This will be executed after the control has been rendered and can be used to
-     * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+     * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
      *
      * @method postRender
      */
@@ -748,7 +748,7 @@
      * @method destroy
      */
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id + '_text');
       Event.clear(this.id + '_open');

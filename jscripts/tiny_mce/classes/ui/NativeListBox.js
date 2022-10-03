@@ -31,7 +31,7 @@
 		 * @param {Object} settings Optional name/value settings object.
 		 */
     NativeListBox: function (id, settings) {
-      this.parent(id, settings);
+      this._super(id, settings);
     },
 
     /**

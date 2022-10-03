@@ -62,7 +62,7 @@
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
     SplitButton: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
       this.classPrefix = 'mceSplitButton';
     },
 
@@ -176,7 +176,7 @@
     },
 
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id + '_action');
       Event.clear(this.id + '_open');

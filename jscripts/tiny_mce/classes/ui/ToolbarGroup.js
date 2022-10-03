@@ -77,7 +77,7 @@
     },
 
     destroy: function () {
-      this.parent();
+      this._super();
       this.keyNav.destroy();
       Event.clear(this.id);
     }

@@ -29,7 +29,7 @@
 		 * @param {Object} s Optional name/value settings object.
 		 */
     Menu: function (id, settings) {
-      this.parent(id, settings);
+      this._super(id, settings);
       this.items = {};
       this.collapsed = false;
       this.menuCount = 0;

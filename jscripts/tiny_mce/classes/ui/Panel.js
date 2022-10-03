@@ -24,7 +24,7 @@
          * @param {Editor} ed Optional the editor instance this button is for.
          */
     Panel: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       this.settings = s = tinymce.extend({
         content: '',
@@ -295,7 +295,7 @@
     },
 
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id);
       DOM.remove(this.id);

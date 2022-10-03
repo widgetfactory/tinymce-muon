@@ -1,8 +1,11 @@
+/* eslint-disable */
+
 import replace from '@rollup/plugin-replace';
+import {eslint} from 'rollup-plugin-eslint';
 
 export default [
   {
-    input: "index.js",
+    input: 'index.js',
 
     external: ['wfe'],
 
@@ -12,18 +15,18 @@ export default [
       globals: {
         wfe: 'wfe'
       },
-      banner: '/* eslint disable */'
-      //intro: 'var tinymce = {};',
-      //outro: 'window.tinymce = tinymce;'
-      
-      //footer: '})();'
+      banner: '/* eslint-disable */'
     },
 
     plugins: [
       //uglify({mangle: false})
       replace({
         'tinymce$1': 'tinymce'
+      }),
+      eslint({
       })
     ]
   }
+
+
 ];

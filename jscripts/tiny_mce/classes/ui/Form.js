@@ -11,29 +11,27 @@
   // Shorten class names
   var dom = tinymce.DOM;
   /**
-	 * This class is used to create layouts. A layout is a container for other controls like buttons etc.
-	 *
-	 * @class tinymce.ui.Form
-	 * @extends tinymce.ui.Container
-	 */
+   * This class is used to create layouts. A layout is a container for other controls like buttons etc.
+   *
+   * @class tinymce.ui.Form
+   * @extends tinymce.ui.Container
+   */
   tinymce.create('tinymce.ui.Form:tinymce.ui.Container', {
 
     /**
-			 * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
-			 * creating a whole toolbar with buttons it does make a lot of difference.
-			 *
-			 * @method renderHTML
-			 * @return {String} HTML for the toolbar control.
-			 */
+       * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
+       * creating a whole toolbar with buttons it does make a lot of difference.
+       *
+       * @method renderHTML
+       * @return {String} HTML for the toolbar control.
+       */
     renderHTML: function () {
       var html = '',
         settings = this.settings,
         i;
 
-      var controls = settings.controls || this.controls;
-
-      for (i = 0; i < controls.length; i++) {
-        var ctrl = controls[i], s = ctrl.settings;
+      for (i = 0; i < this.controls.length; i++) {
+        var ctrl = this.controls[i], s = ctrl.settings;
 
         html += '<div class="mceFormRow">';
 
@@ -42,29 +40,23 @@
         }
 
         html += '	<div class="mceFormControl">';
-        html += controls[i].renderHTML();
+        html += ctrl.renderHTML();
         html += '	</div>';
         html += '</div>';
-
       }
-
-      this.controls = controls;
 
       return dom.createHTML('div', {
         id: this.id,
-        'class': 'mceForm ' + (settings['class'] ? ' ' + settings['class'] : ''),
+        'class': 'mceForm' + (settings['class'] ? ' ' + settings['class'] : ''),
         role: 'group'
       }, html);
     },
 
     submit: function () {
-      var settings = this.settings,
-        i, data = {};
+      var i, data = {};
 
-      var controls = settings.controls || this.controls;
-
-      for (i = 0; i < controls.length; i++) {
-        var ctrl = controls[i];
+      for (i = 0; i < this.controls.length; i++) {
+        var ctrl = this.controls[i];
 
         if (typeof ctrl.value === 'function') {
           data[ctrl.name] = ctrl.value();
@@ -74,26 +66,25 @@
       return data;
     },
 
-    postRender: function () {
-      var settings = this.settings,
-        i;
+    update: function (data) {
+      var i;
 
-      this.parent();
+      for (i = 0; i < this.controls.length; i++) {
+        var ctrl = this.controls[i];
 
-      var controls = settings.controls || this.controls;
-
-      for (i = 0; i < controls.length; i++) {
-        controls[i].postRender();
+        if (data[ctrl.name]) {
+          if (typeof ctrl.value === 'function') {
+            ctrl.value(data[ctrl.name]);
+          }
+        }
       }
     },
 
     empty: function () {
       var i;
 
-      var controls = this.controls;
-
-      for (i = 0; i < controls.length; i++) {
-        controls[i].remove();
+      for (i = 0; i < this.controls.length; i++) {
+        this.controls[i].remove();
       }
 
       this.controls = [];
@@ -102,21 +93,10 @@
 
     add: function (ctrl) {
       if (!this.get(ctrl.id)) {
-        this.parent(ctrl);
+        return this._super(ctrl);
       }
-    },
 
-    destroy: function () {
-      var settings = this.settings,
-        i;
-
-      this.parent();
-
-      var controls = settings.controls || this.controls;
-
-      for (i = 0; i < controls.length; i++) {
-        controls[i].destroy();
-      }
+      return false;
     }
   });
 })(tinymce);

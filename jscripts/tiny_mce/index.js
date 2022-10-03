@@ -97,6 +97,9 @@ import './classes/ui/ContextPanel.js';
 import './classes/ui/PanelButton.js';
 import './classes/ui/PanelSplitButton.js';
 import './classes/ui/ButtonDialog.js';
+import './classes/ui/RepeatableItem.js';
+import './classes/ui/Repeatable.js';
+import './classes/ui/CustomValue.js';
 
 // tinymce.*
 import './classes/AddOnManager.js';

@@ -22,7 +22,7 @@
          * @param {Editor} ed Optional the editor instance this button is for.
          */
     PanelSplitButton: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
     },
 
     /**

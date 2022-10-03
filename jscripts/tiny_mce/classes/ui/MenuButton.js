@@ -60,7 +60,7 @@
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
     MenuButton: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       /**
 			 * Fires when the menu is rendered.

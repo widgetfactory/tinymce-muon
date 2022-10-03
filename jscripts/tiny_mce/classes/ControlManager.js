@@ -78,7 +78,7 @@
      * @return {tinymce.ui.Control} Control instance that got disabled or null if it wasn't found.
      */
     setDisabled: function (id, s) {
-      var c = c = this.get(id);
+      var c = this.get(id);
 
       if (c) {
         c.setDisabled(s);
@@ -617,6 +617,45 @@
       return self.add(c);
     },
 
+    createCustomValue: function (id, s) {
+      var self = this,
+        ed = self.editor,
+        c;
+
+      id = self.prefix + id;
+
+      c = new tinymce.ui.CustomValue(id, s, ed);
+
+      return self.add(c);
+    },
+
+    createRepeatable: function (id, s) {
+      var self = this,
+        ed = self.editor,
+        c, cls;
+
+      id = self.prefix + id;
+
+      c = self.get(id);
+
+      if (c) {
+        return c;
+      }
+
+      s.scope = s.scope || ed;
+
+      s = extend({
+        'class': 'mce_' + id,
+        scope: s.scope,
+        control_manager: self
+      }, s);
+
+      cls = tinymce.ui.Repeatable;
+      c = new cls(id, s, ed);
+
+      return self.add(c);
+    },
+
     /**
      * Creates a panel container control instance by id.
      *
@@ -716,21 +755,14 @@
      * @method createLayout
      * @param {String} id Unique id for the new toolbar container control instance. For example "toolbar1".
      * @param {Object} s Optional settings object for the control.
-     * @param {Object} cc Optional control class to use instead of the default one.
      * @return {tinymce.ui.Control} Control instance that got created and added.
      */
-    createForm: function (id, s, cc) {
+    createForm: function (id, s) {
       var c, self = this,
         cls;
 
-      c = self.get(id);
-
-      if (c) {
-        return c;
-      }
-
       id = self.prefix + id;
-      cls = cc || self._cls.form || tinymce.ui.Form;
+      cls = tinymce.ui.Form;
       c = new cls(id, s, self.editor);
 
       return self.add(c);

@@ -15,6 +15,7 @@
  * @class tinymce.ui.Container
  * @extends tinymce.ui.Control
  */
+
 tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 	/**
 	 * Base contrustor a new container control instance.
@@ -25,7 +26,11 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 	 * @param {Object} settings Optional name/value settings object.
 	 */
 	Container: function (id, settings, editor) {
-		this.parent(id, settings, editor);
+		var self = this;
+
+		settings = settings || {};
+
+		this._super(id, settings, editor);
 
 		/**
 		 * Array of controls added to the container.
@@ -36,6 +41,22 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 		this.controls = [];
 
 		this.lookup = {};
+
+		if (settings.controls) {
+			tinymce.each(settings.controls, function (ctrl) {
+				self.add(ctrl);
+			});
+		}
+	},
+
+	postRender: function () {
+		var i;
+
+		this._super();
+
+		for (i = 0; i < this.controls.length; i++) {
+			this.controls[i].postRender();
+		}
 	},
 
 	/**
@@ -49,7 +70,21 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 		this.lookup[ctrl.id] = ctrl;
 		this.controls.push(ctrl);
 
+		ctrl.parent(this);
+
 		return ctrl;
+	},
+
+	destroy: function () {
+		var i;
+
+		this._super();
+
+		for (i = 0; i < this.controls.length; i++) {
+			this.controls[i].destroy();
+		}
+
+		delete this.lookup[this.id];
 	},
 
 	/**

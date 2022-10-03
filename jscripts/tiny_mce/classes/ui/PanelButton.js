@@ -23,7 +23,7 @@
          * @param {Editor} ed Optional the editor instance this button is for.
          */
     PanelButton: function (id, s, ed) {
-      this.parent(id, s, ed);
+      this._super(id, s, ed);
 
       this.settings = s = tinymce.extend({
       }, this.settings);
@@ -138,7 +138,7 @@
     },
 
     destroy: function () {
-      this.parent();
+      this._super();
 
       Event.clear(this.id + '_panel');
       DOM.remove(this.id + '_panel');

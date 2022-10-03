@@ -26,7 +26,7 @@
 		 * @param {Object} s Optional name/value settings object.
 		 */
 		MenuItem: function (id, settings) {
-			this.parent(id, settings);
+			this._super(id, settings);
 		},
 
 		/**
@@ -59,7 +59,7 @@
 		 * @method postRender
 		 */
 		postRender: function () {
-			this.parent();
+			this._super();
 
 			// Set pending state
 			if (tinymce.is(this.selected)) {
