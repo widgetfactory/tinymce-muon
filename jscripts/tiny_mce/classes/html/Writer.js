@@ -28,7 +28,7 @@
  * @method Writer
  * @param {Object} settings Name/value settings object.
  */
-tinymce.html.Writer = function (settings) {
+tinymce.html.Writer = function (settings, schema) {
   var html = [],
     indent, indentBefore, indentAfter, encode, htmlOutput;
 
@@ -79,7 +79,13 @@ tinymce.html.Writer = function (settings) {
       if (!empty || htmlOutput) {
         html[html.length] = '>';
       } else {
-        html[html.length] = ' />';
+        // use void tag
+        if (settings.schema == 'html5-strict') {
+          html[html.length] = '>';
+        // use self-closing tag
+        } else {
+          html[html.length] = ' />';
+        }
       }
 
       if (empty && indent && indentAfter[name] && html.length > 0) {

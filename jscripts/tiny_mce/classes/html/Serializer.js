@@ -29,7 +29,7 @@
 	 */
   tinymce.html.Serializer = function (settings, schema) {
     var self = this,
-      writer = new tinymce.html.Writer(settings);
+      writer = new tinymce.html.Writer(settings, schema);
 
     settings = settings || {};
     settings.validate = "validate" in settings ? settings.validate : true;
