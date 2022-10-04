@@ -49,16 +49,6 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 		}
 	},
 
-	postRender: function () {
-		var i;
-
-		this._super();
-
-		for (i = 0; i < this.controls.length; i++) {
-			this.controls[i].postRender();
-		}
-	},
-
 	/**
 	 * Adds a control to the collection of controls for the container.
 	 *

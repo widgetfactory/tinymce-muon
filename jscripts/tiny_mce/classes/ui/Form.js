@@ -97,6 +97,16 @@
       }
 
       return false;
+    },
+
+    postRender: function () {
+      var i;
+  
+      this._super();
+  
+      for (i = 0; i < this.controls.length; i++) {
+        this.controls[i].postRender();
+      }
     }
   });
 })(tinymce);
