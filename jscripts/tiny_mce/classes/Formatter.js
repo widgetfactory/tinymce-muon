@@ -117,7 +117,7 @@
 
         alignleft: [
           {
-            selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+            selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
             styles: {
               textAlign: 'left'
             },
@@ -143,7 +143,7 @@
 
         aligncenter: [
           {
-            selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+            selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
             styles: {
               textAlign: 'center'
             },
@@ -181,7 +181,7 @@
 
         alignright: [
           {
-            selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+            selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
             styles: {
               textAlign: 'right'
             },
@@ -207,7 +207,7 @@
 
         alignfull: [
           {
-            selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+            selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
             styles: {
               textAlign: 'justify'
             },
