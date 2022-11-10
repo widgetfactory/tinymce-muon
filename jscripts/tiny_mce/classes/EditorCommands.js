@@ -818,6 +818,11 @@
       'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function (command) {
         var name = 'align' + command.substring(7);
         var nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
+
+        if (selection.getNode().nodeName === 'FIGCAPTION') {
+          nodes = [selection.getNode()];
+        }
+
         var matches = tinymce.map(nodes, function (node) {
           return !!formatter.matchNode(node, name);
         });
