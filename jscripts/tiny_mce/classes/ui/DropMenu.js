@@ -798,6 +798,12 @@
           });
         }
 
+        if (s.svg) {
+          DOM.add(item, 'span', {
+            'class': 'mceIcon mceIconSvg'
+          }, s.svg);
+        }
+
         var txt = DOM.add(item, s.element || 'span', {
           'class': 'mceText',
           role: 'presentation'
