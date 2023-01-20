@@ -45,7 +45,7 @@
 
       if (s.picker) {
         var icon = s.picker_icon || 'file';
-        html += '<button class="mceButton mceButtonPicker" id="' + this.id + '_picker" title="' + DOM.encode(s.picker_label || '') + '"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
+        html += '<button type="button" class="mceButton mceButtonPicker" id="' + this.id + '_picker" title="' + DOM.encode(s.picker_label || '') + '"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
       }
 
       if (s.upload) {
@@ -101,8 +101,9 @@
       if (s.picker) {
         DOM.addClass(this.id, 'mceUrlBoxPicker');
 
-        Event.add(this.id + '_picker', 'click', function (e) {
-          Event.cancel(e);
+        Event.add(this.id + '_picker', 'click', function (e) {          
+          
+          e.preventDefault();
           s.onpick.call(self);
         });
       }
@@ -115,11 +116,11 @@
             s.upload.call(self, e, this.files[0]);
           }
 
-          Event.cancel(e);
+          e.preventDefault();
         });
 
         DOM.bind(this.id, 'drag dragstart dragend dragover dragenter dragleave', function (e) {
-          Event.cancel(e);
+          e.preventDefault();
         });
 
         DOM.bind(this.id, 'dragover dragenter', function () {
@@ -142,7 +143,7 @@
             }
           }
 
-          Event.cancel(e);
+          e.preventDefault();
         });
       }
     }
