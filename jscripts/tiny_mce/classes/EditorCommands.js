@@ -817,10 +817,11 @@
       // Override justify commands
       'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function (command) {
         var name = 'align' + command.substring(7);
-        var nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
+        var node = selection.getNode(), nodes = selection.isCollapsed() ? [dom.getParent(node, dom.isBlock)] : selection.getSelectedBlocks();
 
-        if (selection.getNode().nodeName === 'FIGCAPTION') {
-          nodes = [selection.getNode()];
+        // special case for figcaption
+        if (node.nodeName == 'FIGCAPTION') {
+          nodes = [node];
         }
 
         var matches = tinymce.map(nodes, function (node) {
