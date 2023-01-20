@@ -677,7 +677,7 @@
           function process(node) {
             var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
 
-            if (isBogusBr(node) || isCaretNode(node) || isBookmarkNode(node)) {
+            if (isBogusBr(node) || isBookmarkNode(node)) {
               return;
             }
 
