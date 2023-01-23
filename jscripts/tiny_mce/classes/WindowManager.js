@@ -173,6 +173,8 @@
         });
       }
 
+      f.buttons = f.buttons || [];
+
       url = f.url || f.file;
 
       if (url) {
@@ -196,73 +198,13 @@
           DOM.addClass(id, 'mceModal' + ucfirst(f.type));
         }
 
-        f.buttons = f.buttons || [
-          {
+        if (!f.buttons.length) {
+          f.buttons.push({
             id: 'cancel',
             title: self.editor.getLang('cancel', 'Cancel'),
             onclick: function (e) {
               Event.cancel(e);
               self.close(null, id);
-            }
-          }
-        ];
-
-        if (f.buttons.length) {
-          // add footer
-          DOM.add(DOM.select('.mceModalContainer', id), 'div', { 'class': 'mceModalFooter', id: id + '_footer' });
-
-          // add buttons
-          each(f.buttons, function (button) {
-
-            // patch in close function for cancel button
-            if (button.id === 'cancel') {
-              button.onclick = function (e) {
-                self.close(null, id);
-              };
-            }
-
-            var attribs = {
-              id: id + '_' + button.id,
-              'class': 'mceButton',
-              type: 'button'
-            };
-
-            if (button.autofocus) {
-              attribs.autofocus = true;
-            }
-
-            button.title = button.title || 'OK';
-
-            var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
-
-            if (button.icon) {
-              DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
-            }
-
-            each(tinymce.explode(button.classes), function (cls) {
-              DOM.addClass(btn, 'mceButton' + ucfirst(cls));
-            });
-
-            // process passed in onclick
-            if (button.onclick) {
-              Event.add(btn, 'click', function (e) {
-                Event.cancel(e);
-                button.onclick.call(self, e);
-              });
-            }
-
-            // a submit is simply an onclick with a built in close
-            if (button.onsubmit) {
-              Event.add(btn, 'click', function (e) {
-                Event.cancel(e);
-                button.onsubmit.call(self, e);
-
-                if (e.cancelSubmit) {
-                  return;
-                }
-
-                self.close(null, id);
-              });
             }
           });
         }
@@ -291,8 +233,10 @@
             ctrl.renderTo(form);
 
             // add onClose event to destroy controls
-            self.onClose.add(function () {
-              ctrl.destroy();
+            self.onClose.add(function (e, win) {              
+              if (win.id == id) {
+                ctrl.destroy();
+              }
             });
           });
         }
@@ -343,6 +287,66 @@
 
             e.preventDefault();
             e.stopImmediatePropagation();
+          }
+        });
+      }
+
+      if (f.buttons.length) {
+        // add footer
+        DOM.add(DOM.select('.mceModalContainer', id), 'div', { 'class': 'mceModalFooter', id: id + '_footer' });
+
+        // add buttons
+        each(f.buttons, function (button) {
+
+          // patch in close function for cancel button
+          if (button.id === 'cancel') {
+            button.onclick = function (e) {
+              self.close(null, id);
+            };
+          }
+
+          var attribs = {
+            id: id + '_' + button.id,
+            'class': 'mceButton',
+            type: 'button'
+          };
+
+          if (button.autofocus) {
+            attribs.autofocus = true;
+          }
+
+          button.title = button.title || 'OK';
+
+          var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
+
+          if (button.icon) {
+            DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
+          }
+
+          each(tinymce.explode(button.classes), function (cls) {
+            DOM.addClass(btn, 'mceButton' + ucfirst(cls));
+          });
+
+          // process passed in onclick
+          if (button.onclick) {
+            Event.add(btn, 'click', function (e) {
+              Event.cancel(e);
+              button.onclick.call(self, e);
+            });
+          }
+
+          // a submit is simply an onclick with a built in close
+          if (button.onsubmit) {
+            Event.add(btn, 'click', function (e) {
+              Event.cancel(e);
+              button.onsubmit.call(self, e);
+
+              if (e.cancelSubmit) {
+                return;
+              }
+
+              self.close(null, id);
+            });
           }
         });
       }
@@ -496,7 +500,7 @@
         self.editor.focus();
       }
 
-      self.onClose.dispatch(self);
+      self.onClose.dispatch(self, win);
 
       var f = win.features || {};
 
