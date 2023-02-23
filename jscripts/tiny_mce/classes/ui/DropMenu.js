@@ -777,7 +777,7 @@
       } else {
         DOM.setAttrib(item, 'role', 'option');
 
-        if (s.icon || s.icon_src) {
+        if ((s.icon || s.icon_src) && (!s.svg && !s.image)) {
           icon = DOM.add(item, 'span', {
             'class': 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')
           });
@@ -790,7 +790,7 @@
 
           DOM.addClass(item, 'mceHasIcon');
         }
-
+        
         if (s.image) {
           DOM.add(item, 'span', {
             'class': 'mceImage',
