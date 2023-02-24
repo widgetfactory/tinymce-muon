@@ -740,6 +740,8 @@
       });
 
       this.onPostRender.dispatch(this, DOM.get(this.id));
+
+      this.rendered = true;
     },
 
     /**

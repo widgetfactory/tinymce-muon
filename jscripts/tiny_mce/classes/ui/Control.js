@@ -182,6 +182,8 @@
       }
 
       this._elm = DOM.get(this.id);
+
+      this.rendered = true;
     },
 
     parent: function (ctrl) {

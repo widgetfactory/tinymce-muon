@@ -118,6 +118,8 @@
         }
       });
 
+      this.rendered = true;
+
       this.onPostRender.dispatch(this, DOM.get(this.id));
     }
   });

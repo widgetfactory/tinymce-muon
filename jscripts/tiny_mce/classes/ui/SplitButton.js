@@ -173,6 +173,8 @@
       Event.add([self.id, self.id + '_open'], 'blur', function () {
         self._focused = 0;
       });
+
+      this.rendered = true;
     },
 
     destroy: function () {
