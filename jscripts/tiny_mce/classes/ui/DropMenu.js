@@ -266,6 +266,10 @@
         co = DOM.get('menu_' + self.id);
       }
 
+      if (!co) {
+        return;
+      }
+
       DOM.show(co);
       self.update();
 
