@@ -124,7 +124,7 @@
     self.onBeforeSetContent.add(function (e, args) {
       if (args.format !== 'raw') {
         var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
-        args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
+        args.content = new tinymce.html.Serializer({ validate: false }, editor.schema).serialize(node);
       }
     });
 
