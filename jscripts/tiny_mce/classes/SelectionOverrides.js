@@ -29,7 +29,7 @@
   var NodeType = tinymce.dom.NodeType, RangeUtils = tinymce.dom.RangeUtils;
   var VK = tinymce.VK, Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
 
-  var Dispatcher = tinymce.util.Dispatcher;
+  var Dispatcher = tinymce.util.Dispatcher, DragDropOverrides = tinymce.DragDropOverrides;
 
   var curry = Fun.curry,
     isContentEditableTrue = NodeType.isContentEditableTrue,
@@ -618,14 +618,16 @@
         editor.dom.bind(editor.getBody(), 'touchend', function (e) {
           var contentEditableRoot = getContentEditableRoot(e.target);
 
-          if (isContentEditableFalse(contentEditableRoot)) {
-            if (!moved) {
-              e.preventDefault();
-              setContentEditableSelection(selectNode(contentEditableRoot));
-
-              // fire fake event
-              editor.onContentEditableSelect.dispatch(editor, e);
+          if (contentEditableRoot) {
+            if (isContentEditableFalse(contentEditableRoot)) {
+              if (!moved) {
+                e.preventDefault();
+                setContentEditableSelection(selectNode(contentEditableRoot));
+              }
             }
+
+            // fire fake event
+            editor.onContentEditableSelect.dispatch(editor, e);
           }
         });
       }
@@ -679,8 +681,7 @@
             e.preventDefault();
             setContentEditableSelection(selectNode(contentEditableRoot));
 
-            // fire fake event
-            editor.onContentEditableSelect.dispatch(editor, e);
+
           } else {
             /*if (!isXYWithinRange(e.clientX, e.clientY, editor.selection.getRng())) {
               editor.selection.placeCaretAt(e.clientX, e.clientY);
@@ -690,6 +691,9 @@
               editor.selection.placeCaretAt(e.clientX, e.clientY);
             }
           }
+
+          // fire fake event
+          editor.onContentEditableSelect.dispatch(editor, e);
         } else {
           // Remove needs to be called here since the mousedown might alter the selection without calling selection.setRng
           // and therefore not fire the AfterSetSelectionRange event.
@@ -879,6 +883,8 @@
           }
         }
       });
+
+      DragDropOverrides.init(editor);
     }
 
     function isWithinCaretContainer(node) {
