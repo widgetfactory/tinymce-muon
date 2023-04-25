@@ -714,7 +714,7 @@ tinymce.util.Quirks = function (editor) {
       customDelete(true);
     });
 
-    editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+    /*editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
       dragStartRng = selection.getRng();
       setMceInternalContent(e);
     });
@@ -744,7 +744,7 @@ tinymce.util.Quirks = function (editor) {
           }, 0);
         }
       }
-    });
+    });*/
   }
 
   /**
