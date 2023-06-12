@@ -737,8 +737,8 @@
         }
       });
 
-      // Keep scripts from executing
-      self.parser.addNodeFilter('script', function (nodes) {
+      // Keep scripts from executing - removed as this is handled by the Code plugin by placeholder conversion
+      /*self.parser.addNodeFilter('script', function (nodes) {
         var i = nodes.length,
           node;
 
@@ -746,7 +746,7 @@
           node = nodes[i];
           node.attr('type', 'mce-' + (node.attr('type') || 'text/javascript'));
         }
-      });
+      });*/
 
       self.parser.addNodeFilter('#cdata', function (nodes) {
         var i = nodes.length,
@@ -826,6 +826,8 @@
       self.editorCommands = new tinymce.EditorCommands(self);
 
       self._selectionOverrides = new tinymce.SelectionOverrides(self);
+
+      self.textPattern = new tinymce.TextPattern(self);
 
       self.onExecCommand.add(function (editor, command) {
         // Don't refresh the select lists until caret move
