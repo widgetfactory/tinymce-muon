@@ -147,11 +147,9 @@ tinymce.util.Quirks = function (editor) {
    * fix seemed like a huge task. I hope we can remove this before the year 2030.
    */
   function cleanupStylesWhenDeleting() {
-    var doc = editor.getDoc(),
-      dom = editor.dom,
+    var dom = editor.dom,
       selection = editor.selection;
-    var MutationObserver = window.MutationObserver,
-      dragStartRng;
+    var MutationObserver = window.MutationObserver;
 
     function isTrailingBr(node) {
       var blockElements = dom.schema.getBlockElements(),
@@ -600,11 +598,6 @@ tinymce.util.Quirks = function (editor) {
       tinymce.each(editor.dom.select('span[mce-data-marked]'), function (span) {
         span.removeAttribute('mce-data-marked');
       });
-    }
-
-    function transactCustomDelete(isForward) {
-      customDelete(isForward);
-      editor.undoManager.add();
     }
 
     editor.onKeyDown.add(function (editor, e) {
