@@ -250,6 +250,46 @@ function WordFilter(editor, content) {
     content = content.replace(/<b[^>]+id="?docs-internal-[^>]*>/gi, '');
     content = content.replace(/<br class="?Apple-interchange-newline"?>/gi, '');
 
+    // Remove basic Word junk
+    content = Utils.filter(content, [
+        // Word comments like conditional comments etc
+        /<!--[\s\S]+?-->/gi,
+
+        // Remove comments, scripts (e.g., msoShowComment), XML tag, VML content,
+        // MS Office namespaced tags, and a few other tags
+        /<(!|script[^>]*>.*?<\/script(?=[>\s])|\/?(\?xml(:\w+)?|meta|link|\w:\w+)(?=[\s\/>]))[^>]*>/gi,
+
+        // Convert <s> into <strike> for line-though
+        [/<(\/?)s>/gi, "<$1strike>"],
+
+        // Replace nsbp entites to char since it's easier to handle
+        [/&nbsp;/gi, "\u00a0"],
+
+        // Convert <span style="mso-spacerun:yes">___</span> to string of alternating
+        // breaking/non-breaking spaces of same length
+        [/<span\s+style\s*=\s*"\s*mso-spacerun\s*:\s*yes\s*;?\s*"\s*>([\s\u00a0]*)<\/span>/gi,
+            function (str, spaces) {
+                return (spaces.length > 0) ?
+                    spaces.replace(/./, " ").slice(Math.floor(spaces.length / 2)).split("").join("\u00a0") : "";
+            }
+        ]
+    ]);
+
+    // replace <u> and <strike> with styles
+    if (settings.inline_styles) {
+        content = content.replace(/<(u|strike)>/gi, function (match, node) {
+            var value = (node === "u") ? "underline" : "line-through";
+            return '<span style="text-decoration:' + value + ';">';
+        });
+
+        content = content.replace(/<\/(u|strike)>/g, '</span>');
+    }
+
+    // remove double linebreaks (IE issue?)
+    if (settings.forced_root_block) {
+        content = content.replace(/<br><br>/gi, '');
+    }
+
     // styles to keep
     keepStyles = settings.paste_retain_style_properties;
     // styles to remove
@@ -619,59 +659,9 @@ function WordFilter(editor, content) {
         return null;
     }
 
-    // Remove basic Word junk
-    content = Utils.filter(content, [
-        // Word comments like conditional comments etc
-        /<!--[\s\S]+?-->/gi,
-
-        // Remove comments, scripts (e.g., msoShowComment), XML tag, VML content,
-        // MS Office namespaced tags, and a few other tags
-        /<(!|script[^>]*>.*?<\/script(?=[>\s])|\/?(\?xml(:\w+)?|meta|link|\w:\w+)(?=[\s\/>]))[^>]*>/gi,
-
-        // Convert <s> into <strike> for line-though
-        [/<(\/?)s>/gi, "<$1strike>"],
-
-        // Replace nsbp entites to char since it's easier to handle
-        [/&nbsp;/gi, "\u00a0"],
-
-        // Convert <span style="mso-spacerun:yes">___</span> to string of alternating
-        // breaking/non-breaking spaces of same length
-        [/<span\s+style\s*=\s*"\s*mso-spacerun\s*:\s*yes\s*;?\s*"\s*>([\s\u00a0]*)<\/span>/gi,
-            function (str, spaces) {
-                return (spaces.length > 0) ?
-                    spaces.replace(/./, " ").slice(Math.floor(spaces.length / 2)).split("").join("\u00a0") : "";
-            }
-        ]
-    ]);
-
-    // replace <u> and <strike> with styles
-    if (settings.inline_styles) {
-        content = content.replace(/<(u|strike)>/gi, function (match, node) {
-            var value = (node === "u") ? "underline" : "line-through";
-            return '<span style="text-decoration:' + value + ';">';
-        });
-
-        content = content.replace(/<\/(u|strike)>/g, '</span>');
-    }
-
-    // cleanup table border
-    content = content.replace(/<table([^>]+)>/, function ($1, $2) {
-
-        if (settings.schema !== "html4") {
-            $2 = $2.replace(/(border|cell(padding|spacing))="([^"]+)"/gi, '');
-        }
-
-        return '<table' + $2 + '>';
-    });
-
-    // remove double linebreaks (IE issue?)
-    if (settings.forced_root_block) {
-        content = content.replace(/<br><br>/gi, '');
-    }
-
     var validElements = settings.paste_word_valid_elements || (
         '-strong/b,-em/i,-u,-span,-p,-ol[type|start|reversed],-ul,-li,-h1,-h2,-h3,-h4,-h5,-h6,' +
-        '-p/div,-a[href|name],img[src|alt|width|height],sub,sup,strike,br,del,table[width|border|cellpadding|cellspacing],tr,' +
+        '-p/div,-a[href|name],img[src|alt|width|height],sub,sup,strike,br,del,table[width],tr,' +
         'td[colspan|rowspan|width|valign],th[colspan|rowspan|width],thead,tfoot,tbody'
     );
 
@@ -685,6 +675,11 @@ function WordFilter(editor, content) {
         valid_elements: validElements,
         valid_children: '-li[p]'
     });
+    
+    // allow for extended table attributes
+    if (settings.schema !== 'html5' && schema.getElementRule('table')) {
+        schema.addValidElements('table[width|border|cellpadding|cellspacing]');
+    }
 
     // Add style/class attribute to all element rules since the user might have removed them from
     // paste_word_valid_elements config option and we need to check them for properties
@@ -854,6 +849,19 @@ function WordFilter(editor, content) {
 
             if (node.parent && !node.attributes.length) {
                 node.unwrap();
+            }
+        }
+    });
+
+    domParser.addNodeFilter('td', function (nodes) {
+        var i = nodes.length,
+            node, firstChild, lastChild;
+
+        while (i--) {
+            node = nodes[i], firstChild = node.firstChild, lastChild = node.lastChild;
+
+            if (firstChild.name === "p" && firstChild === lastChild) {
+                firstChild.unwrap();
             }
         }
     });
