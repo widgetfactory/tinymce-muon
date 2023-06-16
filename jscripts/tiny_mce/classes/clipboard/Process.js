@@ -90,12 +90,6 @@ function postProcess(editor, o) {
         return /^(file:|data:image)\//i.test(value);
     }
 
-    function canUploadDataImage() {
-        var uploader = editor.plugins.upload;
-
-        return uploader && uploader.plugins.length;
-    }
-
     // Process images - remove local
     each(dom.select('img', o.node), function (el) {
         var src = dom.getAttrib(el, 'src');
@@ -103,16 +97,13 @@ function postProcess(editor, o) {
         // remove or processs for upload img element if blank, local file url or base64 encoded
         if (!src || isValidDataUriImage(src)) {
             // leave it as it is to be processed as a blob (but skip file:// images)
-            if (settings.paste_data_images !== false && src.indexOf('file://') === -1) {
-                return true;
-            }
-
-            if (settings.paste_upload_data_images != false && canUploadDataImage()) {
+            if (settings.paste_upload_data_images) {
                 // add marker
                 dom.setAttrib(el, 'data-mce-upload-marker', '1');
             } else {
                 dom.remove(el);
             }
+             
         } else {
             dom.setAttrib(el, 'src', editor.convertURL(src));
         }
