@@ -80,10 +80,10 @@ tinymce.dom = {};
       var body = eventDoc.body;
 
       event.pageX = originalEvent.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                (doc && doc.clientLeft || body && body.clientLeft || 0);
+        (doc && doc.clientLeft || body && body.clientLeft || 0);
 
       event.pageY = originalEvent.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                (doc && doc.clientTop || body && body.clientTop || 0);
+        (doc && doc.clientTop || body && body.clientTop || 0);
     }
 
     // Add preventDefault method
@@ -437,14 +437,14 @@ tinymce.dom = {};
     };
 
     /**
-         * Fires the specified event on the specified target.
-         *
-         * @method fire
-         * @param {Object} target Target node/window or custom object.
-         * @param {String} name Event name to fire.
-         * @param {Object} args Optional arguments to send to the observers.
-         * @return {EventUtils} Event utils instance.
-         */
+     * Fires the specified event on the specified target.
+     *
+     * @method fire
+     * @param {Object} target Target node/window or custom object.
+     * @param {String} name Event name to fire.
+     * @param {Object} args Optional arguments to send to the observers.
+     * @return {EventUtils} Event utils instance.    
+     */
     self.fire = function (target, name, args) {
       var id;
 
@@ -473,13 +473,13 @@ tinymce.dom = {};
     };
 
     /**
-         * Removes all bound event listeners for the specified target. This will also remove any bound
-         * listeners to child nodes within that target.
-         *
-         * @method clean
-         * @param {Object} target Target node/window object.
-         * @return {EventUtils} Event utils instance.
-         */
+      * Removes all bound event listeners for the specified target. This will also remove any bound
+      * listeners to child nodes within that target.
+      *
+      * @method clean
+      * @param {Object} target Target node/window object.
+      * @return {EventUtils} Event utils instance.
+      */
     self.clean = function (target) {
       var i, children, unbind = self.unbind;
 
