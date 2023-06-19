@@ -809,6 +809,14 @@
        */
       self.formatter = new tinymce.Formatter(self);
 
+       /**
+       * Textpattern instance.
+       *
+       * @property textpattern
+       * @type tinymce.Textpattern
+       */
+      self.textpattern = new tinymce.TextPattern(self);
+
       /**
        * Undo manager instance, responsible for handling undo levels.
        /
@@ -829,8 +837,6 @@
       self._selectionOverrides = new tinymce.SelectionOverrides(self);
       // internal with no external interface
       self._clipBoard = new tinymce.Clipboard(self);
-
-      self.textPattern = new tinymce.TextPattern(self);
 
       self.onExecCommand.add(function (editor, command) {
         // Don't refresh the select lists until caret move
