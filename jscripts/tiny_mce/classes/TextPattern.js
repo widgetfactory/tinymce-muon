@@ -214,7 +214,8 @@ tinymce.TextPattern = function (editor) {
                 if (!pattern) {
                     return;
                 }
-
+                
+                // cancel newline on enter if the format removes the original pattern
                 if (pattern.remove) {
                     e.preventDefault();
                 }
@@ -329,7 +330,7 @@ tinymce.TextPattern = function (editor) {
         }
     });
 
-    editor.onKeyUp.add(function (ed, e) {
+    editor.onKeyUp.add(function (ed, e) {        
         if (e.keyCode == 32 && !tinymce.VK.modifierPressed(e)) {
             handleSpace();
         }
