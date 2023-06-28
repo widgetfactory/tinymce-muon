@@ -809,12 +809,12 @@
        */
       self.formatter = new tinymce.Formatter(self);
 
-       /**
-       * Textpattern instance.
-       *
-       * @property textpattern
-       * @type tinymce.Textpattern
-       */
+      /**
+      * Textpattern instance.
+      *
+      * @property textpattern
+      * @type tinymce.Textpattern
+      */
       self.textpattern = new tinymce.TextPattern(self);
 
       /**
@@ -932,12 +932,18 @@
         // Handle auto focus
         if (settings.auto_focus) {
           setTimeout(function () {
-            var ed = tinymce.get(settings.auto_focus);
 
-            ed.selection.select(ed.getBody(), 1);
-            ed.selection.collapse(1);
-            ed.getBody().focus();
-            ed.getWin().focus();
+            var focusEditor;
+
+            if (settings.auto_focus === true) {
+              focusEditor = self;
+            } else {
+              focusEditor = tinymce.get(settings.auto_focus);
+            }
+
+            if (!focusEditor.destroyed) {
+              focusEditor.focus();
+            }
           }, 100);
         }
       }
