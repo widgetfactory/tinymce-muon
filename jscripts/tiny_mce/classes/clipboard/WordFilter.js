@@ -853,30 +853,21 @@ function WordFilter(editor, content) {
         }
     });
 
-    domParser.addNodeFilter('td', function (nodes) {
-        var i = nodes.length,
-            node, firstChild, lastChild;
-
-        while (i--) {
-            node = nodes[i], firstChild = node.firstChild, lastChild = node.lastChild;
-
-            if (firstChild.name === "p" && firstChild === lastChild) {
-                firstChild.unwrap();
-            }
-        }
-    });
-
     // Remove single paragraphs in table cells
     if (settings.paste_remove_paragraph_in_table_cell) {
         domParser.addNodeFilter('td', function (nodes) {
             var i = nodes.length,
-                node, firstChild, lastChild;
+                node;
 
             while (i--) {
-                node = nodes[i], firstChild = node.firstChild, lastChild = node.lastChild;
+                node = nodes[i];
 
-                if (firstChild.name === "p" && firstChild === lastChild) {
-                    firstChild.unwrap();
+                if (!node.firstChild) {
+                    continue;
+                }
+
+                if (node.firstChild.name == "p" && node.firstChild === node.lastChild) {
+                    node.firstChild.unwrap();
                 }
             }
         });
