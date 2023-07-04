@@ -262,6 +262,9 @@
         each(self.items, function (o) {
           o.postRender();
         });
+
+        self.postRender();
+
       } else {
         co = DOM.get('menu_' + self.id);
       }
@@ -305,7 +308,7 @@
         n = e.target;
 
         // cancel on input click
-        if (n.nodeName == "INPUT") {
+        if (n.nodeName == "INPUT" || n.nodeName == 'TEXTAREA') {
           return;
         }
 
