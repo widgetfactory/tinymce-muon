@@ -510,9 +510,6 @@
         var root = dom.getRoot(),
           parent, editableRoot;
 
-        // use optional editable root or body
-        root = dom.get(editor.settings.editable_root) || root;
-
         // Get all parents until we hit a non editable parent or the root
         parent = node;
 
