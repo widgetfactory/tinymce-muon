@@ -1287,6 +1287,21 @@
       return self;
     },
 
+    getScrollContainer: function () {
+      var scrollContainer, node = this.dom.getRoot();
+  
+      while (node && node.nodeName != 'BODY') {
+        if (node.scrollHeight > node.clientHeight) {
+          scrollContainer = node;
+          break;
+        }
+  
+        node = node.parentNode;
+      }
+  
+      return scrollContainer;
+    },
+
     scrollIntoView: function (elm, alignToTop) {
       tinymce.dom.ScrollIntoView(this.editor, elm, alignToTop);
     },
