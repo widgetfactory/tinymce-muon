@@ -869,6 +869,19 @@
     };
 
     /**
+     * Returns a map with text block root elements.
+     *
+     * @method getTextRootBlockElements
+     * @return {Object} Name/value lookup map for block elements.
+     */
+    self.getTextRootBlockElements = function () {
+      return makeMap(
+        'td th li dt dd figcaption caption details summary',
+        textBlockElementsMap
+      );
+    };
+
+    /**
      * Returns a map of inline text format nodes for example strong/span or ins.
      *
      * @method getTextInlineElements
