@@ -153,7 +153,7 @@ tinymce.util.Quirks = function (editor) {
 
     function isTrailingBr(node) {
       var blockElements = dom.schema.getBlockElements(),
-        rootNode = editor.getBody();
+        rootNode = dom.getRoot();
 
       if (node.nodeName != 'BR') {
         return false;
@@ -185,14 +185,14 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function findCaretNode(node, forward, startNode) {
-      var walker, current, nonEmptyElements;
+      var walker, current, nonEmptyElements, rootNode = dom.getRoot();
 
       // Protect against the possibility we are asked to find a caret node relative
       // to a node that is no longer in the DOM tree. In this case attempting to
       // select on any match leads to a scenario where selection is completely removed
       // from the editor. This scenario is met in real world at a minimum on
       // WebKit browsers when selecting all and Cmd-X cutting to delete content.
-      if (!dom.isChildOf(node, editor.getBody())) {
+      if (!dom.isChildOf(node, rootNode)) {
         return;
       }
 
@@ -514,16 +514,16 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function customDelete(isForward) {
-      var mutationObserver, rng, caretElement;
+      var mutationObserver, rng, caretElement, rootNode = editor.dom.getRoot();
 
       if (handleTextBlockMergeDelete(isForward)) {
         return;
       }
 
-      tinymce.each(editor.getBody().getElementsByTagName('*'), function (elm) {
+      tinymce.each(rootNode.getElementsByTagName('*'), function (elm) {
         // Mark existing spans
         if (elm.tagName == 'SPAN') {
-          elm.setAttribute('mce-data-marked', 1);
+          elm.setAttribute('data-mce-marked', 1);
         }
 
         // Make sure all elements has a data-mce-style attribute
@@ -547,7 +547,7 @@ tinymce.util.Quirks = function (editor) {
       caretElement = rng.startContainer.parentNode;
 
       tinymce.each(mutationObserver.takeRecords(), function (record) {
-        if (!dom.isChildOf(record.target, editor.getBody())) {
+        if (!dom.isChildOf(record.target, rootNode)) {
           return;
         }
 
@@ -573,7 +573,7 @@ tinymce.util.Quirks = function (editor) {
             node.removeAttribute("style");
           }
 
-          if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
+          if (node.nodeName == "SPAN" && !node.getAttribute('data-mce-marked')) {
             var offset, container;
 
             if (node == caretElement) {
@@ -595,8 +595,8 @@ tinymce.util.Quirks = function (editor) {
       mutationObserver.disconnect();
 
       // Remove any left over marks
-      tinymce.each(editor.dom.select('span[mce-data-marked]'), function (span) {
-        span.removeAttribute('mce-data-marked');
+      tinymce.each(editor.dom.select('span[data-mce-marked]', editor.dom.getRoot()), function (span) {
+        span.removeAttribute('data-mce-marked');
       });
     }
 
@@ -819,23 +819,16 @@ tinymce.util.Quirks = function (editor) {
 
     editor.onKeyDown.add(function (editor, e) {
       var keyCode = e.keyCode,
-        isCollapsed, body;
+        isCollapsed, root;
 
       // Empty the editor if it's needed for example backspace at <p><b>|</b></p>
       if (!isDefaultPrevented(e) && (keyCode == DELETE || keyCode == BACKSPACE)) {
         isCollapsed = editor.selection.isCollapsed();
-        body = editor.getBody();
+        root = dom.getRoot();//editor.getBody();
 
         // Selection is collapsed but the editor isn't empty
-        if (isCollapsed && !dom.isEmpty(body)) {
-
-          if (!tinymce.util.isFakeRoot(body.firstChild)) {
-            return;
-          }
-
-          if (tinymce.util.isFakeRoot(body.firstChild) && !dom.isEmpty(body.firstChild)) {
-            return;
-          }
+        if (isCollapsed && !dom.isEmpty(root)) {
+          return;
         }
 
         // Selection isn't collapsed but not all the contents is selected
@@ -847,10 +840,10 @@ tinymce.util.Quirks = function (editor) {
         e.preventDefault();
         editor.setContent('');
 
-        if (body.firstChild && dom.isBlock(body.firstChild)) {
-          editor.selection.setCursorLocation(body.firstChild, 0);
+        if (root.firstChild && dom.isBlock(root.firstChild)) {
+          editor.selection.setCursorLocation(root.firstChild, 0);
         } else {
-          editor.selection.setCursorLocation(body, 0);
+          editor.selection.setCursorLocation(root, 0);
         }
 
         editor.nodeChanged();
@@ -970,7 +963,7 @@ tinymce.util.Quirks = function (editor) {
       return function () {
         var target = selection.getStart();
 
-        if (target !== editor.getBody()) {
+        if (target !== dom.getRoot()) {
           dom.setAttrib(target, "style", null);
 
           each(template, function (attr) {
@@ -1530,7 +1523,7 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function isRootNode(node) {
-      return node == editor.getBody() || tinymce.util.isFakeRoot(node);
+      return node == editor.dom.getRoot();
     }
 
     function isLastChild(node) {
@@ -1567,7 +1560,7 @@ tinymce.util.Quirks = function (editor) {
     function moveCursorToEnd(e) {
       var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
-      if (!node || node == editor.getBody()) {
+      if (!node || node == editor.dom.getRoot()) {
         return;
       }
 
