@@ -50,6 +50,38 @@
       undef,
       getContentEditable = dom.getContentEditable;
 
+    var hasCaretNodeSibling = function (node) {
+      var sibling = node.parentNode.firstChild;
+
+      while (sibling) {
+        if (sibling !== node && isCaretNode(sibling)) {
+          return true;
+        }
+
+        sibling = sibling.nextSibling;
+      }
+
+      return false;
+    };
+
+    var canFormatBR = function (editor, format, node, parentName) {
+      // TINY-6483: Can format 'br' if it is contained in a valid empty block and an inline format is being applied
+      if (editor.settings.format_empty_lines !== false && format.inline && node.parentNode) {
+        
+        // allow links to wrap br tags
+        if (format.inline == 'a') {
+          return true;
+        }
+
+        var validBRParentElements = editor.schema.getTextRootBlockElements();
+
+        // If a caret node is present, the format should apply to that, not the br (applicable to collapsed selections)
+        return validBRParentElements[parentName] && !editor.dom.isEmpty(node.parentNode) && !hasCaretNodeSibling(node);
+      }
+
+      return false;
+    };
+
     function isTextBlock(name) {
       if (name.nodeType) {
         name = name.nodeName;
@@ -319,7 +351,7 @@
 
         blockquote: {
           block: 'blockquote',
-          wrapper: 1,
+          wrapper: true,
           remove: 'all'
         },
 
@@ -390,28 +422,6 @@
       // Register user defined formats
       register(ed.settings.formats);
     }
-
-    /*function addKeyboardShortcuts() {
-      // Add some inline shortcuts
-      ed.addShortcut('ctrl+b', 'bold_desc', 'Bold');
-      ed.addShortcut('ctrl+i', 'italic_desc', 'Italic');
-      ed.addShortcut('ctrl+u', 'underline_desc', 'Underline');
-
-      // BlockFormat shortcuts keys
-      for (var i = 1; i <= 6; i++) {
-        //ed.addShortcut('alt+shift+' + i, '', ['FormatBlock', false, 'h' + i]);
-        // keep legacy shortcuts
-        ed.addShortcut('ctrl+' + i, '', ['FormatBlock', false, 'h' + i]);
-
-      }
-
-      each(['p', 'div', 'address'], function (name, i) {
-        var n = 7 + i;
-
-        //ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
-        ed.addShortcut('ctrl+' + n, '', ['FormatBlock', false, name]);
-      });
-    }*/
 
     function addKeyboardShortcuts() {
       // Add some inline shortcuts
@@ -692,8 +702,8 @@
               hasContentEditableState = !isShortEnded(node); // We don't want to wrap the container only it's children
             }
 
-            // Stop wrapping on br elements - not sure if this should still be used... TODO
-            /*if (isEq(nodeName, 'br')) {
+            // Stop wrapping on br elements, but skip links
+            if (isEq(nodeName, 'br') && !canFormatBR(ed, format, node, parentName)) {
               currentWrapElm = 0;
 
               // Remove any br elements when we wrap things
@@ -702,7 +712,7 @@
               }
 
               return;
-            }*/
+            }
 
             // If node is wrapper type
             if (format.wrapper && matchNode(node, name, vars)) {
@@ -840,6 +850,11 @@
           if ((newWrappers.length > 1 || !isBlock(node)) && childCount === 0) {
             dom.remove(node, 1);
             return;
+          }
+
+          // remove leading linebreak, eg: <div><br />Some text</div>
+          if (childCount > 1 && isEq(node.firstChild.nodeName, 'BR')) {
+            dom.remove(node.firstChild);
           }
 
           // fontSize defines the line height for the whole branch of nested style wrappers,
