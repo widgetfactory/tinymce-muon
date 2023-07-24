@@ -381,7 +381,7 @@
       var self = this;
 
       /*eslint new-cap:0 */
-      return tinymce.dom.Sizzle(selector, self.get(scope) || self.settings.root_element || self.doc, []);
+      return tinymce.dom.Sizzle(selector, self.get(scope) || self.get(self.settings.root_element) || self.doc, []);
     },
 
     unique: function (arr) {
