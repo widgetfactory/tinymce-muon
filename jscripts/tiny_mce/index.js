@@ -44,9 +44,17 @@ import './classes/dom/Dimensions.js';
 
 import './classes/dom/RangeUtils.js';
 
+import './classes/dom/MousePosition';
+
 // tinymce.text.*
 import './classes/text/ExtendingChar.js';
 import './classes/text/Zwsp.js';
+
+// tinymce.textpattern.*
+import './classes/TextPattern.js';
+
+// tinymce.clipboard.*
+import './classes/clipboard/Clipboard.js';
 
 // tinymce.caret.*
 import './classes/caret/CaretBookmark.js';
@@ -121,4 +129,5 @@ import './classes/Formatter.js';
 import './classes/LegacyInput.js';
 import './classes/EnterKey.js';
 
+import './classes/DragDropOverrides.js';
 import './classes/SelectionOverrides.js';
