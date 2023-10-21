@@ -131,6 +131,11 @@
 			valid_styles: {
 				'*': 'color,font-size,font-family,background-color,font-weight,font-style,text-decoration,float,margin,margin-top,margin-right,margin-bottom,margin-left,display'
 			},
+			language_load: false,
+			compress: {
+				css: false,
+				javascript: false
+			},
 			init_instance_callback: function (ed) {
 				editor = ed;
 
@@ -150,7 +155,7 @@
 	<div id="qunit-testrunner-toolbar"></div>
 	<h2 id="qunit-userAgent"></h2>
 	<ol id="qunit-tests"></ol>
-	<textarea id="view" style="position: absolute; right: 0; top: 0"></textarea>
+	<div id="view" style="position: absolute; right: 0; top: 0"></div>
 	<div>
 		<a href="javascript:alert(tinymce.EditorManager.get('view').getContent({format : 'raw'}));">[getRawContents]</a>
 		<a href="javascript:alert(tinymce.EditorManager.get('view').getContent());">[getContents]</a>
