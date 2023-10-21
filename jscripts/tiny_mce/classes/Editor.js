@@ -4,8 +4,9 @@
  * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
  *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * License: http://www.tinymce.com/license - Inactive
+ * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * Contributing: http://www.tinymce.com/contributing - Inactive
  */
 
 (function (tinymce) {
@@ -332,7 +333,7 @@
         }
 
         if (s.theme && typeof s.theme != "function" && s.theme.charAt(0) != '-' && !ThemeManager.urls[s.theme]) {
-          ThemeManager.load(s.theme, 'themes/' + s.theme + '/editor_template' + tinymce.suffix + '.js');
+          ThemeManager.load(s.theme, 'themes/' + s.theme + '/theme' + tinymce.suffix + '.js');
         }
 
         each(explode(s.plugins), function (p) {
@@ -344,7 +345,7 @@
                 var defaultSettings = {
                   prefix: 'plugins/',
                   resource: dep,
-                  suffix: '/editor_plugin' + tinymce.suffix + '.js'
+                  suffix: '/plugin' + tinymce.suffix + '.js'
                 };
                 dep = PluginManager.createUrl(defaultSettings, dep);
                 PluginManager.load(dep.resource, dep);
@@ -353,7 +354,7 @@
               PluginManager.load(p, {
                 prefix: 'plugins/',
                 resource: p,
-                suffix: '/editor_plugin' + tinymce.suffix + '.js'
+                suffix: '/plugin' + tinymce.suffix + '.js'
               });
             }
           }
@@ -607,7 +608,7 @@
         self.onLoad.dispatch();
       };
 
-      DOM.setAttrib(ifr, "src", url || 'javascript:""');
+      DOM.setAttrib(ifr, "src", url || 'about:blank');
 
       self.contentAreaContainer = o.iframeContainer;
 

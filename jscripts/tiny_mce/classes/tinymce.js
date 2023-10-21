@@ -4,8 +4,9 @@
  * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
  *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * License: http://www.tinymce.com/license - Inactive
+ * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * Contributing: http://www.tinymce.com/contributing - Inactive
  */
 
 /* global CollectGarbage */
@@ -185,7 +186,7 @@
       }
 
       function getBase(n) {
-        if (n.src && /tiny_mce(|_gzip|_jquery|_prototype|_full)(_dev|_src)?.js/.test(n.src)) {
+        if (n.src && /tinymce(|_gzip|_jquery|_prototype|_full)(_dev|_src)?.js/.test(n.src)) {
           if (/_(src|dev)\.js/g.test(n.src)) {
             self.suffix = '_src';
           }

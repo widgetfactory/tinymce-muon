@@ -1,4 +1,4 @@
-/* eslint disable */
+/* eslint-disable */
 (function () {
   'use strict';
 
@@ -505,12 +505,12 @@
   		 * tinymce.create('tinymce.somepackage.SomeSubClass:tinymce.somepackage.SomeClass', {
   		 *     SomeSubClass: function() {
   		 *         // Class constructor
-  		 *         this.parent(); // Call parent constructor
+  		 *         this._super(); // Call parent constructor
   		 *     },
   		 *
   		 *     method : function() {
   		 *         // Some method
-  		 *         this.parent(); // Call parent method
+  		 *         this._super(); // Call parent method
   		 *     },
   		 *
   		 *     'static' : {
@@ -579,7 +579,7 @@
           } else {
             // Add inherit constructor
             ns[cn] = function () {
-              this.parent = sp[scn];
+              this._super = sp[scn];
               return c.apply(this, arguments);
             };
           }
@@ -595,7 +595,7 @@
             // Extend methods if needed
             if (sp[n]) {
               ns[cn].prototype[n] = function () {
-                this.parent = sp[n];
+                this._super = sp[n];
                 return f.apply(this, arguments);
               };
             } else {
@@ -1022,184 +1022,184 @@
    * @class tinymce.util.Delay
    */
   (function (tinymce) {
-    var requestAnimationFramePromise;
+  	var requestAnimationFramePromise;
 
-    function requestAnimationFrame(callback, element) {
-      var i, requestAnimationFrameFunc = window.requestAnimationFrame,
-        vendors = ['ms', 'moz', 'webkit'];
+  	function requestAnimationFrame(callback, element) {
+  		var i, requestAnimationFrameFunc = window.requestAnimationFrame,
+  			vendors = ['ms', 'moz', 'webkit'];
 
-      function featurefill(callback) {
-        window.setTimeout(callback, 0);
-      }
+  		function featurefill(callback) {
+  			window.setTimeout(callback, 0);
+  		}
 
-      for (i = 0; i < vendors.length && !requestAnimationFrameFunc; i++) {
-        requestAnimationFrameFunc = window[vendors[i] + 'RequestAnimationFrame'];
-      }
+  		for (i = 0; i < vendors.length && !requestAnimationFrameFunc; i++) {
+  			requestAnimationFrameFunc = window[vendors[i] + 'RequestAnimationFrame'];
+  		}
 
-      if (!requestAnimationFrameFunc) {
-        requestAnimationFrameFunc = featurefill;
-      }
+  		if (!requestAnimationFrameFunc) {
+  			requestAnimationFrameFunc = featurefill;
+  		}
 
-      requestAnimationFrameFunc(callback, element);
-    }
+  		requestAnimationFrameFunc(callback, element);
+  	}
 
-    function wrappedSetTimeout(callback, time) {
-      if (typeof time != 'number') {
-        time = 0;
-      }
+  	function wrappedSetTimeout(callback, time) {
+  		if (typeof time != 'number') {
+  			time = 0;
+  		}
 
-      return setTimeout(callback, time);
-    }
+  		return setTimeout(callback, time);
+  	}
 
-    function wrappedSetInterval(callback, time) {
-      if (typeof time != 'number') {
-        time = 1; // IE 8 needs it to be > 0
-      }
+  	function wrappedSetInterval(callback, time) {
+  		if (typeof time != 'number') {
+  			time = 1; // IE 8 needs it to be > 0
+  		}
 
-      return setInterval(callback, time);
-    }
+  		return setInterval(callback, time);
+  	}
 
-    function wrappedClearTimeout(id) {
-      return clearTimeout(id);
-    }
+  	function wrappedClearTimeout(id) {
+  		return clearTimeout(id);
+  	}
 
-    function wrappedClearInterval(id) {
-      return clearInterval(id);
-    }
+  	function wrappedClearInterval(id) {
+  		return clearInterval(id);
+  	}
 
-    function debounce(callback, time) {
-      var timer, func;
+  	function debounce(callback, time) {
+  		var timer, func;
 
-      func = function () {
-        var args = arguments;
+  		func = function () {
+  			var args = arguments;
 
-        clearTimeout(timer);
+  			clearTimeout(timer);
 
-        timer = wrappedSetTimeout(function () {
-          callback.apply(this, args);
-        }, time);
-      };
+  			timer = wrappedSetTimeout(function () {
+  				callback.apply(this, args);
+  			}, time);
+  		};
 
-      func.stop = function () {
-        clearTimeout(timer);
-      };
+  		func.stop = function () {
+  			clearTimeout(timer);
+  		};
 
-      return func;
-    }
+  		return func;
+  	}
 
-    tinymce.util.Delay = {
-      /**
-       * Requests an animation frame and fallbacks to a timeout on older browsers.
-       *
-           * @method requestAnimationFrame
-           * @param {function} callback Callback to execute when a new frame is available.
-           * @param {DOMElement} element Optional element to scope it to.
-           */
-      requestAnimationFrame: function (callback, element) {
-        if (requestAnimationFramePromise) {
-          requestAnimationFramePromise.then(callback);
-          return;
-        }
+  	tinymce.util.Delay = {
+  		/**
+  		 * Requests an animation frame and fallbacks to a timeout on older browsers.
+  		 *
+  		 * @method requestAnimationFrame
+  		 * @param {function} callback Callback to execute when a new frame is available.
+  		 * @param {DOMElement} element Optional element to scope it to.
+  		 */
+  		requestAnimationFrame: function (callback, element) {
+  			if (requestAnimationFramePromise) {
+  				requestAnimationFramePromise.then(callback);
+  				return;
+  			}
 
-        requestAnimationFramePromise = new Promise(function (resolve) {
-          if (!element) {
-            element = document.body;
-          }
+  			requestAnimationFramePromise = new Promise(function (resolve) {
+  				if (!element) {
+  					element = document.body;
+  				}
 
-          requestAnimationFrame(resolve, element);
-        }).then(callback);
-      },
+  				requestAnimationFrame(resolve, element);
+  			}).then(callback);
+  		},
 
-      /**
-           * Sets a timer in ms and executes the specified callback when the timer runs out.
-           *
-           * @method setTimeout
-           * @param {function} callback Callback to execute when timer runs out.
-           * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
-           * @return {Number} Timeout id number.
-           */
-      setTimeout: wrappedSetTimeout,
+  		/**
+  		 * Sets a timer in ms and executes the specified callback when the timer runs out.
+  		 *
+  		 * @method setTimeout
+  		 * @param {function} callback Callback to execute when timer runs out.
+  		 * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
+  		 * @return {Number} Timeout id number.
+  		 */
+  		setTimeout: wrappedSetTimeout,
 
-      /**
-           * Sets an interval timer in ms and executes the specified callback at every interval of that time.
-           *
-           * @method setInterval
-           * @param {function} callback Callback to execute when interval time runs out.
-           * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
-           * @return {Number} Timeout id number.
-           */
-      setInterval: wrappedSetInterval,
+  		/**
+  		 * Sets an interval timer in ms and executes the specified callback at every interval of that time.
+  		 *
+  		 * @method setInterval
+  		 * @param {function} callback Callback to execute when interval time runs out.
+  		 * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
+  		 * @return {Number} Timeout id number.
+  		 */
+  		setInterval: wrappedSetInterval,
 
-      /**
-           * Sets an editor timeout it's similar to setTimeout except that it checks if the editor instance is
-           * still alive when the callback gets executed.
-           *
-           * @method setEditorTimeout
-           * @param {tinymce.Editor} editor Editor instance to check the removed state on.
-           * @param {function} callback Callback to execute when timer runs out.
-           * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
-           * @return {Number} Timeout id number.
-           */
-      setEditorTimeout: function (editor, callback, time) {
-        return wrappedSetTimeout(function () {
-          if (!editor.removed) {
-            callback();
-          }
-        }, time);
-      },
+  		/**
+  		 * Sets an editor timeout it's similar to setTimeout except that it checks if the editor instance is
+  		 * still alive when the callback gets executed.
+  		 *
+  		 * @method setEditorTimeout
+  		 * @param {tinymce.Editor} editor Editor instance to check the removed state on.
+  		 * @param {function} callback Callback to execute when timer runs out.
+  		 * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
+  		 * @return {Number} Timeout id number.
+  		 */
+  		setEditorTimeout: function (editor, callback, time) {
+  			return wrappedSetTimeout(function () {
+  				if (!editor.removed) {
+  					callback();
+  				}
+  			}, time);
+  		},
 
-      /**
-           * Sets an interval timer it's similar to setInterval except that it checks if the editor instance is
-           * still alive when the callback gets executed.
-           *
-           * @method setEditorInterval
-           * @param {function} callback Callback to execute when interval time runs out.
-           * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
-           * @return {Number} Timeout id number.
-           */
-      setEditorInterval: function (editor, callback, time) {
-        var timer;
+  		/**
+  		 * Sets an interval timer it's similar to setInterval except that it checks if the editor instance is
+  		 * still alive when the callback gets executed.
+  		 *
+  		 * @method setEditorInterval
+  		 * @param {function} callback Callback to execute when interval time runs out.
+  		 * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
+  		 * @return {Number} Timeout id number.
+  		 */
+  		setEditorInterval: function (editor, callback, time) {
+  			var timer;
 
-        timer = wrappedSetInterval(function () {
-          if (!editor.removed) {
-            callback();
-          } else {
-            clearInterval(timer);
-          }
-        }, time);
+  			timer = wrappedSetInterval(function () {
+  				if (!editor.removed) {
+  					callback();
+  				} else {
+  					clearInterval(timer);
+  				}
+  			}, time);
 
-        return timer;
-      },
+  			return timer;
+  		},
 
-      /**
-           * Creates debounced callback function that only gets executed once within the specified time.
-           *
-           * @method debounce
-           * @param {function} callback Callback to execute when timer finishes.
-           * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
-           * @return {Function} debounced function callback.
-           */
-      debounce: debounce,
+  		/**
+  		 * Creates debounced callback function that only gets executed once within the specified time.
+  		 *
+  		 * @method debounce
+  		 * @param {function} callback Callback to execute when timer finishes.
+  		 * @param {Number} time Optional time to wait before the callback is executed, defaults to 0.
+  		 * @return {Function} debounced function callback.
+  		 */
+  		debounce: debounce,
 
-      // Throttle needs to be debounce due to backwards compatibility.
-      throttle: debounce,
+  		// Throttle needs to be debounce due to backwards compatibility.
+  		throttle: debounce,
 
-      /**
-           * Clears an interval timer so it won't execute.
-           *
-           * @method clearInterval
-           * @param {Number} Interval timer id number.
-           */
-      clearInterval: wrappedClearInterval,
+  		/**
+  		 * Clears an interval timer so it won't execute.
+  		 *
+  		 * @method clearInterval
+  		 * @param {Number} Interval timer id number.
+  		 */
+  		clearInterval: wrappedClearInterval,
 
-      /**
-             * Clears an timeout timer so it won't execute.
-             *
-             * @method clearTimeout
-             * @param {Number} Timeout timer id number.
-             */
-      clearTimeout: wrappedClearTimeout
-    };
+  		/**
+  		 * Clears an timeout timer so it won't execute.
+  		 *
+  		 * @method clearTimeout
+  		 * @param {Number} Timeout timer id number.
+  		 */
+  		clearTimeout: wrappedClearTimeout
+  	};
   })(tinymce);
 
   /**
@@ -2271,9 +2271,10 @@
 
     var mceInternalUrlPrefix = 'data:text/mce-internal,';
     var mceInternalDataType = tinymce.isIE ? 'Text' : 'URL';
+
     /**
-  	 * Executes a command with a specific state this can be to enable/disable browser editing features.
-  	 */
+     * Executes a command with a specific state this can be to enable/disable browser editing features.
+     */
     function setEditorCommandState(cmd, state) {
       try {
         editor.getDoc().execCommand(cmd, false, state);
@@ -2283,23 +2284,23 @@
     }
 
     /**
-  	 * Returns true/false if the event is prevented or not.
-  	 *
-  	 * @param {Event} e Event object.
-  	 * @return {Boolean} true/false if the event is prevented or not.
-  	 */
+     * Returns true/false if the event is prevented or not.
+     *
+     * @param {Event} e Event object.
+     * @return {Boolean} true/false if the event is prevented or not.
+     */
     function isDefaultPrevented(e) {
       return e.isDefaultPrevented();
     }
 
     /**
-  	 * Sets Text/URL data on the event's dataTransfer object to a special data:text/mce-internal url.
-  	 * This is to workaround the inability to set custom contentType on IE and Safari.
-  	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
-  	 *
-  	 * @private
-  	 * @param {DragEvent} e Event object
-  	 */
+     * Sets Text/URL data on the event's dataTransfer object to a special data:text/mce-internal url.
+     * This is to workaround the inability to set custom contentType on IE and Safari.
+     * The editor's selected content is encoded into this url so drag and drop between editors will work.
+     *
+     * @private
+     * @param {DragEvent} e Event object
+     */
     function setMceInternalContent(e) {
       var selectionHtml, internalContent;
 
@@ -2319,14 +2320,14 @@
     }
 
     /**
-  	 * Gets content of special data:text/mce-internal url on the event's dataTransfer object.
-  	 * This is to workaround the inability to set custom contentType on IE and Safari.
-  	 * The editor's selected content is encoded into this url so drag and drop between editors will work.
-  	 *
-  	 * @private
-  	 * @param {DragEvent} e Event object
-  	 * @returns {String} mce-internal content
-  	 */
+     * Gets content of special data:text/mce-internal url on the event's dataTransfer object.
+     * This is to workaround the inability to set custom contentType on IE and Safari.
+     * The editor's selected content is encoded into this url so drag and drop between editors will work.
+     *
+     * @private
+     * @param {DragEvent} e Event object
+     * @returns {String} mce-internal content
+     */
     function getMceInternalContent(e) {
       var internalContent;
 
@@ -2347,12 +2348,12 @@
     }
 
     /**
-  	 * Inserts contents using the paste clipboard command if it's available if it isn't it will fallback
-  	 * to the core command.
-  	 *
-  	 * @private
-  	 * @param {String} content Content to insert at selection.
-  	 */
+     * Inserts contents using the paste clipboard command if it's available if it isn't it will fallback
+     * to the core command.
+     *
+     * @private
+     * @param {String} content Content to insert at selection.
+     */
     function insertClipboardContents(content) {
       if (editor.queryCommandSupported('mceInsertClipboardContent')) {
         editor.execCommand('mceInsertClipboardContent', false, {
@@ -2364,42 +2365,40 @@
     }
 
     /**
-  	 * Fixes a WebKit bug when deleting contents using backspace or delete key.
-  	 * WebKit will produce a span element if you delete across two block elements.
-  	 *
-  	 * Example:
-  	 * <h1>a</h1><p>|b</p>
-  	 *
-  	 * Will produce this on backspace:
-  	 * <h1>a<span style="<all runtime styles>">b</span></p>
-  	 *
-  	 * This fixes the backspace to produce:
-  	 * <h1>a|b</p>
-  	 *
-  	 * See bug: https://bugs.webkit.org/show_bug.cgi?id=45784
-  	 *
-  	 * This fixes the following delete scenarios:
-  	 *  1. Delete by pressing backspace key.
-  	 *  2. Delete by pressing delete key.
-  	 *  3. Delete by pressing backspace key with ctrl/cmd (Word delete).
-  	 *  4. Delete by pressing delete key with ctrl/cmd (Word delete).
-  	 *  5. Delete by drag/dropping contents inside the editor.
-  	 *  6. Delete by using Cut Ctrl+X/Cmd+X.
-  	 *  7. Delete by selecting contents and writing a character.
-  	 *
-  	 * This code is a ugly hack since writing full custom delete logic for just this bug
-  	 * fix seemed like a huge task. I hope we can remove this before the year 2030.
-  	 */
+     * Fixes a WebKit bug when deleting contents using backspace or delete key.
+     * WebKit will produce a span element if you delete across two block elements.
+     *
+     * Example:
+     * <h1>a</h1><p>|b</p>
+     *
+     * Will produce this on backspace:
+     * <h1>a<span style="<all runtime styles>">b</span></p>
+     *
+     * This fixes the backspace to produce:
+     * <h1>a|b</p>
+     *
+     * See bug: https://bugs.webkit.org/show_bug.cgi?id=45784
+     *
+     * This fixes the following delete scenarios:
+     *  1. Delete by pressing backspace key.
+     *  2. Delete by pressing delete key.
+     *  3. Delete by pressing backspace key with ctrl/cmd (Word delete).
+     *  4. Delete by pressing delete key with ctrl/cmd (Word delete).
+     *  5. Delete by drag/dropping contents inside the editor.
+     *  6. Delete by using Cut Ctrl+X/Cmd+X.
+     *  7. Delete by selecting contents and writing a character.
+     *
+     * This code is a ugly hack since writing full custom delete logic for just this bug
+     * fix seemed like a huge task. I hope we can remove this before the year 2030.
+     */
     function cleanupStylesWhenDeleting() {
-      var doc = editor.getDoc(),
-        dom = editor.dom,
+      var dom = editor.dom,
         selection = editor.selection;
-      var MutationObserver = window.MutationObserver,
-        dragStartRng;
+      var MutationObserver = window.MutationObserver;
 
       function isTrailingBr(node) {
         var blockElements = dom.schema.getBlockElements(),
-          rootNode = editor.getBody();
+          rootNode = dom.getRoot();
 
         if (node.nodeName != 'BR') {
           return false;
@@ -2431,14 +2430,14 @@
       }
 
       function findCaretNode(node, forward, startNode) {
-        var walker, current, nonEmptyElements;
+        var walker, current, nonEmptyElements, rootNode = dom.getRoot();
 
         // Protect against the possibility we are asked to find a caret node relative
         // to a node that is no longer in the DOM tree. In this case attempting to
         // select on any match leads to a scenario where selection is completely removed
         // from the editor. This scenario is met in real world at a minimum on
         // WebKit browsers when selecting all and Cmd-X cutting to delete content.
-        if (!dom.isChildOf(node, editor.getBody())) {
+        if (!dom.isChildOf(node, rootNode)) {
           return;
         }
 
@@ -2629,11 +2628,11 @@
       }
 
       /**
-  		 * This retains the formatting if the last character is to be deleted.
-  		 *
-  		 * Backspace on this: <p><b><i>a|</i></b></p> would become <p>|</p> in WebKit.
-  		 * With this patch: <p><b><i>|<br></i></b></p>
-  		 */
+       * This retains the formatting if the last character is to be deleted.
+       *
+       * Backspace on this: <p><b><i>a|</i></b></p> would become <p>|</p> in WebKit.
+       * With this patch: <p><b><i>|<br></i></b></p>
+       */
       function handleLastBlockCharacterDelete(isForward, rng) {
         var path, blockElm, newBlockElm, clonedBlockElm, sibling,
           container, offset, br, currentFormatNodes;
@@ -2760,16 +2759,16 @@
       }
 
       function customDelete(isForward) {
-        var mutationObserver, rng, caretElement;
+        var mutationObserver, rng, caretElement, rootNode = editor.dom.getRoot();
 
         if (handleTextBlockMergeDelete(isForward)) {
           return;
         }
 
-        tinymce.each(editor.getBody().getElementsByTagName('*'), function (elm) {
+        tinymce.each(rootNode.getElementsByTagName('*'), function (elm) {
           // Mark existing spans
           if (elm.tagName == 'SPAN') {
-            elm.setAttribute('mce-data-marked', 1);
+            elm.setAttribute('data-mce-marked', 1);
           }
 
           // Make sure all elements has a data-mce-style attribute
@@ -2793,7 +2792,7 @@
         caretElement = rng.startContainer.parentNode;
 
         tinymce.each(mutationObserver.takeRecords(), function (record) {
-          if (!dom.isChildOf(record.target, editor.getBody())) {
+          if (!dom.isChildOf(record.target, rootNode)) {
             return;
           }
 
@@ -2819,7 +2818,7 @@
               node.removeAttribute("style");
             }
 
-            if (node.nodeName == "SPAN" && !node.getAttribute('mce-data-marked')) {
+            if (node.nodeName == "SPAN" && !node.getAttribute('data-mce-marked')) {
               var offset, container;
 
               if (node == caretElement) {
@@ -2841,14 +2840,9 @@
         mutationObserver.disconnect();
 
         // Remove any left over marks
-        tinymce.each(editor.dom.select('span[mce-data-marked]'), function (span) {
-          span.removeAttribute('mce-data-marked');
+        tinymce.each(editor.dom.select('span[data-mce-marked]', editor.dom.getRoot()), function (span) {
+          span.removeAttribute('data-mce-marked');
         });
-      }
-
-      function transactCustomDelete(isForward) {
-        customDelete(isForward);
-        editor.undoManager.add();
       }
 
       editor.onKeyDown.add(function (editor, e) {
@@ -2859,10 +2853,6 @@
           var rng = editor.selection.getRng(),
             container = rng.startContainer,
             offset = rng.startOffset;
-
-          /*if (editor.settings.forced_root_block === false) {
-  					return;
-  				}*/
 
           // Shift+Delete is cut
           if (isForward && e.shiftKey) {
@@ -2893,66 +2883,66 @@
 
       // Handle case where text is deleted by typing over
       /*editor.onKeyPress.add(function (editor, e) {
-  			if (!isDefaultPrevented(e) && !selection.isCollapsed() && e.charCode > 31 && !VK.metaKeyPressed(e)) {
-  				var rng, currentFormatNodes, fragmentNode, blockParent, caretNode, charText;
+        if (!isDefaultPrevented(e) && !selection.isCollapsed() && e.charCode > 31 && !VK.metaKeyPressed(e)) {
+          var rng, currentFormatNodes, fragmentNode, blockParent, caretNode, charText;
 
-  				if (editor.settings.forced_root_block === false) {
-  					return;
-  				}
+          if (editor.settings.forced_root_block === false) {
+            return;
+          }
 
-  				rng = editor.selection.getRng();
-  				charText = String.fromCharCode(e.charCode);
-  				e.preventDefault();
+          rng = editor.selection.getRng();
+          charText = String.fromCharCode(e.charCode);
+          e.preventDefault();
 
-  				// Keep track of current format nodes
-  				currentFormatNodes = dom.getParents(rng.startContainer, function (node) {
-  					return !!editor.schema.getTextInlineElements()[node.nodeName];
-  				});
+          // Keep track of current format nodes
+          currentFormatNodes = dom.getParents(rng.startContainer, function (node) {
+            return !!editor.schema.getTextInlineElements()[node.nodeName];
+          });
 
-  				customDelete(true);
+          customDelete(true);
 
-  				// Check if the browser removed them
-  				currentFormatNodes = currentFormatNodes.filter(function (idx, node) {
-  					return !editor.getBody().contains(node);
-  				});
+          // Check if the browser removed them
+          currentFormatNodes = currentFormatNodes.filter(function (idx, node) {
+            return !editor.getBody().contains(node);
+          });
 
-  				// Then re-add them
-  				if (currentFormatNodes.length) {
-  					fragmentNode = dom.createFragment();
+          // Then re-add them
+          if (currentFormatNodes.length) {
+            fragmentNode = dom.createFragment();
 
-  					currentFormatNodes.each(function (idx, formatNode) {
-  						formatNode = formatNode.cloneNode(false);
+            currentFormatNodes.each(function (idx, formatNode) {
+              formatNode = formatNode.cloneNode(false);
 
-  						if (fragmentNode.hasChildNodes()) {
-  							formatNode.appendChild(fragmentNode.firstChild);
-  							fragmentNode.appendChild(formatNode);
-  						} else {
-  							caretNode = formatNode;
-  							fragmentNode.appendChild(formatNode);
-  						}
+              if (fragmentNode.hasChildNodes()) {
+                formatNode.appendChild(fragmentNode.firstChild);
+                fragmentNode.appendChild(formatNode);
+              } else {
+                caretNode = formatNode;
+                fragmentNode.appendChild(formatNode);
+              }
 
-  						fragmentNode.appendChild(formatNode);
-  					});
+              fragmentNode.appendChild(formatNode);
+            });
 
-  					caretNode.appendChild(editor.getDoc().createTextNode(charText));
+            caretNode.appendChild(editor.getDoc().createTextNode(charText));
 
-  					// Prevent edge case where older WebKit would add an extra BR element
-  					blockParent = dom.getParent(rng.startContainer, dom.isBlock);
-  					if (dom.isEmpty(blockParent)) {
-  						dom.empty(blockParent);
-  						dom.add(blockParent, fragmentNode);
-  					} else {
-  						rng.insertNode(fragmentNode);
-  					}
+            // Prevent edge case where older WebKit would add an extra BR element
+            blockParent = dom.getParent(rng.startContainer, dom.isBlock);
+            if (dom.isEmpty(blockParent)) {
+              dom.empty(blockParent);
+              dom.add(blockParent, fragmentNode);
+            } else {
+              rng.insertNode(fragmentNode);
+            }
 
-  					rng.setStart(caretNode.firstChild, 1);
-  					rng.setEnd(caretNode.firstChild, 1);
-  					editor.selection.setRng(rng);
-  				} else {
-  					editor.selection.setContent(charText);
-  				}
-  			}
-  		});*/
+            rng.setStart(caretNode.firstChild, 1);
+            rng.setEnd(caretNode.firstChild, 1);
+            editor.selection.setRng(rng);
+          } else {
+            editor.selection.setContent(charText);
+          }
+        }
+      });*/
 
       editor.addCommand('Delete', function () {
         customDelete();
@@ -2962,7 +2952,7 @@
         customDelete(true);
       });
 
-      editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+      /*editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
         dragStartRng = selection.getRng();
         setMceInternalContent(e);
       });
@@ -2992,12 +2982,12 @@
             }, 0);
           }
         }
-      });
+      });*/
     }
 
     /**
-  	 * Remove runtime styles from Chrome / Safari, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
-  	 */
+     * Remove runtime styles from Chrome / Safari, eg: <span style="color: inherit; font-family: inherit; font-size: 1rem;">
+     */
     function cleanupRuntimeStyles() {
       function removeRuntimeStyle(node) {
         var style = node.attr('style');
@@ -3031,17 +3021,17 @@
     }
 
     /**
-  	 * Makes sure that the editor body becomes empty when backspace or delete is pressed in empty editors.
-  	 *
-  	 * For example:
-  	 * <p><b>|</b></p>
-  	 *
-  	 * Or:
-  	 * <h1>|</h1>
-  	 *
-  	 * Or:
-  	 * [<h1></h1>]
-  	 */
+     * Makes sure that the editor body becomes empty when backspace or delete is pressed in empty editors.
+     *
+     * For example:
+     * <p><b>|</b></p>
+     *
+     * Or:
+     * <h1>|</h1>
+     *
+     * Or:
+     * [<h1></h1>]
+     */
     function emptyEditorWhenDeleting() {
       function serializeRng(rng) {
         var body = dom.create("body");
@@ -3074,15 +3064,15 @@
 
       editor.onKeyDown.add(function (editor, e) {
         var keyCode = e.keyCode,
-          isCollapsed, body;
+          isCollapsed, root;
 
         // Empty the editor if it's needed for example backspace at <p><b>|</b></p>
         if (!isDefaultPrevented(e) && (keyCode == DELETE || keyCode == BACKSPACE)) {
           isCollapsed = editor.selection.isCollapsed();
-          body = editor.getBody();
+          root = dom.getRoot();//editor.getBody();
 
           // Selection is collapsed but the editor isn't empty
-          if (isCollapsed && !dom.isEmpty(body)) {
+          if (isCollapsed && !dom.isEmpty(root)) {
             return;
           }
 
@@ -3095,10 +3085,10 @@
           e.preventDefault();
           editor.setContent('');
 
-          if (body.firstChild && dom.isBlock(body.firstChild)) {
-            editor.selection.setCursorLocation(body.firstChild, 0);
+          if (root.firstChild && dom.isBlock(root.firstChild)) {
+            editor.selection.setCursorLocation(root.firstChild, 0);
           } else {
-            editor.selection.setCursorLocation(body, 0);
+            editor.selection.setCursorLocation(root, 0);
           }
 
           editor.nodeChanged();
@@ -3107,9 +3097,9 @@
     }
 
     /**
-  	 * WebKit doesn't select all the nodes in the body when you press Ctrl+A.
-  	 * This selects the whole body so that backspace/delete logic will delete everything
-  	 */
+     * WebKit doesn't select all the nodes in the body when you press Ctrl+A.
+     * This selects the whole body so that backspace/delete logic will delete everything
+     */
     function selectAll() {
       editor.onKeyDown.add(function (editor, e) {
         if (!isDefaultPrevented(e) && e.keyCode == 65 && VK.metaKeyPressed(e)) {
@@ -3120,24 +3110,24 @@
     }
 
     /**
-  	 * WebKit has a weird issue where it some times fails to properly convert keypresses to input method keystrokes.
-  	 * The IME on Mac doesn't initialize when it doesn't fire a proper focus event.
-  	 *
-  	 * This seems to happen when the user manages to click the documentElement element then the window doesn't get proper focus until
-  	 * you enter a character into the editor.
-  	 *
-  	 * It also happens when the first focus in made to the body.
-  	 *
-  	 * See: https://bugs.webkit.org/show_bug.cgi?id=83566
-  	 */
+     * WebKit has a weird issue where it some times fails to properly convert keypresses to input method keystrokes.
+     * The IME on Mac doesn't initialize when it doesn't fire a proper focus event.
+     *
+     * This seems to happen when the user manages to click the documentElement element then the window doesn't get proper focus until
+     * you enter a character into the editor.
+     *
+     * It also happens when the first focus in made to the body.
+     *
+     * See: https://bugs.webkit.org/show_bug.cgi?id=83566
+     */
     function inputMethodFocus() {
       if (!editor.settings.content_editable) {
         // Case 1 IME doesn't initialize if you focus the document
         // Disabled since it was interferring with the cE=false logic
         // Also coultn't reproduce the issue on Safari 9
         /*dom.bind(editor.getDoc(), 'focusin', function() {
-  				selection.setRng(selection.getRng());
-  			});*/
+          selection.setRng(selection.getRng());
+        });*/
 
         // Case 2 IME doesn't initialize if you click the documentElement it also doesn't properly fire the focusin event
         // Needs to be both down/up due to weird rendering bug on Chrome Windows
@@ -3150,8 +3140,8 @@
 
             if (e.type == 'mousedown') {
               /*if (CaretContainer.isCaretContainer(rng.startContainer)) {
-  							return;
-  						}*/
+                return;
+              }*/
 
               // Edge case for mousedown, drag select and mousedown again within selection on Chrome Windows to render caret
               selection.placeCaretAt(e.clientX, e.clientY);
@@ -3164,14 +3154,14 @@
     }
 
     /**
-  	 * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
-  	 * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
-  	 * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
-  	 * addRootBlocks), meaning the action does nothing. With this code, FireFox/IE matche the behaviour of other
-  	 * browsers.
-  	 *
-  	 * It also fixes a bug on Firefox where it's impossible to delete HR elements.
-  	 */
+     * Backspacing in FireFox/IE from a paragraph into a horizontal rule results in a floating text node because the
+     * browser just deletes the paragraph - the browser fails to merge the text node with a horizontal rule so it is
+     * left there. TinyMCE sees a floating text node and wraps it in a paragraph on the key up event (ForceBlocks.js
+     * addRootBlocks), meaning the action does nothing. With this code, FireFox/IE matche the behaviour of other
+     * browsers.
+     *
+     * It also fixes a bug on Firefox where it's impossible to delete HR elements.
+     */
     function removeHrOnBackspace() {
       editor.onKeyDown.add(function (editor, e) {
         if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
@@ -3200,17 +3190,17 @@
     }
 
     /**
-  	 * Fixes a Gecko bug where the style attribute gets added to the wrong element when deleting between two block elements.
-  	 *
-  	 * Fixes do backspace/delete on this:
-  	 * <p>bla[ck</p><p style="color:red">r]ed</p>
-  	 *
-  	 * Would become:
-  	 * <p>bla|ed</p>
-  	 *
-  	 * Instead of:
-  	 * <p style="color:red">bla|ed</p>
-  	 */
+     * Fixes a Gecko bug where the style attribute gets added to the wrong element when deleting between two block elements.
+     *
+     * Fixes do backspace/delete on this:
+     * <p>bla[ck</p><p style="color:red">r]ed</p>
+     *
+     * Would become:
+     * <p>bla|ed</p>
+     *
+     * Instead of:
+     * <p style="color:red">bla|ed</p>
+     */
     function removeStylesWhenDeletingAcrossBlockElements() {
       function getAttributeApplyFunction() {
         var template = dom.getAttribs(selection.getStart().cloneNode(false));
@@ -3218,7 +3208,7 @@
         return function () {
           var target = selection.getStart();
 
-          if (target !== editor.getBody()) {
+          if (target !== dom.getRoot()) {
             dom.setAttrib(target, "style", null);
 
             each(template, function (attr) {
@@ -3230,7 +3220,7 @@
 
       function isSelectionAcrossElements() {
         return !selection.isCollapsed() &&
-  				dom.getParent(selection.getStart(), dom.isBlock) != dom.getParent(selection.getEnd(), dom.isBlock);
+          dom.getParent(selection.getStart(), dom.isBlock) != dom.getParent(selection.getEnd(), dom.isBlock);
       }
 
       editor.onKeyPress.add(function (editor, e) {
@@ -3259,34 +3249,34 @@
     }
 
     /**
-  	 * Fire a nodeChanged when the selection is changed on WebKit this fixes selection issues on iOS5. It only fires the nodeChange
-  	 * event every 50ms since it would other wise update the UI when you type and it hogs the CPU.
-  	 */
+     * Fire a nodeChanged when the selection is changed on WebKit this fixes selection issues on iOS5. It only fires the nodeChange
+     * event every 50ms since it would other wise update the UI when you type and it hogs the CPU.
+     */
     /*function selectionChangeNodeChanged() {
-  		var lastRng, selectionTimer;
+      var lastRng, selectionTimer;
 
-  		dom.bind(editor.getDoc(), 'selectionchange', function () {
-  			if (selectionTimer) {
-  				clearTimeout(selectionTimer);
-  				selectionTimer = 0;
-  			}
+      dom.bind(editor.getDoc(), 'selectionchange', function () {
+        if (selectionTimer) {
+          clearTimeout(selectionTimer);
+          selectionTimer = 0;
+        }
 
-  			selectionTimer = window.setTimeout(function () {
-  				var rng = selection.getRng();
+        selectionTimer = window.setTimeout(function () {
+          var rng = selection.getRng();
 
-  				// Compare the ranges to see if it was a real change or not
-  				if (!lastRng || !tinymce.dom.RangeUtils.compareRanges(rng, lastRng)) {
-  					editor.nodeChanged();
-  					lastRng = rng;
-  				}
-  			}, 50);
-  		});
-  	}*/
+          // Compare the ranges to see if it was a real change or not
+          if (!lastRng || !tinymce.dom.RangeUtils.compareRanges(rng, lastRng)) {
+            editor.nodeChanged();
+            lastRng = rng;
+          }
+        }, 50);
+      });
+    }*/
 
     /**
-  	 * Backspacing into a table behaves differently depending upon browser type.
-  	 * Therefore, disable Backspace when cursor immediately follows a table.
-  	 */
+     * Backspacing into a table behaves differently depending upon browser type.
+     * Therefore, disable Backspace when cursor immediately follows a table.
+     */
     function disableBackspaceIntoATable() {
       editor.onKeyDown.add(function (editor, e) {
         if (!isDefaultPrevented(e) && e.keyCode === BACKSPACE) {
@@ -3302,76 +3292,76 @@
     }
 
     /**
-  	 * Backspace or delete on WebKit will combine all visual styles in a span if the last character is deleted.
-  	 *
-  	 * For example backspace on:
-  	 * <p><b>x|</b></p>
-  	 *
-  	 * Will produce:
-  	 * <p><span style="font-weight: bold">|<br></span></p>
-  	 *
-  	 * When it should produce:
-  	 * <p><b>|<br></b></p>
-  	 *
-  	 * See: https://bugs.webkit.org/show_bug.cgi?id=81656
-  	 */
+     * Backspace or delete on WebKit will combine all visual styles in a span if the last character is deleted.
+     *
+     * For example backspace on:
+     * <p><b>x|</b></p>
+     *
+     * Will produce:
+     * <p><span style="font-weight: bold">|<br></span></p>
+     *
+     * When it should produce:
+     * <p><b>|<br></b></p>
+     *
+     * See: https://bugs.webkit.org/show_bug.cgi?id=81656
+     */
     /*function keepInlineElementOnDeleteBackspace() {
-  		editor.onKeyDown.add(function (editor, e) {
-  			var isDelete, rng, container, offset, brElm, sibling, collapsed;
+      editor.onKeyDown.add(function (editor, e) {
+        var isDelete, rng, container, offset, brElm, sibling, collapsed;
 
-  			isDelete = e.keyCode == DELETE;
-  			if (!isDefaultPrevented(e) && (isDelete || e.keyCode == BACKSPACE) && !VK.modifierPressed(e)) {
-  				rng = selection.getRng();
-  				container = rng.startContainer;
-  				offset = rng.startOffset;
-  				collapsed = rng.collapsed;
+        isDelete = e.keyCode == DELETE;
+        if (!isDefaultPrevented(e) && (isDelete || e.keyCode == BACKSPACE) && !VK.modifierPressed(e)) {
+          rng = selection.getRng();
+          container = rng.startContainer;
+          offset = rng.startOffset;
+          collapsed = rng.collapsed;
 
-  				// Override delete if the start container is a text node and is at the beginning of text or
-  				// just before/after the last character to be deleted in collapsed mode
-  				if (container.nodeType == 3 && container.nodeValue.length > 0 && ((offset === 0 && !collapsed) || (collapsed && offset === (isDelete ? 0 : 1)))) {
-  					// Edge case when deleting <p><b><img> |x</b></p>
-  					sibling = container.previousSibling;
-  					if (sibling && sibling.nodeName == "IMG") {
-  						return;
-  					}
+          // Override delete if the start container is a text node and is at the beginning of text or
+          // just before/after the last character to be deleted in collapsed mode
+          if (container.nodeType == 3 && container.nodeValue.length > 0 && ((offset === 0 && !collapsed) || (collapsed && offset === (isDelete ? 0 : 1)))) {
+            // Edge case when deleting <p><b><img> |x</b></p>
+            sibling = container.previousSibling;
+            if (sibling && sibling.nodeName == "IMG") {
+              return;
+            }
 
-  					nonEmptyElements = editor.schema.getNonEmptyElements();
+            nonEmptyElements = editor.schema.getNonEmptyElements();
 
-  					// Prevent default logic since it's broken
-  					e.preventDefault();
+            // Prevent default logic since it's broken
+            e.preventDefault();
 
-  					// Insert a BR before the text node this will prevent the containing element from being deleted/converted
-  					brElm = dom.create('br', {
-  						id: '__tmp'
-  					});
-  					container.parentNode.insertBefore(brElm, container);
+            // Insert a BR before the text node this will prevent the containing element from being deleted/converted
+            brElm = dom.create('br', {
+              id: '__tmp'
+            });
+            container.parentNode.insertBefore(brElm, container);
 
-  					// Do the browser delete
-  					editor.getDoc().execCommand(isDelete ? 'ForwardDelete' : 'Delete', false, null);
+            // Do the browser delete
+            editor.getDoc().execCommand(isDelete ? 'ForwardDelete' : 'Delete', false, null);
 
-  					// Check if the previous sibling is empty after deleting for example: <p><b></b>|</p>
-  					container = selection.getRng().startContainer;
-  					sibling = container.previousSibling;
-  					if (sibling && sibling.nodeType == 1 && !dom.isBlock(sibling) && dom.isEmpty(sibling) && !nonEmptyElements[sibling.nodeName.toLowerCase()]) {
-  						dom.remove(sibling);
-  					}
+            // Check if the previous sibling is empty after deleting for example: <p><b></b>|</p>
+            container = selection.getRng().startContainer;
+            sibling = container.previousSibling;
+            if (sibling && sibling.nodeType == 1 && !dom.isBlock(sibling) && dom.isEmpty(sibling) && !nonEmptyElements[sibling.nodeName.toLowerCase()]) {
+              dom.remove(sibling);
+            }
 
-  					// Remove the temp element we inserted
-  					dom.remove('__tmp');
-  				}
-  			}
-  		});
-  	}*/
+            // Remove the temp element we inserted
+            dom.remove('__tmp');
+          }
+        }
+      });
+    }*/
 
     /**
-  	 * Removes a blockquote when backspace is pressed at the beginning of it.
-  	 *
-  	 * For example:
-  	 * <blockquote><p>|x</p></blockquote>
-  	 *
-  	 * Becomes:
-  	 * <p>|x</p>
-  	 */
+     * Removes a blockquote when backspace is pressed at the beginning of it.
+     *
+     * For example:
+     * <blockquote><p>|x</p></blockquote>
+     *
+     * Becomes:
+     * <p>|x</p>
+     */
     function removeBlockQuoteOnBackSpace() {
       // Add block quote deletion handler
       editor.onKeyDown.add(function (editor, e) {
@@ -3410,8 +3400,8 @@
     }
 
     /**
-  	 * Sets various Gecko editing options on mouse down and before a execCommand to disable inline table editing that is broken etc.
-  	 */
+     * Sets various Gecko editing options on mouse down and before a execCommand to disable inline table editing that is broken etc.
+     */
     function setGeckoEditingOptions() {
       function setOpts() {
         setEditorCommandState("StyleWithCSS", false);
@@ -3429,15 +3419,15 @@
     }
 
     /**
-  	 * Fixes a gecko link bug, when a link is placed at the end of block elements there is
-  	 * no way to move the caret behind the link. This fix adds a bogus br element after the link.
-  	 *
-  	 * For example this:
-  	 * <p><b><a href="#">x</a></b></p>
-  	 *
-  	 * Becomes this:
-  	 * <p><b><a href="#">x</a></b><br></p>
-  	 */
+     * Fixes a gecko link bug, when a link is placed at the end of block elements there is
+     * no way to move the caret behind the link. This fix adds a bogus br element after the link.
+     *
+     * For example this:
+     * <p><b><a href="#">x</a></b></p>
+     *
+     * Becomes this:
+     * <p><b><a href="#">x</a></b><br></p>
+     */
     function addBrAfterLastLinks() {
       function fixLinks() {
         each(dom.select('a'), function (node) {
@@ -3470,9 +3460,9 @@
     }
 
     /**
-  	 * WebKit will produce DIV elements here and there by default. But since TinyMCE uses paragraphs by
-  	 * default we want to change that behavior.
-  	 */
+     * WebKit will produce DIV elements here and there by default. But since TinyMCE uses paragraphs by
+     * default we want to change that behavior.
+     */
     function setDefaultBlockType() {
       if (settings.forced_root_block) {
         editor.onInit.add(function () {
@@ -3482,25 +3472,25 @@
     }
 
     /**
-  	 * Forces Gecko to render a broken image icon if it fails to load an image.
-  	 */
+     * Forces Gecko to render a broken image icon if it fails to load an image.
+     */
     function showBrokenImageIcon() {
       editor.contentStyles.push(
         'img:-moz-broken {' +
-  			'-moz-force-broken-image-icon:1;' +
-  			'min-width:24px;' +
-  			'min-height:24px' +
-  			'}'
+        '-moz-force-broken-image-icon:1;' +
+        'min-width:24px;' +
+        'min-height:24px' +
+        '}'
       );
     }
 
     /**
-  	 * iOS has a bug where it's impossible to type if the document has a touchstart event
-  	 * bound and the user touches the document while having the on screen keyboard visible.
-  	 *
-  	 * The touch event moves the focus to the parent document while having the caret inside the iframe
-  	 * this fix moves the focus back into the iframe document.
-  	 */
+     * iOS has a bug where it's impossible to type if the document has a touchstart event
+     * bound and the user touches the document while having the on screen keyboard visible.
+     *
+     * The touch event moves the focus to the parent document while having the caret inside the iframe
+     * this fix moves the focus back into the iframe document.
+     */
     function restoreFocusOnKeyDown() {
       editor.onKeyDown.add(function () {
         if (document.activeElement == document.body) {
@@ -3510,14 +3500,14 @@
     }
 
     /**
-  	 * IE 11 has an annoying issue where you can't move focus into the editor
-  	 * by clicking on the white area HTML element. We used to be able to to fix this with
-  	 * the fixCaretSelectionOfDocumentElementOnIe fix. But since M$ removed the selection
-  	 * object it's not possible anymore. So we need to hack in a ungly CSS to force the
-  	 * body to be at least 150px. If the user clicks the HTML element out side this 150px region
-  	 * we simply move the focus into the first paragraph. Not ideal since you loose the
-  	 * positioning of the caret but good enough for most cases.
-  	 */
+     * IE 11 has an annoying issue where you can't move focus into the editor
+     * by clicking on the white area HTML element. We used to be able to to fix this with
+     * the fixCaretSelectionOfDocumentElementOnIe fix. But since M$ removed the selection
+     * object it's not possible anymore. So we need to hack in a ungly CSS to force the
+     * body to be at least 150px. If the user clicks the HTML element out side this 150px region
+     * we simply move the focus into the first paragraph. Not ideal since you loose the
+     * positioning of the caret but good enough for most cases.
+     */
     function bodyHeight() {
       if (!editor.inline) {
         editor.contentStyles.push('body {min-height: 150px}');
@@ -3544,9 +3534,9 @@
     }
 
     /**
-  	 * Firefox on Mac OS will move the browser back to the previous page if you press CMD+Left arrow.
-  	 * You might then loose all your work so we need to block that behavior and replace it with our own.
-  	 */
+     * Firefox on Mac OS will move the browser back to the previous page if you press CMD+Left arrow.
+     * You might then loose all your work so we need to block that behavior and replace it with our own.
+     */
     function blockCmdArrowNavigation() {
       if (tinymce.isMac) {
         editor.onKeyDown.add(function (editor, e) {
@@ -3559,17 +3549,17 @@
     }
 
     /**
-  	 * Disables the autolinking in IE 9+ this is then re-enabled by the autolink plugin.
-  	 */
+     * Disables the autolinking in IE 9+ this is then re-enabled by the autolink plugin.
+     */
     function disableAutoUrlDetect() {
       setEditorCommandState("AutoUrlDetect", false);
     }
 
     /**
-  	 * iOS 7.1 introduced two new bugs:
-  	 * 1) It's possible to open links within a contentEditable area by clicking on them.
-  	 * 2) If you hold down the finger it will display the link/image touch callout menu.
-  	 */
+     * iOS 7.1 introduced two new bugs:
+     * 1) It's possible to open links within a contentEditable area by clicking on them.
+     * 2) If you hold down the finger it will display the link/image touch callout menu.
+     */
     function tapLinksAndImages() {
       editor.onClick.add(function (editor, e) {
         var elm = e.target;
@@ -3586,66 +3576,66 @@
     }
 
     /**
-  	 * iOS Safari and possible other browsers have a bug where it won't fire
-  	 * a click event when a contentEditable is focused. This function fakes click events
-  	 * by using touchstart/touchend and measuring the time and distance travelled.
-  	 */
+     * iOS Safari and possible other browsers have a bug where it won't fire
+     * a click event when a contentEditable is focused. This function fakes click events
+     * by using touchstart/touchend and measuring the time and distance travelled.
+     */
     /*
-  	function touchClickEvent() {
-  		editor.on('touchstart', function(e) {
-  			var elm, time, startTouch, changedTouches;
+    function touchClickEvent() {
+      editor.on('touchstart', function(e) {
+        var elm, time, startTouch, changedTouches;
 
-  			elm = e.target;
-  			time = new Date().getTime();
-  			changedTouches = e.changedTouches;
+        elm = e.target;
+        time = new Date().getTime();
+        changedTouches = e.changedTouches;
 
-  			if (!changedTouches || changedTouches.length > 1) {
-  				return;
-  			}
+        if (!changedTouches || changedTouches.length > 1) {
+          return;
+        }
 
-  			startTouch = changedTouches[0];
+        startTouch = changedTouches[0];
 
-  			editor.once('touchend', function(e) {
-  				var endTouch = e.changedTouches[0], args;
+        editor.once('touchend', function(e) {
+          var endTouch = e.changedTouches[0], args;
 
-  				if (new Date().getTime() - time > 500) {
-  					return;
-  				}
+          if (new Date().getTime() - time > 500) {
+            return;
+          }
 
-  				if (Math.abs(startTouch.clientX - endTouch.clientX) > 5) {
-  					return;
-  				}
+          if (Math.abs(startTouch.clientX - endTouch.clientX) > 5) {
+            return;
+          }
 
-  				if (Math.abs(startTouch.clientY - endTouch.clientY) > 5) {
-  					return;
-  				}
+          if (Math.abs(startTouch.clientY - endTouch.clientY) > 5) {
+            return;
+          }
 
-  				args = {
-  					target: elm
-  				};
+          args = {
+            target: elm
+          };
 
-  				each('pageX pageY clientX clientY screenX screenY'.split(' '), function(key) {
-  					args[key] = endTouch[key];
-  				});
+          each('pageX pageY clientX clientY screenX screenY'.split(' '), function(key) {
+            args[key] = endTouch[key];
+          });
 
-  				args = editor.fire('click', args);
+          args = editor.fire('click', args);
 
-  				if (!args.isDefaultPrevented()) {
-  					// iOS WebKit can't place the caret properly once
-  					// you bind touch events so we need to do this manually
-  					// TODO: Expand to the closest word? Touble tap still works.
-  					editor.selection.placeCaretAt(endTouch.clientX, endTouch.clientY);
-  					editor.nodeChanged();
-  				}
-  			});
-  		});
-  	}
-  	*/
+          if (!args.isDefaultPrevented()) {
+            // iOS WebKit can't place the caret properly once
+            // you bind touch events so we need to do this manually
+            // TODO: Expand to the closest word? Touble tap still works.
+            editor.selection.placeCaretAt(endTouch.clientX, endTouch.clientY);
+            editor.nodeChanged();
+          }
+        });
+      });
+    }
+    */
 
     /**
-  	 * WebKit has a bug where it will allow forms to be submitted if they are inside a contentEditable element.
-  	 * For example this: <form><button></form>
-  	 */
+     * WebKit has a bug where it will allow forms to be submitted if they are inside a contentEditable element.
+     * For example this: <form><button></form>
+     */
     function blockFormSubmitInsideEditor() {
       editor.onInit.add(function () {
         editor.dom.bind(editor.getBody(), 'submit', function (e) {
@@ -3655,13 +3645,13 @@
     }
 
     /**
-  	 * Sometimes WebKit/Blink generates BR elements with the Apple-interchange-newline class.
-  	 *
-  	 * Scenario:
-  	 *  1) Create a table 2x2.
-  	 *  2) Select and copy cells A2-B2.
-  	 *  3) Paste and it will add BR element to table cell.
-  	 */
+     * Sometimes WebKit/Blink generates BR elements with the Apple-interchange-newline class.
+     *
+     * Scenario:
+     *  1) Create a table 2x2.
+     *  2) Select and copy cells A2-B2.
+     *  3) Paste and it will add BR element to table cell.
+     */
     function removeAppleInterchangeBrs() {
       parser.addNodeFilter('br', function (nodes) {
         var i = nodes.length;
@@ -3675,9 +3665,9 @@
     }
 
     /**
-  	 * IE cannot set custom contentType's on drag events, and also does not properly drag/drop between
-  	 * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
-  	 */
+     * IE cannot set custom contentType's on drag events, and also does not properly drag/drop between
+     * editors. This uses a special data:text/mce-internal URL to pass data when drag/drop between editors.
+     */
     function ieInternalDragAndDrop() {
       editor.dom.bind('dragstart', function (e) {
         setMceInternalContent(e);
@@ -3729,9 +3719,9 @@
     }
 
     /**
-  	 * WebKit has a bug where it isn't possible to select image, hr or anchor elements
-  	 * by clicking on them so we need to fake that.
-  	 */
+     * WebKit has a bug where it isn't possible to select image, hr or anchor elements
+     * by clicking on them so we need to fake that.
+     */
     function selectControlElements() {
       editor.onClick.add(function (editor, e) {
         var target = e.target;
@@ -3755,9 +3745,9 @@
     }
 
     /**
-  	 * Fixes selection issues where the caret can be placed between two inline elements like <b>a</b>|<b>b</b>
-  	 * this fix will lean the caret right into the closest inline element.
-  	 */
+     * Fixes selection issues where the caret can be placed between two inline elements like <b>a</b>|<b>b</b>
+     * this fix will lean the caret right into the closest inline element.
+     */
     function normalizeSelection() {
       var normalize = function (e) {
         if (e.keyCode != 65 || !VK.metaKeyPressed(e)) {
@@ -3770,63 +3760,117 @@
       editor.onMouseUp.add(normalize);
     }
 
-    /*function inlineBoundary() {
-      function isBoundaryNode(node) {
-        return node && node.nodeName === 'A';
+    function inlineBoundary() {
+      var marker;
+
+      function isBr(node) {
+        return node && node.nodeType == 1 && node.nodeName == 'BR';
       }
 
-      function isLastChildOf(node) {
-        return node.parentNode && node.parentNode.lastChild === node;
+      function isRootNode(node) {
+        return node == editor.dom.getRoot();
       }
 
-      editor.onNodeChange.add(function () {
-        // remove existing selections
-        dom.removeAttrib(dom.select('a'), 'data-mce-selected');
+      function isLastChild(node) {
+        var parent = node.parentNode;
 
-        var node = editor.selection.getNode(), node = dom.getParent(node, 'a');
-
-        if (isBoundaryNode(node)) {
-          node.setAttribute('data-mce-selected', 'inline-boundary');
+        if (isRootNode(parent)) {
+          return true;
         }
-      });
 
-  		// Attempt to move caret after a container element like <a> or <code>
-      editor.onKeyDown.addToTop(function (editor, e) {
-        if (e.keyCode == VK.RIGHT) {
-          var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
+        if (node == parent.lastChild) {
+          return true;
+        }
 
-          if (!node || node === editor.getBody()) {
-            return;
-          }
+        if (node.nextSibling && isBr(node.nextSibling) && node.nextSibling == parent.lastChild) {
+          return true;
+        }
 
-          node = dom.getParent(node, 'a');
+        return false;
+      }
 
-          if (!isBoundaryNode(node) || !isLastChildOf(node)) {
-            return;
-          }
+      function isEmpty(node) {
+        // is linebreak or empty whitespace text node
+        return isBr(node) || (node && node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
+      }
 
-          if (container.nodeType === 3 && node) {
-            var text = container.data;
+      function isChildOf(container, node) {
+        if (node.lastChild && node.lastChild.nodeType == 1) {
+          node = node.lastChild;
+        }
 
-            if (text && text.length && rng.startOffset == text.length) {
-              var marker = dom.add(node.parentNode, 'span', {'data-mce-type': "bookmark"}, '\uFEFF');
+        return dom.isChildOf(container, node);
+      }
 
-              // Move the caret to the end of the marker
-              rng = dom.createRng();
-              rng.setStart(marker, 0);
-              rng.setEnd(marker, 0);
-              selection.setRng(rng);
+      function moveCursorToEnd(e) {
+        var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
-              // remove marker
+        if (!node || node == editor.dom.getRoot()) {
+          return;
+        }
+
+        node = dom.getParent(node, 'a');
+
+        if (!node) {
+          return;
+        }
+
+        if (!isLastChild(node) && !isEmpty(node.nextSibling)) {
+          return;
+        }
+
+        function moveToMarker() {
+          // Move the caret to the end of the marker
+          rng = dom.createRng();
+          rng.setStart(marker, 0);
+          rng.setEnd(marker, 0);
+          rng.collapse();
+          selection.setRng(rng);
+        }
+
+        if (container.nodeType == 3 && isChildOf(container, node)) {
+          var text = container.data;
+
+          if (text && text.length && rng.startOffset == text.length) {
+            marker = dom.create('span', { 'data-mce-type': "caret" }, '\uFEFF');
+
+            if (dom.isBlock(node.parentNode) && isLastChild(node)) {
+              node.parentNode.appendChild(marker);
+
+              moveToMarker();
               dom.remove(marker);
 
-              editor.nodeChanged();
-              e.preventDefault();
+            } else {
+              // edge case for - some text <a href="link.html">link</a><br />
+              if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
+                node = node.nextSibling;
+              }
+              node.insertAdjacentElement('afterend', marker);
+
+              moveToMarker();
             }
+
+            e.preventDefault();
+            editor.nodeChanged();
           }
         }
+      }
+
+      // Attempt to move caret after a container element like <a> or <code> (use addToTop to remove marker before EnterKey)
+      editor.onKeyDown.addToTop(function (editor, e) {
+        dom.remove(marker);
+
+        if (e.keyCode == VK.RIGHT) {
+          moveCursorToEnd(e);
+        }
       });
-    }*/
+
+      editor.onMouseDown.add(function (editor, e) {
+        dom.remove(marker);
+
+        moveCursorToEnd(e);
+      });
+    }
 
     // All browsers
     normalizeSelection();
@@ -3834,7 +3878,7 @@
     removeBlockQuoteOnBackSpace();
     emptyEditorWhenDeleting();
 
-    //inlineBoundary();
+    inlineBoundary();
 
     // WebKit
     if (tinymce.isWebKit) {
@@ -3896,9 +3940,11 @@
    */
 
   (function (tinymce) {
-    var each = tinymce.each;
+    var each = tinymce.each, extend = tinymce.extend;
 
     var rgba = {}, luma = {}, white = 'rgb(255, 255, 255)';
+
+    var previewElm;
 
     function getRGBA(val) {
       if (!rgba[val]) {
@@ -4004,9 +4050,19 @@
       return lvl >= 2;
     }
 
-    tinymce.util.PreviewCss = function (ed, fmt) {
-      var name, previewElm, dom = ed.dom,
+    var resetElm = function () {
+      if (previewElm && previewElm.parentNode) {
+        previewElm.parentNode.removeChild(previewElm);
+
+        previewElm = null;
+      }
+    };
+
+    var getCssText = function (ed, fmt, reset) {
+      var name, dom = ed.dom,
         previewCss = {};
+
+      fmt = extend({ styles: [], attributes: [], classes: '' }, fmt);
 
       var previewStyles = ed.settings.preview_styles;
 
@@ -4030,8 +4086,15 @@
       }
 
       // Create block/inline element to use for preview
-      name = fmt.block || fmt.inline || 'span';
-      previewElm = dom.create(name);
+      name = fmt.block || fmt.inline || 'div';
+
+      if (!previewElm || previewElm.nodeName != name.toUpperCase()) {
+        previewElm = dom.create(name);
+        ed.getBody().appendChild(previewElm);
+      }
+
+      // clear preview element
+      dom.removeAllAttribs(previewElm);
 
       // Add format styles to preview element
       each(fmt.styles, function (value, name) {
@@ -4064,18 +4127,20 @@
         left: -0xFFFF
       });
 
-      ed.getBody().appendChild(previewElm);
+      previewElm.setAttribute('data-mce-type', 'temp');
 
       // get body background color and element background color
       var bodybg = dom.getStyle(ed.getBody(), 'background-color', true), elmbg = dom.getStyle(previewElm, 'background-color', true);
 
       var styles = previewStyles.split(' ');
 
+      var css = '';
+
       for (var i = 0, len = styles.length; i < len; i++) {
         var key = styles[i], value = dom.getStyle(previewElm, key, true);
 
         // skip if already added
-        if (key == 'background-color' && previewCss[key]) {
+        if (previewCss[key]) {
           continue;
         }
 
@@ -4089,12 +4154,17 @@
           // if background color produces unreadable text, try body background color
           if (!isReadable(value, elmbg)) {
             // use body background color
-            if (isReadable(value, bodybg)) {
-              previewCss['background-color'] = bodybg;
+            if (value && isReadable(value, bodybg)) {
+              value = bodybg;
             } else {
               value = 'inherit';
             }
           }
+        }
+
+        // default to inherit
+        if (!value) {
+          value = 'inherit';
         }
 
         // set to default if value is 0
@@ -4103,11 +4173,20 @@
         }
 
         previewCss[key] = value;
+
+        css += key + ':' + value + ';';
       }
 
-      dom.remove(previewElm);
+      if (reset) {
+        resetElm();
+      }
 
-      return dom.serializeStyle(previewCss);
+      return css;
+    };
+
+    tinymce.util.PreviewCss = {
+      getCssText: getCssText,
+      reset: resetElm
     };
   })(tinymce);
 
@@ -4439,7 +4518,7 @@
     return mimes[mime.toLowerCase()] || 'dat';
   }
 
-  function create(o, blob, base64, filename) {
+  function create$1(o, blob, base64, filename) {
     return typeof o === 'object' ? toBlobInfo(o) : toBlobInfo({
       id: o,
       name: filename,
@@ -4511,7 +4590,7 @@
   }
 
   tinymce.file.BlobCache = {
-    create: create,
+    create: create$1,
     add: add,
     get: get,
     getByUri: getByUri,
@@ -4960,341 +5039,341 @@
    * @version 3.4
    */
   tinymce.html.Styles = function (settings, schema) {
-    /*jshint maxlen:255 */
-    /*eslint max-len:0 */
-    var rgbRegExp = /rgb\s*\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*\)/gi,
-      urlOrStrRegExp = /(?:url(?:(?:\(\s*\"([^\"]+)\"\s*\))|(?:\(\s*\'([^\']+)\'\s*\))|(?:\(\s*([^)\s]+)\s*\))))|(?:\'([^\']+)\')|(?:\"([^\"]+)\")/gi,
-      styleRegExp = /\s*([^:]+):\s*([^;]+);?/g,
-      trimRightRegExp = /\s+$/,
-      undef, i, encodingLookup = {},
-      encodingItems, validStyles, invalidStyles, invisibleChar = '\uFEFF';
+  	/*jshint maxlen:255 */
+  	/*eslint max-len:0 */
+  	var rgbRegExp = /rgb\s*\(\s*([0-9]+)\s*,\s*([0-9]+)\s*,\s*([0-9]+)\s*\)/gi,
+  		urlOrStrRegExp = /(?:url(?:(?:\(\s*\"([^\"]+)\"\s*\))|(?:\(\s*\'([^\']+)\'\s*\))|(?:\(\s*([^)\s]+)\s*\))))|(?:\'([^\']+)\')|(?:\"([^\"]+)\")/gi,
+  		styleRegExp = /\s*([^:]+):\s*([^;]+);?/g,
+  		trimRightRegExp = /\s+$/,
+  		undef, i, encodingLookup = {},
+  		encodingItems, validStyles, invalidStyles, invisibleChar = '\uFEFF';
 
-    settings = settings || {};
+  	settings = settings || {};
 
-    if (schema) {
-      validStyles = schema.getValidStyles();
-      invalidStyles = schema.getInvalidStyles();
-    }
+  	if (schema) {
+  		validStyles = schema.getValidStyles();
+  		invalidStyles = schema.getInvalidStyles();
+  	}
 
-    encodingItems = ('\\" \\\' \\; \\: ; : ' + invisibleChar).split(' ');
-    for (i = 0; i < encodingItems.length; i++) {
-      encodingLookup[encodingItems[i]] = invisibleChar + i;
-      encodingLookup[invisibleChar + i] = encodingItems[i];
-    }
+  	encodingItems = ('\\" \\\' \\; \\: ; : ' + invisibleChar).split(' ');
+  	for (i = 0; i < encodingItems.length; i++) {
+  		encodingLookup[encodingItems[i]] = invisibleChar + i;
+  		encodingLookup[invisibleChar + i] = encodingItems[i];
+  	}
 
-    function toHex(match, r, g, b) {
-      function hex(val) {
-        val = parseInt(val, 10).toString(16);
+  	function toHex(match, r, g, b) {
+  		function hex(val) {
+  			val = parseInt(val, 10).toString(16);
 
-        return val.length > 1 ? val : '0' + val; // 0 -> 00
-      }
+  			return val.length > 1 ? val : '0' + val; // 0 -> 00
+  		}
 
-      return '#' + hex(r) + hex(g) + hex(b);
-    }
+  		return '#' + hex(r) + hex(g) + hex(b);
+  	}
 
-    return {
-      /**
-           * Parses the specified RGB color value and returns a hex version of that color.
-           *
-           * @method toHex
-           * @param {String} color RGB string value like rgb(1,2,3)
-           * @return {String} Hex version of that RGB value like #FF00FF.
-           */
-      toHex: function (color) {
-        return color.replace(rgbRegExp, toHex);
-      },
+  	return {
+  		/**
+  		 * Parses the specified RGB color value and returns a hex version of that color.
+  		 *
+  		 * @method toHex
+  		 * @param {String} color RGB string value like rgb(1,2,3)
+  		 * @return {String} Hex version of that RGB value like #FF00FF.
+  		 */
+  		toHex: function (color) {
+  			return color.replace(rgbRegExp, toHex);
+  		},
 
-      /**
-           * Parses the specified style value into an object collection. This parser will also
-           * merge and remove any redundant items that browsers might have added. It will also convert non hex
-           * colors to hex values. Urls inside the styles will also be converted to absolute/relative based on settings.
-           *
-           * @method parse
-           * @param {String} css Style value to parse for example: border:1px solid red;.
-           * @return {Object} Object representation of that style like {border: '1px solid red'}
-           */
-      parse: function (css) {
-        var styles = {},
-          matches, name, value, isEncoded, urlConverter = settings.url_converter;
-        var urlConverterScope = settings.url_converter_scope || this;
+  		/**
+  		 * Parses the specified style value into an object collection. This parser will also
+  		 * merge and remove any redundant items that browsers might have added. It will also convert non hex
+  		 * colors to hex values. Urls inside the styles will also be converted to absolute/relative based on settings.
+  		 *
+  		 * @method parse
+  		 * @param {String} css Style value to parse for example: border:1px solid red;.
+  		 * @return {Object} Object representation of that style like {border: '1px solid red'}
+  		 */
+  		parse: function (css) {
+  			var styles = {},
+  				matches, name, value, isEncoded, urlConverter = settings.url_converter;
+  			var urlConverterScope = settings.url_converter_scope || this;
 
-        function compress(prefix, suffix, noJoin) {
-          var top, right, bottom, left;
+  			function compress(prefix, suffix, noJoin) {
+  				var top, right, bottom, left;
 
-          top = styles[prefix + '-top' + suffix];
-          if (!top) {
-            return;
-          }
+  				top = styles[prefix + '-top' + suffix];
+  				if (!top) {
+  					return;
+  				}
 
-          right = styles[prefix + '-right' + suffix];
-          if (!right) {
-            return;
-          }
+  				right = styles[prefix + '-right' + suffix];
+  				if (!right) {
+  					return;
+  				}
 
-          bottom = styles[prefix + '-bottom' + suffix];
-          if (!bottom) {
-            return;
-          }
+  				bottom = styles[prefix + '-bottom' + suffix];
+  				if (!bottom) {
+  					return;
+  				}
 
-          left = styles[prefix + '-left' + suffix];
-          if (!left) {
-            return;
-          }
+  				left = styles[prefix + '-left' + suffix];
+  				if (!left) {
+  					return;
+  				}
 
-          var box = [top, right, bottom, left];
-          i = box.length - 1;
-          while (i--) {
-            if (box[i] !== box[i + 1]) {
-              break;
-            }
-          }
+  				var box = [top, right, bottom, left];
+  				i = box.length - 1;
+  				while (i--) {
+  					if (box[i] !== box[i + 1]) {
+  						break;
+  					}
+  				}
 
-          if (i > -1 && noJoin) {
-            return;
-          }
+  				if (i > -1 && noJoin) {
+  					return;
+  				}
 
-          styles[prefix + suffix] = i == -1 ? box[0] : box.join(' ');
-          delete styles[prefix + '-top' + suffix];
-          delete styles[prefix + '-right' + suffix];
-          delete styles[prefix + '-bottom' + suffix];
-          delete styles[prefix + '-left' + suffix];
-        }
+  				styles[prefix + suffix] = i == -1 ? box[0] : box.join(' ');
+  				delete styles[prefix + '-top' + suffix];
+  				delete styles[prefix + '-right' + suffix];
+  				delete styles[prefix + '-bottom' + suffix];
+  				delete styles[prefix + '-left' + suffix];
+  			}
 
-        /**
-               * Checks if the specific style can be compressed in other words if all border-width are equal.
-               */
-        function canCompress(key) {
-          var value = styles[key],
-            i;
+  			/**
+  			 * Checks if the specific style can be compressed in other words if all border-width are equal.
+  			 */
+  			function canCompress(key) {
+  				var value = styles[key],
+  					i;
 
-          if (!value) {
-            return;
-          }
+  				if (!value) {
+  					return;
+  				}
 
-          value = value.split(' ');
-          i = value.length;
-          while (i--) {
-            if (value[i] !== value[0]) {
-              return false;
-            }
-          }
+  				value = value.split(' ');
+  				i = value.length;
+  				while (i--) {
+  					if (value[i] !== value[0]) {
+  						return false;
+  					}
+  				}
 
-          styles[key] = value[0];
+  				styles[key] = value[0];
 
-          return true;
-        }
+  				return true;
+  			}
 
-        /**
-               * Compresses multiple styles into one style.
-               */
-        function compress2(target, a, b, c) {
-          if (!canCompress(a)) {
-            return;
-          }
+  			/**
+  			 * Compresses multiple styles into one style.
+  			 */
+  			function compress2(target, a, b, c) {
+  				if (!canCompress(a)) {
+  					return;
+  				}
 
-          if (!canCompress(b)) {
-            return;
-          }
+  				if (!canCompress(b)) {
+  					return;
+  				}
 
-          if (!canCompress(c)) {
-            return;
-          }
+  				if (!canCompress(c)) {
+  					return;
+  				}
 
-          // Compress
-          styles[target] = styles[a] + ' ' + styles[b] + ' ' + styles[c];
-          delete styles[a];
-          delete styles[b];
-          delete styles[c];
-        }
+  				// Compress
+  				styles[target] = styles[a] + ' ' + styles[b] + ' ' + styles[c];
+  				delete styles[a];
+  				delete styles[b];
+  				delete styles[c];
+  			}
 
-        // Encodes the specified string by replacing all \" \' ; : with _<num>
-        function encode(str) {
-          isEncoded = true;
+  			// Encodes the specified string by replacing all \" \' ; : with _<num>
+  			function encode(str) {
+  				isEncoded = true;
 
-          return encodingLookup[str];
-        }
+  				return encodingLookup[str];
+  			}
 
-        // Decodes the specified string by replacing all _<num> with it's original value \" \' etc
-        // It will also decode the \" \' if keep_slashes is set to fale or omitted
-        function decode(str, keep_slashes) {
-          if (isEncoded) {
-            str = str.replace(/\uFEFF[0-9]/g, function (str) {
-              return encodingLookup[str];
-            });
-          }
+  			// Decodes the specified string by replacing all _<num> with it's original value \" \' etc
+  			// It will also decode the \" \' if keep_slashes is set to fale or omitted
+  			function decode(str, keep_slashes) {
+  				if (isEncoded) {
+  					str = str.replace(/\uFEFF[0-9]/g, function (str) {
+  						return encodingLookup[str];
+  					});
+  				}
 
-          if (!keep_slashes) {
-            str = str.replace(/\\([\'\";:])/g, "$1");
-          }
+  				if (!keep_slashes) {
+  					str = str.replace(/\\([\'\";:])/g, "$1");
+  				}
 
-          return str;
-        }
+  				return str;
+  			}
 
-        function processUrl(match, url, url2, url3, str, str2) {
-          str = str || str2;
+  			function processUrl(match, url, url2, url3, str, str2) {
+  				str = str || str2;
 
-          if (str) {
-            str = decode(str);
+  				if (str) {
+  					str = decode(str);
 
-            // Force strings into single quote format
-            return "'" + str.replace(/\'/g, "\\'") + "'";
-          }
+  					// Force strings into single quote format
+  					return "'" + str.replace(/\'/g, "\\'") + "'";
+  				}
 
-          url = decode(url || url2 || url3);
+  				url = decode(url || url2 || url3);
 
-          if (!settings.allow_script_urls) {
-            var scriptUrl = url.replace(/[\s\r\n]+/, '');
+  				if (!settings.allow_script_urls) {
+  					var scriptUrl = url.replace(/[\s\r\n]+/, '');
 
-            if (/(java|vb)script:/i.test(scriptUrl)) {
-              return "";
-            }
+  					if (/(java|vb)script:/i.test(scriptUrl)) {
+  						return "";
+  					}
 
-            if (!settings.allow_svg_data_urls && /^data:image\/svg/i.test(scriptUrl)) {
-              return "";
-            }
-          }
+  					if (!settings.allow_svg_data_urls && /^data:image\/svg/i.test(scriptUrl)) {
+  						return "";
+  					}
+  				}
 
-          // Convert the URL to relative/absolute depending on config
-          if (urlConverter) {
-            url = urlConverter.call(urlConverterScope, url, 'style');
-          }
+  				// Convert the URL to relative/absolute depending on config
+  				if (urlConverter) {
+  					url = urlConverter.call(urlConverterScope, url, 'style');
+  				}
 
-          // Output new URL format
-          return "url('" + url.replace(/\'/g, "\\'") + "')";
-        }
+  				// Output new URL format
+  				return "url('" + url.replace(/\'/g, "\\'") + "')";
+  			}
 
-        if (css) {
-          css = css.replace(/[\u0000-\u001F]/g, '');
+  			if (css) {
+  				css = css.replace(/[\u0000-\u001F]/g, '');
 
-          // Encode \" \' % and ; and : inside strings so they don't interfere with the style parsing
-          css = css.replace(/\\[\"\';:\uFEFF]/g, encode).replace(/\"[^\"]+\"|\'[^\']+\'/g, function (str) {
-            return str.replace(/[;:]/g, encode);
-          });
+  				// Encode \" \' % and ; and : inside strings so they don't interfere with the style parsing
+  				css = css.replace(/\\[\"\';:\uFEFF]/g, encode).replace(/\"[^\"]+\"|\'[^\']+\'/g, function (str) {
+  					return str.replace(/[;:]/g, encode);
+  				});
 
-          // Parse styles
-          while ((matches = styleRegExp.exec(css))) {
-            name = matches[1].replace(trimRightRegExp, '').toLowerCase();
-            value = matches[2].replace(trimRightRegExp, '');
+  				// Parse styles
+  				while ((matches = styleRegExp.exec(css))) {
+  					name = matches[1].replace(trimRightRegExp, '').toLowerCase();
+  					value = matches[2].replace(trimRightRegExp, '');
 
-            // Decode escaped sequences like \65 -> e
-            /*jshint loopfunc:true*/
-            /*eslint no-loop-func:0 */
-            value = value.replace(/\\[0-9a-f]+/g, function (e) {
-              return String.fromCharCode(parseInt(e.substr(1), 16));
-            });
+  					// Decode escaped sequences like \65 -> e
+  					/*jshint loopfunc:true*/
+  					/*eslint no-loop-func:0 */
+  					value = value.replace(/\\[0-9a-f]+/g, function (e) {
+  						return String.fromCharCode(parseInt(e.substr(1), 16));
+  					});
 
-            if (name && value.length > 0) {
-              // Don't allow behavior name or expression/comments within the values
-              if (!settings.allow_script_urls && (name == "behavior" || /expression\s*\(|\/\*|\*\//.test(value))) {
-                continue;
-              }
+  					if (name && value.length > 0) {
+  						// Don't allow behavior name or expression/comments within the values
+  						if (!settings.allow_script_urls && (name == "behavior" || /expression\s*\(|\/\*|\*\//.test(value))) {
+  							continue;
+  						}
 
-              // Opera will produce 700 instead of bold in their style values
-              if (name === 'font-weight' && value === '700') {
-                value = 'bold';
-              } else if (name === 'color' || name === 'background-color') { // Lowercase colors like RED
-                value = value.toLowerCase();
-              }
+  						// Opera will produce 700 instead of bold in their style values
+  						if (name === 'font-weight' && value === '700') {
+  							value = 'bold';
+  						} else if (name === 'color' || name === 'background-color') { // Lowercase colors like RED
+  							value = value.toLowerCase();
+  						}
 
-              // Convert RGB colors to HEX
-              value = value.replace(rgbRegExp, toHex);
+  						// Convert RGB colors to HEX
+  						value = value.replace(rgbRegExp, toHex);
 
-              // Convert URLs and force them into url('value') format
-              value = value.replace(urlOrStrRegExp, processUrl);
-              styles[name] = isEncoded ? decode(value, true) : value;
-            }
+  						// Convert URLs and force them into url('value') format
+  						value = value.replace(urlOrStrRegExp, processUrl);
+  						styles[name] = isEncoded ? decode(value, true) : value;
+  					}
 
-            styleRegExp.lastIndex = matches.index + matches[0].length;
-          }
-          // Compress the styles to reduce it's size for example IE will expand styles
-          compress("border", "", true);
-          compress("border", "-width");
-          compress("border", "-color");
-          compress("border", "-style");
-          compress("padding", "");
-          compress("margin", "");
-          compress2('border', 'border-width', 'border-style', 'border-color');
+  					styleRegExp.lastIndex = matches.index + matches[0].length;
+  				}
+  				// Compress the styles to reduce it's size for example IE will expand styles
+  				compress("border", "", true);
+  				compress("border", "-width");
+  				compress("border", "-color");
+  				compress("border", "-style");
+  				compress("padding", "");
+  				compress("margin", "");
+  				compress2('border', 'border-width', 'border-style', 'border-color');
 
-          // Remove pointless border, IE produces these
-          if (styles.border === 'medium none') {
-            delete styles.border;
-          }
+  				// Remove pointless border, IE produces these
+  				if (styles.border === 'medium none') {
+  					delete styles.border;
+  				}
 
-          // IE 11 will produce a border-image: none when getting the style attribute from <p style="border: 1px solid red"></p>
-          // So lets asume it shouldn't be there
-          if (styles['border-image'] === 'none') {
-            delete styles['border-image'];
-          }
-        }
+  				// IE 11 will produce a border-image: none when getting the style attribute from <p style="border: 1px solid red"></p>
+  				// So lets asume it shouldn't be there
+  				if (styles['border-image'] === 'none') {
+  					delete styles['border-image'];
+  				}
+  			}
 
-        return styles;
-      },
+  			return styles;
+  		},
 
-      /**
-           * Serializes the specified style object into a string.
-           *
-           * @method serialize
-           * @param {Object} styles Object to serialize as string for example: {border: '1px solid red'}
-           * @param {String} elementName Optional element name, if specified only the styles that matches the schema will be serialized.
-           * @return {String} String representation of the style object for example: border: 1px solid red.
-           */
-      serialize: function (styles, elementName) {
-        var css = '',
-          name, value;
+  		/**
+  		 * Serializes the specified style object into a string.
+  		 *
+  		 * @method serialize
+  		 * @param {Object} styles Object to serialize as string for example: {border: '1px solid red'}
+  		 * @param {String} elementName Optional element name, if specified only the styles that matches the schema will be serialized.
+  		 * @return {String} String representation of the style object for example: border: 1px solid red.
+  		 */
+  		serialize: function (styles, elementName) {
+  			var css = '',
+  				name, value;
 
-        function serializeStyles(name) {
-          var styleList, i, l, value;
+  			function serializeStyles(name) {
+  				var styleList, i, l, value;
 
-          styleList = validStyles[name];
-          if (styleList) {
-            for (i = 0, l = styleList.length; i < l; i++) {
-              name = styleList[i];
-              value = styles[name];
+  				styleList = validStyles[name];
+  				if (styleList) {
+  					for (i = 0, l = styleList.length; i < l; i++) {
+  						name = styleList[i];
+  						value = styles[name];
 
-              if (value !== undef && value.length > 0) {
-                css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
-              }
-            }
-          }
-        }
+  						if (value !== undef && value.length > 0) {
+  							css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
+  						}
+  					}
+  				}
+  			}
 
-        function isValid(name, elementName) {
-          var styleMap;
+  			function isValid(name, elementName) {
+  				var styleMap;
 
-          styleMap = invalidStyles['*'];
-          if (styleMap && styleMap[name]) {
-            return false;
-          }
+  				styleMap = invalidStyles['*'];
+  				if (styleMap && styleMap[name]) {
+  					return false;
+  				}
 
-          styleMap = invalidStyles[elementName];
-          if (styleMap && styleMap[name]) {
-            return false;
-          }
+  				styleMap = invalidStyles[elementName];
+  				if (styleMap && styleMap[name]) {
+  					return false;
+  				}
 
-          return true;
-        }
+  				return true;
+  			}
 
-        // Serialize styles according to schema
-        if (elementName && validStyles) {
-          // Serialize global styles and element specific styles
-          serializeStyles('*');
-          serializeStyles(elementName);
-        } else {
-          // Output the styles in the order they are inside the object
-          for (name in styles) {
-            value = styles[name];
+  			// Serialize styles according to schema
+  			if (elementName && validStyles) {
+  				// Serialize global styles and element specific styles
+  				serializeStyles('*');
+  				serializeStyles(elementName);
+  			} else {
+  				// Output the styles in the order they are inside the object
+  				for (name in styles) {
+  					value = styles[name];
 
-            if (value !== undef && value.length > 0) {
-              if (!invalidStyles || isValid(name, elementName)) {
-                css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
-              }
-            }
-          }
-        }
+  					if (value !== undef && value.length > 0) {
+  						if (!invalidStyles || isValid(name, elementName)) {
+  							css += (css.length > 0 ? ' ' : '') + name + ': ' + value + ';';
+  						}
+  					}
+  				}
+  			}
 
-        return css;
-      }
-    };
+  			return css;
+  		}
+  	};
   };
 
   /**
@@ -5321,12 +5400,12 @@
     }
 
     /**
-       * Builds a schema lookup table
-       *
-       * @private
-       * @param {String} type html4, html5 or html5-strict schema type.
-       * @return {Object} Schema lookup table.
-       */
+     * Builds a schema lookup table
+     *
+     * @private
+     * @param {String} type html4, html5 or html5-strict schema type.
+     * @return {Object} Schema lookup table.
+     */
     function compileSchema(type) {
       var schema = {},
         globalAttributes, blockContent;
@@ -5406,16 +5485,16 @@
 
       // global event attributes
       eventAttributes = split("onclick ondblclick onmousedown " +
-              "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup");
+        "onmouseup onmouseover onmousemove onmouseout onkeypress onkeydown onkeyup");
 
       // html5 mouse events
       if (type != "html4") {
         eventAttributes.push.apply(eventAttributes, split("onabort onblur oncancel oncanplay oncanplaythrough onchange onclose oncontextmenu oncuechange " +
-                  "ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
-                  "onerror onfocus oninput oninvalid onload onloadeddata onloadedmetadata onloadstart " +
-                  "onmouseenter onmouseleave onmousewheel onpause onplay onplaying onprogress onratechange " +
-                  "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
-                  "onwaiting onwheel"));
+          "ondrag ondragend ondragenter ondragleave ondragover ondragstart ondrop ondurationchange onemptied onended " +
+          "onerror onfocus oninput oninvalid onload onloadeddata onloadedmetadata onloadstart " +
+          "onmouseenter onmouseleave onmousewheel onpause onplay onplaying onprogress onratechange " +
+          "onreset onscroll onseeked onseeking onseeking onselect onshow onstalled onsubmit onsuspend ontimeupdate onvolumechange " +
+          "onwaiting onwheel"));
       }
 
       // Event attributes can be opt-in/opt-out
@@ -5435,17 +5514,17 @@
       // Phrasing content elements from the HTML5 spec (inline)
       phrasingContent = split(
         "a abbr b bdo br button cite code del dfn em embed i iframe img input ins kbd " +
-              "label map noscript object q s samp script select small span strong sub sup " +
-              "textarea u var link style #text #comment"
+        "label map noscript object q s samp script select small span strong sub sup " +
+        "textarea u var link style #text #comment"
       );
 
       // Add HTML5 items to globalAttributes, blockContent, phrasingContent
       if (type != "html4") {
         globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
-                  "hidden spellcheck translate"));
+          "hidden spellcheck translate"));
         blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
         phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
-                  "progress time wbr video ruby bdi keygen"));
+          "progress time wbr video ruby bdi keygen"));
       }
 
       // Add HTML4 elements unless it's html5-strict
@@ -5484,8 +5563,8 @@
       add("style", "media type scoped");
       add("script", "src async defer type charset");
       add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
-              "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
-              "onpopstate onresize onscroll onstorage onunload", flowContent);
+        "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
+        "onpopstate onresize onscroll onstorage onunload", flowContent);
       add("address dt dd div caption", "", flowContent);
       add("h1 h2 h3 h4 h5 h6 pre p abbr code var samp kbd sub sup i b u bdo span legend em strong small s cite dfn", "", phrasingContent);
       add("blockquote", "cite", flowContent);
@@ -5514,7 +5593,7 @@
       add("fieldset", "disabled form name", flowContent, "legend");
       add("label", "form for", phrasingContent);
       add("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate " +
-              "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
+        "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
       );
       add("button", "disabled form formaction formenctype formmethod formnovalidate formtarget name type value",
         type == "html4" ? flowContent : phrasingContent);
@@ -5533,7 +5612,7 @@
         add("mark rt rp summary bdi", "", phrasingContent);
         add("canvas", "width height", flowContent);
         add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-                  "muted controls width height buffered controlslist playsinline", flowContent, "track source");
+          "muted controls width height buffered controlslist playsinline", flowContent, "track source");
         add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
         add("picture", "", "img source");
         add("source", "src srcset type media sizes");
@@ -5615,9 +5694,9 @@
 
         // media events
         addAttrs("video audio", "onabort oncanplay oncanplaythrough ondurationchange onemptied onended " +
-                  "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
-                  "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
-                  "onvolumechange onwaiting");
+          "onerror onloadeddata onloadedmetadata onloadstart onpause onplay onplaying onprogress " +
+          "onratechange onreadystatechange onseeked onseeking onstalled onsuspend ontimeupdate " +
+          "onvolumechange onwaiting");
       }
 
       // Special: iframe, ruby, video, audio, label
@@ -5670,12 +5749,12 @@
     }
 
     /**
-       * Constructs a new Schema instance.
-       *
-       * @constructor
-       * @method Schema
-       * @param {Object} settings Name/value settings object.
-       */
+     * Constructs a new Schema instance.
+     *
+     * @constructor
+     * @method Schema
+     * @param {Object} settings Name/value settings object.
+     */
     tinymce.html.Schema = function (settings) {
       var self = this,
         elements = {},
@@ -5725,19 +5804,19 @@
       whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object');
       selfClosingElementsMap = createLookupTable('self_closing_elements', 'colgroup dd dt li option p td tfoot th thead tr');
       shortEndedElementsMap = createLookupTable('short_ended_elements', 'area base basefont br col frame hr img input isindex link ' +
-              'meta param embed source wbr track');
+        'meta param embed source wbr track');
       boolAttrMap = createLookupTable('boolean_attributes', 'async checked compact declare defer disabled ismap multiple nohref noresize ' +
-              'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen');
+        'noshade nowrap readonly selected autoplay loop controls itemscope playsinline spellcheck contextmenu draggable hidden allowfullscreen muted');
 
       nonEmptyElementsMap = createLookupTable('non_empty_elements', 'td th iframe video audio object script pre code', shortEndedElementsMap);
       moveCaretBeforeOnEnterElementsMap = createLookupTable('move_caret_before_on_enter_elements', 'table', nonEmptyElementsMap);
       textBlockElementsMap = createLookupTable('text_block_elements', 'h1 h2 h3 h4 h5 h6 p div address pre form ' +
-              'blockquote center dir fieldset header footer article section hgroup aside nav figure');
+        'blockquote center dir fieldset header footer article section hgroup aside nav figure');
       blockElementsMap = createLookupTable('block_elements', 'hr table tbody thead tfoot ' +
-              'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
-              'datalist select optgroup', textBlockElementsMap);
+        'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
+        'datalist select optgroup', textBlockElementsMap);
       textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
-              'dfn code mark q sup sub samp');
+        'dfn code mark q sup sub samp');
 
       each((settings.special || 'script noscript iframe noframes noembed title style textarea xmp').split(' '), function (name) {
         specialElements[name] = new RegExp('<\/' + name + '[^>]*>', 'gi');
@@ -6096,160 +6175,173 @@
       }
 
       /**
-           * Name/value map object with valid parents and children to those parents.
-           *
-           * @example
-           * children = {
-           *    div:{p:{}, h1:{}}
-           * };
-           * @field children
-           * @type Object
-           */
+       * Name/value map object with valid parents and children to those parents.
+       *
+       * @example
+       * children = {
+       *    div:{p:{}, h1:{}}
+       * };
+       * @field children
+       * @type Object
+       */
       self.children = children;
 
       /**
-           * Name/value map object with valid styles for each element.
-           *
-           * @method getValidStyles
-           * @type Object
-           */
+       * Name/value map object with valid styles for each element.
+       *
+       * @method getValidStyles
+       * @type Object
+       */
       self.getValidStyles = function () {
         return validStyles;
       };
 
       /**
-           * Name/value map object with valid styles for each element.
-           *
-           * @method getInvalidStyles
-           * @type Object
-           */
+       * Name/value map object with valid styles for each element.
+       *
+       * @method getInvalidStyles
+       * @type Object
+       */
       self.getInvalidStyles = function () {
         return invalidStyles;
       };
 
       /**
-           * Name/value map object with valid classes for each element.
-           *
-           * @method getValidClasses
-           * @type Object
-           */
+       * Name/value map object with valid classes for each element.
+       *
+       * @method getValidClasses
+       * @type Object
+       */
       self.getValidClasses = function () {
         return validClasses;
       };
 
       /**
-           * Returns a map with boolean attributes.
-           *
-           * @method getBoolAttrs
-           * @return {Object} Name/value lookup map for boolean attributes.
-           */
+       * Returns a map with boolean attributes.
+       *
+       * @method getBoolAttrs
+       * @return {Object} Name/value lookup map for boolean attributes.
+       */
       self.getBoolAttrs = function () {
         return boolAttrMap;
       };
 
       /**
-           * Returns a map with block elements.
-           *
-           * @method getBlockElements
-           * @return {Object} Name/value lookup map for block elements.
-           */
+       * Returns a map with block elements.
+       *
+       * @method getBlockElements
+       * @return {Object} Name/value lookup map for block elements.
+       */
       self.getBlockElements = function () {
         return blockElementsMap;
       };
 
       /**
-           * Returns a map with text block elements. Such as: p,h1-h6,div,address
-           *
-           * @method getTextBlockElements
-           * @return {Object} Name/value lookup map for block elements.
-           */
+       * Returns a map with text block elements. Such as: p,h1-h6,div,address
+       *
+       * @method getTextBlockElements
+       * @return {Object} Name/value lookup map for block elements.
+       */
       self.getTextBlockElements = function () {
         return textBlockElementsMap;
       };
 
       /**
-           * Returns a map of inline text format nodes for example strong/span or ins.
-           *
-           * @method getTextInlineElements
-           * @return {Object} Name/value lookup map for text format elements.
-           */
+       * Returns a map with text block root elements.
+       *
+       * @method getTextRootBlockElements
+       * @return {Object} Name/value lookup map for block elements.
+       */
+      self.getTextRootBlockElements = function () {
+        return makeMap(
+          'td th li dt dd figcaption caption details summary',
+          textBlockElementsMap
+        );
+      };
+
+      /**
+       * Returns a map of inline text format nodes for example strong/span or ins.
+       *
+       * @method getTextInlineElements
+       * @return {Object} Name/value lookup map for text format elements.
+       */
       self.getTextInlineElements = function () {
         return textInlineElementsMap;
       };
 
       /**
-           * Returns a map with short ended elements such as BR or IMG.
-           *
-           * @method getShortEndedElements
-           * @return {Object} Name/value lookup map for short ended elements.
-           */
+       * Returns a map with short ended elements such as BR or IMG.
+       *
+       * @method getShortEndedElements
+       * @return {Object} Name/value lookup map for short ended elements.
+       */
       self.getShortEndedElements = function () {
         return shortEndedElementsMap;
       };
 
       /**
-           * Returns a map with self closing tags such as <li>.
-           *
-           * @method getSelfClosingElements
-           * @return {Object} Name/value lookup map for self closing tags elements.
-           */
+       * Returns a map with self closing tags such as <li>.
+       *
+       * @method getSelfClosingElements
+       * @return {Object} Name/value lookup map for self closing tags elements.
+       */
       self.getSelfClosingElements = function () {
         return selfClosingElementsMap;
       };
 
       /**
-           * Returns a map with elements that should be treated as contents regardless if it has text
-           * content in them or not such as TD, VIDEO or IMG.
-           *
-           * @method getNonEmptyElements
-           * @return {Object} Name/value lookup map for non empty elements.
-           */
+       * Returns a map with elements that should be treated as contents regardless if it has text
+       * content in them or not such as TD, VIDEO or IMG.
+       *
+       * @method getNonEmptyElements
+       * @return {Object} Name/value lookup map for non empty elements.
+       */
       self.getNonEmptyElements = function () {
         return nonEmptyElementsMap;
       };
 
       /**
-           * Returns a map with elements that the caret should be moved in front of after enter is
-           * pressed
-           *
-           * @method getMoveCaretBeforeOnEnterElements
-           * @return {Object} Name/value lookup map for elements to place the caret in front of.
-           */
+       * Returns a map with elements that the caret should be moved in front of after enter is
+       * pressed
+       *
+       * @method getMoveCaretBeforeOnEnterElements
+       * @return {Object} Name/value lookup map for elements to place the caret in front of.
+       */
       self.getMoveCaretBeforeOnEnterElements = function () {
         return moveCaretBeforeOnEnterElementsMap;
       };
 
       /**
-           * Returns a map with elements where white space is to be preserved like PRE or SCRIPT.
-           *
-           * @method getWhiteSpaceElements
-           * @return {Object} Name/value lookup map for white space elements.
-           */
+       * Returns a map with elements where white space is to be preserved like PRE or SCRIPT.
+       *
+       * @method getWhiteSpaceElements
+       * @return {Object} Name/value lookup map for white space elements.
+       */
       self.getWhiteSpaceElements = function () {
         return whiteSpaceElementsMap;
       };
 
       /**
-           * Returns a map with special elements. These are elements that needs to be parsed
-           * in a special way such as script, style, textarea etc. The map object values
-           * are regexps used to find the end of the element.
-           *
-           * @method getSpecialElements
-           * @return {Object} Name/value lookup map for special elements.
-           */
+       * Returns a map with special elements. These are elements that needs to be parsed
+       * in a special way such as script, style, textarea etc. The map object values
+       * are regexps used to find the end of the element.
+       *
+       * @method getSpecialElements
+       * @return {Object} Name/value lookup map for special elements.
+       */
       self.getSpecialElements = function () {
         return specialElements;
       };
 
       /**
-           * Returns true/false if the specified element and it's child is valid or not
-           * according to the schema.
-           *
-           * @method isValidChild
-           * @param {String} name Element name to check for.
-           * @param {String} child Element child to verify.
-           * @return {Boolean} True/false if the element is a valid child of the specified parent.
-           */
+       * Returns true/false if the specified element and it's child is valid or not
+       * according to the schema.
+       *
+       * @method isValidChild
+       * @param {String} name Element name to check for.
+       * @param {String} child Element child to verify.
+       * @return {Boolean} True/false if the element is a valid child of the specified parent.
+       */
       self.isValidChild = function (name, child) {
         var parent = children[name];
 
@@ -6257,14 +6349,14 @@
       };
 
       /**
-           * Returns true/false if the specified element name and optional attribute is
-           * valid according to the schema.
-           *
-           * @method isValid
-           * @param {String} name Name of element to check.
-           * @param {String} attr Optional attribute name to check for.
-           * @return {Boolean} True/false if the element and attribute is valid.
-           */
+       * Returns true/false if the specified element name and optional attribute is
+       * valid according to the schema.
+       *
+       * @method isValid
+       * @param {String} name Name of element to check.
+       * @param {String} attr Optional attribute name to check for.
+       * @return {Boolean} True/false if the element and attribute is valid.
+       */
       self.isValid = function (name, attr) {
         var attrPatterns, i, rule = getElementRule(name);
 
@@ -6296,60 +6388,60 @@
       };
 
       /**
-           * Returns true/false if the specified element is valid or not
-           * according to the schema.
-           *
-           * @method getElementRule
-           * @param {String} name Element name to check for.
-           * @return {Object} Element object or undefined if the element isn't valid.
-           */
+       * Returns true/false if the specified element is valid or not
+       * according to the schema.
+       *
+       * @method getElementRule
+       * @param {String} name Element name to check for.
+       * @return {Object} Element object or undefined if the element isn't valid.
+       */
       self.getElementRule = getElementRule;
 
       /**
-           * Returns an map object of all custom elements.
-           *
-           * @method getCustomElements
-           * @return {Object} Name/value map object of all custom elements.
-           */
+       * Returns an map object of all custom elements.
+       *
+       * @method getCustomElements
+       * @return {Object} Name/value map object of all custom elements.
+       */
       self.getCustomElements = function () {
         return customElementsMap;
       };
 
       /**
-           * Parses a valid elements string and adds it to the schema. The valid elements
-           * format is for example "element[attr=default|otherattr]".
-           * Existing rules will be replaced with the ones specified, so this extends the schema.
-           *
-           * @method addValidElements
-           * @param {String} valid_elements String in the valid elements format to be parsed.
-           */
+       * Parses a valid elements string and adds it to the schema. The valid elements
+       * format is for example "element[attr=default|otherattr]".
+       * Existing rules will be replaced with the ones specified, so this extends the schema.
+       *
+       * @method addValidElements
+       * @param {String} valid_elements String in the valid elements format to be parsed.
+       */
       self.addValidElements = addValidElements;
 
       /**
-           * Parses a valid elements string and sets it to the schema. The valid elements
-           * format is for example "element[attr=default|otherattr]".
-           * Existing rules will be replaced with the ones specified, so this extends the schema.
-           *
-           * @method setValidElements
-           * @param {String} valid_elements String in the valid elements format to be parsed.
-           */
+       * Parses a valid elements string and sets it to the schema. The valid elements
+       * format is for example "element[attr=default|otherattr]".
+       * Existing rules will be replaced with the ones specified, so this extends the schema.
+       *
+       * @method setValidElements
+       * @param {String} valid_elements String in the valid elements format to be parsed.
+       */
       self.setValidElements = setValidElements;
 
       /**
-           * Adds custom non HTML elements to the schema.
-           *
-           * @method addCustomElements
-           * @param {String} custom_elements Comma separated list of custom elements to add.
-           */
+       * Adds custom non HTML elements to the schema.
+       *
+       * @method addCustomElements
+       * @param {String} custom_elements Comma separated list of custom elements to add.
+       */
       self.addCustomElements = addCustomElements;
 
       /**
-           * Parses a valid children string and adds them to the schema structure. The valid children
-           * format is for example: "element[child1|child2]".
-           *
-           * @method addValidChildren
-           * @param {String} valid_children Valid children elements string to parse
-           */
+       * Parses a valid children string and adds them to the schema structure. The valid children
+       * format is for example: "element[child1|child2]".
+       *
+       * @method addValidChildren
+       * @param {String} valid_children Valid children elements string to parse
+       */
       self.addValidChildren = addValidChildren;
 
       self.elements = elements;
@@ -8518,7 +8610,7 @@
   	 */
     tinymce.html.Serializer = function (settings, schema) {
       var self = this,
-        writer = new tinymce.html.Writer(settings);
+        writer = new tinymce.html.Writer(settings, schema);
 
       settings = settings || {};
       settings.validate = "validate" in settings ? settings.validate : true;
@@ -8685,7 +8777,7 @@
    * @method Writer
    * @param {Object} settings Name/value settings object.
    */
-  tinymce.html.Writer = function (settings) {
+  tinymce.html.Writer = function (settings, schema) {
     var html = [],
       indent, indentBefore, indentAfter, encode, htmlOutput;
 
@@ -8736,7 +8828,13 @@
         if (!empty || htmlOutput) {
           html[html.length] = '>';
         } else {
-          html[html.length] = ' />';
+          // use void tag
+          if (settings.schema == 'html5-strict') {
+            html[html.length] = '>';
+          // use self-closing tag
+          } else {
+            html[html.length] = ' />';
+          }
         }
 
         if (empty && indent && indentAfter[name] && html.length > 0) {
@@ -9251,7 +9349,8 @@
       webkitMovementX: 1,
       webkitMovementY: 1,
       keyIdentifier: 1,
-      mozPressure: 1
+      mozPressure: 1,
+      path: 1
     };
 
     /**
@@ -9305,10 +9404,10 @@
         var body = eventDoc.body;
 
         event.pageX = originalEvent.clientX + (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
-                  (doc && doc.clientLeft || body && body.clientLeft || 0);
+          (doc && doc.clientLeft || body && body.clientLeft || 0);
 
         event.pageY = originalEvent.clientY + (doc && doc.scrollTop || body && body.scrollTop || 0) -
-                  (doc && doc.clientTop || body && body.clientTop || 0);
+          (doc && doc.clientTop || body && body.clientTop || 0);
       }
 
       // Add preventDefault method
@@ -9662,14 +9761,14 @@
       };
 
       /**
-           * Fires the specified event on the specified target.
-           *
-           * @method fire
-           * @param {Object} target Target node/window or custom object.
-           * @param {String} name Event name to fire.
-           * @param {Object} args Optional arguments to send to the observers.
-           * @return {EventUtils} Event utils instance.
-           */
+       * Fires the specified event on the specified target.
+       *
+       * @method fire
+       * @param {Object} target Target node/window or custom object.
+       * @param {String} name Event name to fire.
+       * @param {Object} args Optional arguments to send to the observers.
+       * @return {EventUtils} Event utils instance.    
+       */
       self.fire = function (target, name, args) {
         var id;
 
@@ -9698,13 +9797,13 @@
       };
 
       /**
-           * Removes all bound event listeners for the specified target. This will also remove any bound
-           * listeners to child nodes within that target.
-           *
-           * @method clean
-           * @param {Object} target Target node/window object.
-           * @return {EventUtils} Event utils instance.
-           */
+        * Removes all bound event listeners for the specified target. This will also remove any bound
+        * listeners to child nodes within that target.
+        *
+        * @method clean
+        * @param {Object} target Target node/window object.
+        * @return {EventUtils} Event utils instance.
+        */
       self.clean = function (target) {
         var i, children, unbind = self.unbind;
 
@@ -9819,11 +9918,7 @@
 
     namespace.EventUtils = EventUtils;
 
-    namespace.Event = new EventUtils(function (id) {
-      return function (evt) {
-        tinymce.dom.Event.callNativeHandler(id, evt);
-      };
-    });
+    namespace.Event = new EventUtils();
 
     // Bind ready event when tinymce script is loaded
     namespace.Event.bind(window, 'ready', function () { });
@@ -9842,95 +9937,95 @@
    */
 
   tinymce.dom.TreeWalker = function (startNode, rootNode) {
-    var node = startNode;
+  	var node = startNode;
 
-    function findSibling(node, startName, siblingName, shallow) {
-      var sibling, parent;
+  	function findSibling(node, startName, siblingName, shallow) {
+  		var sibling, parent;
 
-      if (node) {
-        // Walk into nodes if it has a start
-        if (!shallow && node[startName]) {
-          return node[startName];
-        }
+  		if (node) {
+  			// Walk into nodes if it has a start
+  			if (!shallow && node[startName]) {
+  				return node[startName];
+  			}
 
-        // Return the sibling if it has one
-        if (node != rootNode) {
-          sibling = node[siblingName];
-          if (sibling) {
-            return sibling;
-          }
+  			// Return the sibling if it has one
+  			if (node != rootNode) {
+  				sibling = node[siblingName];
+  				if (sibling) {
+  					return sibling;
+  				}
 
-          // Walk up the parents to look for siblings
-          for (parent = node.parentNode; parent && parent != rootNode; parent = parent.parentNode) {
-            sibling = parent[siblingName];
-            if (sibling) {
-              return sibling;
-            }
-          }
-        }
-      }
-    }
+  				// Walk up the parents to look for siblings
+  				for (parent = node.parentNode; parent && parent != rootNode; parent = parent.parentNode) {
+  					sibling = parent[siblingName];
+  					if (sibling) {
+  						return sibling;
+  					}
+  				}
+  			}
+  		}
+  	}
 
-    function findPreviousNode(node, startName, siblingName, shallow) {
-      var sibling, parent, child;
+  	function findPreviousNode(node, startName, siblingName, shallow) {
+  		var sibling, parent, child;
 
-      if (node) {
-        sibling = node[siblingName];
-        if (rootNode && sibling === rootNode) {
-          return;
-        }
+  		if (node) {
+  			sibling = node[siblingName];
+  			if (rootNode && sibling === rootNode) {
+  				return;
+  			}
 
-        if (sibling) {
-          if (!shallow) {
-            // Walk up the parents to look for siblings
-            for (child = sibling[startName]; child; child = child[startName]) {
-              if (!child[startName]) {
-                return child;
-              }
-            }
-          }
+  			if (sibling) {
+  				if (!shallow) {
+  					// Walk up the parents to look for siblings
+  					for (child = sibling[startName]; child; child = child[startName]) {
+  						if (!child[startName]) {
+  							return child;
+  						}
+  					}
+  				}
 
-          return sibling;
-        }
+  				return sibling;
+  			}
 
-        parent = node.parentNode;
-        if (parent && parent !== rootNode) {
-          return parent;
-        }
-      }
-    }
+  			parent = node.parentNode;
+  			if (parent && parent !== rootNode) {
+  				return parent;
+  			}
+  		}
+  	}
 
-    /**
-       * Returns the current node.
-       *
-       * @return {Node} Current node where the walker is.
-       */
-    this.current = function () {
-      return node;
-    };
+  	/**
+  	 * Returns the current node.
+  	 *
+  	 * @return {Node} Current node where the walker is.
+  	 */
+  	this.current = function () {
+  		return node;
+  	};
 
-    /**
-       * Walks to the next node in tree.
-       *
-       * @return {Node} Current node where the walker is after moving to the next node.
-       */
-    this.next = function (shallow) {
-      return (node = findSibling(node, 'firstChild', 'nextSibling', shallow));
-    };
+  	/**
+  	 * Walks to the next node in tree.
+  	 *
+  	 * @return {Node} Current node where the walker is after moving to the next node.
+  	 */
+  	this.next = function (shallow) {
+  		return (node = findSibling(node, 'firstChild', 'nextSibling', shallow));
+  	};
 
-    /**
-       * Walks to the previous node in tree.
-       *
-       * @return {Node} Current node where the walker is after moving to the previous node.
-       */
-    this.prev = function (shallow) {
-      return (node = findSibling(node, 'lastChild', 'previousSibling', shallow));
-    };
+  	/**
+  	 * Walks to the previous node in tree.
+  	 *
+  	 * @return {Node} Current node where the walker is after moving to the previous node.
+  	 */
+  	this.prev = function (shallow) {
+  		return (node = findSibling(node, 'lastChild', 'previousSibling', shallow));
+  	};
 
-    this.prev2 = function (shallow) {
-      node = findPreviousNode(node, 'lastChild', 'previousSibling', shallow);
-      return node;
-    };
+  	this.prev2 = function (shallow) {
+  		node = findPreviousNode(node, 'lastChild', 'previousSibling', shallow);
+  		return node;
+  	};
   };
 
   /**
@@ -10095,7 +10190,7 @@
         var self = this,
           s = self.settings;
 
-        return (s && self.get(s.root_element)) || self.doc.body;
+          return (s && self.get(s.root_element)) || self.doc.body;
       },
 
       /**
@@ -10316,7 +10411,7 @@
         var self = this;
 
         /*eslint new-cap:0 */
-        return tinymce.dom.Sizzle(selector, self.get(scope) || self.settings.root_element || self.doc, []);
+        return tinymce.dom.Sizzle(selector, self.get(scope) || self.get(self.settings.root_element) || self.doc, []);
       },
 
       unique: function (arr) {
@@ -12160,7 +12255,7 @@
         var contentEditable;
 
         // Check type
-        if (node.nodeType != 1) {
+        if (!node || node.nodeType != 1) {
           return null;
         }
 
@@ -12352,16 +12447,31 @@
       return isElement(node) && node.getAttribute('data-mce-type') == 'bookmark';
     }
 
+    function isCaret(node) {
+      return isElement(node) && node.id === '_mce_caret';
+    }
+
+    function isInternal(node) {
+      return isBogus(node) || isBookmark(node) || isCaret(node);
+    }
+
     function hasContentEditableState(value) {
       return function (node) {
         if (isElement(node)) {
+
+          // check contenteditable override
+          if (node.hasAttribute('data-mce-contenteditable')) {
+            return node.getAttribute('data-mce-contenteditable') === value;
+          }
+
+          // check attribute
           if (node.contentEditable === value) {
             return true;
           }
 
-          if (node.getAttribute('data-mce-contenteditable') === value) {
+          /*if (node.getAttribute('data-mce-contenteditable') === value) {
             return true;
-          }
+          }*/
         }
 
         return false;
@@ -12382,7 +12492,8 @@
       hasAttributeValue: hasAttributeValue,
       matchStyleValues: matchStyleValues,
       isBogus: isBogus,
-      isBookmark: isBookmark
+      isBookmark: isBookmark,
+      isInternal: isInternal
     };
 
   })(tinymce);
@@ -12462,537 +12573,618 @@
    * Contributing: http://www.tinymce.com/contributing
    */
   (function (tinymce) {
-    var each = tinymce.each,
-      TreeWalker = tinymce.dom.TreeWalker;
+  	var each = tinymce.each,
+  		TreeWalker = tinymce.dom.TreeWalker;
 
-    function getEndChild(container, index) {
-      var childNodes = container.childNodes;
+  	function getEndChild(container, index) {
+  		var childNodes = container.childNodes;
 
-      index--;
+  		index--;
 
-      if (index > childNodes.length - 1) {
-        index = childNodes.length - 1;
-      } else if (index < 0) {
-        index = 0;
-      }
+  		if (index > childNodes.length - 1) {
+  			index = childNodes.length - 1;
+  		} else if (index < 0) {
+  			index = 0;
+  		}
 
-      return childNodes[index] || container;
-    }
+  		return childNodes[index] || container;
+  	}
 
-    tinymce.dom.RangeUtils = function (dom) {
-      /**
-           * Walks the specified range like object and executes the callback for each sibling collection it finds.
-           *
-           * @method walk
-           * @param {Object} rng Range like object.
-           * @param {function} callback Callback function to execute for each sibling collection.
-           */
-      this.walk = function (rng, callback) {
-        var startContainer = rng.startContainer,
-          startOffset = rng.startOffset,
-          endContainer = rng.endContainer,
-          endOffset = rng.endOffset,
-          ancestor, startPoint,
-          endPoint, node, parent, siblings, nodes;
+  	tinymce.dom.RangeUtils = function (dom) {
+  		/**
+  		 * Walks the specified range like object and executes the callback for each sibling collection it finds.
+  		 *
+  		 * @method walk
+  		 * @param {Object} rng Range like object.
+  		 * @param {function} callback Callback function to execute for each sibling collection.
+  		 */
+  		this.walk = function (rng, callback) {
+  			var startContainer = rng.startContainer,
+  				startOffset = rng.startOffset,
+  				endContainer = rng.endContainer,
+  				endOffset = rng.endOffset,
+  				ancestor, startPoint,
+  				endPoint, node, parent, siblings, nodes;
 
-        // Handle table cell and column selection
-        nodes = dom.select('td.mceSelected,th.mceSelected,div.mceSelected');
+  			// Handle table cell and column selection
+  			nodes = dom.select('td.mceSelected,th.mceSelected,div.mceSelected');
 
-        if (nodes.length > 0) {
-          each(nodes, function (node) {
-            callback([node]);
-          });
+  			if (nodes.length > 0) {
+  				each(nodes, function (node) {
+  					callback([node]);
+  				});
 
-          return;
-        }
+  				return;
+  			}
 
-        /**
-               * Excludes start/end text node if they are out side the range
-               *
-               * @private
-               * @param {Array} nodes Nodes to exclude items from.
-               * @return {Array} Array with nodes excluding the start/end container if needed.
-               */
-        function exclude(nodes) {
-          var node;
+  			/**
+  			 * Excludes start/end text node if they are out side the range
+  			 *
+  			 * @private
+  			 * @param {Array} nodes Nodes to exclude items from.
+  			 * @return {Array} Array with nodes excluding the start/end container if needed.
+  			 */
+  			function exclude(nodes) {
+  				var node;
 
-          // First node is excluded
-          node = nodes[0];
-          if (node.nodeType === 3 && node === startContainer && startOffset >= node.nodeValue.length) {
-            nodes.splice(0, 1);
-          }
+  				// First node is excluded
+  				node = nodes[0];
+  				if (node.nodeType === 3 && node === startContainer && startOffset >= node.nodeValue.length) {
+  					nodes.splice(0, 1);
+  				}
 
-          // Last node is excluded
-          node = nodes[nodes.length - 1];
-          if (endOffset === 0 && nodes.length > 0 && node === endContainer && node.nodeType === 3) {
-            nodes.splice(nodes.length - 1, 1);
-          }
+  				// Last node is excluded
+  				node = nodes[nodes.length - 1];
+  				if (endOffset === 0 && nodes.length > 0 && node === endContainer && node.nodeType === 3) {
+  					nodes.splice(nodes.length - 1, 1);
+  				}
 
-          return nodes;
-        }
+  				return nodes;
+  			}
 
-        /**
-               * Collects siblings
-               *
-               * @private
-               * @param {Node} node Node to collect siblings from.
-               * @param {String} name Name of the sibling to check for.
-               * @return {Array} Array of collected siblings.
-               */
-        function collectSiblings(node, name, end_node) {
-          var siblings = [];
+  			/**
+  			 * Collects siblings
+  			 *
+  			 * @private
+  			 * @param {Node} node Node to collect siblings from.
+  			 * @param {String} name Name of the sibling to check for.
+  			 * @return {Array} Array of collected siblings.
+  			 */
+  			function collectSiblings(node, name, end_node) {
+  				var siblings = [];
 
-          for (; node && node != end_node; node = node[name]) {
-            siblings.push(node);
-          }
+  				for (; node && node != end_node; node = node[name]) {
+  					siblings.push(node);
+  				}
 
-          return siblings;
-        }
+  				return siblings;
+  			}
 
-        /**
-               * Find an end point this is the node just before the common ancestor root.
-               *
-               * @private
-               * @param {Node} node Node to start at.
-               * @param {Node} root Root/ancestor element to stop just before.
-               * @return {Node} Node just before the root element.
-               */
-        function findEndPoint(node, root) {
-          do {
-            if (node.parentNode == root) {
-              return node;
-            }
+  			/**
+  			 * Find an end point this is the node just before the common ancestor root.
+  			 *
+  			 * @private
+  			 * @param {Node} node Node to start at.
+  			 * @param {Node} root Root/ancestor element to stop just before.
+  			 * @return {Node} Node just before the root element.
+  			 */
+  			function findEndPoint(node, root) {
+  				do {
+  					if (node.parentNode == root) {
+  						return node;
+  					}
 
-            node = node.parentNode;
-          } while (node);
-        }
+  					node = node.parentNode;
+  				} while (node);
+  			}
 
-        function walkBoundary(start_node, end_node, next) {
-          var siblingName = next ? 'nextSibling' : 'previousSibling';
+  			function walkBoundary(start_node, end_node, next) {
+  				var siblingName = next ? 'nextSibling' : 'previousSibling';
 
-          for (node = start_node, parent = node.parentNode; node && node != end_node; node = parent) {
-            parent = node.parentNode;
-            siblings = collectSiblings(node == start_node ? node : node[siblingName], siblingName);
+  				for (node = start_node, parent = node.parentNode; node && node != end_node; node = parent) {
+  					parent = node.parentNode;
+  					siblings = collectSiblings(node == start_node ? node : node[siblingName], siblingName);
 
-            if (siblings.length) {
-              if (!next) {
-                siblings.reverse();
-              }
+  					if (siblings.length) {
+  						if (!next) {
+  							siblings.reverse();
+  						}
 
-              callback(exclude(siblings));
-            }
-          }
-        }
+  						callback(exclude(siblings));
+  					}
+  				}
+  			}
 
-        // If index based start position then resolve it
-        if (startContainer.nodeType == 1 && startContainer.hasChildNodes()) {
-          startContainer = startContainer.childNodes[startOffset];
-        }
+  			// If index based start position then resolve it
+  			if (startContainer.nodeType == 1 && startContainer.hasChildNodes()) {
+  				startContainer = startContainer.childNodes[startOffset];
+  			}
 
-        // If index based end position then resolve it
-        if (endContainer.nodeType == 1 && endContainer.hasChildNodes()) {
-          endContainer = getEndChild(endContainer, endOffset);
-        }
+  			// If index based end position then resolve it
+  			if (endContainer.nodeType == 1 && endContainer.hasChildNodes()) {
+  				endContainer = getEndChild(endContainer, endOffset);
+  			}
 
-        // Same container
-        if (startContainer == endContainer) {
-          return callback(exclude([startContainer]));
-        }
+  			// Same container
+  			if (startContainer == endContainer) {
+  				return callback(exclude([startContainer]));
+  			}
 
-        // Find common ancestor and end points
-        ancestor = dom.findCommonAncestor(startContainer, endContainer);
+  			// Find common ancestor and end points
+  			ancestor = dom.findCommonAncestor(startContainer, endContainer);
 
-        // Process left side
-        for (node = startContainer; node; node = node.parentNode) {
-          if (node === endContainer) {
-            return walkBoundary(startContainer, ancestor, true);
-          }
+  			// Process left side
+  			for (node = startContainer; node; node = node.parentNode) {
+  				if (node === endContainer) {
+  					return walkBoundary(startContainer, ancestor, true);
+  				}
 
-          if (node === ancestor) {
-            break;
-          }
-        }
+  				if (node === ancestor) {
+  					break;
+  				}
+  			}
 
-        // Process right side
-        for (node = endContainer; node; node = node.parentNode) {
-          if (node === startContainer) {
-            return walkBoundary(endContainer, ancestor);
-          }
+  			// Process right side
+  			for (node = endContainer; node; node = node.parentNode) {
+  				if (node === startContainer) {
+  					return walkBoundary(endContainer, ancestor);
+  				}
 
-          if (node === ancestor) {
-            break;
-          }
-        }
+  				if (node === ancestor) {
+  					break;
+  				}
+  			}
 
-        // Find start/end point
-        startPoint = findEndPoint(startContainer, ancestor) || startContainer;
-        endPoint = findEndPoint(endContainer, ancestor) || endContainer;
+  			// Find start/end point
+  			startPoint = findEndPoint(startContainer, ancestor) || startContainer;
+  			endPoint = findEndPoint(endContainer, ancestor) || endContainer;
 
-        // Walk left leaf
-        walkBoundary(startContainer, startPoint, true);
+  			// Walk left leaf
+  			walkBoundary(startContainer, startPoint, true);
 
-        // Walk the middle from start to end point
-        siblings = collectSiblings(
-          startPoint == startContainer ? startPoint : startPoint.nextSibling,
-          'nextSibling',
-          endPoint == endContainer ? endPoint.nextSibling : endPoint
-        );
+  			// Walk the middle from start to end point
+  			siblings = collectSiblings(
+  				startPoint == startContainer ? startPoint : startPoint.nextSibling,
+  				'nextSibling',
+  				endPoint == endContainer ? endPoint.nextSibling : endPoint
+  			);
 
-        if (siblings.length) {
-          callback(exclude(siblings));
-        }
+  			if (siblings.length) {
+  				callback(exclude(siblings));
+  			}
 
-        // Walk right leaf
-        walkBoundary(endContainer, endPoint);
-      };
+  			// Walk right leaf
+  			walkBoundary(endContainer, endPoint);
+  		};
 
-      /**
-           * Splits the specified range at it's start/end points.
-           *
-           * @private
-           * @param {Range/RangeObject} rng Range to split.
-           * @return {Object} Range position object.
-           */
-      this.split = function (rng) {
-        var startContainer = rng.startContainer,
-          startOffset = rng.startOffset,
-          endContainer = rng.endContainer,
-          endOffset = rng.endOffset;
+  		/**
+  		 * Splits the specified range at it's start/end points.
+  		 *
+  		 * @private
+  		 * @param {Range/RangeObject} rng Range to split.
+  		 * @return {Object} Range position object.
+  		 */
+  		this.split = function (rng) {
+  			var startContainer = rng.startContainer,
+  				startOffset = rng.startOffset,
+  				endContainer = rng.endContainer,
+  				endOffset = rng.endOffset;
 
-        function splitText(node, offset) {
-          return node.splitText(offset);
-        }
+  			function splitText(node, offset) {
+  				return node.splitText(offset);
+  			}
 
-        // Handle single text node
-        if (startContainer == endContainer && startContainer.nodeType == 3) {
-          if (startOffset > 0 && startOffset < startContainer.nodeValue.length) {
-            endContainer = splitText(startContainer, startOffset);
-            startContainer = endContainer.previousSibling;
+  			// Handle single text node
+  			if (startContainer == endContainer && startContainer.nodeType == 3) {
+  				if (startOffset > 0 && startOffset < startContainer.nodeValue.length) {
+  					endContainer = splitText(startContainer, startOffset);
+  					startContainer = endContainer.previousSibling;
 
-            if (endOffset > startOffset) {
-              endOffset = endOffset - startOffset;
-              startContainer = endContainer = splitText(endContainer, endOffset).previousSibling;
-              endOffset = endContainer.nodeValue.length;
-              startOffset = 0;
-            } else {
-              endOffset = 0;
-            }
-          }
-        } else {
-          // Split startContainer text node if needed
-          if (startContainer.nodeType == 3 && startOffset > 0 && startOffset < startContainer.nodeValue.length) {
-            startContainer = splitText(startContainer, startOffset);
-            startOffset = 0;
-          }
+  					if (endOffset > startOffset) {
+  						endOffset = endOffset - startOffset;
+  						startContainer = endContainer = splitText(endContainer, endOffset).previousSibling;
+  						endOffset = endContainer.nodeValue.length;
+  						startOffset = 0;
+  					} else {
+  						endOffset = 0;
+  					}
+  				}
+  			} else {
+  				// Split startContainer text node if needed
+  				if (startContainer.nodeType == 3 && startOffset > 0 && startOffset < startContainer.nodeValue.length) {
+  					startContainer = splitText(startContainer, startOffset);
+  					startOffset = 0;
+  				}
 
-          // Split endContainer text node if needed
-          if (endContainer.nodeType == 3 && endOffset > 0 && endOffset < endContainer.nodeValue.length) {
-            endContainer = splitText(endContainer, endOffset).previousSibling;
-            endOffset = endContainer.nodeValue.length;
-          }
-        }
+  				// Split endContainer text node if needed
+  				if (endContainer.nodeType == 3 && endOffset > 0 && endOffset < endContainer.nodeValue.length) {
+  					endContainer = splitText(endContainer, endOffset).previousSibling;
+  					endOffset = endContainer.nodeValue.length;
+  				}
+  			}
+
+  			return {
+  				startContainer: startContainer,
+  				startOffset: startOffset,
+  				endContainer: endContainer,
+  				endOffset: endOffset
+  			};
+  		};
+
+  		/**
+  		 * Normalizes the specified range by finding the closest best suitable caret location.
+  		 *
+  		 * @private
+  		 * @param {Range} rng Range to normalize.
+  		 * @return {Boolean} True/false if the specified range was normalized or not.
+  		 */
+  		this.normalize = function (rng) {
+  			var normalized, collapsed;
+
+  			function normalizeEndPoint(start) {
+  				var container, offset, walker, body = dom.getRoot(),
+  					node, nonEmptyElementsMap;
+  				var directionLeft, isAfterNode;
+
+  				function hasBrBeforeAfter(node, left) {
+  					var walker = new TreeWalker(node, dom.getParent(node.parentNode, dom.isBlock) || body);
+
+  					while ((node = walker[left ? 'prev' : 'next']())) {
+  						if (node.nodeName === "BR") {
+  							return true;
+  						}
+  					}
+  				}
+
+  				function isPrevNode(node, name) {
+  					return node.previousSibling && node.previousSibling.nodeName == name;
+  				}
+
+  				// Walks the dom left/right to find a suitable text node to move the endpoint into
+  				// It will only walk within the current parent block or body and will stop if it hits a block or a BR/IMG
+  				function findTextNodeRelative(left, startNode) {
+  					var walker, lastInlineElement, parentBlockContainer;
+
+  					startNode = startNode || container;
+  					parentBlockContainer = dom.getParent(startNode.parentNode, dom.isBlock) || body;
+
+  					// Lean left before the BR element if it's the only BR within a block element. Gecko bug: #6680
+  					// This: <p><br>|</p> becomes <p>|<br></p>
+  					if (left && startNode.nodeName == 'BR' && isAfterNode && dom.isEmpty(parentBlockContainer)) {
+  						container = startNode.parentNode;
+  						offset = dom.nodeIndex(startNode);
+  						normalized = true;
+  						return;
+  					}
+
+  					// Walk left until we hit a text node we can move to or a block/br/img
+  					walker = new TreeWalker(startNode, parentBlockContainer);
+  					while ((node = walker[left ? 'prev' : 'next']())) {
+  						// Break if we hit a non content editable node
+  						if (dom.getContentEditableParent(node) === "false") {
+  							return;
+  						}
+
+  						// Found text node that has a length
+  						if (node.nodeType === 3 && node.nodeValue.length > 0) {
+  							container = node;
+  							offset = left ? node.nodeValue.length : 0;
+  							normalized = true;
+  							return;
+  						}
+
+  						// Break if we find a block or a BR/IMG/INPUT etc
+  						if (dom.isBlock(node) || nonEmptyElementsMap[node.nodeName.toLowerCase()]) {
+  							return;
+  						}
+
+  						lastInlineElement = node;
+  					}
+
+  					// Only fetch the last inline element when in caret mode for now
+  					if (collapsed && lastInlineElement) {
+  						container = lastInlineElement;
+  						normalized = true;
+  						offset = 0;
+  					}
+  				}
+
+  				container = rng[(start ? 'start' : 'end') + 'Container'];
+  				offset = rng[(start ? 'start' : 'end') + 'Offset'];
+  				isAfterNode = container.nodeType == 1 && offset === container.childNodes.length;
+  				nonEmptyElementsMap = dom.schema.getNonEmptyElements();
+  				directionLeft = start;
+
+  				if (container.nodeType == 1 && offset > container.childNodes.length - 1) {
+  					directionLeft = false;
+  				}
+
+  				// If the container is a document move it to the body element
+  				if (container.nodeType === 9) {
+  					container = dom.getRoot();
+  					offset = 0;
+  				}
+
+  				// If the container is body try move it into the closest text node or position
+  				if (container === body) {
+  					// If start is before/after a image, table etc
+  					if (directionLeft) {
+  						node = container.childNodes[offset > 0 ? offset - 1 : 0];
+  						if (node) {
+  							if (nonEmptyElementsMap[node.nodeName] || node.nodeName == "TABLE") {
+  								return;
+  							}
+  						}
+  					}
+
+  					// Resolve the index
+  					if (container.hasChildNodes()) {
+  						offset = Math.min(!directionLeft && offset > 0 ? offset - 1 : offset, container.childNodes.length - 1);
+  						container = container.childNodes[offset];
+  						offset = 0;
+
+  						// Don't walk into elements that doesn't have any child nodes like a IMG
+  						if (container.hasChildNodes() && !/TABLE/.test(container.nodeName)) {
+  							// Walk the DOM to find a text node to place the caret at or a BR
+  							node = container;
+  							walker = new TreeWalker(container, body);
+
+  							do {
+  								// Found a text node use that position
+  								if (node.nodeType === 3 && node.nodeValue.length > 0) {
+  									offset = directionLeft ? 0 : node.nodeValue.length;
+  									container = node;
+  									normalized = true;
+  									break;
+  								}
+
+  								// Found a BR/IMG element that we can place the caret before
+  								if (nonEmptyElementsMap[node.nodeName.toLowerCase()]) {
+  									offset = dom.nodeIndex(node);
+  									container = node.parentNode;
+
+  									// Put caret after image when moving the end point
+  									if (node.nodeName == "IMG" && !directionLeft) {
+  										offset++;
+  									}
+
+  									normalized = true;
+  									break;
+  								}
+  							} while ((node = (directionLeft ? walker.next() : walker.prev())));
+  						}
+  					}
+  				}
+
+  				// Lean the caret to the left if possible
+  				if (collapsed) {
+  					// So this: <b>x</b><i>|x</i>
+  					// Becomes: <b>x|</b><i>x</i>
+  					// Seems that only gecko has issues with this
+  					if (container.nodeType === 3 && offset === 0) {
+  						findTextNodeRelative(true);
+  					}
+
+  					// Lean left into empty inline elements when the caret is before a BR
+  					// So this: <i><b></b><i>|<br></i>
+  					// Becomes: <i><b>|</b><i><br></i>
+  					// Seems that only gecko has issues with this.
+  					// Special edge case for <p><a>x</a>|<br></p> since we don't want <p><a>x|</a><br></p>
+  					if (container.nodeType === 1) {
+  						node = container.childNodes[offset];
+
+  						// Offset is after the containers last child
+  						// then use the previous child for normalization
+  						if (!node) {
+  							node = container.childNodes[offset - 1];
+  						}
+
+  						if (node && node.nodeName === 'BR' && !isPrevNode(node, 'A') &&
+  							!hasBrBeforeAfter(node) && !hasBrBeforeAfter(node, true)) {
+  							findTextNodeRelative(true, node);
+  						}
+  					}
+  				}
+
+  				// Lean the start of the selection right if possible
+  				// So this: x[<b>x]</b>
+  				// Becomes: x<b>[x]</b>
+  				if (directionLeft && !collapsed && container.nodeType === 3 && offset === container.nodeValue.length) {
+  					findTextNodeRelative(false);
+  				}
+
+  				// Set endpoint if it was normalized
+  				if (normalized) {
+  					rng['set' + (start ? 'Start' : 'End')](container, offset);
+  				}
+  			}
+
+  			collapsed = rng.collapsed;
+
+  			normalizeEndPoint(true);
+
+  			if (!collapsed) {
+  				normalizeEndPoint();
+  			}
+
+  			// If it was collapsed then make sure it still is
+  			if (normalized && collapsed) {
+  				rng.collapse(true);
+  			}
+
+  			return normalized;
+  		};
+  	};
+
+  	/**
+  	 * Compares two ranges and checks if they are equal.
+  	 *
+  	 * @static
+  	 * @method compareRanges
+  	 * @param {DOMRange} rng1 First range to compare.
+  	 * @param {DOMRange} rng2 First range to compare.
+  	 * @return {Boolean} true/false if the ranges are equal.
+  	 */
+  	tinymce.dom.RangeUtils.compareRanges = function (rng1, rng2) {
+  		if (rng1 && rng2) {
+  			// Compare native IE ranges
+  			if (rng1.item || rng1.duplicate) {
+  				// Both are control ranges and the selected element matches
+  				if (rng1.item && rng2.item && rng1.item(0) === rng2.item(0)) {
+  					return true;
+  				}
+
+  				// Both are text ranges and the range matches
+  				if (rng1.isEqual && rng2.isEqual && rng2.isEqual(rng1)) {
+  					return true;
+  				}
+  			} else {
+  				// Compare w3c ranges
+  				return rng1.startContainer == rng2.startContainer && rng1.startOffset == rng2.startOffset;
+  			}
+  		}
+
+  		return false;
+  	};
+
+  	/**
+  	 * Gets the caret range for the given x/y location.
+  	 *
+  	 * @static
+  	 * @method getCaretRangeFromPoint
+  	 * @param {Number} x X coordinate for range
+  	 * @param {Number} y Y coordinate for range
+  	 * @param {Document} doc Document that x/y are relative to
+  	 * @returns {Range} caret range
+  	 */
+  	tinymce.dom.RangeUtils.getCaretRangeFromPoint = function (x, y, doc) {
+  		var rng, point;
+
+  		if (doc.caretPositionFromPoint) {
+  			point = doc.caretPositionFromPoint(x, y);
+  			rng = doc.createRange();
+  			rng.setStart(point.offsetNode, point.offset);
+  			rng.collapse(true);
+  		} else if (doc.caretRangeFromPoint) {
+  			rng = doc.caretRangeFromPoint(x, y);
+  		} else if (doc.body.createTextRange) {
+  			rng = doc.body.createTextRange();
+
+  			try {
+  				rng.moveToPoint(x, y);
+  				rng.collapse(true);
+  			} catch (ex) {
+  				// Append to top or bottom depending on drop location
+  				rng.collapse(y < doc.body.clientHeight);
+  			}
+  		}
+
+  		return rng;
+  	};
+
+  	tinymce.dom.RangeUtils.getSelectedNode = function (range) {
+  		var startContainer = range.startContainer,
+  			startOffset = range.startOffset;
+
+  		if (startContainer.hasChildNodes() && range.endOffset == startOffset + 1) {
+  			return startContainer.childNodes[startOffset];
+  		}
+
+  		return null;
+  	};
+
+  	tinymce.dom.RangeUtils.getNode = function (container, offset) {
+  		if (container.nodeType == 1 && container.hasChildNodes()) {
+  			if (offset >= container.childNodes.length) {
+  				offset = container.childNodes.length - 1;
+  			}
+
+  			container = container.childNodes[offset];
+  		}
+
+  		return container;
+  	};
+  })(tinymce);
+
+  /**
+   * MousePosition.js
+   *
+   * Released under LGPL License.
+   * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+   *
+   * License: http://www.tinymce.com/license
+   * Contributing: http://www.tinymce.com/contributing
+   */
+
+  /**
+   * This module calculates an absolute coordinate inside the editor body for both local and global mouse events.
+   *
+   * @private
+   * @class tinymce.dom.MousePosition
+   */
+  (function (tinymce) {
+      var getAbsolutePosition = function (elm) {
+        var doc, docElem, win, clientRect;
+
+        clientRect = elm.getBoundingClientRect();
+        doc = elm.ownerDocument;
+        docElem = doc.documentElement;
+        win = doc.defaultView;
 
         return {
-          startContainer: startContainer,
-          startOffset: startOffset,
-          endContainer: endContainer,
-          endOffset: endOffset
+          top: clientRect.top + win.pageYOffset - docElem.clientTop,
+          left: clientRect.left + win.pageXOffset - docElem.clientLeft
         };
       };
 
-      /**
-           * Normalizes the specified range by finding the closest best suitable caret location.
-           *
-           * @private
-           * @param {Range} rng Range to normalize.
-           * @return {Boolean} True/false if the specified range was normalized or not.
-           */
-      this.normalize = function (rng) {
-        var normalized, collapsed;
-
-        function normalizeEndPoint(start) {
-          var container, offset, walker, body = dom.getRoot(),
-            node, nonEmptyElementsMap;
-          var directionLeft, isAfterNode;
-
-          function hasBrBeforeAfter(node, left) {
-            var walker = new TreeWalker(node, dom.getParent(node.parentNode, dom.isBlock) || body);
-
-            while ((node = walker[left ? 'prev' : 'next']())) {
-              if (node.nodeName === "BR") {
-                return true;
-              }
-            }
-          }
-
-          function isPrevNode(node, name) {
-            return node.previousSibling && node.previousSibling.nodeName == name;
-          }
-
-          // Walks the dom left/right to find a suitable text node to move the endpoint into
-          // It will only walk within the current parent block or body and will stop if it hits a block or a BR/IMG
-          function findTextNodeRelative(left, startNode) {
-            var walker, lastInlineElement, parentBlockContainer;
-
-            startNode = startNode || container;
-            parentBlockContainer = dom.getParent(startNode.parentNode, dom.isBlock) || body;
-
-            // Lean left before the BR element if it's the only BR within a block element. Gecko bug: #6680
-            // This: <p><br>|</p> becomes <p>|<br></p>
-            if (left && startNode.nodeName == 'BR' && isAfterNode && dom.isEmpty(parentBlockContainer)) {
-              container = startNode.parentNode;
-              offset = dom.nodeIndex(startNode);
-              normalized = true;
-              return;
-            }
-
-            // Walk left until we hit a text node we can move to or a block/br/img
-            walker = new TreeWalker(startNode, parentBlockContainer);
-            while ((node = walker[left ? 'prev' : 'next']())) {
-              // Break if we hit a non content editable node
-              if (dom.getContentEditableParent(node) === "false") {
-                return;
-              }
-
-              // Found text node that has a length
-              if (node.nodeType === 3 && node.nodeValue.length > 0) {
-                container = node;
-                offset = left ? node.nodeValue.length : 0;
-                normalized = true;
-                return;
-              }
-
-              // Break if we find a block or a BR/IMG/INPUT etc
-              if (dom.isBlock(node) || nonEmptyElementsMap[node.nodeName.toLowerCase()]) {
-                return;
-              }
-
-              lastInlineElement = node;
-            }
-
-            // Only fetch the last inline element when in caret mode for now
-            if (collapsed && lastInlineElement) {
-              container = lastInlineElement;
-              normalized = true;
-              offset = 0;
-            }
-          }
-
-          container = rng[(start ? 'start' : 'end') + 'Container'];
-          offset = rng[(start ? 'start' : 'end') + 'Offset'];
-          isAfterNode = container.nodeType == 1 && offset === container.childNodes.length;
-          nonEmptyElementsMap = dom.schema.getNonEmptyElements();
-          directionLeft = start;
-
-          if (container.nodeType == 1 && offset > container.childNodes.length - 1) {
-            directionLeft = false;
-          }
-
-          // If the container is a document move it to the body element
-          if (container.nodeType === 9) {
-            container = dom.getRoot();
-            offset = 0;
-          }
-
-          // If the container is body try move it into the closest text node or position
-          if (container === body) {
-            // If start is before/after a image, table etc
-            if (directionLeft) {
-              node = container.childNodes[offset > 0 ? offset - 1 : 0];
-              if (node) {
-                if (nonEmptyElementsMap[node.nodeName] || node.nodeName == "TABLE") {
-                  return;
-                }
-              }
-            }
-
-            // Resolve the index
-            if (container.hasChildNodes()) {
-              offset = Math.min(!directionLeft && offset > 0 ? offset - 1 : offset, container.childNodes.length - 1);
-              container = container.childNodes[offset];
-              offset = 0;
-
-              // Don't walk into elements that doesn't have any child nodes like a IMG
-              if (container.hasChildNodes() && !/TABLE/.test(container.nodeName)) {
-                // Walk the DOM to find a text node to place the caret at or a BR
-                node = container;
-                walker = new TreeWalker(container, body);
-
-                do {
-                  // Found a text node use that position
-                  if (node.nodeType === 3 && node.nodeValue.length > 0) {
-                    offset = directionLeft ? 0 : node.nodeValue.length;
-                    container = node;
-                    normalized = true;
-                    break;
-                  }
-
-                  // Found a BR/IMG element that we can place the caret before
-                  if (nonEmptyElementsMap[node.nodeName.toLowerCase()]) {
-                    offset = dom.nodeIndex(node);
-                    container = node.parentNode;
-
-                    // Put caret after image when moving the end point
-                    if (node.nodeName == "IMG" && !directionLeft) {
-                      offset++;
-                    }
-
-                    normalized = true;
-                    break;
-                  }
-                } while ((node = (directionLeft ? walker.next() : walker.prev())));
-              }
-            }
-          }
-
-          // Lean the caret to the left if possible
-          if (collapsed) {
-            // So this: <b>x</b><i>|x</i>
-            // Becomes: <b>x|</b><i>x</i>
-            // Seems that only gecko has issues with this
-            if (container.nodeType === 3 && offset === 0) {
-              findTextNodeRelative(true);
-            }
-
-            // Lean left into empty inline elements when the caret is before a BR
-            // So this: <i><b></b><i>|<br></i>
-            // Becomes: <i><b>|</b><i><br></i>
-            // Seems that only gecko has issues with this.
-            // Special edge case for <p><a>x</a>|<br></p> since we don't want <p><a>x|</a><br></p>
-            if (container.nodeType === 1) {
-              node = container.childNodes[offset];
-
-              // Offset is after the containers last child
-              // then use the previous child for normalization
-              if (!node) {
-                node = container.childNodes[offset - 1];
-              }
-
-              if (node && node.nodeName === 'BR' && !isPrevNode(node, 'A') &&
-                              !hasBrBeforeAfter(node) && !hasBrBeforeAfter(node, true)) {
-                findTextNodeRelative(true, node);
-              }
-            }
-          }
-
-          // Lean the start of the selection right if possible
-          // So this: x[<b>x]</b>
-          // Becomes: x<b>[x]</b>
-          if (directionLeft && !collapsed && container.nodeType === 3 && offset === container.nodeValue.length) {
-            findTextNodeRelative(false);
-          }
-
-          // Set endpoint if it was normalized
-          if (normalized) {
-            rng['set' + (start ? 'Start' : 'End')](container, offset);
-          }
-        }
-
-        collapsed = rng.collapsed;
-
-        normalizeEndPoint(true);
-
-        if (!collapsed) {
-          normalizeEndPoint();
-        }
-
-        // If it was collapsed then make sure it still is
-        if (normalized && collapsed) {
-          rng.collapse(true);
-        }
-
-        return normalized;
+      var getBodyPosition = function (editor) {
+        return editor.inline ? getAbsolutePosition(editor.getBody()) : { left: 0, top: 0 };
       };
-    };
 
-    /**
-       * Compares two ranges and checks if they are equal.
-       *
-       * @static
-       * @method compareRanges
-       * @param {DOMRange} rng1 First range to compare.
-       * @param {DOMRange} rng2 First range to compare.
-       * @return {Boolean} true/false if the ranges are equal.
-       */
-    tinymce.dom.RangeUtils.compareRanges = function (rng1, rng2) {
-      if (rng1 && rng2) {
-        // Compare native IE ranges
-        if (rng1.item || rng1.duplicate) {
-          // Both are control ranges and the selected element matches
-          if (rng1.item && rng2.item && rng1.item(0) === rng2.item(0)) {
-            return true;
-          }
+      var getScrollPosition = function (editor) {
+        var body = editor.getBody();
+        return editor.inline ? { left: body.scrollLeft, top: body.scrollTop } : { left: 0, top: 0 };
+      };
 
-          // Both are text ranges and the range matches
-          if (rng1.isEqual && rng2.isEqual && rng2.isEqual(rng1)) {
-            return true;
-          }
-        } else {
-          // Compare w3c ranges
-          return rng1.startContainer == rng2.startContainer && rng1.startOffset == rng2.startOffset;
-        }
-      }
+      var getBodyScroll = function (editor) {
+        var body = editor.getBody(), docElm = editor.getDoc().documentElement;
+        var inlineScroll = { left: body.scrollLeft, top: body.scrollTop };
+        var iframeScroll = { left: body.scrollLeft || docElm.scrollLeft, top: body.scrollTop || docElm.scrollTop };
 
-      return false;
-    };
+        return editor.inline ? inlineScroll : iframeScroll;
+      };
 
-    /**
-       * Gets the caret range for the given x/y location.
-       *
-       * @static
-       * @method getCaretRangeFromPoint
-       * @param {Number} x X coordinate for range
-       * @param {Number} y Y coordinate for range
-       * @param {Document} doc Document that x/y are relative to
-       * @returns {Range} caret range
-       */
-    tinymce.dom.RangeUtils.getCaretRangeFromPoint = function (x, y, doc) {
-      var rng, point;
+      var getMousePosition = function (editor, event) {
+        if (event.target.ownerDocument !== editor.getDoc()) {
+          var iframePosition = getAbsolutePosition(editor.getContentAreaContainer());
+          var scrollPosition = getBodyScroll(editor);
 
-      if (doc.caretPositionFromPoint) {
-        point = doc.caretPositionFromPoint(x, y);
-        rng = doc.createRange();
-        rng.setStart(point.offsetNode, point.offset);
-        rng.collapse(true);
-      } else if (doc.caretRangeFromPoint) {
-        rng = doc.caretRangeFromPoint(x, y);
-      } else if (doc.body.createTextRange) {
-        rng = doc.body.createTextRange();
-
-        try {
-          rng.moveToPoint(x, y);
-          rng.collapse(true);
-        } catch (ex) {
-          // Append to top or bottom depending on drop location
-          rng.collapse(y < doc.body.clientHeight);
-        }
-      }
-
-      return rng;
-    };
-
-    tinymce.dom.RangeUtils.getSelectedNode = function (range) {
-      var startContainer = range.startContainer,
-        startOffset = range.startOffset;
-
-      if (startContainer.hasChildNodes() && range.endOffset == startOffset + 1) {
-        return startContainer.childNodes[startOffset];
-      }
-
-      return null;
-    };
-
-    tinymce.dom.RangeUtils.getNode = function (container, offset) {
-      if (container.nodeType == 1 && container.hasChildNodes()) {
-        if (offset >= container.childNodes.length) {
-          offset = container.childNodes.length - 1;
+          return {
+            left: event.pageX - iframePosition.left + scrollPosition.left,
+            top: event.pageY - iframePosition.top + scrollPosition.top
+          };
         }
 
-        container = container.childNodes[offset];
-      }
+        return {
+          left: event.pageX,
+          top: event.pageY
+        };
+      };
 
-      return container;
-    };
+      var calculatePosition = function (bodyPosition, scrollPosition, mousePosition) {
+        return {
+          pageX: (mousePosition.left - bodyPosition.left) + scrollPosition.left,
+          pageY: (mousePosition.top - bodyPosition.top) + scrollPosition.top
+        };
+      };
+
+      var calc = function (editor, event) {
+        return calculatePosition(getBodyPosition(editor), getScrollPosition(editor), getMousePosition(editor, event));
+      };
+
+      return {
+        calc: calc
+      };
   })(tinymce);
 
   /**
@@ -13089,6 +13281,3376 @@
   })(tinymce);
 
   /**
+   * Plugin.js
+   *
+   * Released under LGPL License.
+   * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+   *
+   * License: http://www.tinymce.com/license
+   * Contributing: http://www.tinymce.com/contributing
+   */
+
+  /**
+   * This class contains all core logic for the code plugin.
+   *
+   * @class tinymce.textpattern
+   * @private
+   */
+
+  tinymce.TextPattern = function (editor) {
+      var self = this, isPatternsDirty = true;
+      
+      self.patterns = [];
+      
+      // Returns a sorted patterns list, ordered descending by start length
+      function getPatterns() {
+          if (isPatternsDirty) {
+              sortPatterns(self.patterns);
+              isPatternsDirty = false;
+          }
+
+          return self.patterns;
+      }
+
+      // Finds a matching pattern to the specified text
+      function findPattern(text) {
+          var patterns = getPatterns();
+
+          for (var i = 0; i < patterns.length; i++) {
+              if (text.indexOf(patterns[i].start) !== 0) {
+                  continue;
+              }
+
+              if (patterns[i].end && text.lastIndexOf(patterns[i].end) != text.length - patterns[i].end.length) {
+                  continue;
+              }
+
+              return patterns[i];
+          }
+      }
+
+      function sortPatterns(patterns) {
+          return patterns.sort(function (a, b) {
+              if (a.start.length > b.start.length) {
+                  return -1;
+              }
+
+              if (a.start.length < b.start.length) {
+                  return 1;
+              }
+
+              return 0;
+          });
+      }
+
+      function isMatchingPattern(pattern, text, offset, delta) {
+          var textEnd = text.substr(offset - pattern.end.length - delta, pattern.end.length);
+          return textEnd === pattern.end;
+      }
+
+      function hasContent(offset, delta, pattern) {
+          return (offset - delta - pattern.end.length - pattern.start.length) > 0;
+      }
+
+      // Finds the best matching end pattern
+      function findEndPattern(text, offset, delta) {
+          var pattern, i;
+          var patterns = getPatterns();
+          var sortedPatterns = sortPatterns(patterns);
+
+          // Find best matching end
+          for (i = 0; i < sortedPatterns.length; i++) {
+              pattern = sortedPatterns[i];
+              if (pattern.end !== undefined && isMatchingPattern(pattern, text, offset, delta) && hasContent(offset, delta, pattern)) {
+                  return pattern;
+              }
+          }
+      }
+
+      function splitContainer(container, pattern, offset, startOffset, delta) {
+          // remove leading space in pattern
+          if (delta && /[\u00a0 ]/.test(pattern.start)) {
+              startOffset += 1;
+          }
+
+          // Split text node and remove start/end from text node
+          container = startOffset > 0 ? container.splitText(startOffset) : container;
+          container.splitText(offset - startOffset - delta);
+
+          if (pattern.remove !== false) {
+              container.deleteData(0, pattern.start.length);
+              container.deleteData(container.data.length - pattern.end.length, pattern.end.length);
+          }
+
+          return container;
+      }
+
+      // Handles inline formats like *abc* and **abc**
+      function applyInlineFormat(space) {
+          var selection, dom, rng, container, offset, startOffset, text, patternRng, pattern, delta, format;
+
+          selection = editor.selection;
+          dom = editor.dom;
+
+          if (!selection.isCollapsed()) {
+              return;
+          }
+
+          rng = selection.getRng(true);
+          container = rng.startContainer;
+          offset = rng.startOffset;
+          text = container.data;
+          delta = space === true ? 1 : 0;
+
+          if (container.nodeType != 3) {
+              return;
+          }
+
+          if (dom.getParent(container, 'PRE')) {
+              return;
+          }
+
+          // Find best matching end
+          pattern = findEndPattern(text, offset, delta);
+
+          if (pattern === undefined) {
+              return;
+          }
+
+          // Find start of matched pattern
+          // TODO: Might need to improve this if there is nested formats
+          startOffset = Math.max(0, offset - delta);
+
+          startOffset = text.lastIndexOf(pattern.start, startOffset - pattern.end.length - 1);
+
+          if (startOffset === -1) {
+              return;
+          }
+
+          // Setup a range for the matching word
+          patternRng = dom.createRng();
+          patternRng.setStart(container, startOffset);
+          patternRng.setEnd(container, offset - delta);
+          pattern = findPattern(patternRng.toString());
+
+          if (!pattern || !pattern.end) {
+              return;
+          }
+
+          // If container match doesn't have anything between start/end then do nothing
+          if (container.data.length <= pattern.start.length + pattern.end.length) {
+              return;
+          }
+
+          if (!pattern.format) {
+              return;
+          }
+
+          format = editor.formatter.get(pattern.format);
+
+          if (format && format[0].inline) {
+              container = splitContainer(container, pattern, offset, startOffset, delta);
+
+              // add back removed space
+              if (space) {
+                  container.appendData(' ');
+              }
+
+              editor.formatter.apply(pattern.format, {}, container);
+
+              return container;
+          }
+      }
+
+      // Handles block formats like ##abc or 1. abc
+      function applyBlockFormat(e) {
+          var selection, dom, container, firstTextNode, node, format, textBlockElm, pattern, walker, rng, offset;
+
+          selection = editor.selection;
+          dom = editor.dom;
+
+          if (!selection.isCollapsed()) {
+              return;
+          }
+
+          // skip in pre
+          if (selection.getStart().nodeName === 'PRE') {
+              return;
+          }
+
+          textBlockElm = dom.getParent(selection.getStart(), 'p');
+
+          if (textBlockElm) {
+              walker = new tinymce.dom.TreeWalker(textBlockElm, textBlockElm);
+              
+              while ((node = walker.next())) {
+                  if (node.nodeType == 3) {
+                      firstTextNode = node;
+                      break;
+                  }
+              }
+
+              if (firstTextNode) {
+                  pattern = findPattern(firstTextNode.data);
+
+                  if (!pattern) {
+                      return;
+                  }
+                  
+                  // cancel newline on enter if the format removes the original pattern
+                  if (pattern.remove) {
+                      e.preventDefault();
+                  }
+
+                  rng = selection.getRng(true);
+                  container = rng.startContainer;
+                  offset = rng.startOffset;
+
+                  if (firstTextNode == container) {
+                      offset = Math.max(0, offset - pattern.start.length);
+                  }
+
+                  if (tinymce.trim(firstTextNode.data).length == pattern.start.length) {
+                      return;
+                  }
+
+                  if (pattern.format) {
+                      format = editor.formatter.get(pattern.format);
+
+                      if (format && format[0].block) {
+                          firstTextNode.deleteData(0, pattern.start.length);
+                          editor.formatter.apply(pattern.format, {}, firstTextNode);
+
+                          rng.setStart(container, offset);
+                          rng.collapse(true);
+                          selection.setRng(rng);
+                      }
+
+                      return;
+                  }
+
+                  if (pattern.cmd) {
+                      editor.undoManager.add();
+
+                      var length = pattern.start.length,
+                          data = firstTextNode.data;
+
+                      // remove pattern entirely
+                      if (pattern.remove) {
+                          length = firstTextNode.data.length;
+                      }
+
+                      firstTextNode.deleteData(0, length);
+
+                      var parent = firstTextNode.parentNode;
+
+                      if (dom.isEmpty(parent) && dom.isBlock(parent)) {
+                          parent.innerHTML = '<br data-mce-bogus="1">';
+
+                          window.setTimeout(function () {
+                              rng.setStart(parent, 0);
+                              rng.collapse(true);
+                              selection.setRng(rng);
+                          }, 0);
+                      }
+
+                      // pass to command
+                      editor.execCommand(pattern.cmd, false, data);
+
+                      return;
+                  }
+              }
+          }
+      }
+
+      function handleEnter(e) {
+          var rng, wrappedTextNode;
+
+          wrappedTextNode = applyInlineFormat();
+
+          if (wrappedTextNode) {
+              rng = editor.dom.createRng();
+              rng.setStart(wrappedTextNode, wrappedTextNode.data.length);
+              rng.setEnd(wrappedTextNode, wrappedTextNode.data.length);
+              editor.selection.setRng(rng);
+          }
+
+          applyBlockFormat(e);
+      }
+
+      function handleSpace() {
+          var wrappedTextNode, lastChar, lastCharNode, rng, dom;
+
+          wrappedTextNode = applyInlineFormat(true);
+
+          if (wrappedTextNode) {
+              dom = editor.dom;
+              lastChar = wrappedTextNode.data.slice(-1);
+
+              // Move space after the newly formatted node
+              if (/[\u00a0 ]/.test(lastChar)) {
+                  wrappedTextNode.deleteData(wrappedTextNode.data.length - 1, 1);
+                  lastCharNode = dom.doc.createTextNode(lastChar);
+
+                  if (wrappedTextNode.nextSibling) {
+                      dom.insertAfter(lastCharNode, wrappedTextNode.nextSibling);
+                  } else {
+                      wrappedTextNode.parentNode.appendChild(lastCharNode);
+                  }
+
+                  rng = dom.createRng();
+                  rng.setStart(lastCharNode, 1);
+                  rng.setEnd(lastCharNode, 1);
+                  editor.selection.setRng(rng);
+              }
+          }
+      }
+
+      editor.onKeyDown.addToTop(function (ed, e) {
+          if (e.keyCode == 13 && !tinymce.VK.modifierPressed(e)) {
+              handleEnter(e);
+          }
+      });
+
+      editor.onKeyUp.add(function (ed, e) {        
+          if (e.keyCode == 32 && !tinymce.VK.modifierPressed(e)) {
+              handleSpace();
+          }
+      });
+
+      var addPattern = function (pattern) {
+          self.patterns.push(pattern);
+          isPatternsDirty = true;
+      };
+
+      return {
+          getPatterns: getPatterns,
+          addPattern: addPattern
+      };
+  };
+
+  var internalMimeType = 'x-tinymce/html';
+  var internalMark = '<!-- ' + internalMimeType + ' -->';
+
+  var mark = function (html) {
+    return internalMark + html;
+  };
+
+  var unmark = function (html) {
+    return html.replace(internalMark, '');
+  };
+
+  var isMarked = function (html) {
+    return html.indexOf(internalMark) !== -1;
+  };
+
+  var internalHtmlMime = function () {
+    return internalMimeType;
+  };
+
+  var noop = function () { };
+
+  var hasWorkingClipboardApi = function (clipboardData) {
+      // iOS supports the clipboardData API but it doesn't do anything for cut operations
+      return tinymce.isIOS === false && clipboardData !== undefined && typeof clipboardData.setData === 'function';
+  };
+
+  var setHtml5Clipboard = function (clipboardData, html, text) {
+      if (hasWorkingClipboardApi(clipboardData)) {
+          try {
+              clipboardData.clearData();
+              clipboardData.setData('text/html', html);
+              clipboardData.setData('text/plain', text);
+              clipboardData.setData(internalHtmlMime(), html);
+              return true;
+          } catch (e) {
+              return false;
+          }
+      } else {
+          return false;
+      }
+  };
+
+  var setClipboardData = function (evt, data, fallback, done) {
+      if (setHtml5Clipboard(evt.clipboardData, data.html, data.text)) {
+          evt.preventDefault();
+          done();
+      } else {
+          fallback(data.html, done);
+      }
+  };
+
+  var fallback = function (editor) {
+      return function (html, done) {
+          var markedHtml = mark(html);
+          var outer = editor.dom.create('div', {
+              contenteditable: "false",
+              "data-mce-bogus": "all"
+          });
+
+          var inner = editor.dom.create('div', {
+              contenteditable: "true",
+              "data-mce-bogus": "all"
+          }, markedHtml);
+
+          editor.dom.setStyles(outer, {
+              position: 'fixed',
+              left: '-3000px',
+              width: '1000px',
+              overflow: 'hidden'
+          });
+
+          outer.appendChild(inner);
+          editor.dom.add(editor.getBody(), outer);
+
+          var range = editor.selection.getRng();
+          inner.focus();
+
+          var offscreenRange = editor.dom.createRng();
+          offscreenRange.selectNodeContents(inner);
+          editor.selection.setRng(offscreenRange);
+
+          setTimeout(function () {
+              outer.parentNode.removeChild(outer);
+              editor.selection.setRng(range);
+              done();
+          }, 0);
+      };
+  };
+
+  var getData = function (editor) {
+      return {
+          html: editor.selection.getContent({
+              contextual: true
+          }),
+          text: editor.selection.getContent({
+              format: 'text'
+          })
+      };
+  };
+
+  var cut = function (editor, evt) {
+      
+      if (evt.isDefaultPrevented()) {
+          return;
+      }
+      
+      if (editor.selection.isCollapsed() === false) {
+          setClipboardData(evt, getData(editor), fallback(editor), function () {
+              // Chrome fails to execCommand from another execCommand with this message:
+              // "We don't execute document.execCommand() this time, because it is called recursively.""
+              setTimeout(function () { // detach
+                  editor.execCommand('Delete');
+              }, 0);
+          });
+      }
+  };
+
+  var copy = function (editor, evt) {
+      if (evt.isDefaultPrevented()) {
+          return;
+      }
+      
+      if (editor.selection.isCollapsed() === false) {
+          setClipboardData(evt, getData(editor), fallback(editor), noop);
+      }
+  };
+
+  var register = function (editor) {
+      editor.onCut.add(cut);
+      editor.onCopy.add(copy);
+  };
+
+  var DomParser$2 = tinymce.html.DomParser, Schema$1 = tinymce.html.Schema, each$4 = tinymce.each, DOM = tinymce.DOM;
+
+  var mceInternalUrlPrefix = 'data:text/mce-internal,';
+
+  var resetStyleAttribute = function (content) {
+    var div = DOM.create('div', {}, content);
+
+    each$4(DOM.select('[style]', div), function (elm) {
+        elm.setAttribute('style', elm.getAttribute('data-mce-style') || '');
+    });
+
+    return div.innerHTML;
+  };
+
+  var parseCssToRules = function (content) {
+    var doc = document.implementation.createHTMLDocument(""),
+      styleElement = document.createElement("style");
+
+    styleElement.textContent = content;
+
+    doc.body.appendChild(styleElement);
+
+    return styleElement.sheet.cssRules;
+  };
+
+  function parseCSS(content) {
+    var rules, classes = {};
+
+    rules = parseCssToRules(content);
+
+    function isValue(val) {
+      return val !== "" && val !== "normal" && val !== "inherit" && val !== "none" && val !== "initial";
+    }
+
+    function isValidStyle(value) {
+      return Object.values(value).length;
+    }
+
+    each$4(rules, function (r) {
+
+      if (r.selectorText) {
+        var styles = {};
+
+        each$4(r.style, function (name) {
+          var value = r.style.getPropertyValue(name);
+
+          if (isValue(value)) {
+            styles[name] = value;
+          }
+
+        });
+
+        each$4(r.selectorText.split(','), function (selector) {
+          selector = selector.trim();
+
+          if (selector.indexOf('.mce') == 0 || selector.indexOf('.mce-') !== -1 || selector.indexOf('.mso-') !== -1) {
+            return;
+          }
+
+          if (isValidStyle(styles)) {
+            classes[selector] = {
+              styles: styles,
+              text: r.cssText
+            };
+          }
+        });
+      }
+    });
+
+    return classes;
+  }
+
+  function processStylesheets(content, embed_stylesheet) {
+    var div = DOM.create('div', {}, content), styles = {}, css = '';
+
+    styles = tinymce.extend(styles, parseCSS(content));
+
+    each$4(styles, function (value, selector) {
+      // skip Word stuff
+      if (selector.indexOf('Mso') !== -1) {
+        return true;
+      }
+
+      // skip pseudo selectors
+      if (selector.indexOf(':') !== -1) {
+        return true;
+      }
+
+      // skip at-rules
+      if (selector.indexOf('@') === 0) {
+        return true;
+      }
+      
+      if (!embed_stylesheet) {
+        DOM.setStyles(DOM.select(selector, div), value.styles);
+      } else {
+        css += value.text;
+      }
+    });
+
+    if (css) {
+      div.prepend(DOM.create('style', { type: 'text/css' }, css));
+    }
+
+    content = div.innerHTML;
+
+    return content;
+  }
+
+  function hasContentType(clipboardContent, mimeType) {
+    return mimeType in clipboardContent && clipboardContent[mimeType].length > 0;
+  }
+
+  function hasHtmlOrText(content) {
+    return (hasContentType(content, 'text/html') || hasContentType(content, 'text/plain')) && !content.Files;
+  }
+
+  /**
+   * Gets various content types out of a datatransfer object.
+   *
+   * @param {DataTransfer} dataTransfer Event fired on paste.
+   * @return {Object} Object with mime types and data for those mime types.
+   */
+  function getDataTransferItems(dataTransfer) {
+    var items = {};
+
+    if (dataTransfer) {
+      // Use old WebKit/IE API
+      if (dataTransfer.getData) {
+        var legacyText = dataTransfer.getData('Text');
+        if (legacyText && legacyText.length > 0) {
+          if (legacyText.indexOf(mceInternalUrlPrefix) === -1) {
+            items['text/plain'] = legacyText;
+          }
+        }
+      }
+
+      if (dataTransfer.types) {
+        for (var i = 0; i < dataTransfer.types.length; i++) {
+          var contentType = dataTransfer.types[i];
+          try { // IE11 throws exception when contentType is Files (type is present but data cannot be retrieved via getData())
+            items[contentType] = dataTransfer.getData(contentType);
+          } catch (ex) {
+            items[contentType] = ""; // useless in general, but for consistency across browsers
+          }
+        }
+      }
+    }
+
+    return items;
+  }
+
+  function filter(content, items) {
+    tinymce.each(items, function (v) {
+      if (v.constructor == RegExp) {
+        content = content.replace(v, '');
+      } else {
+        content = content.replace(v[0], v[1]);
+      }
+    });
+
+    return content;
+  }
+
+  /**
+   * Gets the innerText of the specified element. It will handle edge cases
+   * and works better than textContent on Gecko.
+   *
+   * @param {String} html HTML string to get text from.
+   * @return {String} String of text with line feeds.
+   */
+  function innerText(html) {
+    var schema = new Schema$1(),
+      domParser = new DomParser$2({}, schema),
+      text = '';
+    var shortEndedElements = schema.getShortEndedElements();
+    var ignoreElements = tinymce.makeMap('script noscript style textarea video audio iframe object', ' ');
+    var blockElements = schema.getBlockElements();
+
+    function walk(node) {
+      var name = node.name,
+        currentNode = node;
+
+      if (name === 'br') {
+        text += '\n';
+        return;
+      }
+
+      // img/input/hr
+      if (shortEndedElements[name]) {
+        text += ' ';
+      }
+
+      // Ingore script, video contents
+      if (ignoreElements[name]) {
+        text += ' ';
+        return;
+      }
+
+      if (node.type == 3) {
+        text += node.value;
+      }
+
+      // Walk all children
+      if (!node.shortEnded) {
+        if ((node = node.firstChild)) {
+          do {
+            walk(node);
+          } while ((node = node.next));
+        }
+      }
+
+      // Add \n or \n\n for blocks or P
+      if (blockElements[name] && currentNode.next) {
+        text += '\n';
+
+        if (name == 'p') {
+          text += '\n';
+        }
+      }
+    }
+
+    html = filter(html, [
+      /<!\[[^\]]+\]>/g // Conditional comments
+    ]);
+
+    walk(domParser.parse(html));
+
+    return text;
+  }
+
+  /**
+   * Trims the specified HTML by removing all WebKit fragments, all elements wrapping the body trailing BR elements etc.
+   *
+   * @param {String} html Html string to trim contents on.
+   * @return {String} Html contents that got trimmed.
+   */
+  function trimHtml(html) {
+    function trimSpaces(all, s1, s2) {
+
+      // WebKit &nbsp; meant to preserve multiple spaces but instead inserted around all inline tags,
+      // including the spans with inline styles created on paste
+      if (!s1 && !s2) {
+        return ' ';
+      }
+
+      return '\u00a0';
+    }
+
+    function getInnerFragment(html) {
+      var startFragment = '<!--StartFragment-->';
+      var endFragment = '<!--EndFragment-->';
+      var startPos = html.indexOf(startFragment);
+      if (startPos !== -1) {
+        var fragmentHtml = html.substr(startPos + startFragment.length);
+        var endPos = fragmentHtml.indexOf(endFragment);
+        if (endPos !== -1 && /^<\/(p|h[1-6]|li)>/i.test(fragmentHtml.substr(endPos + endFragment.length, 5))) {
+          return fragmentHtml.substr(0, endPos);
+        }
+      }
+
+      return html;
+    }
+
+    html = filter(getInnerFragment(html), [
+      /^[\s\S]*<body[^>]*>\s*|\s*<\/body[^>]*>[\s\S]*$/gi, // Remove anything but the contents within the BODY element
+      /<!--StartFragment-->|<!--EndFragment-->/g, // Inner fragments (tables from excel on mac)
+      [/( ?)<span class="Apple-converted-space">(\u00a0|&nbsp;)<\/span>( ?)/g, trimSpaces],
+      /<br class="Apple-interchange-newline">/g,
+      /^<meta[^>]+>/g, // Chrome weirdness
+      /<br>$/i, // Trailing BR elements,
+      /&nbsp;$/ // trailing non-breaking space
+    ]);
+
+    return html;
+  }
+
+  var each$3 = tinymce.each;
+
+  /**
+   * Removes BR elements after block elements. IE9 has a nasty bug where it puts a BR element after each
+   * block element when pasting from word. This removes those elements.
+   *
+   * This:
+   *  <p>a</p><br><p>b</p>
+   *
+   * Becomes:
+   *  <p>a</p><p>b</p>
+   */
+  function removeExplorerBrElementsAfterBlocks(editor, html, internal) {
+      // Produce block regexp based on the block elements in schema
+      var blockElements = [];
+
+      each$3(editor.schema.getBlockElements(), function (block, blockName) {
+          blockElements.push(blockName);
+      });
+
+      var explorerBlocksRegExp = new RegExp(
+          '(?:<br>&nbsp;[\\s\\r\\n]+|<br>)*(<\\/?(' + blockElements.join('|') + ')[^>]*>)(?:<br>&nbsp;[\\s\\r\\n]+|<br>)*',
+          'g'
+      );
+
+      // Remove BR:s from: <BLOCK>X</BLOCK><BR>
+      html = filter(html, [
+          [explorerBlocksRegExp, '$1']
+      ]);
+
+      // IE9 also adds an extra BR element for each soft-linefeed and it also adds a BR for each word wrap break
+      html = filter(html, [
+          [/<br><br>/g, '<BR><BR>'], // Replace multiple BR elements with uppercase BR to keep them intact
+          [/<br>/g, ' '], // Replace single br elements with space since they are word wrap BR:s
+          [/<BR><BR>/g, '<br>'] // Replace back the double brs but into a single BR
+      ]);
+
+      return html;
+  }
+
+  /**
+   * WebKit has a nasty bug where the all computed styles gets added to style attributes when copy/pasting contents.
+   * This fix solves that by simply removing the whole style attribute.
+   *
+   * The paste_webkit_styles option can be set to specify what to keep:
+   *  paste_webkit_styles: "none" // Keep no styles
+   *  paste_webkit_styles: "all", // Keep all of them
+   *  paste_webkit_styles: "font-weight color" // Keep specific ones
+   * 
+   * @param {Object} self A reference to the plugin.
+   * @param {String} content Content that needs to be processed.
+   * @return {String} Processed contents.
+   */
+  function removeWebKitStyles(editor, content) {
+      // Filter away styles that isn't matching the target node
+      var webKitStyles = editor.settings.paste_webkit_styles;
+
+      if (editor.settings.paste_remove_styles_if_webkit !== true || webKitStyles == "all") {
+          return content;
+      }
+
+      if (webKitStyles) {
+          webKitStyles = webKitStyles.split(/[, ]/);
+      }
+
+      // Keep specific styles that doesn't match the current node computed style
+      if (webKitStyles) {
+          var dom = editor.dom,
+              node = editor.selection.getNode();
+
+          content = content.replace(/(<[^>]+) style="([^"]*)"([^>]*>)/gi, function (all, before, value, after) {
+              var inputStyles = dom.parseStyle(value, 'span'),
+                  outputStyles = {};
+
+              if (webKitStyles === "none") {
+                  return before + after;
+              }
+
+              for (var i = 0; i < webKitStyles.length; i++) {
+                  var inputValue = inputStyles[webKitStyles[i]],
+                      currentValue = dom.getStyle(node, webKitStyles[i], true);
+
+                  if (/color/.test(webKitStyles[i])) {
+                      inputValue = dom.toHex(inputValue);
+                      currentValue = dom.toHex(currentValue);
+                  }
+
+                  if (currentValue != inputValue) {
+                      outputStyles[webKitStyles[i]] = inputValue;
+                  }
+              }
+
+              outputStyles = dom.serializeStyle(outputStyles, 'span');
+              if (outputStyles) {
+                  return before + ' style="' + outputStyles + '"' + after;
+              }
+
+              return before + after;
+          });
+      } else {
+          // Remove all external styles
+          content = content.replace(/(<[^>]+) style="([^"]*)"([^>]*>)/gi, '$1$3');
+      }
+
+      // Keep internal styles
+      content = content.replace(/(<[^>]+) data-mce-style="([^"]+)"([^>]*>)/gi, function (all, before, value, after) {
+          return before + ' style="' + value + '"' + after;
+      });
+
+      return content;
+  }
+  var setup$3 = function (editor) {
+      if (tinymce.isWebKit) {
+          editor.onPastePreProcess.add(function (editor, o) {
+              if (!o.isWordContent) {
+                  o.content = removeWebKitStyles(editor, o.content);
+              }
+          });
+      }
+      
+      if (tinymce.isIE || tinymce.isIE12) {
+          editor.onPastePostProcess.add(function (editor, o) {
+              if (!o.isWordContent) {
+                  o.content = removeExplorerBrElementsAfterBlocks(editor, o.content);
+              }
+          });
+      }
+  };
+
+  function convertToPixels(v) {
+      // return pixel value
+      if (v.indexOf('px') !== -1) {
+          return v;
+      }
+
+      // retun integer 0 for 0 values, eg: 0cm, 0pt etc. 
+      if (parseInt(v, 10) === 0) {
+          return 0;
+      }
+
+      // convert pt to px
+      if (v.indexOf('pt') !== -1) {
+          // convert to integer
+          v = parseInt(v, 10);
+          // convert to pixel value (round up to 1)
+          v = Math.ceil(v / 1.33333);
+          // convert to absolute integer
+          v = Math.abs(v);
+      }
+
+      if (v) {
+          v += 'px';
+      }
+
+      return v;
+  }
+
+  var pixelStyles = [
+      'width', 'height', 'min-width', 'max-width', 'min-height', 'max-height',
+      'margin-top', 'margin-right', 'margin-bottom', 'margin-left',
+      'padding-top', 'padding-right', 'padding-bottom', 'padding-left',
+      'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width'
+  ];
+
+  var styleProps = [
+      'background', 'background-attachment', 'background-color', 'background-image', 'background-position', 'background-repeat',
+      'border', 'border-bottom', 'border-bottom-color', 'border-bottom-style', 'border-bottom-width', 'border-color', 'border-left', 'border-left-color', 'border-left-style', 'border-left-width', 'border-right', 'border-right-color', 'border-right-style', 'border-right-width', 'border-style', 'border-top', 'border-top-color', 'border-top-style', 'border-top-width', 'border-width', 'outline', 'outline-color', 'outline-style', 'outline-width',
+      'height', 'max-height', 'max-width', 'min-height', 'min-width', 'width',
+      'font', 'font-family', 'font-size', 'font-style', 'font-variant', 'font-weight',
+      'content', 'counter-increment', 'counter-reset', 'quotes',
+      'list-style', 'list-style-image', 'list-style-position', 'list-style-type',
+      'margin', 'margin-bottom', 'margin-left', 'margin-right', 'margin-top',
+      'padding', 'padding-bottom', 'padding-left', 'padding-right', 'padding-top',
+      'bottom', 'clear', 'clip', 'cursor', 'display', 'float', 'left', 'overflow', 'position', 'right', 'top', 'visibility', 'z-index',
+      'orphans', 'page-break-after', 'page-break-before', 'page-break-inside', 'widows',
+      'border-collapse', 'border-spacing', 'caption-side', 'empty-cells', 'table-layout',
+      'color', 'direction', 'letter-spacing', 'line-height', 'text-align', 'text-decoration', 'text-indent', 'text-shadow', 'text-transform', 'unicode-bidi', 'vertical-align', 'white-space', 'word-spacing'
+  ];
+
+  var borderStyles = [
+      'border', 'border-width', 'border-style', 'border-color',
+      'border-top', 'border-right', 'border-bottom', 'border-left',
+      'border-top-width', 'border-right-width', 'border-bottom-width', 'border-left-width',
+      'border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color',
+      'border-top-style', 'border-right-style', 'border-bottom-style', 'border-left-style'
+  ];
+
+  var backgroundStyles = {
+      'background-image': 'none',
+      'background-position': '0% 0%',
+      'background-size': 'auto auto',
+      'background-repeat': 'repeat',
+      'background-origin': 'padding-box',
+      'background-clip': 'border-box',
+      'background-attachment': 'scroll',
+      'background-color': 'transparent'
+  };
+
+  var fontStyles = [
+      'font', 'font-family', 'font-size',
+      'font-style', 'font-variant', 'font-weight'
+  ];
+
+  var namedColors = {
+      '#F0F8FF': 'AliceBlue',
+      '#FAEBD7': 'AntiqueWhite',
+      '#7FFFD4': 'Aquamarine',
+      '#F0FFFF': 'Azure',
+      '#F5F5DC': 'Beige',
+      '#FFE4C4': 'Bisque',
+      '#000000': 'Black',
+      '#FFEBCD': 'BlanchedAlmond',
+      '#0000FF': 'Blue',
+      '#8A2BE2': 'BlueViolet',
+      '#A52A2A': 'Brown',
+      '#DEB887': 'BurlyWood',
+      '#5F9EA0': 'CadetBlue',
+      '#7FFF00': 'Chartreuse',
+      '#D2691E': 'Chocolate',
+      '#FF7F50': 'Coral',
+      '#6495ED': 'CornflowerBlue',
+      '#FFF8DC': 'Cornsilk',
+      '#DC143C': 'Crimson',
+      '#00008B': 'DarkBlue',
+      '#008B8B': 'DarkCyan',
+      '#B8860B': 'DarkGoldenRod',
+      '#A9A9A9': 'DarkGray',
+      '#006400': 'DarkGreen',
+      '#BDB76B': 'DarkKhaki',
+      '#8B008B': 'DarkMagenta',
+      '#556B2F': 'DarkOliveGreen',
+      '#FF8C00': 'Darkorange',
+      '#9932CC': 'DarkOrchid',
+      '#8B0000': 'DarkRed',
+      '#E9967A': 'DarkSalmon',
+      '#8FBC8F': 'DarkSeaGreen',
+      '#483D8B': 'DarkSlateBlue',
+      '#2F4F4F': 'DarkSlateGrey',
+      '#00CED1': 'DarkTurquoise',
+      '#9400D3': 'DarkViolet',
+      '#FF1493': 'DeepPink',
+      '#00BFFF': 'DeepSkyBlue',
+      '#696969': 'DimGrey',
+      '#1E90FF': 'DodgerBlue',
+      '#B22222': 'FireBrick',
+      '#FFFAF0': 'FloralWhite',
+      '#228B22': 'ForestGreen',
+      '#DCDCDC': 'Gainsboro',
+      '#F8F8FF': 'GhostWhite',
+      '#FFD700': 'Gold',
+      '#DAA520': 'GoldenRod',
+      '#808080': 'Grey',
+      '#008000': 'Green',
+      '#ADFF2F': 'GreenYellow',
+      '#F0FFF0': 'HoneyDew',
+      '#FF69B4': 'HotPink',
+      '#CD5C5C': 'IndianRed',
+      '#4B0082': 'Indigo',
+      '#FFFFF0': 'Ivory',
+      '#F0E68C': 'Khaki',
+      '#E6E6FA': 'Lavender',
+      '#FFF0F5': 'LavenderBlush',
+      '#7CFC00': 'LawnGreen',
+      '#FFFACD': 'LemonChiffon',
+      '#ADD8E6': 'LightBlue',
+      '#F08080': 'LightCoral',
+      '#E0FFFF': 'LightCyan',
+      '#FAFAD2': 'LightGoldenRodYellow',
+      '#D3D3D3': 'LightGrey',
+      '#90EE90': 'LightGreen',
+      '#FFB6C1': 'LightPink',
+      '#FFA07A': 'LightSalmon',
+      '#20B2AA': 'LightSeaGreen',
+      '#87CEFA': 'LightSkyBlue',
+      '#778899': 'LightSlateGrey',
+      '#B0C4DE': 'LightSteelBlue',
+      '#FFFFE0': 'LightYellow',
+      '#00FF00': 'Lime',
+      '#32CD32': 'LimeGreen',
+      '#FAF0E6': 'Linen',
+      '#FF00FF': 'Magenta',
+      '#800000': 'Maroon',
+      '#66CDAA': 'MediumAquaMarine',
+      '#0000CD': 'MediumBlue',
+      '#BA55D3': 'MediumOrchid',
+      '#9370D8': 'MediumPurple',
+      '#3CB371': 'MediumSeaGreen',
+      '#7B68EE': 'MediumSlateBlue',
+      '#00FA9A': 'MediumSpringGreen',
+      '#48D1CC': 'MediumTurquoise',
+      '#C71585': 'MediumVioletRed',
+      '#191970': 'MidnightBlue',
+      '#F5FFFA': 'MintCream',
+      '#FFE4E1': 'MistyRose',
+      '#FFE4B5': 'Moccasin',
+      '#FFDEAD': 'NavajoWhite',
+      '#000080': 'Navy',
+      '#FDF5E6': 'OldLace',
+      '#808000': 'Olive',
+      '#6B8E23': 'OliveDrab',
+      '#FFA500': 'Orange',
+      '#FF4500': 'OrangeRed',
+      '#DA70D6': 'Orchid',
+      '#EEE8AA': 'PaleGoldenRod',
+      '#98FB98': 'PaleGreen',
+      '#AFEEEE': 'PaleTurquoise',
+      '#D87093': 'PaleVioletRed',
+      '#FFEFD5': 'PapayaWhip',
+      '#FFDAB9': 'PeachPuff',
+      '#CD853F': 'Peru',
+      '#FFC0CB': 'Pink',
+      '#DDA0DD': 'Plum',
+      '#B0E0E6': 'PowderBlue',
+      '#800080': 'Purple',
+      '#FF0000': 'Red',
+      '#BC8F8F': 'RosyBrown',
+      '#4169E1': 'RoyalBlue',
+      '#8B4513': 'SaddleBrown',
+      '#FA8072': 'Salmon',
+      '#F4A460': 'SandyBrown',
+      '#2E8B57': 'SeaGreen',
+      '#FFF5EE': 'SeaShell',
+      '#A0522D': 'Sienna',
+      '#C0C0C0': 'Silver',
+      '#87CEEB': 'SkyBlue',
+      '#6A5ACD': 'SlateBlue',
+      '#708090': 'SlateGrey',
+      '#FFFAFA': 'Snow',
+      '#00FF7F': 'SpringGreen',
+      '#4682B4': 'SteelBlue',
+      '#D2B48C': 'Tan',
+      '#008080': 'Teal',
+      '#D8BFD8': 'Thistle',
+      '#FF6347': 'Tomato',
+      '#40E0D0': 'Turquoise',
+      '#EE82EE': 'Violet',
+      '#F5DEB3': 'Wheat',
+      '#FFFFFF': 'White',
+      '#F5F5F5': 'WhiteSmoke',
+      '#FFFF00': 'Yellow',
+      '#9ACD32': 'YellowGreen'
+  };
+
+  function namedColorToHex(value) {
+      tinymce.each(namedColors, function (name, hex) {
+          if (value.toLowerCase() === name.toLowerCase()) {
+              value = hex;
+              return false;
+          }
+      });
+
+      return value.toLowerCase();
+  }
+
+  var each$2 = tinymce.each,
+      Schema = tinymce.html.Schema,
+      DomParser$1 = tinymce.html.DomParser,
+      Serializer$1 = tinymce.html.Serializer,
+      Node = tinymce.html.Node;
+
+  // Open Office
+  var ooRe = /(Version:[\d\.]+)\s*?((Start|End)(HTML|Fragment):[\d]+\s*?){4}/;
+
+  function cleanCssContent(content) {
+      var classes = [],
+          rules = parseCssToRules(content);
+
+      each$2(rules, function (r) {
+          if (r.selectorText) {
+              each$2(r.selectorText.split(','), function (v) {
+                  v = v.replace(/^\s*|\s*$|^\s\./g, "");
+
+                  // Is internal or it doesn't contain a class
+                  if (/\.mso/i.test(v) || !/\.[\w\-]+$/.test(v)) {
+                      return;
+                  }
+
+                  var text = r.cssText || "";
+
+                  if (!text) {
+                      return;
+                  }
+
+                  if (tinymce.inArray(classes, text) === -1) {
+                      classes.push(text);
+                  }
+              });
+          }
+      });
+
+      return classes.join("");
+  }
+
+  function isWordContent(editor, content) {
+      // force word cleanup
+      if (editor.settings.paste_force_cleanup) {
+          return true;
+      }
+
+      // Open / Libre Office
+      if (/(content=\"OpenOffice.org[^\"]+\")/i.test(content) || ooRe.test(content) || /@page {/.test(content)) {
+          return true; // Mark the pasted contents as word specific content
+      }
+
+      // Word / Google Docs
+      return (
+          (/<font face="Times New Roman"|class="?Mso|style="[^"]*\bmso-|style='[^'']*\bmso-|w:WordDocument|Excel\.Sheet|Microsoft Excel\s\d+/i).test(content) ||
+          (/class="OutlineElement/).test(content) ||
+          (/id="?docs\-internal\-guid\-/.test(content))
+      );
+  }
+
+  /**
+   * Checks if the specified text starts with "1. " or "a. " etc.
+   */
+  function isNumericList(text) {
+      var found = "",
+          patterns;
+
+      patterns = {
+          'uppper-roman': /^[IVXLMCD]{1,2}\.[ \u00a0]/,
+          'lower-roman': /^[ivxlmcd]{1,2}\.[ \u00a0]/,
+          'upper-alpha': /^[A-Z]{1,2}[\.\)][ \u00a0]/,
+          'lower-alpha': /^[a-z]{1,2}[\.\)][ \u00a0]/,
+          'numeric': /^[0-9]+\.[ \u00a0]/,
+          'japanese': /^[\u3007\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d]+\.[ \u00a0]/,
+          'chinese': /^[\u58f1\u5f10\u53c2\u56db\u4f0d\u516d\u4e03\u516b\u4e5d\u62fe]+\.[ \u00a0]/
+      };
+
+      /*patterns = [
+          /^[IVXLMCD]{1,2}\.[ \u00a0]/, // Roman upper case
+          /^[ivxlmcd]{1,2}\.[ \u00a0]/, // Roman lower case
+          /^[a-z]{1,2}[\.\)][ \u00a0]/, // Alphabetical a-z
+          /^[A-Z]{1,2}[\.\)][ \u00a0]/, // Alphabetical A-Z
+          /^[0-9]+\.[ \u00a0]/, // Numeric lists
+          /^[\u3007\u4e00\u4e8c\u4e09\u56db\u4e94\u516d\u4e03\u516b\u4e5d]+\.[ \u00a0]/, // Japanese
+          /^[\u58f1\u5f10\u53c2\u56db\u4f0d\u516d\u4e03\u516b\u4e5d\u62fe]+\.[ \u00a0]/ // Chinese
+      ];*/
+
+      text = text.replace(/^[\u00a0 ]+/, '');
+
+      each$2(patterns, function (pattern, type) {
+          if (pattern.test(text)) {
+              found = type;
+              return false;
+          }
+      });
+
+      return found;
+  }
+
+  function isBulletList(text) {
+      return /^[\s\u00a0]*[\u2022\u00b7\u00a7\u25CF]\s*/.test(text);
+  }
+
+  function postProcess$1(editor, node) {
+      var dom = editor.dom;
+
+      // fix table borders
+      var borderColors = ['border-top-color', 'border-right-color', 'border-bottom-color', 'border-left-color'];
+      var positions = ['top', 'right', 'bottom', 'left'];
+
+      each$2(dom.select('table[style], td[style], th[style]', node), function (n) {
+          var styles = {};
+
+          each$2(borderStyles, function (name) {
+              // process each side, eg: border-left-width
+              if (/-(top|right|bottom|left)-/.test(name)) {
+                  // get style
+                  var value = dom.getStyle(n, name);
+
+                  // replace default values with black
+                  if (name.indexOf('color') !== -1) {
+                      if (value === 'currentcolor' || value === 'windowtext') {
+                          each$2(borderColors, function (str) {
+                              if (str === name) {
+                                  return true;
+                              }
+
+                              var val = dom.getStyle(n, str);
+
+                              if (/(currentcolor|windowtext)/.test(val)) {
+                                  return true;
+                              }
+
+                              value = val;
+                          });
+                      }
+
+                      value = namedColorToHex(value);
+                  }
+
+                  // Word uses "medium" as the default border-width
+                  if (value === "medium") {
+                      value = '1';
+                  }
+
+                  // if border-style is not set, use "solid"
+                  if (name.indexOf('style') !== -1 && value === "none") {
+                      value = "solid";
+                  }
+
+                  // convert to pixels
+                  if (value && /^\d[a-z]?/.test(value)) {
+                      value = convertToPixels(value);
+                  }
+
+                  styles[name] = value;
+              }
+          });
+
+          // convert padding and margin to pixels
+          each$2(positions, function (pos) {
+              var padding = dom.getStyle(n, 'padding-' + pos);
+              var margin = dom.getStyle(n, 'margin-' + pos);
+
+              if (padding) {
+                  styles['padding-' + pos] = convertToPixels(padding);
+              }
+
+              if (margin) {
+                  styles['margin-' + pos] = convertToPixels(margin);
+              }
+          });
+
+          each$2(styles, function (value, name) {
+
+              // remove styles with no width value
+              if (name.indexOf('-width') !== -1 && value === "") {
+                  var prefix = name.replace(/-width/, '');
+
+                  delete styles[prefix + '-style'];
+                  delete styles[prefix + '-color'];
+                  delete styles[name];
+              }
+
+              // convert named colors to hex
+              if (name.indexOf('color') !== -1) {
+                  styles[name] = namedColorToHex(value);
+              }
+          });
+
+          each$2(backgroundStyles, function (def, name) {
+              var value = dom.getStyle(n, name);
+
+              if (value === def) {
+                  value = "";
+              }
+
+              styles[name] = value;
+          });
+
+          // remove borders
+          dom.setStyle(n, 'border', '');
+
+          // remove background
+          dom.setStyle(n, 'background', '');
+
+          dom.setStyles(n, styles);
+      });
+
+      // update indent conversion
+      each$2(dom.select('[data-mce-indent]', node), function (el) {
+          if (el.nodeName === "p") {
+              var value = dom.getAttrib(el, 'data-mce-indent');
+              var style = editor.settings.indent_use_margin ? 'margin-left' : 'padding-left';
+
+              dom.setStyle(el, style, value + 'px');
+          }
+
+          dom.setAttrib(el, 'data-mce-indent', '');
+      });
+
+      each$2(dom.select('[data-mce-word-list]', node), function (el) {
+          el.removeAttribute('data-mce-word-list');
+      });
+  }
+
+  function WordFilter(editor, content) {
+      var settings = editor.settings;
+
+      var keepStyles, removeStyles, validStyles = {}, styleProps$1 = styleProps;
+
+      // Chrome...
+      content = content.replace(/<meta([^>]+)>/, '');
+
+      // remove styles
+      content = content.replace(/<style([^>]*)>([\w\W]*?)<\/style>/gi, function (match, attr, value) {
+          // process to remove mso junk
+          value = cleanCssContent(value);
+          return '<style' + attr + '>' + value + '</style>';
+      });
+
+      // Copy paste from Java like Open Office will produce this junk on FF
+      content = content.replace(/Version:[\d.]+\nStartHTML:\d+\nEndHTML:\d+\nStartFragment:\d+\nEndFragment:\d+/gi, '');
+
+      // Open Office
+      //content = content.replace(ooRe, '', 'g');
+
+      // Remove google docs internal guid markers
+      content = content.replace(/<b[^>]+id="?docs-internal-[^>]*>/gi, '');
+      content = content.replace(/<br class="?Apple-interchange-newline"?>/gi, '');
+
+      // Remove basic Word junk
+      content = filter(content, [
+          // Word comments like conditional comments etc
+          /<!--[\s\S]+?-->/gi,
+
+          // Remove comments, scripts (e.g., msoShowComment), XML tag, VML content,
+          // MS Office namespaced tags, and a few other tags
+          /<(!|script[^>]*>.*?<\/script(?=[>\s])|\/?(\?xml(:\w+)?|meta|link|\w:\w+)(?=[\s\/>]))[^>]*>/gi,
+
+          // Convert <s> into <strike> for line-though
+          [/<(\/?)s>/gi, "<$1strike>"],
+
+          // Replace nsbp entites to char since it's easier to handle
+          [/&nbsp;/gi, "\u00a0"],
+
+          // Convert <span style="mso-spacerun:yes">___</span> to string of alternating
+          // breaking/non-breaking spaces of same length
+          [/<span\s+style\s*=\s*"\s*mso-spacerun\s*:\s*yes\s*;?\s*"\s*>([\s\u00a0]*)<\/span>/gi,
+              function (str, spaces) {
+                  return (spaces.length > 0) ?
+                      spaces.replace(/./, " ").slice(Math.floor(spaces.length / 2)).split("").join("\u00a0") : "";
+              }
+          ]
+      ]);
+
+      // replace <u> and <strike> with styles
+      if (settings.inline_styles) {
+          content = content.replace(/<(u|strike)>/gi, function (match, node) {
+              var value = (node === "u") ? "underline" : "line-through";
+              return '<span style="text-decoration:' + value + ';">';
+          });
+
+          content = content.replace(/<\/(u|strike)>/g, '</span>');
+      }
+
+      // remove double linebreaks (IE issue?)
+      if (settings.forced_root_block) {
+          content = content.replace(/<br><br>/gi, '');
+      }
+
+      // styles to keep
+      keepStyles = settings.paste_retain_style_properties;
+      // styles to remove
+      removeStyles = settings.paste_remove_style_properties;
+
+      // remove valid styles if we are removing all styles
+      if (settings.paste_remove_styles !== false) {
+          validStyles = {
+              'font-weight': {},
+              'font-style': {}
+          };
+
+          // split to array if string
+          if (keepStyles && tinymce.is(keepStyles, 'string')) {
+              var styleProps$1 = tinymce.explode(keepStyles);
+
+              each$2(styleProps$1, function (style, i) {
+                  if (style === "border") {
+                      // add expanded border styles
+                      styleProps$1 = styleProps$1.concat(borderStyles);
+                      return true;
+                  }
+              });
+          }
+      } else {
+          // split to array if string
+          if (removeStyles && tinymce.is(removeStyles, 'string')) {
+              var removeProps = tinymce.explode(removeStyles);
+
+              each$2(removeProps, function (style, i) {
+                  if (style === "border") {
+                      // add expanded border styles
+                      removeProps = removeProps.concat(borderStyles);
+                      return true;
+                  }
+              });
+
+              // remove from core styleProps array
+              styleProps$1 = tinymce.grep(styleProps$1, function (prop) {
+                  return tinymce.inArray(removeProps, prop) === -1;
+              });
+          }
+      }
+
+      each$2(styleProps$1, function (style) {
+          // add all border styles if "border" is set
+          if (style === "border") {
+              each$2(borderStyles, function (name) {
+                  validStyles[name] = {};
+              });
+
+              return true;
+          }
+
+          validStyles[style] = {};
+      });
+
+      /**
+       * Converts fake bullet and numbered lists to real semantic OL/UL.
+       *
+       * @param {tinymce.html.Node} node Root node to convert children of.
+       */
+      function convertFakeListsToProperLists(node) {
+          var currentListNode, prevListNode, lastLevel = 1;
+
+          function getText(node) {
+              var txt = '';
+
+              if (node.type === 3) {
+                  return node.value;
+              }
+
+              if ((node = node.firstChild)) {
+                  do {
+                      txt += getText(node);
+                  } while ((node = node.next));
+              }
+
+              return txt;
+          }
+
+          function trimListStart(node, regExp) {
+              if (node.type === 3) {
+                  if (regExp.test(node.value)) {
+                      node.value = node.value.replace(regExp, '');
+                      return false;
+                  }
+              }
+
+              if ((node = node.firstChild)) {
+                  do {
+                      if (!trimListStart(node, regExp)) {
+                          return false;
+                      }
+                  } while ((node = node.next));
+              }
+
+              return true;
+          }
+
+          function removeIgnoredNodes(node) {
+              if (node._listIgnore) {
+                  node.remove();
+                  return;
+              }
+
+              if ((node = node.firstChild)) {
+                  do {
+                      removeIgnoredNodes(node);
+                  } while ((node = node.next));
+              }
+          }
+
+          function convertParagraphToLi(paragraphNode, listName, start, type) {
+              var level = paragraphNode._listLevel || lastLevel;
+
+              // Handle list nesting
+              if (level != lastLevel) {
+                  if (level < lastLevel) {
+                      // Move to parent list
+                      if (currentListNode) {
+                          currentListNode = currentListNode.parent.parent;
+                      }
+                  } else {
+                      // Create new list
+                      prevListNode = currentListNode;
+                      currentListNode = null;
+                  }
+              }
+
+              if (!currentListNode || currentListNode.name != listName) {
+                  prevListNode = prevListNode || currentListNode;
+                  currentListNode = new Node(listName, 1);
+
+                  // add list style if any
+                  if (type && /roman|alpha/.test(type)) {
+                      var style = 'list-style-type:' + type;
+                      currentListNode.attr({
+                          'style': style,
+                          'data-mce-style': style
+                      });
+                  }
+
+                  if (start > 1) {
+                      currentListNode.attr('start', '' + start);
+                  }
+
+                  paragraphNode.wrap(currentListNode);
+              } else {
+                  currentListNode.append(paragraphNode);
+              }
+
+              paragraphNode.name = 'li';
+
+              // Append list to previous list if it exists
+              if (level > lastLevel && prevListNode) {
+                  prevListNode.lastChild.append(currentListNode);
+              }
+
+              lastLevel = level;
+
+              // Remove start of list item "1. " or "&middot; " etc
+              removeIgnoredNodes(paragraphNode);
+              trimListStart(paragraphNode, /^\u00a0+/);
+
+              if (currentListNode.name === "ol") {
+                  trimListStart(paragraphNode, /^\s*([\u2022\u00b7\u00a7\u25CF]|\w+\.)/);
+              }
+
+              if (currentListNode.name === "ul") {
+                  trimListStart(paragraphNode, /^\s*([\u2022\u00b7\u00a7\u25CF]|\w+\.)/);
+              }
+
+              trimListStart(paragraphNode, /^\u00a0+/);
+          }
+
+          // Build a list of all root level elements before we start
+          // altering them in the loop below.
+          var elements = [],
+              child = node.firstChild;
+
+          while (typeof child !== 'undefined' && child !== null) {
+              elements.push(child);
+
+              child = child.walk();
+
+              if (child !== null) {
+                  while (typeof child !== 'undefined' && child.parent !== node) {
+                      child = child.walk();
+                  }
+              }
+          }
+
+          for (var i = 0; i < elements.length; i++) {
+              node = elements[i];
+
+              if (node.name == 'p' && node.firstChild) {
+                  // Find first text node in paragraph
+                  var nodeText = getText(node),
+                      type;
+
+                  // Detect unordered lists look for bullets
+                  if (isBulletList(nodeText)) {
+                      convertParagraphToLi(node, 'ul');
+                      continue;
+                  }
+
+                  // Detect ordered lists 1., a. or ixv.
+                  if (node.attr('data-mce-word-list')) {
+
+                      // remove marker
+                      node.attr('data-mce-word-list', null);
+
+                      if ((type = isNumericList(nodeText))) {
+                          // Parse OL start number
+                          var matches = /([0-9]+)\./.exec(nodeText);
+                          var start = 1;
+                          if (matches) {
+                              start = parseInt(matches[1], 10);
+                          }
+
+                          convertParagraphToLi(node, 'ol', start, type);
+                          continue;
+                      }
+                  }
+
+                  // Convert paragraphs marked as lists but doesn't look like anything
+                  if (node._listLevel) {
+                      convertParagraphToLi(node, 'ul', 1);
+                      continue;
+                  }
+
+                  currentListNode = null;
+              } else {
+                  // If the root level element isn't a p tag which can be
+                  // processed by convertParagraphToLi, it interrupts the
+                  // lists, causing a new list to start instead of having
+                  // elements from the next list inserted above this tag.
+                  prevListNode = currentListNode;
+                  currentListNode = null;
+              }
+          }
+      }
+
+      function filterStyles(node, styleValue) {
+          var outputStyles = {},
+              matches, styles = editor.dom.parseStyle(styleValue);
+
+          each$2(styles, function (value, name) {
+              // Convert various MS styles to W3C styles
+              switch (name) {
+                  case 'mso-list':
+                      // Parse out list indent level for lists
+                      matches = /\w+ \w+([0-9]+)/i.exec(styleValue);
+                      if (matches) {
+                          node._listLevel = parseInt(matches[1], 10);
+                      }
+
+                      // Remove these nodes <span style="mso-list:Ignore">o</span>
+                      // Since the span gets removed we mark the text node and the span
+                      if (/Ignore/i.test(value) && node.firstChild) {
+                          node._listIgnore = true;
+                          node.firstChild._listIgnore = true;
+                      }
+
+                      break;
+
+                  case "horiz-align":
+                      name = "text-align";
+                      break;
+
+                  case "vert-align":
+                      name = "vertical-align";
+                      break;
+
+                  case "font-color":
+                  case "mso-foreground":
+                  case "color":
+                      name = "color";
+
+                      // remove "windowtext"
+                      if (value == "windowtext") {
+                          value = "";
+                      }
+
+                      break;
+
+                  case "mso-background":
+                  case "mso-highlight":
+                      name = "background";
+                      break;
+
+                  case "font-weight":
+                  case "font-style":
+                      if (value == "normal") {
+                          value = "";
+                      }
+
+                      break;
+
+                  case "mso-element":
+                      // Remove track changes code
+                      if (/^(comment|comment-list)$/i.test(value)) {
+                          node.remove();
+                          return;
+                      }
+
+                      break;
+
+                  case "margin-left":
+                      if (node.name === "p" && settings.paste_convert_indents !== false) {
+                          var indentValue = parseInt(editor.settings.indentation, 10);
+                          value = parseInt(value, 10);
+
+                          // convert to an indent value, must be greater than 0
+                          value = Math.round(value / indentValue) * indentValue;
+
+                          // store value and remove
+                          if (value) {
+                              node.attr('data-mce-indent', "" + value);
+                              value = "";
+                          }
+                      }
+                      break;
+              }
+
+              if (name.indexOf('mso-comment') === 0) {
+                  node.remove();
+                  return true;
+              }
+
+              // Never allow mso- prefixed names
+              if (name.indexOf('mso-') === 0) {
+                  return true;
+              }
+
+              // convert to pixel values
+              if (value && tinymce.inArray(pixelStyles, name) !== -1) {
+                  value = convertToPixels(value);
+              }
+
+              // Output only valid styles
+              if (validStyles[name]) {
+                  outputStyles[name] = value;
+              }
+          });
+
+          // Convert bold style to "b" element
+          if (/(bold|700|800|900)/i.test(outputStyles["font-weight"]) && editor.schema.isValidChild('strong', node.name)) {
+              delete outputStyles["font-weight"];
+              node.wrap(new Node("strong", 1));
+          }
+
+          // Convert italic style to "i" element
+          if (/(italic)/i.test(outputStyles["font-style"]) && editor.schema.isValidChild('em', node.name)) {
+              delete outputStyles["font-style"];
+              node.wrap(new Node("em", 1));
+          }
+
+          // Serialize the styles and see if there is something left to keep
+          outputStyles = editor.dom.serializeStyle(outputStyles, node.name);
+
+          if (outputStyles) {
+              return outputStyles;
+          }
+
+          return null;
+      }
+
+      var validElements = settings.paste_word_valid_elements || (
+          '-strong/b,-em/i,-u,-span,-p,-ol[type|start|reversed],-ul,-li,-h1,-h2,-h3,-h4,-h5,-h6,' +
+          '-p/div,-a[href|name],img[src|alt|width|height],sub,sup,strike,br,del,table[width],tr,' +
+          'td[colspan|rowspan|width|valign],th[colspan|rowspan|width],thead,tfoot,tbody'
+      );
+
+      // keep style tags for process_stylesheets
+      if (settings.paste_process_stylesheets == 'style') {
+          validElements += ',style';
+      }
+
+      // Setup strict schema
+      var schema = new Schema({
+          valid_elements: validElements,
+          valid_children: '-li[p]'
+      });
+      
+      // allow for extended table attributes
+      if (settings.schema !== 'html5' && schema.getElementRule('table')) {
+          schema.addValidElements('table[width|border|cellpadding|cellspacing]');
+      }
+
+      // Add style/class attribute to all element rules since the user might have removed them from
+      // paste_word_valid_elements config option and we need to check them for properties
+      each$2(schema.elements, function (rule) {
+          /*eslint dot-notation:0*/
+          if (!rule.attributes["class"]) {
+              rule.attributes["class"] = {};
+              rule.attributesOrder.push("class");
+          }
+
+          if (!rule.attributes.style) {
+              rule.attributes.style = {};
+              rule.attributesOrder.push("style");
+          }
+      });
+
+      // Parse HTML into DOM structure
+      var domParser = new DomParser$1({}, schema);
+
+      // Filter styles to remove "mso" specific styles and convert some of them
+      domParser.addAttributeFilter('style', function (nodes) {
+          var i = nodes.length,
+              node, style;
+
+          while (i--) {
+              node = nodes[i];
+
+              style = node.attr('style');
+
+              // check for fake list (unordered)
+              if (style && style.indexOf('mso-list') !== -1 && node.name !== 'li') {
+                  node.attr('data-mce-word-list', 1);
+              }
+
+              node.attr('style', filterStyles(node, style));
+
+              // Remove pointess spans
+              if (node.name == 'span' && node.parent && !node.attributes.length) {
+                  node.unwrap();
+              }
+          }
+      });
+
+      // Check the class attribute for comments or del items and remove those
+      domParser.addAttributeFilter('class', function (nodes) {
+          var i = nodes.length,
+              node, className;
+
+          while (i--) {
+              node = nodes[i];
+
+              className = node.attr('class');
+
+              if (/^(MsoCommentReference|MsoCommentText|msoDel)$/i.test(className)) {
+                  node.remove();
+                  continue;
+              }
+
+              if (/^Mso[\w]+/i.test(className) || settings.paste_strip_class_attributes !== 0) {
+                  node.attr('class', null);
+
+                  if (className && className.indexOf('MsoList') !== -1 && node.name !== 'li') {
+                      node.attr('data-mce-word-list', 1);
+                  }
+
+                  if (className && /\s*Mso(Foot|End)note\s*/.test(className)) {
+                      var parent = node.parent;
+
+                      // replace footnote span with <sup>
+                      if (parent && parent.name === 'a') {
+                          node.name = 'sup';
+                      }
+
+                      // remove additional span tags
+                      if (node.name === 'span' && !node.attributes.length) {
+                          node.unwrap();
+                      }
+                  }
+
+                  // blockquote
+                  if (className && /\s*MsoQuote\s*/.test(className)) {
+                      node.name = 'blockquote';
+                  }
+              }
+          }
+      });
+
+      // Remove all del elements since we don't want the track changes code in the editor
+      domParser.addNodeFilter('del', function (nodes) {
+          var i = nodes.length;
+
+          while (i--) {
+              nodes[i].remove();
+          }
+      });
+
+      var footnotes = settings.paste_process_footnotes || 'convert';
+
+      // Keep some of the links and anchors
+      domParser.addNodeFilter('a', function (nodes) {
+          var i = nodes.length,
+              node, href, name;
+
+          while (i--) {
+              node = nodes[i];
+              href = node.attr('href');
+              name = node.attr('name');
+
+              if (href && href.indexOf('#_msocom_') != -1) {
+                  node.remove();
+                  continue;
+              }
+
+              // convert URL
+              if (href && !name) {
+                  href = editor.convertURL(href);
+              }
+
+              if (href && href.indexOf('#') !== -1) {
+                  href = href.substr(href.indexOf('#'));
+              }
+
+              if (!href && !name) {
+                  node.unwrap();
+              } else {
+                  // Remove all named anchors that aren't specific to TOC, Footnotes or Endnotes
+                  if (name && !/^_?(?:toc|edn|ftn)/i.test(name)) {
+                      node.unwrap();
+                      continue;
+                  }
+
+                  // remove footnote
+                  if (name && footnotes === "remove") {
+                      node.remove();
+                      continue;
+                  }
+
+                  // unlink footnote
+                  if (name && footnotes === "unlink") {
+                      node.unwrap();
+                      continue;
+                  }
+
+                  // set href, remove name
+                  node.attr({
+                      href: href,
+                      name: null
+                  });
+
+                  // set appropriate anchor
+                  if (settings.schema === "html4") {
+                      node.attr('name', name);
+                  } else {
+                      node.attr('id', name);
+                  }
+              }
+          }
+      });
+
+      // Remove empty span tags without attributes or content
+      domParser.addNodeFilter('span', function (nodes) {
+          var i = nodes.length,
+              node;
+
+          while (i--) {
+              node = nodes[i];
+
+              if (node.parent && !node.attributes.length) {
+                  node.unwrap();
+              }
+          }
+      });
+
+      // Remove single paragraphs in table cells
+      if (settings.paste_remove_paragraph_in_table_cell) {
+          domParser.addNodeFilter('td', function (nodes) {
+              var i = nodes.length,
+                  node;
+
+              while (i--) {
+                  node = nodes[i];
+
+                  if (!node.firstChild) {
+                      continue;
+                  }
+
+                  if (node.firstChild.name == "p" && node.firstChild === node.lastChild) {
+                      node.firstChild.unwrap();
+                  }
+              }
+          });
+      }
+
+      // Parse into DOM structure
+      var rootNode = domParser.parse(content);
+
+      // Process DOM
+      if (settings.paste_convert_word_fake_lists !== false) {
+          convertFakeListsToProperLists(rootNode);
+      }
+
+      // Serialize DOM back to HTML
+      content = new Serializer$1({
+          validate: settings.validate
+      }, schema).serialize(rootNode);
+
+      return content;
+  }
+
+  var each$1 = tinymce.each;
+  var isIE$1 = tinymce.isIE || tinymce.isIE12;
+
+  function preProcess(editor, o) {
+      var h = o.content;
+
+      // Process away some basic content
+      h = h.replace(/^\s*(&nbsp;)+/g, ''); // nbsp entities at the start of contents
+      h = h.replace(/(&nbsp;|<br[^>]*>)+\s*$/g, ''); // nbsp entities at the end of contents
+
+      // skip plain text
+      if (o.pasteAsPlainText) {
+          return h;
+      }
+
+      if (o.wordContent) {
+          h = WordFilter(editor, h);
+      }
+
+      // convert some tags if cleanup is off
+      if (editor.settings.verify_html === false) {
+          h = h.replace(/<b\b([^>]*)>/gi, '<strong$1>');
+          h = h.replace(/<\/b>/gi, '</strong>');
+      }
+
+      o.content = h;
+  }
+
+  function postProcess(editor, o) {
+      var dom = editor.dom, settings = editor.settings;
+
+      // remove url conversion containers
+      dom.remove(dom.select('div[data-mce-convert]', o.node), 1);
+
+      // skip plain text
+      if (o.pasteAsPlainText) {
+          return;
+      }
+
+      // Remove Apple style spans
+      each$1(dom.select('span.Apple-style-span', o.node), function (n) {
+          dom.remove(n, 1);
+      });
+
+      // Remove all classes
+      if (settings.paste_strip_class_attributes == 1) {
+          // Remove class attribute
+          each$1(dom.select('*[class]', o.node), function (el) {
+              el.removeAttribute('class');
+          });
+      }
+
+      // Convert width and height attributes to styles
+      each$1(dom.select('table, td, th', o.node), function (n) {
+          var width = dom.getAttrib(n, 'width');
+
+          if (width) {
+              dom.setStyle(n, 'width', width);
+              dom.setAttrib(n, 'width', '');
+          }
+
+          var height = dom.getAttrib(n, 'height');
+
+          if (height) {
+              dom.setStyle(n, 'height', height);
+              dom.setAttrib(n, 'height', '');
+          }
+      });
+
+      // Remove all styles if none are retained
+      if (settings.paste_remove_styles !== false && !settings.paste_retain_style_properties) {
+          // Remove style attribute
+          each$1(dom.select('*[style]', o.node), function (el) {            
+              el.removeAttribute('style');
+              el.removeAttribute('data-mce-style');
+          });
+      } else {
+          // process style attributes
+          processStyles(editor, o.node);
+      }
+
+      if (o.wordContent) {
+          postProcess$1(editor, o.node);
+      }
+
+      function isValidDataUriImage(value) {
+          return /^(file:|data:image)\//i.test(value);
+      }
+
+      // Process images - remove local
+      each$1(dom.select('img', o.node), function (el) {
+          var src = dom.getAttrib(el, 'src');
+
+          // remove or processs for upload img element if blank, local file url or base64 encoded
+          if (!src || isValidDataUriImage(src)) {
+              // leave it as it is to be processed as a blob (but skip file:// images)
+              if (settings.paste_upload_data_images) {
+                  // add marker
+                  dom.setAttrib(el, 'data-mce-upload-marker', '1');
+              } else {
+                  dom.remove(el);
+              }
+               
+          } else {
+              dom.setAttrib(el, 'src', editor.convertURL(src));
+          }
+      });
+
+      // remove font and underline tags in IE
+      if (isIE$1) {
+          each$1(dom.select('a', o.node), function (el) {
+              each$1(dom.select('font,u'), function (n) {
+                  dom.remove(n, 1);
+              });
+          });
+      }
+
+      // remove tags
+      if (settings.paste_remove_tags) {
+          dom.remove(dom.select(settings.paste_remove_tags, o.node), 1);
+      }
+
+      // keep tags
+      if (settings.paste_keep_tags) {
+          var tags = settings.paste_keep_tags;
+
+          dom.remove(dom.select('*:not(' + tags + ')', o.node), 1);
+      }
+
+      // remove all spans
+      if (settings.paste_remove_spans) {
+          dom.remove(dom.select('span', o.node), 1);
+          // remove empty spans
+      } else {
+          dom.remove(dom.select('span:empty', o.node));
+
+          each$1(dom.select('span', o.node), function (n) {
+              // remove span without children eg: <span></span>
+              if (!n.childNodes || n.childNodes.length === 0) {
+                  dom.remove(n);
+              }
+
+              // remove span without attributes
+              if (dom.getAttribs(n).length === 0) {
+                  dom.remove(n, 1);
+              }
+          });
+      }
+
+      if (settings.paste_remove_empty_paragraphs !== false) {
+          dom.remove(dom.select('p:empty', o.node));
+
+          each$1(dom.select('p', o.node), function (n) {
+              var h = n.innerHTML;
+
+              // remove paragraph without children eg: <p></p>
+              if (!n.childNodes || n.childNodes.length === 0 || /^(\s|&nbsp;|\u00a0)?$/.test(h)) {
+                  dom.remove(n);
+              }
+          });
+      }
+
+      // replace paragraphs with linebreaks
+      /*if (!settings.forced_root_block')) {
+          var frag = dom.createFragment('<br /><br />');
+
+          each(dom.select('p,div', o.node), function (n) {
+              // if the linebreaks are 
+              if (n.parentNode.lastChild !== n) {
+                  dom.insertAfter(frag, n);
+              }
+
+              dom.remove(n, 1);
+          });
+      }*/
+  }
+
+  /**
+   * Process style attributes
+   * @param node Node to process
+   */
+  function processStyles(editor, node) {
+      var dom = editor.dom, settings = editor.settings, styleProps$1 = styleProps;
+
+      // Style to keep
+      var keepStyles = settings.paste_retain_style_properties;
+
+      // Style to remove
+      var removeStyles = settings.paste_remove_style_properties;
+
+      // split to array if string
+      if (keepStyles && tinymce.is(keepStyles, 'string')) {
+          var styleProps$1 = tinymce.explode(keepStyles);
+
+          each$1(styleProps$1, function (style, i) {
+              if (style == "border") {
+                  // add expanded border styles
+                  styleProps$1 = styleProps$1.concat(borderStyles);
+                  return true;
+              }
+
+              if (style == "font") {
+                  // add expanded border styles
+                  styleProps$1 = styleProps$1.concat(fontStyles);
+                  return true;
+              }
+
+              if (style == "padding" || style == "margin") {
+                  each$1(['top', 'bottom', 'right', 'left'], function (side) {
+                      styleProps$1.push(style + '-' + side);
+                  });
+
+                  return true;
+              }
+          });
+      }
+
+      // split to array if string
+      if (removeStyles && tinymce.is(removeStyles, 'string')) {
+          var removeProps = tinymce.explode(removeStyles);
+
+          each$1(removeProps, function (style, i) {
+              if (style === "border") {
+                  // add expanded border styles
+                  removeProps = removeProps.concat(borderStyles);
+                  return true;
+              }
+
+              if (style == "font") {
+                  // add expanded border styles
+                  removeProps = removeProps.concat(fontStyles);
+                  return true;
+              }
+
+              if (style == "padding" || style == "margin") {
+                  each$1(['top', 'bottom', 'right', 'left'], function (side) {
+                      removeProps.push(style + '-' + side);
+                  });
+
+                  return true;
+              }
+          });
+
+          // remove from core styleProps array
+          styleProps$1 = tinymce.grep(styleProps$1, function (prop) {
+              return tinymce.inArray(removeProps, prop) === -1;
+          });
+      }
+
+      // Retains some style properties
+      each$1(dom.select('*[style]', node), function (n) {
+          var ns = {},
+              x = 0;
+
+          // get styles on element
+          var styles = dom.parseStyle(n.style.cssText);
+
+          // check style against styleProps array
+          each$1(styles, function (v, k) {
+              if (tinymce.inArray(styleProps$1, k) != -1) {
+                  ns[k] = v;
+                  x++;
+              }
+          });
+
+          // Remove all of the existing styles
+          dom.setAttrib(n, 'style', '');
+
+          // compress
+          ns = dom.parseStyle(dom.serializeStyle(ns, n.nodeName));
+
+          if (x > 0) {
+              dom.setStyles(n, ns); // Add back the stored subset of styles
+          } else {
+              // Remove empty span tags that do not have class attributes
+              if (n.nodeName == 'SPAN' && !n.className) {
+                  dom.remove(n, true);
+              }
+          }
+
+          // We need to compress the styles on WebKit since if you paste <img border="0" /> it will become <img border="0" style="... lots of junk ..." />
+          // Removing the mce_style that contains the real value will force the Serializer engine to compress the styles
+          if (tinymce.isWebKit) {
+              n.removeAttribute('data-mce-style');
+          }
+      });
+
+      // convert some attributes
+      each$1(dom.select('*[align]', node), function (el) {
+          var v = dom.getAttrib(el, 'align');
+
+          if (v === "left" || v === "right" || v === "center") {
+              if (/(IFRAME|IMG|OBJECT|VIDEO|AUDIO|EMBED)/i.test(el.nodeName)) {
+                  if (v === "center") {
+                      dom.setStyles(el, {
+                          'margin': 'auto',
+                          'display': 'block'
+                      });
+                  } else {
+                      dom.setStyle(el, 'float', v);
+                  }
+              } else {
+                  dom.setStyle(el, 'text-align', v);
+              }
+          }
+
+          el.removeAttribute('align');
+      });
+  }
+
+  const setup$2 = function (editor) {
+      editor.onPastePreProcess.add(function (editor, o) {        
+          preProcess(editor, o);
+      });
+
+      editor.onPastePostProcess.add(function (editor, o) {
+          postProcess(editor, o);
+      });
+  };
+
+  var Entities = tinymce.html.Entities;
+
+  var isPlainText = function (text) {
+      // so basically any tag that is not one of the "p, div, br", or is one of them, but is followed
+      // by some additional characters qualifies the text as not a plain text (having some HTML tags)
+      return !/<(?:(?!\/?(?:\w+))[^>]*|(?:\w+)\s+\w[^>]+)>/.test(text);
+  };
+
+  var toBRs = function (text) {
+      return text.replace(/\r?\n/g, '<br>');
+  };
+
+  var openContainer = function (rootTag, rootAttrs) {
+      var key, attrs = [];
+      var tag = '<' + rootTag;
+
+      if (typeof rootAttrs === 'object') {
+          for (key in rootAttrs) {
+              if (Object.prototype.hasOwnProperty.call(rootAttrs, key)) {
+                  attrs.push(key + '="' + Entities.encodeAllRaw(rootAttrs[key]) + '"');
+              }
+          }
+
+          if (attrs.length) {
+              tag += ' ' + attrs.join(' ');
+          }
+      }
+      return tag + '>';
+  };
+
+  var toBlockElements = function (text, rootTag, rootAttrs) {
+      var pieces = text.split(/\r?\n/);
+      var i = 0,
+          len = pieces.length;
+      var stack = [];
+      var blocks = [];
+      var tagOpen = openContainer(rootTag, rootAttrs);
+      var tagClose = '</' + rootTag + '>';
+      var isLast, newlineFollows, isSingleNewline;
+
+      // if single-line text then nothing to do
+      if (pieces.length === 1) {
+          return text;
+      }
+
+      for (; i < len; i++) {
+          isLast = i === len - 1;
+          newlineFollows = !isLast && !pieces[i + 1];
+          isSingleNewline = !pieces[i] && !stack.length;
+
+          stack.push(pieces[i] ? pieces[i] : '&nbsp;');
+
+          if (isLast || newlineFollows || isSingleNewline) {
+              blocks.push(stack.join('<br>'));
+              stack = [];
+          }
+
+          if (newlineFollows) {
+              i++; // extra progress for extra newline
+          }
+      }
+
+      return blocks.length === 1 ? blocks[0] : tagOpen + blocks.join(tagClose + tagOpen) + tagClose;
+  };
+
+  var convert = function (text, rootTag, rootAttrs) {    
+      return rootTag ? toBlockElements(text, rootTag, rootAttrs) : toBRs(text);
+  };
+
+  var each = tinymce.each,
+      VK = tinymce.VK,
+      DomParser = tinymce.html.DomParser,
+      Serializer = tinymce.html.Serializer,
+      BlobCache = tinymce.file.BlobCache;
+
+  // IE flag to include Edge
+  var isIE = tinymce.isIE || tinymce.isIE12;
+
+  function getBase64FromUri(uri) {
+      var idx;
+
+      idx = uri.indexOf(',');
+      if (idx !== -1) {
+          return uri.substr(idx + 1);
+      }
+
+      return null;
+  }
+
+  function isValidDataUriImage(settings, imgElm) {
+      return settings.images_dataimg_filter ? settings.images_dataimg_filter(imgElm) : true;
+  }
+
+  function pasteImage(editor, rng, reader, blob) {
+      if (rng) {
+          editor.selection.setRng(rng);
+          rng = null;
+      }
+
+      var dataUri = reader.result;
+      var base64 = getBase64FromUri(dataUri);
+
+      var img = new Image();
+      img.src = dataUri;
+
+      // TODO: Move the bulk of the cache logic to EditorUpload
+      if (isValidDataUriImage(editor.settings, img)) {
+          var blobInfo, existingBlobInfo;
+
+          existingBlobInfo = BlobCache.findFirst(function (cachedBlobInfo) {
+              return cachedBlobInfo.base64() === base64;
+          });
+
+          if (!existingBlobInfo) {
+              blobInfo = BlobCache.create('mceclip', blob, base64);
+              BlobCache.add(blobInfo);
+          } else {
+              blobInfo = existingBlobInfo;
+          }
+
+          return '<img src="' + blobInfo.blobUri() + '" />';
+
+      } else {
+          return '<img src="' + dataUri + '" />';
+      }
+  }
+
+  /**
+   * Convert URL strings to elements
+   * @param content HTML to process
+   */
+  function convertURLs(editor, content) {
+
+      var ex = '([-!#$%&\'\*\+\\./0-9=?A-Z^_`a-z{|}~]+@[-!#$%&\'\*\+\\/0-9=?A-Z^_`a-z{|}~]+\.[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+)';
+      var ux = '((?:news|telnet|nttp|file|http|ftp|https)://[-!#$%&\'\*\+\\/0-9=?A-Z^_`a-z{|}~;]+\.[-!#$%&\'\*\+\\./0-9=?A-Z^_`a-z{|}~;]+)';
+
+      var attribRe = '(?:(?:[a-z0-9_-]+)=["\'])'; // match attribute before url, eg: href="url"
+      var bracketRe = '(?:\}|\].?)'; // match shortcode and markdown, eg: {url} or [url] or [text](url)
+
+      function createLink(url) {
+          // create attribs and decode url to prevent double encoding in dom.createHTML
+          var attribs = { 'href': editor.dom.decode(url) }, params = editor.settings.link || {};
+
+          attribs = tinymce.extend(attribs, params.attributes || {});
+
+          return editor.dom.createHTML('a', attribs, url);
+      }
+
+      function wrapContent(content) {
+          if (content.indexOf('data-mce-convert="url"') === -1) {
+              return editor.dom.createHTML('div', { 'data-mce-convert': 'url' }, content);
+          }
+
+          return content;
+      }
+
+      // existing link...
+      var decoded = editor.dom.decode(content);
+
+      // skip blobs and data uri
+      if (/^<img src="(data|blob):[^>]+?>/.test(content)) {
+          return content;
+      }
+
+      if (/^<a([^>]+)>([\s\S]+?)<\/a>$/.test(decoded)) {
+          return content;
+      }
+
+      if (editor.settings.autolink_url !== false) {
+          if (new RegExp('^' + ux + '$').test(content)) {
+              content = createLink(content);
+              return content;
+          }
+
+          // wrap content - this seems to be required to prevent repeats of link conversion
+          content = wrapContent(content);
+
+          // find and link url if not already linked
+          content = content.replace(new RegExp('(' + attribRe + '|' + bracketRe + ')?' + ux, 'gi'), function (match, extra, url) {
+              if (extra) {
+                  return match;
+              }
+
+              // only if not already a link or shortcode
+              return createLink(url);
+          });
+      }
+
+      if (editor.settings.autolink_email !== false) {
+
+          if (new RegExp('^' + ex + '$').test(content)) {
+              return '<a href="mailto:' + content + '">' + content + '</a>';
+          }
+
+          // wrap content - this seems to be required to prevent repeats of link conversion
+          content = wrapContent(content);
+
+          content = content.replace(new RegExp('(href=["\']mailto:)*' + ex, 'g'), function (match, attrib, email) {
+              // only if not already a mailto: link
+              if (!attrib) {
+                  return '<a href="mailto:' + email + '">' + email + '</a>';
+              }
+
+              return match;
+          });
+      }
+
+      return content;
+  }
+
+  /**
+   * Gets various content types out of the Clipboard API. It will also get the
+   * plain text using older IE and WebKit API:s.
+   *
+   * @param {ClipboardEvent} clipboardEvent Event fired on paste.
+   * @return {Object} Object with mime types and data for those mime types.
+   */
+  function getClipboardContent(editor, clipboardEvent) {
+      var content = getDataTransferItems(clipboardEvent.clipboardData || clipboardEvent.dataTransfer || editor.getDoc().dataTransfer);
+      //var content = getDataTransferItems(clipboardEvent.clipboardData || editor.getDoc().dataTransfer);
+
+      return content;
+  }
+
+  function isKeyboardPasteEvent(e) {
+      return (VK.metaKeyPressed(e) && e.keyCode == 86) || (e.shiftKey && e.keyCode == 45);
+  }
+
+  /**
+   * Inserts the specified contents at the caret position.
+   */
+  function insertData(editor, content, skip_undo) {
+      // get validate setting
+      var validate = editor.settings.validate;
+
+      // reset validate setting
+      editor.settings.validate = true;
+
+      // insert content
+      editor.execCommand('mceInsertContent', false, content);
+
+      // reset validate
+      editor.settings.validate = validate;
+  }
+
+  function pasteText(editor, text) {    
+      // encode text and replace returns
+      text = editor.dom.encode(text).replace(/\r\n/g, '\n');
+
+      // convert newlines to block elements
+      text = convert(text, editor.settings.forced_root_block, editor.settings.forced_root_block_attrs);
+
+      pasteHtml(editor, text);
+  }
+
+  function sanitizePastedHTML(editor, html) {
+      var parser = new DomParser({ allow_event_attributes: !!editor.settings.paste_allow_event_attributes }, editor.schema);
+
+      // Strip elements
+      parser.addNodeFilter('meta,svg,script,noscript', function (nodes) {
+          var i = nodes.length;
+
+          while (i--) {
+              nodes[i].remove();
+          }
+      });
+
+      // remove spans
+      if (editor.settings.paste_remove_spans) {
+          parser.addNodeFilter('span', function (nodes, name) {
+              var i = nodes.length;
+
+              while (i--) {
+                  nodes[i].unwrap();
+              }
+          });
+      }
+
+      // remove attributes
+      var remove_attribs = editor.settings.paste_remove_attributes;
+
+      if (remove_attribs) {
+          parser.addAttributeFilter(remove_attribs, function (nodes, name) {
+              var i = nodes.length;
+
+              while (i--) {
+                  nodes[i].attr(name, null);
+              }
+          });
+      }
+
+      var fragment = parser.parse(html, { forced_root_block: false, isRootContent: true });
+
+      return new Serializer({ validate: editor.settings.validate }, editor.schema).serialize(fragment);
+  }
+
+  function pasteHtml(editor, content, internal, pasteAsPlainText) {
+      if (!content) {
+          return false;
+      }
+
+      // create object to process
+      var o = {
+          content: content,
+          internal: internal,
+          pasteAsPlainText: pasteAsPlainText
+      };
+
+      // only process externally sourced content
+      if (!internal && editor.settings.paste_enable_default_filters !== false) {
+          // set wordContent flag
+          o.wordContent = isWordContent(editor, o.content);
+
+          // process stylesheets into content
+          if (editor.settings.paste_process_stylesheets) {
+              o.content = processStylesheets(o.content);
+          }
+
+          // trim
+          o.content = trimHtml(o.content);
+
+          // Execute pre process handlers
+          editor.onPastePreProcess.dispatch(editor, o);
+
+          // sanitize content
+          o.content = sanitizePastedHTML(editor, o.content);
+
+          // convert urls in content
+          if (editor.settings.paste_convert_urls !== false) {
+              o.content = convertURLs(editor, o.content);
+          }
+
+          // Create DOM structure
+          o.node = editor.dom.create('div', { style: 'display:none' }, o.content);
+
+          // Execute post process handlers
+          editor.onPastePostProcess.dispatch(editor, o);
+
+          // get content from node
+          o.content = o.node.innerHTML;
+
+          // remove empty paragraphs
+          if (editor.settings.paste_remove_empty_paragraphs !== false) {
+              o.content = o.content.replace(/<p([^>]+)>(&nbsp;|\u00a0)?<\/p>/g, '');
+          }
+
+          // clean up extra whitespace
+          if (editor.settings.paste_remove_whitespace) {
+              o.content = o.content.replace(/(&nbsp;|\u00a0|\s| ){2,}/g, ' ');
+          }
+
+          // process regular expression
+          if (editor.settings.paste_filter) {
+              var re, rules = editor.settings.paste_filter.split(';');
+
+              each(rules, function (s) {
+                  // if it is already in Regular Expression format...
+                  if (/^\/.*\/(g|i|m)*$/.test(s)) {
+                      re = (new Function('return ' + s))();
+                      // ...else create expression
+                  } else {
+                      re = new RegExp(s);
+                  }
+
+                  o.content = o.content.replace(re, "");
+              });
+          }
+      }
+
+      editor.onPasteBeforeInsert.dispatch(editor, o);
+
+      insertData(editor, o.content);
+  }
+
+  // This function executes the process handlers and inserts the contents
+  function insertClipboardContent(editor, clipboardContent, internal, pasteAsPlainText) {
+      var content, isPlainTextHtml;
+
+      editor.onGetClipboardContent.dispatch(editor, clipboardContent);
+
+      // get html content
+      content = clipboardContent['x-tinymce/html'] || clipboardContent['text/html'];
+
+      // mark as internal
+      internal = internal ? internal : isMarked(content);
+
+      // unmark content
+      content = unmark(content);
+
+      // pasting content into a pre element so encode html first, then insert using setContent
+      if (isPasteInPre(editor)) {
+          var text = clipboardContent['text/plain'];
+
+          // encode
+          text = editor.dom.encode(text);
+
+          // prefer plain text, otherwise use encoded html
+          if (content && !text) {
+              content = trimHtml(content);
+              text = editor.dom.encode(content);
+          }
+
+          editor.selection.setContent(text, { no_events: true });
+
+          return true;
+      }
+
+      /*if (!internal && isPlainTextPaste(clipboardContent)) {
+          // set pasteAsPlainText state
+          self.pasteAsPlainText = clipboardContent['text/plain'] == content;
+      }*/
+
+      var isPlainTextHtml = (internal === false && (isPlainText(content)));
+
+      // If we got nothing from clipboard API and pastebin or the content is a plain text (with only
+      // some BRs, Ps or DIVs as newlines) then we fallback to plain/text
+      if (!content.length || isPlainTextHtml) {
+          pasteAsPlainText = true;
+      }
+
+      // paste text
+      if (pasteAsPlainText) {
+          // Use plain text contents from Clipboard API unless the HTML contains paragraphs then
+          // we should convert the HTML to plain text since works better when pasting HTML/Word contents as plain text
+          if (hasContentType(clipboardContent, 'text/plain') && isPlainTextHtml) {
+              content = clipboardContent['text/plain'];
+          } else {
+              content = innerText(content);
+          }
+
+          pasteText(editor, content);
+
+          return true;
+      }
+
+      // paste HTML
+      pasteHtml(editor, content, internal, pasteAsPlainText);
+  }
+
+  /**
+   * Chrome on Android doesn't support proper clipboard access so we have no choice but to allow the browser default behavior.
+   *
+   * @param {Event} e Paste event object to check if it contains any data.
+   * @return {Boolean} true/false if the clipboard is empty or not.
+   */
+  function isBrokenAndroidClipboardEvent(e) {
+      var clipboardData = e.clipboardData;
+      return navigator.userAgent.indexOf('Android') !== -1 && clipboardData && clipboardData.items && clipboardData.items.length === 0;
+  }
+
+  function isHtmlPaste(content) {
+      if (!hasContentType(content, "text/html")) {
+          return false;
+      }
+
+      return true;
+  }
+
+  function pasteImageData(editor, e, lastRng) {
+      var dataTransfer = e.clipboardData || e.dataTransfer;
+
+      function processItems(items) {
+          var i, item, hadImage = false;
+
+          if (items) {
+              for (i = 0; i < items.length; i++) {
+                  item = items[i];
+
+                  if (/^image\/(jpeg|png|gif|bmp)$/.test(item.type)) {
+                      hadImage = true;
+                      e.preventDefault();
+
+                      if (editor.settings.paste_data_images !== false) {
+                          var blob = item.getAsFile ? item.getAsFile() : item;
+
+                          var reader = new FileReader();
+                          // eslint-disable-next-line no-loop-func
+                          reader.onload = function () {
+                              var html = pasteImage(editor, lastRng, reader, blob);
+                              pasteHtml(editor, html);
+                          };
+
+                          reader.readAsDataURL(blob);
+                      } else {
+                          pasteHtml(editor, '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-mce-upload-marker="1" />', true);
+                      }
+                  }
+              }
+          }
+
+          return hadImage;
+      }
+
+      if (!dataTransfer) {
+          return true;
+      }
+
+      processItems(dataTransfer.items) || processItems(dataTransfer.files);
+
+      return true;
+  }
+
+  function isPasteInPre(editor) {
+      var node = editor.selection.getNode();
+      return editor.settings.html_paste_in_pre !== false && node && node.nodeName === 'PRE';
+  }
+
+  function isPlainTextFileUrl$1(content) {
+      var plainTextContent = content['text/plain'];
+      return plainTextContent ? plainTextContent.indexOf('file://') === 0 : false;
+  }
+
+  var setup$1 = function (editor, pasteBin) {
+      var keyboardPastePlainTextState, keyboardPasteTimeStamp = 0;
+
+      // Add command for external usage
+      editor.addCommand('mceInsertClipboardContent', function (u, data) {        
+          if (data.text) {
+              pasteText(editor, data.text);
+          }
+
+          if (data.content) {
+              pasteHtml(editor, data.content, data.internal || false);
+          }
+      });
+
+      var getLastRng = function () {
+          return pasteBin.getLastRng() || editor.selection.getRng();
+      };
+
+      function getContentAndInsert(e) {
+          // Getting content from the Clipboard can take some time
+          var clipboardTimer = new Date().getTime();
+          var clipboardContent = getClipboardContent(editor, e);
+          var clipboardDelay = new Date().getTime() - clipboardTimer;
+
+          function isKeyBoardPaste() {
+              if (e.type == 'drop') {
+                  return false;
+              }
+
+              return (new Date().getTime() - keyboardPasteTimeStamp - clipboardDelay) < 1000;
+          }
+
+          var internal = hasContentType(clipboardContent, internalHtmlMime());
+
+          var pasteAsPlainText = keyboardPastePlainTextState;
+          keyboardPastePlainTextState = false;
+
+          if (e.isDefaultPrevented() || isBrokenAndroidClipboardEvent(e)) {
+              pasteBin.remove();
+              return;
+          }
+
+          // Not a keyboard paste prevent default paste and try to grab the clipboard contents using different APIs
+          if (!isKeyBoardPaste()) {
+              e.preventDefault();
+          }
+
+          // Try IE only method if paste isn't a keyboard paste
+          if (isIE && (!isKeyBoardPaste() || e.ieFake) && !hasContentType(clipboardContent, 'text/html')) {
+              pasteBin.create();
+
+              editor.dom.bind(editor.dom.get('mcepastebin'), 'paste', function (e) {
+                  e.stopPropagation();
+              });
+
+              editor.getDoc().execCommand('Paste', false, null);
+              clipboardContent["text/html"] = pasteBin.getHtml();
+          }
+
+          if (isPlainTextFileUrl$1(clipboardContent)) {
+              pasteBin.remove();
+              return;
+          }
+
+          if (!hasHtmlOrText(clipboardContent) && pasteImageData(editor, e, getLastRng())) {
+              pasteBin.remove();
+              return;
+          }
+
+          // Grab HTML from paste bin as a fallback
+          if (!isHtmlPaste(clipboardContent)) {
+              var content = pasteBin.getHtml();
+
+              // no content....?
+              if (pasteBin.isDefaultContent(content)) {
+                  pasteAsPlainText = true;
+              } else {
+                  clipboardContent['text/html'] = content;
+              }
+          }
+
+          // If clipboard API has HTML then use that directly
+          if (isHtmlPaste(clipboardContent)) {
+              e.preventDefault();
+
+              // if clipboard lacks internal mime type, inspect html for internal markings
+              if (!internal) {
+                  internal = isMarked(clipboardContent['text/html']);
+              }
+
+              insertClipboardContent(editor, clipboardContent, internal, pasteAsPlainText);
+
+              pasteBin.remove();
+
+          } else if (hasContentType(clipboardContent, 'text/plain') && hasContentType(clipboardContent, 'text/uri-list')) {
+              /*
+              Safari adds the uri-list attribute to links copied within it.
+              When pasting something with the url-list within safari using the default functionality it will convert it from www.example.com to <a href="www.example.com">www.example.com</a> when pasting into the pasteBin-div.
+              This causes issues. To solve this we bypass the default paste functionality for this situation.
+               */
+              e.preventDefault();
+
+              clipboardContent['text/html'] = clipboardContent['text/plain'];
+
+              insertClipboardContent(editor, clipboardContent, internal, pasteAsPlainText);
+          } else {
+              setTimeout(function () {
+                  function block(e) {
+                      e.preventDefault();
+                  }
+
+                  // Block mousedown and click to prevent selection change
+                  editor.dom.bind(editor.getDoc(), 'mousedown', block);
+                  editor.dom.bind(editor.getDoc(), 'keydown', block);
+
+                  insertClipboardContent(editor, clipboardContent, internal, pasteAsPlainText);
+
+                  // Block mousedown and click to prevent selection change
+                  editor.dom.unbind(editor.getDoc(), 'mousedown', block);
+                  editor.dom.unbind(editor.getDoc(), 'keydown', block);
+
+                  pasteBin.remove();
+              }, 0);
+          }
+      }
+
+      // Grab contents on paste event
+      editor.onPaste.add(function (editor, e) {
+          if (e.isDefaultPrevented() || isBrokenAndroidClipboardEvent(e)) {
+              pasteBin.remove();
+              return false;
+          }
+
+          getContentAndInsert(e);
+
+          e.preventDefault();
+      });
+
+      function removePasteBinOnKeyUp(e) {
+          // Ctrl+V or Shift+Insert
+          if (isKeyboardPasteEvent(e) && !e.isDefaultPrevented()) {
+              pasteBin.remove();
+          }
+      }
+
+      editor.onKeyDown.add(function (editor, e) {
+          // Ctrl+V or Shift+Insert
+          if (isKeyboardPasteEvent(e) && !e.isDefaultPrevented()) {
+              keyboardPasteTimeStamp = new Date().getTime();
+
+              // Prevent undoManager keydown handler from making an undo level with the pastebin in it
+              e.stopImmediatePropagation();
+
+              keyboardPastePlainTextState = e.shiftKey && e.keyCode == 86;
+
+              // Remove pastebin if we get a keyup and no paste event
+              // For example pasting a file in IE 11 will not produce a paste event
+              editor.dom.bind(editor.getBody(), 'keyup', function handler(e) {
+                  removePasteBinOnKeyUp(e);
+                  editor.dom.unbind(editor.getBody(), 'keyup', handler);
+              });
+
+              editor.dom.bind(editor.getBody(), 'paste', function handler(e) {
+                  removePasteBinOnKeyUp(e);
+                  editor.dom.unbind(editor.getBody(), 'paste', handler);
+              });
+          }
+      });
+  };
+
+  var RangeUtils = tinymce.dom.RangeUtils, Delay = tinymce.util.Delay;
+
+  var getCaretRangeFromEvent = function (editor, e) {
+      return RangeUtils.getCaretRangeFromPoint(e.clientX, e.clientY, editor.getDoc());
+  };
+
+  var isPlainTextFileUrl = function (content) {
+      var plainTextContent = content['text/plain'];
+      return plainTextContent ? plainTextContent.indexOf('file://') === 0 : false;
+  };
+
+  var setFocusedRange = function (editor, rng) {
+      editor.focus();
+      editor.selection.setRng(rng);
+  };
+
+  var draggingInternallyState = false;
+
+  var setup = function (editor) {
+      // Block all drag/drop events
+      if (editor.settings.paste_block_drop) {
+          editor.dom.bind(editor.getBody(), ['dragend', 'dragover', 'draggesture', 'dragdrop', 'drop', 'drag'], function (e) {
+              e.preventDefault();
+              e.stopPropagation();
+          });
+      }
+
+      // Prevent users from dropping data images on Gecko
+      if (editor.settings.paste_data_images === false) {
+          editor.dom.bind(editor.getBody(), 'drop', function (e) {
+              var dataTransfer = e.dataTransfer;
+
+              if (dataTransfer && dataTransfer.files && dataTransfer.files.length > 0) {
+                  e.preventDefault();
+              }
+          });
+      }
+
+      editor.dom.bind(editor.getBody(), 'drop', function (e) {
+          var dropContent, rng;
+
+          rng = getCaretRangeFromEvent(editor, e);
+
+          if (e.isDefaultPrevented()) {
+              return;
+          }
+
+          dropContent = getDataTransferItems(e.dataTransfer);
+          var internal = hasContentType(dropContent, internalHtmlMime()) || draggingInternallyState;
+
+          if ((!hasHtmlOrText(dropContent) || isPlainTextFileUrl(dropContent)) && pasteImageData(e, rng)) {
+              return;
+          }
+
+          if (rng && editor.settings.paste_filter_drop !== false) {
+              var content = dropContent[internalHtmlMime()] || dropContent['text/html'] || dropContent['text/plain'];
+
+              if (content) {
+                  e.preventDefault();
+
+                  // FF 45 doesn't paint a caret when dragging in text in due to focus call by execCommand
+                  Delay.setEditorTimeout(editor, function () {
+                      editor.undoManager.add();
+
+                      if (internal) {
+                          editor.execCommand('Delete', false, null, { skip_undo: true });
+                          editor.selection.getRng().deleteContents();
+                      }
+
+                      setFocusedRange(editor, rng);
+
+                      content = trimHtml(content);
+
+                      var data = {};
+
+                      if (!dropContent['text/html']) {
+                          data.text = content;
+                      } else {
+                          // reset styles, replacing style attribute with data-mce-style value or remove
+                          content = resetStyleAttribute(content);
+
+                          data.content = content;
+                          data.internal = internal || draggingInternallyState;
+                      }
+
+                      editor.execCommand('mceInsertClipboardContent', false, data, { skip_undo: true });
+                  });
+              }
+          }
+      });
+
+      editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+          draggingInternallyState = true;
+
+          if (e.altKey) {
+              e.dataTransfer.effectAllowed = "copy";
+              e.dataTransfer.dropEffect = "copy";
+          }
+      });
+
+      editor.dom.bind(editor.getBody(), ['dragover', 'dragend'], function (e) {
+          if (editor.settings.clipboard_paste_data_images && draggingInternallyState == false) {
+              e.preventDefault();
+              setFocusedRange(editor, getCaretRangeFromEvent(editor, e));
+          }
+
+          if (e.type == 'dragend') {
+              draggingInternallyState = false;
+          }
+      });
+  };
+
+  var pasteBinDefaultContent = '%MCEPASTEBIN%';
+
+  /**
+   * Creates a paste bin element as close as possible to the current caret location and places the focus inside that element
+   * so that when the real paste event occurs the contents gets inserted into this element
+   * instead of the current editor selection element.
+   */
+  var create = function (editor, lastRng) {
+    var dom = editor.dom, body = editor.getBody();
+    var viewport = editor.dom.getViewPort(editor.getWin()), scrollTop = viewport.y, top = 20;
+    var pasteBinElm;
+    var scrollContainer;
+
+    if (editor.inline) {
+      scrollContainer = editor.selection.getScrollContainer();
+
+      // Can't always rely on scrollTop returning a useful value.
+      // It returns 0 if the browser doesn't support scrollTop for the element or is non-scrollable
+      if (scrollContainer && scrollContainer.scrollTop > 0) {
+        scrollTop = scrollContainer.scrollTop;
+      }
+    }
+    
+    /**
+     * Returns the rect of the current caret if the caret is in an empty block before a
+     * BR we insert a temporary invisible character that we get the rect this way we always get a proper rect.
+     *
+     * TODO: This might be useful in core.
+     */
+    function getCaretRect(rng) {
+      var rects, textNode, node, container = rng.startContainer;
+
+      rects = rng.getClientRects();
+      if (rects.length) {
+        return rects[0];
+      }
+
+      if (!rng.collapsed || container.nodeType != 1) {
+        return;
+      }
+
+      node = container.childNodes[lastRng.startOffset];
+
+      // Skip empty whitespace nodes
+      while (node && node.nodeType == 3 && !node.data.length) {
+        node = node.nextSibling;
+      }
+
+      if (!node) {
+        return;
+      }
+
+      // Check if the location is |<br>
+      // TODO: Might need to expand this to say |<table>
+      if (node.tagName == 'BR') {
+        textNode = dom.doc.createTextNode('\uFEFF');
+        node.parentNode.insertBefore(textNode, node);
+
+        rng = dom.createRng();
+        rng.setStartBefore(textNode);
+        rng.setEndAfter(textNode);
+
+        rects = rng.getClientRects();
+        dom.remove(textNode);
+      }
+
+      if (rects.length) {
+        return rects[0];
+      }
+    }
+
+    // Calculate top cordinate this is needed to avoid scrolling to top of document
+    // We want the paste bin to be as close to the caret as possible to avoid scrolling
+    if (lastRng.getClientRects) {
+      var rect = getCaretRect(lastRng);
+
+      if (rect) {
+        // Client rects gets us closes to the actual
+        // caret location in for example a wrapped paragraph block
+        top = scrollTop + (rect.top - dom.getPos(body).y);
+      } else {
+        top = scrollTop;
+
+        // Check if we can find a closer location by checking the range element
+        var container = lastRng.startContainer;
+        if (container) {
+          if (container.nodeType == 3 && container.parentNode != body) {
+            container = container.parentNode;
+          }
+
+          if (container.nodeType == 1) {
+            top = dom.getPos(container, scrollContainer || body).y;
+          }
+        }
+      }
+    }
+
+    // Create a pastebin
+    pasteBinElm = editor.dom.add(editor.getBody(), 'div', {
+      id: "mcepastebin",
+      contentEditable: true,
+      "data-mce-bogus": "all",
+      style: 'position: absolute; top: ' + top + 'px; width: 10px; height: 10px; overflow: hidden; opacity: 0'
+    }, pasteBinDefaultContent);
+
+    // Move paste bin out of sight since the controlSelection rect gets displayed otherwise on IE and Gecko
+    if (tinymce.isGecko) {
+      dom.setStyle(pasteBinElm, 'left', dom.getStyle(body, 'direction', true) == 'rtl' ? 0xFFFF : -0xFFFF);
+    }
+
+    // Prevent focus events from bubbeling fixed FocusManager issues
+    dom.bind(pasteBinElm, 'beforedeactivate focusin focusout', function (e) {
+      e.stopPropagation();
+    });
+
+    pasteBinElm.focus();
+    editor.selection.select(pasteBinElm, true);
+  };
+
+  /**
+   * Removes the paste bin if it exists.
+   */
+  var remove = function (editor, lastRng) {
+    if (getEl(editor)) {
+      var pasteBinClone;
+
+      // WebKit/Blink might clone the div so
+      // lets make sure we remove all clones
+      // TODO: Man o man is this ugly. WebKit is the new IE! Remove this if they ever fix it!
+      while ((pasteBinClone = editor.dom.get('mcepastebin'))) {
+        editor.dom.remove(pasteBinClone);
+        editor.dom.unbind(pasteBinClone);
+      }
+
+      if (lastRng) {
+        editor.selection.setRng(lastRng);
+      }
+    }
+
+    lastRng = null;
+  };
+
+  var getEl = function (editor) {
+    return editor.dom.get('mcepastebin');
+  };
+
+  /**
+   * Returns the contents of the paste bin as a HTML string.
+   *
+   * @return {String} Get the contents of the paste bin.
+   */
+  var getHtml = function (editor) {
+    var pasteBinElm, pasteBinClones, i, dirtyWrappers, cleanWrapper;
+
+    // Since WebKit/Chrome might clone the paste bin when pasting
+    // for example: <img style="float: right"> we need to check if any of them contains some useful html.
+    // TODO: Man o man is this ugly. WebKit is the new IE! Remove this if they ever fix it!
+
+    var copyAndRemove = function (toElm, fromElm) {
+      toElm.appendChild(fromElm);
+      editor.dom.remove(fromElm, true); // remove, but keep children
+    };
+
+    // find only top level elements (there might be more nested inside them as well, see TINY-1162)
+    pasteBinClones = tinymce.grep(editor.getBody().childNodes, function (elm) {
+      return elm.id === 'mcepastebin';
+    });
+    pasteBinElm = pasteBinClones.shift();
+
+    // if clones were found, move their content into the first bin
+    tinymce.each(pasteBinClones, function (pasteBinClone) {
+      copyAndRemove(pasteBinElm, pasteBinClone);
+    });
+
+    // TINY-1162: when copying plain text (from notepad for example) WebKit clones
+    // paste bin (with styles and attributes) and uses it as a default  wrapper for
+    // the chunks of the content, here we cycle over the whole paste bin and replace
+    // those wrappers with a basic div
+    dirtyWrappers = editor.dom.select('div[id=mcepastebin]', pasteBinElm);
+    for (i = dirtyWrappers.length - 1; i >= 0; i--) {
+      cleanWrapper = editor.dom.create('div');
+      pasteBinElm.insertBefore(cleanWrapper, dirtyWrappers[i]);
+      copyAndRemove(cleanWrapper, dirtyWrappers[i]);
+    }
+
+    return pasteBinElm ? pasteBinElm.innerHTML : '';
+  };
+
+  var getLastRng = function (lastRng) {
+    return lastRng;
+  };
+
+  var isDefaultPasteBinContent = function (content) {
+    return content === pasteBinDefaultContent;
+  };
+
+  var PasteBin = function (editor) {
+    var lastRng;
+
+    return {
+      create: function () {
+        lastRng = editor.selection.getRng();
+        return create(editor, lastRng);
+      },
+      remove: function () {
+        return remove(editor, lastRng);
+      },
+      getEl: function () {
+        return getEl(editor);
+      },
+      getHtml: function () {
+        return getHtml(editor);
+      },
+      getLastRng: function () {
+        return getLastRng(lastRng);
+      },
+      isDefaultContent: function (value) {
+        return isDefaultPasteBinContent(value);
+      }
+    };
+  };
+
+  /**
+   * @package   	JCE
+   * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved.
+   * @copyright   Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+   * @license   	GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+   * JCE is free software. This version may have been modified pursuant
+   * to the GNU General Public License, and as distributed it includes or
+   * is derivative of works licensed under the GNU General Public License or
+   * other free or open source software licenses.
+   */
+
+  var Dispatcher = tinymce.util.Dispatcher;
+
+  tinymce.Clipboard = function (editor) {
+      var pasteBin = new PasteBin(editor);
+
+      editor.onGetClipboardContent = new Dispatcher(this);
+      editor.onPastePreProcess = new Dispatcher(this);
+      editor.onPastePostProcess = new Dispatcher(this);
+      editor.onPasteBeforeInsert = new Dispatcher(this);
+
+      setup$3(editor);
+
+      setup$2(editor);
+    
+      // IMPORTANT: The following event hooks need to be setup later so that other things
+      // can hook in and prevent the event so core paste doesn't handle them.
+      editor.onPreInit.add(function () {
+        register(editor);
+        setup(editor);
+        setup$1(editor, pasteBin);
+      });
+  };
+
+  /**
    * CaretBookmark.js
    *
    * Released under LGPL License.
@@ -13118,7 +16680,7 @@
    */
   (function (tinymce) {
     var NodeType = tinymce.dom.NodeType, DOMUtils = tinymce.DOM;
-    var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr, CaretPosition = tinymce.caret.CaretPosition;
+    var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
 
     var isText = NodeType.isText,
       isBogus = NodeType.isBogus,
@@ -13284,7 +16846,7 @@
         offset = container.data.length;
       }
 
-      return new CaretPosition(container, offset);
+      return new tinymce.caret.CaretPosition(container, offset);
     }
 
     function resolve(rootNode, path) {
@@ -13322,7 +16884,7 @@
           offset = nodeIndex(container);
         }
 
-        return new CaretPosition(container.parentNode, offset);
+        return new tinymce.caret.CaretPosition(container.parentNode, offset);
       }
 
       return findTextPosition(container, parseInt(offset, 10));
@@ -18645,7 +22207,7 @@
       self.onBeforeSetContent.add(function (e, args) {
         if (args.format !== 'raw') {
           var node = new tinymce.html.DomParser(editor.settings, editor.schema).parse(args.content, extend(args, { isRootContent: true, forced_root_block: false }));
-          args.content = new tinymce.html.Serializer({ validate: editor.settings.validate }, editor.schema).serialize(node);
+          args.content = new tinymce.html.Serializer({ validate: false }, editor.schema).serialize(node);
         }
       });
 
@@ -19808,6 +23370,21 @@
         return self;
       },
 
+      getScrollContainer: function () {
+        var scrollContainer, node = this.dom.getRoot();
+    
+        while (node && node.nodeName != 'BODY') {
+          if (node.scrollHeight > node.clientHeight) {
+            scrollContainer = node;
+            break;
+          }
+    
+          node = node.parentNode;
+        }
+    
+        return scrollContainer;
+      },
+
       scrollIntoView: function (elm, alignToTop) {
         tinymce.dom.ScrollIntoView(this.editor, elm, alignToTop);
       },
@@ -19931,20 +23508,20 @@
 
   (function (tinymce) {
     /**
-  	 * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
-  	 *
-  	 * @class tinymce.dom.Serializer
-  	 */
+     * This class is used to serialize DOM trees into a string. Consult the TinyMCE Wiki API for more details and examples on how to use this class.
+     *
+     * @class tinymce.dom.Serializer
+     */
 
     /**
-  	 * Constucts a new DOM serializer class.
-  	 *
-  	 * @constructor
-  	 * @method Serializer
-  	 * @param {Object} settings Serializer settings object.
-  	 * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
-  	 * @param {tinymce.html.Schema} schema Optional schema reference.
-  	 */
+     * Constucts a new DOM serializer class.
+     *
+     * @constructor
+     * @method Serializer
+     * @param {Object} settings Serializer settings object.
+     * @param {tinymce.dom.DOMUtils} dom DOMUtils instance reference.
+     * @param {tinymce.html.Schema} schema Optional schema reference.
+     */
     tinymce.dom.Serializer = function (settings, dom, schema) {
       var self = this,
         onPreProcess, onPostProcess, isIE = tinymce.isIE,
@@ -19963,14 +23540,14 @@
       settings.remove_trailing_brs = "remove_trailing_brs" in settings ? settings.remove_trailing_brs : true;
 
       /**
-  		 * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
-  		 * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
-  		 * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
-  		 * but not as the lastChild of the body. So this fix simply removes the last two
-  		 * BR elements at the end of the document.
-  		 *
-  		 * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
-  		 */
+       * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
+       * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
+       * with innerHTML in this case. It's like IE adds shadow DOM BR elements that appears on innerHTML
+       * but not as the lastChild of the body. So this fix simply removes the last two
+       * BR elements at the end of the document.
+       *
+       * Example of what happens: <body>text</body> becomes <body>text<br><br></body>
+       */
       function trimTrailingBr(rootNode) {
         var brNode1, brNode2;
 
@@ -19990,34 +23567,34 @@
       }
 
       /**
-  		 * This event gets executed before a HTML fragment gets serialized into a HTML string. This event enables you to do modifications to the DOM before the serialization occurs. It's important to know that the element that is getting serialized is cloned so it's not inside a document.
-  		 *
-  		 * @event onPreProcess
-  		 * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
-  		 * @param {Object} args Object containing things like the current node.
-  		 * @example
-  		 * // Adds an observer to the onPreProcess event
-  		 * serializer.onPreProcess.add(function(se, o) {
-  		 *     // Add a class to each paragraph
-  		 *     se.dom.addClass(se.dom.select('p', o.node), 'myclass');
-  		 * });
-  		 */
+       * This event gets executed before a HTML fragment gets serialized into a HTML string. This event enables you to do modifications to the DOM before the serialization occurs. It's important to know that the element that is getting serialized is cloned so it's not inside a document.
+       *
+       * @event onPreProcess
+       * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
+       * @param {Object} args Object containing things like the current node.
+       * @example
+       * // Adds an observer to the onPreProcess event
+       * serializer.onPreProcess.add(function(se, o) {
+       *     // Add a class to each paragraph
+       *     se.dom.addClass(se.dom.select('p', o.node), 'myclass');
+       * });
+       */
       onPreProcess = new tinymce.util.Dispatcher(self);
 
       /**
-  		 * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc.
-  		 *
-  		 * @event onPreProcess
-  		 * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
-  		 * @param {Object} args Object containing things like the current contents.
-  		 * @example
-  		 * // Adds an observer to the onPostProcess event
-  		 * serializer.onPostProcess.add(function(se, o) {
-  		 *    // Remove all paragraphs and replace with BR
-  		 *    o.content = o.content.replace(/<p[^>]+>|<p>/g, '');
-  		 *    o.content = o.content.replace(/<\/p>/g, '<br />');
-  		 * });
-  		 */
+       * This event gets executed after a HTML fragment has been serialized into a HTML string. This event enables you to do modifications to the HTML string like regexp replaces etc.
+       *
+       * @event onPreProcess
+       * @param {tinymce.dom.Serializer} sender object/Serializer instance that is serializing an element.
+       * @param {Object} args Object containing things like the current contents.
+       * @example
+       * // Adds an observer to the onPostProcess event
+       * serializer.onPostProcess.add(function(se, o) {
+       *    // Remove all paragraphs and replace with BR
+       *    o.content = o.content.replace(/<p[^>]+>|<p>/g, '');
+       *    o.content = o.content.replace(/<\/p>/g, '<br />');
+       * });
+       */
       onPostProcess = new tinymce.util.Dispatcher(self);
 
       htmlParser = new tinymce.html.DomParser(settings, schema);
@@ -20085,13 +23662,18 @@
         }
       });
 
-      // Remove bookmark elements
+      // Remove bookmark and temp elements
       htmlParser.addAttributeFilter('data-mce-type', function (nodes, name, args) {
         var i = nodes.length,
           node;
 
         while (i--) {
           node = nodes[i];
+
+          if (node.attributes.map['data-mce-type'] === 'temp') {
+            node.remove();
+            continue;
+          }
 
           if (node.attributes.map['data-mce-type'] === 'bookmark' && !args.cleanup) {
             node.remove();
@@ -20101,16 +23683,16 @@
 
       // Remove bogus elements
       /*htmlParser.addAttributeFilter('data-mce-bogus', function(nodes, name, args) {
-  			var i = nodes.length, node;
+        var i = nodes.length, node;
 
-  			while (i--) {
-  				node = nodes[i];
+        while (i--) {
+          node = nodes[i];
 
-  				if (node.attributes.map['data-mce-bogus'] === 'all' && !args.cleanup) {
-  					node.remove();
-  				}
-  			}
-  		});*/
+          if (node.attributes.map['data-mce-bogus'] === 'all' && !args.cleanup) {
+            node.remove();
+          }
+        }
+      });*/
 
       htmlParser.addNodeFilter('noscript', function (nodes) {
         var i = nodes.length,
@@ -20222,8 +23804,8 @@
       // Remove internal data attributes
       htmlParser.addAttributeFilter(
         'data-mce-src,data-mce-href,data-mce-style,' +
-  			'data-mce-selected,data-mce-expando,' +
-  			'data-mce-type,data-mce-resize,data-mce-new',
+        'data-mce-selected,data-mce-expando,' +
+        'data-mce-type,data-mce-resize,data-mce-new',
 
         function (nodes, name) {
           var i = nodes.length;
@@ -20237,74 +23819,74 @@
       // Return public methods
       return {
         /**
-  			 * Schema instance that was used to when the Serializer was constructed.
-  			 *
-  			 * @field {tinymce.html.Schema} schema
-  			 */
+         * Schema instance that was used to when the Serializer was constructed.
+         *
+         * @field {tinymce.html.Schema} schema
+         */
         schema: schema,
 
         /**
-  			 * Adds a node filter function to the parser used by the serializer, the parser will collect the specified nodes by name
-  			 * and then execute the callback ones it has finished parsing the document.
-  			 *
-  			 * @example
-  			 * parser.addNodeFilter('p,h1', function(nodes, name) {
-  			 *		for (var i = 0; i < nodes.length; i++) {
-  			 *			console.log(nodes[i].name);
-  			 *		}
-  			 * });
-  			 * @method addNodeFilter
-  			 * @method {String} name Comma separated list of nodes to collect.
-  			 * @param {function} callback Callback function to execute once it has collected nodes.
-  			 */
+         * Adds a node filter function to the parser used by the serializer, the parser will collect the specified nodes by name
+         * and then execute the callback ones it has finished parsing the document.
+         *
+         * @example
+         * parser.addNodeFilter('p,h1', function(nodes, name) {
+         *		for (var i = 0; i < nodes.length; i++) {
+         *			console.log(nodes[i].name);
+         *		}
+         * });
+         * @method addNodeFilter
+         * @method {String} name Comma separated list of nodes to collect.
+         * @param {function} callback Callback function to execute once it has collected nodes.
+         */
         addNodeFilter: htmlParser.addNodeFilter,
 
         /**
-  			 * Adds a attribute filter function to the parser used by the serializer, the parser will collect nodes that has the specified attributes
-  			 * and then execute the callback ones it has finished parsing the document.
-  			 *
-  			 * @example
-  			 * parser.addAttributeFilter('src,href', function(nodes, name) {
-  			 *		for (var i = 0; i < nodes.length; i++) {
-  			 *			console.log(nodes[i].name);
-  			 *		}
-  			 * });
-  			 * @method addAttributeFilter
-  			 * @method {String} name Comma separated list of nodes to collect.
-  			 * @param {function} callback Callback function to execute once it has collected nodes.
-  			 */
+         * Adds a attribute filter function to the parser used by the serializer, the parser will collect nodes that has the specified attributes
+         * and then execute the callback ones it has finished parsing the document.
+         *
+         * @example
+         * parser.addAttributeFilter('src,href', function(nodes, name) {
+         *		for (var i = 0; i < nodes.length; i++) {
+         *			console.log(nodes[i].name);
+         *		}
+         * });
+         * @method addAttributeFilter
+         * @method {String} name Comma separated list of nodes to collect.
+         * @param {function} callback Callback function to execute once it has collected nodes.
+         */
         addAttributeFilter: htmlParser.addAttributeFilter,
 
         /**
-  			 * Fires when the Serializer does a preProcess on the contents.
-  			 *
-  			 * @event onPreProcess
-  			 * @param {tinymce.Editor} sender Editor instance.
-  			 * @param {Object} obj PreProcess object.
-  			 * @option {Node} node DOM node for the item being serialized.
-  			 * @option {String} format The specified output format normally "html".
-  			 * @option {Boolean} get Is true if the process is on a getContent operation.
-  			 * @option {Boolean} set Is true if the process is on a setContent operation.
-  			 * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
-  			 */
+         * Fires when the Serializer does a preProcess on the contents.
+         *
+         * @event onPreProcess
+         * @param {tinymce.Editor} sender Editor instance.
+         * @param {Object} obj PreProcess object.
+         * @option {Node} node DOM node for the item being serialized.
+         * @option {String} format The specified output format normally "html".
+         * @option {Boolean} get Is true if the process is on a getContent operation.
+         * @option {Boolean} set Is true if the process is on a setContent operation.
+         * @option {Boolean} cleanup Is true if the process is on a cleanup operation.
+         */
         onPreProcess: onPreProcess,
 
         /**
-  			 * Fires when the Serializer does a postProcess on the contents.
-  			 *
-  			 * @event onPostProcess
-  			 * @param {tinymce.Editor} sender Editor instance.
-  			 * @param {Object} obj PreProcess object.
-  			 */
+         * Fires when the Serializer does a postProcess on the contents.
+         *
+         * @event onPostProcess
+         * @param {tinymce.Editor} sender Editor instance.
+         * @param {Object} obj PreProcess object.
+         */
         onPostProcess: onPostProcess,
 
         /**
-  			 * Serializes the specified browser DOM node into a HTML string.
-  			 *
-  			 * @method serialize
-  			 * @param {DOMNode} node DOM node to serialize.
-  			 * @param {Object} args Arguments option that gets passed to event handlers.
-  			 */
+         * Serializes the specified browser DOM node into a HTML string.
+         *
+         * @method serialize
+         * @param {DOMNode} node DOM node to serialize.
+         * @param {Object} args Arguments option that gets passed to event handlers.
+         */
         serialize: function (node, args) {
           var impl, doc, oldDoc, htmlSerializer, content, rootNode;
 
@@ -20385,25 +23967,25 @@
         },
 
         /**
-  			 * Adds valid elements rules to the serializers schema instance this enables you to specify things
-  			 * like what elements should be outputted and what attributes specific elements might have.
-  			 * Consult the Wiki for more details on this format.
-  			 *
-  			 * @method addRules
-  			 * @param {String} rules Valid elements rules string to add to schema.
-  			 */
+         * Adds valid elements rules to the serializers schema instance this enables you to specify things
+         * like what elements should be outputted and what attributes specific elements might have.
+         * Consult the Wiki for more details on this format.
+         *
+         * @method addRules
+         * @param {String} rules Valid elements rules string to add to schema.
+         */
         addRules: function (rules) {
           schema.addValidElements(rules);
         },
 
         /**
-  			 * Sets the valid elements rules to the serializers schema instance this enables you to specify things
-  			 * like what elements should be outputted and what attributes specific elements might have.
-  			 * Consult the Wiki for more details on this format.
-  			 *
-  			 * @method setRules
-  			 * @param {String} rules Valid elements rules string.
-  			 */
+         * Sets the valid elements rules to the serializers schema instance this enables you to specify things
+         * like what elements should be outputted and what attributes specific elements might have.
+         * Consult the Wiki for more details on this format.
+         *
+         * @method setRules
+         * @param {String} rules Valid elements rules string.
+         */
         setRules: function (rules) {
           schema.setValidElements(rules);
         }
@@ -21565,14 +25147,15 @@
   		 * @param {Element} n HTML DOM element to add control to.
   		 */
       renderTo: function (n) {
-        DOM.setHTML(n, this.renderHTML());
+        var frag = DOM.createFragment(this.renderHTML());
+        n.appendChild(frag);
 
         this.postRender();
       },
 
       /**
   		 * Post render event. This will be executed after the control has been rendered and can be used to
-  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
   		 *
   		 * @method postRender
   		 */
@@ -21591,6 +25174,18 @@
           this.active = -1;
           this.setActive(state);
         }
+
+        this._elm = DOM.get(this.id);
+
+        this.onRender.dispatch();
+      },
+
+      parent: function (ctrl) {
+        if (!ctrl) {
+          return this._parent || null;
+        }
+        
+        this._parent = ctrl;
       },
 
       /**
@@ -21600,8 +25195,9 @@
   		 * @method remove
   		 */
       remove: function () {
-        DOM.remove(this.id);
         this.destroy();
+
+        DOM.remove(this.id);
       },
 
       /**
@@ -21609,7 +25205,7 @@
   		 *
   		 * @method destroy
   		 */
-      destroy: function () {
+       destroy: function () {
         tinymce.dom.Event.clear(this.id);
       }
     });
@@ -21632,8 +25228,9 @@
    * @class tinymce.ui.Container
    * @extends tinymce.ui.Control
    */
+
   tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
-    /**
+  	/**
   	 * Base contrustor a new container control instance.
   	 *
   	 * @constructor
@@ -21641,44 +25238,68 @@
   	 * @param {String} id Control id to use for the container.
   	 * @param {Object} settings Optional name/value settings object.
   	 */
-    Container: function (id, settings, editor) {
-      this.parent(id, settings, editor);
+  	Container: function (id, settings, editor) {
+  		var self = this;
 
-      /**
+  		settings = settings || {};
+
+  		this._super(id, settings, editor);
+
+  		/**
   		 * Array of controls added to the container.
   		 *
   		 * @property controls
   		 * @type Array
   		 */
-      this.controls = [];
+  		this.controls = [];
 
-      this.lookup = {};
-    },
+  		this.lookup = {};
 
-    /**
+  		if (settings.controls) {
+  			tinymce.each(settings.controls, function (ctrl) {
+  				self.add(ctrl);
+  			});
+  		}
+  	},
+
+  	/**
   	 * Adds a control to the collection of controls for the container.
   	 *
   	 * @method add
   	 * @param {tinymce.ui.Control} c Control instance to add to the container.
   	 * @return {tinymce.ui.Control} Same control instance that got passed in.
   	 */
-    add: function (ctrl) {
-      this.lookup[ctrl.id] = ctrl;
-      this.controls.push(ctrl);
+  	add: function (ctrl) {
+  		this.lookup[ctrl.id] = ctrl;
+  		this.controls.push(ctrl);
 
-      return ctrl;
-    },
+  		ctrl.parent(this);
 
-    /**
+  		return ctrl;
+  	},
+
+  	destroy: function () {
+  		var i;
+
+  		this._super();
+
+  		for (i = 0; i < this.controls.length; i++) {
+  			this.controls[i].destroy();
+  		}
+
+  		delete this.lookup[this.id];
+  	},
+
+  	/**
   	 * Returns a control by id from the containers collection.
   	 *
   	 * @method get
   	 * @param {String} id Id for the control to retrive.
   	 * @return {tinymce.ui.Control} Control instance by the specified name or undefined if it wasn't found.
   	 */
-    get: function (id) {
-      return this.lookup[id];
-    }
+  	get: function (id) {
+  		return this.lookup[id];
+  	}
   });
 
   /**
@@ -21694,29 +25315,27 @@
     // Shorten class names
     var dom = tinymce.DOM;
     /**
-  	 * This class is used to create layouts. A layout is a container for other controls like buttons etc.
-  	 *
-  	 * @class tinymce.ui.Form
-  	 * @extends tinymce.ui.Container
-  	 */
+     * This class is used to create layouts. A layout is a container for other controls like buttons etc.
+     *
+     * @class tinymce.ui.Form
+     * @extends tinymce.ui.Container
+     */
     tinymce.create('tinymce.ui.Form:tinymce.ui.Container', {
 
       /**
-  			 * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
-  			 * creating a whole toolbar with buttons it does make a lot of difference.
-  			 *
-  			 * @method renderHTML
-  			 * @return {String} HTML for the toolbar control.
-  			 */
+         * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
+         * creating a whole toolbar with buttons it does make a lot of difference.
+         *
+         * @method renderHTML
+         * @return {String} HTML for the toolbar control.
+         */
       renderHTML: function () {
         var html = '',
           settings = this.settings,
           i;
 
-        var controls = settings.controls || this.controls;
-
-        for (i = 0; i < controls.length; i++) {
-          var ctrl = controls[i], s = ctrl.settings;
+        for (i = 0; i < this.controls.length; i++) {
+          var ctrl = this.controls[i], s = ctrl.settings;
 
           html += '<div class="mceFormRow">';
 
@@ -21725,29 +25344,23 @@
           }
 
           html += '	<div class="mceFormControl">';
-          html += controls[i].renderHTML();
+          html += ctrl.renderHTML();
           html += '	</div>';
           html += '</div>';
-
         }
-
-        this.controls = controls;
 
         return dom.createHTML('div', {
           id: this.id,
-          'class': 'mceForm ' + (settings['class'] ? ' ' + settings['class'] : ''),
+          'class': 'mceForm' + (settings['class'] ? ' ' + settings['class'] : ''),
           role: 'group'
         }, html);
       },
 
       submit: function () {
-        var settings = this.settings,
-          i, data = {};
+        var i, data = {};
 
-        var controls = settings.controls || this.controls;
-
-        for (i = 0; i < controls.length; i++) {
-          var ctrl = controls[i];
+        for (i = 0; i < this.controls.length; i++) {
+          var ctrl = this.controls[i];
 
           if (typeof ctrl.value === 'function') {
             data[ctrl.name] = ctrl.value();
@@ -21757,41 +25370,46 @@
         return data;
       },
 
-      postRender: function () {
-        var settings = this.settings,
-          i;
+      update: function (data) {
+        var i;
 
-        this.parent();
+        for (i = 0; i < this.controls.length; i++) {
+          var ctrl = this.controls[i];
 
-        var controls = settings.controls || this.controls;
-
-        for (i = 0; i < controls.length; i++) {
-          controls[i].postRender();
+          if (data[ctrl.name]) {
+            if (typeof ctrl.value === 'function') {
+              ctrl.value(data[ctrl.name]);
+            }
+          }
         }
       },
 
       empty: function () {
         var i;
 
-        var controls = this.controls;
-
-        for (i = 0; i < controls.length; i++) {
-          controls[i].remove();
+        for (i = 0; i < this.controls.length; i++) {
+          this.controls[i].remove();
         }
 
         this.controls = [];
+        this.lookup = {};
       },
 
-      destroy: function () {
-        var settings = this.settings,
-          i;
+      add: function (ctrl) {
+        if (!this.get(ctrl.id)) {
+          return this._super(ctrl);
+        }
 
-        this.parent();
+        return false;
+      },
 
-        var controls = settings.controls || this.controls;
-
-        for (i = 0; i < controls.length; i++) {
-          controls[i].destroy();
+      postRender: function () {
+        var i;
+    
+        this._super();
+    
+        for (i = 0; i < this.controls.length; i++) {
+          this.controls[i].postRender();
         }
       }
     });
@@ -21823,7 +25441,7 @@
        * @param {Object} s Optional name/value settings object.
        */
     Separator: function (id, s) {
-      this.parent(id, s);
+      this._super(id, s);
       this.classPrefix = 'mceSeparator';
       this.setDisabled(true);
     },
@@ -21873,7 +25491,7 @@
   		 * @param {Object} s Optional name/value settings object.
   		 */
   		MenuItem: function (id, settings) {
-  			this.parent(id, settings);
+  			this._super(id, settings);
   		},
 
   		/**
@@ -21906,7 +25524,7 @@
   		 * @method postRender
   		 */
   		postRender: function () {
-  			this.parent();
+  			this._super();
 
   			// Set pending state
   			if (tinymce.is(this.selected)) {
@@ -21947,7 +25565,7 @@
   		 * @param {Object} s Optional name/value settings object.
   		 */
       Menu: function (id, settings) {
-        this.parent(id, settings);
+        this._super(id, settings);
         this.items = {};
         this.collapsed = false;
         this.menuCount = 0;
@@ -22222,12 +25840,13 @@
         s.vp_offset_x = s.vp_offset_x || 0;
         s.vp_offset_y = s.vp_offset_y || 0;
 
-        this.parent(id, s);
+        this._super(id, s);
         this.onShowMenu = new tinymce.util.Dispatcher(this);
         this.onHideMenu = new tinymce.util.Dispatcher(this);
+        this.onFilterInput = new tinymce.util.Dispatcher(this);
         this.classPrefix = 'mceMenu';
 
-        // array of selected elements
+        // array of selected items
         this.selected = [];
       },
 
@@ -22288,57 +25907,27 @@
         p.scrollTop = el.offsetTop;
       },
 
-      selectItem: function (e, node) {
-        var self = this, dm, item = self.items[node.id];
+      deselectAll: function () {
+        var self = this;
 
-        if (!item) {
-          return;
-        }
-
-        if (item.isDisabled()) {
-          return;
-        }
-
-        var idx = tinymce.inArray(self.selected, node);
-
-        if (idx >= 0) {
-          self.selected.splice(idx, 1);
+        each(self.items, function (item) {
           item.setSelected(0);
+        });
+      },
+
+      selectItem: function (item, state) {
+        var self = this;
+
+        item.setSelected(state);
+
+        if (state) {
+          self.selected.push(item);
         } else {
-          self.selected.push(node);
-          item.setSelected(1);
-        }
+          var idx = tinymce.inArray(self.selected, item);
 
-        // trigger click event
-        if (item.settings.onclick) {
-          item.settings.onclick(e);
-        }
-
-        // update tags
-        if (self.settings.filter) {
-          // clear input
-          self.clearFilterInput(true);
-
-          // add tags
-          tinymce.each(self.selected, function (el) {
-            var item = self.items[el.id];
-
-            if (item) {
-              self.addFilterTag(item);
-            }
-          });
-
-          return item;
-        }
-
-        dm = self;
-
-        while (dm) {
-          if (dm.hideMenu) {
-            dm.hideMenu();
+          if (idx >= 0) {
+            self.selected.splice(idx, 1);
           }
-
-          dm = dm.settings.parent;
         }
 
         return item;
@@ -22359,50 +25948,18 @@
         return found;
       },
 
-      clearFilterInput: function (removetags) {
-        var self = this, input = DOM.select('input', 'menu_filter_input_' + self.id)[0];
+      clearFilterInput: function () {
+        var self = this, filter = DOM.get('menu_' + self.id + '_filter'), input = DOM.select('input', 'menu_' + self.id + '_filter_input')[0];
+
+        if (!filter) {
+          return;
+        }
 
         // find and clear input element
         input.value = '';
         input.focus();
 
         self.clearFilteredItems();
-
-        if (removetags) {
-          DOM.remove(DOM.select('button', 'menu_filter_' + self.id));
-        }
-      },
-
-      removeFilterTag: function (tag, item) {
-        var self = this;
-
-        DOM.remove(tag);
-
-        if (!item) {
-          item = self.findItem(tag.value);
-        }
-
-        if (item) {
-          var node = DOM.get(item.id);
-          self.selectItem({}, node);
-        }
-      },
-
-      addFilterTag: function (item) {
-        var self = this, value = item.settings.title;
-
-        var filter = DOM.get('menu_filter_' + self.id), btn = DOM.create('button', { 'class': 'mceButton', 'value': value }, '<label>' + value + '</label>');
-        DOM.insertBefore(btn, filter.lastChild);
-
-        Event.add(btn, 'click', function (evt) {
-          evt.preventDefault();
-
-          if (evt.target.nodeName === 'LABEL') {
-            return;
-          }
-
-          self.removeFilterTag(btn);
-        });
       },
 
       /**
@@ -22434,8 +25991,15 @@
           each(self.items, function (o) {
             o.postRender();
           });
+
+          self.postRender();
+
         } else {
           co = DOM.get('menu_' + self.id);
+        }
+
+        if (!co) {
+          return;
         }
 
         DOM.show(co);
@@ -22473,12 +26037,28 @@
           n = e.target;
 
           // cancel on input click
-          if (n.nodeName === "INPUT") {
+          if (n.nodeName == "INPUT" || n.nodeName == 'TEXTAREA') {
             return;
           }
 
           if (n && (n = DOM.getParent(n, '.mceMenuItem')) && !DOM.hasClass(n, cp + 'ItemSub')) {
-            self.selectItem(e, n);
+            var item = self.items[n.id];
+
+            if (!item || item.isDisabled()) {
+              return false;
+            }
+
+            if (item.settings.onAction) {
+              item.settings.onAction(e);
+            }
+
+            if (item.settings.onclick) {
+              item.settings.onclick(e);
+              self.close();
+            }
+
+            self.clearFilterInput();
+
             return false; // Cancel to fix onbeforeunload problem
           }
         });
@@ -22504,7 +26084,7 @@
                 r = DOM.getRect(n);
                 m.showMenu((r.x + r.w - ot), r.y - ot, r.x);
                 self.lastMenu = m;
-                DOM.addClass(DOM.get(m.id).firstChild, cp + 'ItemActive');
+                //DOM.addClass(DOM.get(m.id).firstChild, cp + 'ItemActive');
               }
             }
 
@@ -22525,22 +26105,15 @@
         // scroll to selected item
         each(self.items, function (o) {
           if (o.selected) {
-            if (self.settings.filter) {
-              self.addFilterTag(o);
-            }
-
-            var el = DOM.get(o.id);
-
-            if (el) {
-              if (tinymce.inArray(self.selected, el) === -1) {
-                self.selected.push(el);
-              }
+            if (tinymce.inArray(self.selected, o) === -1) {
+              self.selected.push(o);
             }
           }
         });
 
         if (self.selected.length) {
-          self.scrollTo(self.selected[0]);
+          var el = DOM.get(self.selected[0].id);
+          self.scrollTo(el);
         } else {
           // reset scroll position
           DOM.get('menu_' + self.id + '_items').scrollTop = 0;
@@ -22552,7 +26125,7 @@
 
         if (s.filter) {
           // focus input
-          var input = DOM.select('input', 'menu_filter_input_' + self.id);
+          var input = DOM.select('input', 'menu_' + self.id + '_filter_input');
 
           if (input) {
             input[0].focus();
@@ -22591,7 +26164,7 @@
           self.collapse(1);
         }
 
-        e = DOM.get(self.id);
+        e = DOM.get('menu_' + self.id);
 
         if (e) {
           DOM.removeClass(e.firstChild, self.classPrefix + 'ItemActive');
@@ -22612,7 +26185,7 @@
         var self = this,
           co;
 
-        o = self.parent(o);
+        o = self._super(o);
 
         if (self.isRendered && (co = DOM.get('menu_' + self.id + '_items'))) {
           self._add(co, o);
@@ -22628,9 +26201,21 @@
        * @param {Boolean} d Optional deep state. If this is set to true all children will be collapsed as well.
        */
       collapse: function (d) {
-        this.parent(d);
+        this._super(d);
         this.hideMenu(1);
       },
+
+      close: function () {
+        var self = this, dm = self;
+
+        while (dm) {
+          if (dm.hideMenu) {
+            dm.hideMenu();
+          }
+
+          dm = dm.settings.parent;
+        }
+      },  
 
       /**
        * Removes a specific sub menu or menu item from the drop menu.
@@ -22643,7 +26228,7 @@
         DOM.remove(o.id);
         this.destroy();
 
-        return this.parent(o);
+        return this._super(o);
       },
 
       /**
@@ -22685,18 +26270,18 @@
         });
 
         if (self.settings.parent) {
-          DOM.setAttrib(menu, 'aria-parent', 'menu_' + self.settings.parent.id);
+          DOM.setAttrib(menu, 'aria-parent', self.settings.parent.id);
         }
 
         // create autocomplete filter
         if (s.filter) {
           var filter = DOM.add(menu, 'div', {
-            id: 'menu_filter_' + self.id,
+            id: 'menu_' + self.id + '_filter',
             'class': self.classPrefix + 'Filter'
           }, '');
 
           var filterInput = DOM.add(filter, 'div', {
-            id: 'menu_filter_input_' + self.id,
+            id: 'menu_' + self.id + '_filter_input',
             'class': self.classPrefix + 'FilterInput'
           }, '<input type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="..." />');
 
@@ -22720,6 +26305,13 @@
         return menu;
       },
 
+      selectAndClear : function (value) {
+        var self = this;
+
+        self.settings.onselect(value);
+        self.clearFilterInput();
+      },
+
       // Internal functions
       _setupKeyboardNav: function () {
         var contextMenu, menuItems, self = this;
@@ -22734,7 +26326,7 @@
           onCancel: function () {
             self.hideMenu();
           },
-          onAction: function (e, id) {
+          onAction: function (e, id) {          
             // process filter value
             if (menuItems.length > 1) {
               if (e.target && e.target.nodeName === "INPUT") {
@@ -22747,36 +26339,33 @@
                     id = item.id;
                   } else {
                     id = DOM.uniqueId();
-
-                    item = {
+                    
+                    item = self.add({
                       id: id,
                       role: 'option',
                       title: val,
                       onclick: function () {
-                        self.settings.onselect(this.title);
+                        self.selectAndClear(this.settings.value);
                       }
-                    };
-
-                    self.add(item);
+                    });
                   }
                 }
 
                 // clear input
                 e.target.value = '';
               }
-
-              var n = DOM.get(id);
-
-              if (n) {
-                self.selectItem(e, n);
-              }
-
             } else {
               if (self.settings.onselect) {
                 self.settings.onselect(e.target);
               }
-
+              
               self.hideMenu();
+            }
+
+            item = item || self.items[id];
+
+            if (item && item.settings.value) {
+              self.selectAndClear(item.settings.value);
             }
           },
           enableUpDown: true
@@ -22787,7 +26376,7 @@
 
       _updateKeyboardNav: function () {
         // update keyboard nav with new list
-        var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', 'menu_' + this.id);
+        var items = DOM.select('div[role="option"]:not(.mceMenuItemHidden)', this.id + '');
         this.keyboardNav.update(items);
       },
 
@@ -22832,38 +26421,9 @@
       },
 
       _keyDownHandler: function (evt) {
-        var self = this;
+        var self = this, tabIndex = 0;
 
-        // backspace
-        if (evt.keyCode === 8) {
-          if (evt.target && evt.target.nodeName === "INPUT") {
-            var input = evt.target;
-
-            // keep normal behaviour while input has a value
-            if (input.value) {
-              return;
-            }
-
-            var tags = DOM.select('button', 'menu_filter_' + self.id);
-
-            if (tags.length) {
-              var tag = tags.pop(), val = DOM.getValue(tag);
-
-              // remove tag
-              self.removeFilterTag(tag);
-
-              evt.preventDefault();
-
-              // update value with tag value and focus
-              input.value = val;
-              input.focus();
-            }
-          }
-        }
-
-        var tabIndex = 0;
-
-        if (evt.keyCode === 9) {
+        if (evt.keyCode == 9) {
           var nodes = DOM.select('input, button, select, textarea', DOM.get('menu_' + self.id));
 
           nodes = tinymce.grep(nodes, function (node) {
@@ -22910,11 +26470,7 @@
               var item = self.findItem(input.value);
 
               if (item) {
-                var node = DOM.get(item.id);
-
-                if (node) {
-                  self.selectItem(evt, node);
-                }
+                self.selectItem(item);
               }
 
               // clear input
@@ -22924,6 +26480,8 @@
             if (!specialKeyCodeMap[evt.keyCode]) {
               self.filterItems(input.value);
             }
+
+            self.onFilterInput.dispatch(self, evt);
           }, 0);
         }
       },
@@ -22944,7 +26502,9 @@
 
         var item = DOM.add(menu, 'div', {
           id: o.id,
-          'class': cp + 'Item ' + cp + 'ItemEnabled'
+          'class': cp + 'Item ' + cp + 'ItemEnabled',
+          title: o.settings.title || '',
+          'aria-label': o.settings.title || ''
         });
 
         if (s.html) {
@@ -22953,7 +26513,7 @@
         } else {
           DOM.setAttrib(item, 'role', 'option');
 
-          if (s.icon || s.icon_src) {
+          if ((s.icon || s.icon_src) && (!s.svg && !s.image)) {
             icon = DOM.add(item, 'span', {
               'class': 'mceIcon' + (s.icon ? ' mce_' + s.icon : '')
             });
@@ -22966,7 +26526,7 @@
 
             DOM.addClass(item, 'mceHasIcon');
           }
-
+          
           if (s.image) {
             DOM.add(item, 'span', {
               'class': 'mceImage',
@@ -22974,10 +26534,15 @@
             });
           }
 
+          if (s.svg) {
+            DOM.add(item, 'span', {
+              'class': 'mceIcon mceIconSvg'
+            }, s.svg);
+          }
+
           var txt = DOM.add(item, s.element || 'span', {
             'class': 'mceText',
-            title: o.settings.title,
-            'aria-label': o.settings.title
+            role: 'presentation'
           }, o.settings.title);
 
           if (o.settings.style) {
@@ -22990,7 +26555,7 @@
 
           if (s.parent) {
             DOM.setAttrib(txt, 'aria-haspopup', 'true');
-            DOM.setAttrib(txt, 'aria-owns', 'menu_' + o.id);
+            DOM.setAttrib(txt, 'aria-owns', o.id);
           }
         }
 
@@ -23040,7 +26605,7 @@
   		 * @param {Editor} ed Optional the editor instance this button is for.
   		 */
       Button: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
         this.classPrefix = 'mceButton';
 
         /**
@@ -23127,6 +26692,8 @@
           }
         });
 
+        this.rendered = true;
+
         this.onPostRender.dispatch(this, DOM.get(this.id));
       }
     });
@@ -23197,7 +26764,7 @@
       17: 'ctrl',
       18: 'alt',
       27: 'esc',
-      32: 'space',
+      //32: 'space',
       37: 'left',
       39: 'right',
       13: 'enter',
@@ -23217,7 +26784,7 @@
        * @param {Editor} ed Optional the editor instance this button is for.
        */
       ListBox: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         /**
          * Array of ListBox items.
@@ -23276,6 +26843,10 @@
         each(self.items, function (item) {
           item.selected = false;
         });
+
+        if (self.menu) {
+          self.menu.deselectAll();
+        }
       },
 
       /**
@@ -23303,7 +26874,7 @@
         }
 
         // used by fontselect etc.
-        if (values && typeof values == "function") {
+        if (typeof values == "function") {
           each(self.items, function (item, i) {
             if (values(item.value)) {
               self.selectByIndex(i);
@@ -23329,9 +26900,11 @@
         each(values, function (value) {
           var i = self.findItem(value);
 
-          // add a new custom combobox value
-          if (i == -1 && self.settings.combobox) {
-            i = self.add(value, value);
+          if (i == -1) {
+            // add a new custom combobox value
+            if (self.settings.combobox) {
+              i = self.add(value, value);
+            }
           }
 
           self.selectByIndex(i);
@@ -23385,12 +26958,18 @@
 
           if (item.selected) {
             this.selectedValue = item.value;
+          } else {
+            this.selectedValue = null;
           }
 
           if (!this.settings.combobox) {
             DOM.setHTML(elm, DOM.encode(item.title));
             DOM.removeClass(elm, 'mceTitle');
             DOM.setAttrib(this.id, 'aria-valuenow', item.title);
+          }
+
+          if (self.menu) {          
+            self.menu.selectItem(self.menu.items[item.id], item.selected);
           }
 
         } else {
@@ -23526,9 +27105,13 @@
       removeTag: function (btn) {
         var self = this;
 
-        each(self.items, function (item) {
+        each(self.items, function (item, i) {
           if (item.value === btn.value) {
             item.selected = false;
+
+            if (self.selectedValue == item.value) {
+              self.selectedValue = null;
+            }
           }
         });
 
@@ -23556,7 +27139,6 @@
           }
 
           self.removeTag(btn);
-
         });
       },
 
@@ -23596,7 +27178,7 @@
         // Select in menu
         each(this.items, function (item) {
           if (menu.items[item.id]) {
-            // deselect item
+            // deselect all items
             menu.items[item.id].setSelected(0);
 
             // select if value match or selected
@@ -23658,16 +27240,17 @@
           onselect: function (value) {
             if (self.settings.onselect(value) !== false) {
               self.select(value);
+              menu.close();
             }
           }
         });
 
         menu.onHideMenu.add(function () {
           self.hideMenu();
-          self.focus();
 
           if (self.settings.combobox) {
             menu.clearFilteredItems();
+            self.focus();
           }
 
         });
@@ -23681,22 +27264,25 @@
             menu.add({
               title: item.title,
               role: "option",
-              onclick: function () {
+              onAction: function (e) {
                 if (self.settings.onselect('') !== false) {
                   self.select('');
-                } // Must be run after
+                }
+
+                menu.close();
               }
             });
           } else {
             item.id = DOM.uniqueId();
             item.role = "option";
-            item.onclick = function () {
-              // execute onselect
-              var onselect = self.settings.onselect(item.value);
-
-              if (onselect !== false) {
+            item.onAction = function (e) {
+              if (self.settings.onselect(item.value) !== false) {
                 self.select(item.value);
-              } // Must be run after
+              }
+
+              if (!self.settings.multiple && !self.settings.keepopen) {
+                menu.close();
+              }
             };
 
             menu.add(item);
@@ -23709,7 +27295,7 @@
 
       /**
        * Post render event. This will be executed after the control has been rendered and can be used to
-       * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+       * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
        *
        * @method postRender
        */
@@ -23751,14 +27337,8 @@
 
         Event.add(this.id + '_input', 'keyup', function (evt) {
 
-          if (!self.menu || !self.menu.isMenuVisible) {
-            self.showMenu();
-          }
-
           setTimeout(function () {
             var value = evt.target.value;
-
-            evt.target.focus();
 
             if (!value) {
               Event.cancel(evt);
@@ -23767,7 +27347,13 @@
             }
 
             if (!specialKeyCodeMap[evt.keyCode]) {
-              self.menu.filterItems(evt.target.value);
+              if (!self.menu || !self.menu.isMenuVisible) {
+                self.showMenu();
+              }
+
+              evt.target.focus();
+
+              self.menu.filterItems(value);
             }
           }, 0);
         });
@@ -23781,7 +27367,10 @@
               if (this.value === "") {
                 self.showMenu();
               } else {
-                self.settings.onselect(this.value);
+                if (self.settings.onselect(this.value) !== false) {
+                  self.select(this.value);
+                }
+
                 self.hideMenu();
 
                 this.value = "";
@@ -23792,6 +27381,7 @@
             case 38:
               self.showMenu();
               Event.cancel(evt);
+              self.menu.focus();
               break;
             // backspace
             case 8:
@@ -23800,7 +27390,21 @@
                 return;
               }
 
-              Event.cancel(evt);
+              var tags = DOM.select('button', evt.target.parentNode);
+
+              if (tags.length) {
+                var tag = tags.pop(), val = tag.value;
+
+                // remove tag
+                self.removeTag(tag);
+
+                Event.cancel(evt);
+
+                // update value with tag value and focus
+                this.value = val;
+                this.focus();
+              }
+
               break;
           }
         });
@@ -23837,6 +27441,8 @@
         });
 
         this.onPostRender.dispatch(this, DOM.get(this.id));
+
+        this.rendered = true;
       },
 
       /**
@@ -23845,7 +27451,7 @@
        * @method destroy
        */
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id + '_text');
         Event.clear(this.id + '_open');
@@ -23892,7 +27498,7 @@
   		 * @param {Object} settings Optional name/value settings object.
   		 */
       NativeListBox: function (id, settings) {
-        this.parent(id, settings);
+        this._super(id, settings);
       },
 
       /**
@@ -24109,56 +27715,57 @@
   (function (tinymce) {
     var DOM = tinymce.DOM,
       Event = tinymce.dom.Event,
-      each = tinymce.each,
       Dispatcher = tinymce.util.Dispatcher;
 
     /**
-  	 * This class is used to create text / input boxes.
-  	 *
-  	 * @class tinymce.ui.TextBox
-  	 * @extends tinymce.ui.Control
-  	 * @example
-  	 */
+     * This class is used to create text / input boxes.
+     *
+     * @class tinymce.ui.TextBox
+     * @extends tinymce.ui.Control
+     * @example
+     */
     tinymce.create('tinymce.ui.TextBox:tinymce.ui.Control', {
       /**
-  		 * Constructs a new textbox control instance.
-  		 *
-  		 * @constructor
-  		 * @method TextBox
-  		 * @param {String} id Control id for the list box.
-  		 * @param {Object} s Optional name/value settings object.
-  		 * @param {Editor} ed Optional the editor instance this button is for.
-  		 */
+       * Constructs a new textbox control instance.
+       *
+       * @constructor
+       * @method TextBox
+       * @param {String} id Control id for the list box.
+       * @param {Object} s Optional name/value settings object.
+       * @param {Editor} ed Optional the editor instance this button is for.
+       */
       TextBox: function (id, s, ed) {
 
-        this.parent(id, s, ed);
+        s = tinymce.extend({
+          class: '',
+          title: ''
+        }, s);
 
-        // store value
-        this._value = '';
+        this._super(id, s, ed);
 
         /**
-  			 * Fires when the selection has been changed.
-  			 *
-  			 * @event onChange
-  			 */
+         * Fires when the selection has been changed.
+         *
+         * @event onChange
+         */
         this.onChange = new Dispatcher(this);
 
         /**
-  			 * Fires after the element has been rendered to DOM.
-  			 *
-  			 * @event onPostRender
-  			 */
+         * Fires after the element has been rendered to DOM.
+         *
+         * @event onPostRender
+         */
         this.onPostRender = new Dispatcher(this);
 
         this.classPrefix = 'mceTextBox';
       },
 
       /**
-  		 * Sets / gets the input value.
-  		 *
-  		 * @method select
-  		 * @param {String/function} val Value to set for the textbox.
-  		 */
+       * Sets / gets the input value.
+       *
+       * @method select
+       * @param {String/function} val Value to set for the textbox.
+       */
       value: function (val) {
         if (!arguments.length) {
           return DOM.getValue(this.id);
@@ -24168,45 +27775,52 @@
       },
 
       /**
-  		 * Renders the text box as a HTML string. This method is much faster than using the DOM and when
-  		 * creating a whole toolbar with buttons it does make a lot of difference.
-  		 *
-  		 * @method renderHTML
-  		 * @return {String} HTML for the text control element.
-  		 */
+       * Renders the text box as a HTML string. This method is much faster than using the DOM and when
+       * creating a whole toolbar with buttons it does make a lot of difference.
+       *
+       * @method renderHTML
+       * @return {String} HTML for the text control element.
+       */
       renderHTML: function () {
         var html = '',
           prefix = this.classPrefix, s = this.settings;
 
         var type = s.subtype ? s.subtype : 'text';
 
+        var attribs = {
+          type: type,
+          id: this.id,
+          class: prefix + ' ' + s['class'],
+          title: DOM.encode(s.title),
+          tabindex: 0,
+          autofocus: true
+        };
+
+        attribs = tinymce.extend(attribs, s.attributes || {});
+
         if (s.multiline) {
-          html += '<textarea id="' + this.id + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '" tabindex="0" autofocus>' + DOM.encode(this._value);
+          html += DOM.createHTML('textarea', attribs);
         } else {
-          html += '<input type="' + type + '" id="' + this.id + '" value="' + this._value + '" class="' + prefix + ' ' + s['class'] + '" title="' + DOM.encode(s.title) + '" tabindex="0" autofocus';
+          html += DOM.createHTML('input', attribs);
         }
 
-        if (s.attributes) {
-          each(s.attributes, function (val, key) {
-            html += ' ' + key + '="' + val + '"';
-          });
-        }
-
-        if (s.multiline) {
-          html += '</textarea>';
-        } else {
-          html += ' />';
+        if (s.button) {
+          html += DOM.createHTML('button', {
+            id: this.id + '_button',
+            class: 'mceButton',
+            title: DOM.encode(s.button.label || '')
+          }, '<span role="presentation" class="mceIcon mce_' + s.button.icon + '"></span>');
         }
 
         return html;
       },
 
       /**
-  		 * Post render event. This will be executed after the control has been rendered and can be used to
-  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
-  		 *
-  		 * @method postRender
-  		 */
+       * Post render event. This will be executed after the control has been rendered and can be used to
+       * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
+       *
+       * @method postRender
+       */
       postRender: function () {
         var self = this, s = this.settings;
 
@@ -24222,28 +27836,36 @@
           self.onChange.dispatch(this, DOM.get(self.id));
         });
 
+        if (s.button) {
+          Event.add(this.id + '_button', 'click', function (e) {
+            e.preventDefault();
+
+            s.button.click.apply(self);
+          });
+        }
+
         this.onPostRender.dispatch(this, DOM.get(this.id));
       },
 
       /**
-  		 * Sets the disabled state for the control. This will add CSS classes to the
-  		 * element that contains the control. So that it can be disabled visually.
-  		 *
-  		 * @method setDisabled
-  		 * @param {Boolean} state Boolean state if the control should be disabled or not.
-  		 */
+       * Sets the disabled state for the control. This will add CSS classes to the
+       * element that contains the control. So that it can be disabled visually.
+       *
+       * @method setDisabled
+       * @param {Boolean} state Boolean state if the control should be disabled or not.
+       */
       setDisabled: function (state) {
-        this.parent(state);
+        this._super(state);
         DOM.get(this.id).disabled = state;
       },
 
       /**
-  		 * Destroys the TextBox i.e. clear memory and events.
-  		 *
-  		 * @method destroy
-  		 */
+       * Destroys the TextBox i.e. clear memory and events.
+       *
+       * @method destroy
+       */
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id);
       }
@@ -24281,7 +27903,7 @@
 
         s["class"] = 'mceUrlBox';
 
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
       },
 
       /**
@@ -24292,12 +27914,12 @@
        * @return {String} HTML for the text control element.
        */
       renderHTML: function () {
-        var html = this.parent(),
+        var html = this._super(),
           s = this.settings;
 
         if (s.picker) {
           var icon = s.picker_icon || 'file';
-          html += '<button class="mceButton mceButtonPicker" id="' + this.id + '_picker" title="' + DOM.encode(s.picker_label || '') + '"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
+          html += '<button type="button" class="mceButton mceButtonPicker" id="' + this.id + '_picker" title="' + DOM.encode(s.picker_label || '') + '"><span role="presentation" class="mceIcon mce_' + icon + '"></span></button>';
         }
 
         if (s.upload) {
@@ -24335,26 +27957,27 @@
        * @param {Boolean} state Boolean state if the control should be disabled or not.
        */
       setDisabled: function (state) {
-        this.parent(state);
+        this._super(state);
         DOM.get(this.id + '_upload').disabled = state;
       },
 
       /**
        * Post render event. This will be executed after the control has been rendered and can be used to
-       * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+       * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
        *
        * @method postRender
        */
       postRender: function () {
         var self = this, s = this.settings;
 
-        this.parent();
+        this._super();
 
         if (s.picker) {
           DOM.addClass(this.id, 'mceUrlBoxPicker');
 
-          Event.add(this.id + '_picker', 'click', function (e) {
-            Event.cancel(e);
+          Event.add(this.id + '_picker', 'click', function (e) {          
+            
+            e.preventDefault();
             s.onpick.call(self);
           });
         }
@@ -24367,11 +27990,11 @@
               s.upload.call(self, e, this.files[0]);
             }
 
-            Event.cancel(e);
+            e.preventDefault();
           });
 
           DOM.bind(this.id, 'drag dragstart dragend dragover dragenter dragleave', function (e) {
-            Event.cancel(e);
+            e.preventDefault();
           });
 
           DOM.bind(this.id, 'dragover dragenter', function () {
@@ -24394,7 +28017,7 @@
               }
             }
 
-            Event.cancel(e);
+            e.preventDefault();
           });
         }
       }
@@ -24430,7 +28053,7 @@
   		 */
       CheckBox: function (id, s, ed) {
 
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         if (typeof s.value === 'undefined') {
           s.value = '';
@@ -24514,7 +28137,7 @@
 
       /**
   		 * Post render event. This will be executed after the control has been rendered and can be used to
-  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
   		 *
   		 * @method postRender
   		 */
@@ -24544,7 +28167,7 @@
   		 * @param {Boolean} state Boolean state if the control should be disabled or not.
   		 */
       setDisabled: function (state) {
-        this.parent(state);
+        this._super(state);
         DOM.get(this.id).disabled = state;
       },
 
@@ -24554,7 +28177,7 @@
   		 * @method destroy
   		 */
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id);
       }
@@ -24576,70 +28199,70 @@
       Event = tinymce.dom.Event;
 
     /**
-  	 * This class is used to create a UI button. A button is basically a link
-  	 * that is styled to look like a button or icon.
-  	 *
-  	 * @class tinymce.ui.MenuButton
-  	 * @extends tinymce.ui.Control
-  	 * @example
-  	 * // Creates a new plugin class and a custom menu button
-  	 * tinymce.create('tinymce.plugins.ExamplePlugin', {
-  	 *     createControl: function(n, cm) {
-  	 *         switch (n) {
-  	 *             case 'mymenubutton':
-  	 *                 var c = cm.createSplitButton('mysplitbutton', {
-  	 *                     title : 'My menu button',
-  	 *                     image : 'some.gif'
-  	 *                 });
-  	 *
-  	 *                 c.onRenderMenu.add(function(c, m) {
-  	 *                     m.add({title : 'Some title', 'class' : 'mceMenuItemTitle'}).setDisabled(1);
-  	 *
-  	 *                     m.add({title : 'Some item 1', onclick : function() {
-  	 *                         alert('Some item 1 was clicked.');
-  	 *                     }});
-  	 *
-  	 *                     m.add({title : 'Some item 2', onclick : function() {
-  	 *                         alert('Some item 2 was clicked.');
-  	 *                     }});
-  	 *               });
-  	 *
-  	 *               // Return the new menubutton instance
-  	 *               return c;
-  	 *         }
-  	 *
-  	 *         return null;
-  	 *     }
-  	 * });
-  	 */
+     * This class is used to create a UI button. A button is basically a link
+     * that is styled to look like a button or icon.
+     *
+     * @class tinymce.ui.MenuButton
+     * @extends tinymce.ui.Control
+     * @example
+     * // Creates a new plugin class and a custom menu button
+     * tinymce.create('tinymce.plugins.ExamplePlugin', {
+     *     createControl: function(n, cm) {
+     *         switch (n) {
+     *             case 'mymenubutton':
+     *                 var c = cm.createSplitButton('mysplitbutton', {
+     *                     title : 'My menu button',
+     *                     image : 'some.gif'
+     *                 });
+     *
+     *                 c.onRenderMenu.add(function(c, m) {
+     *                     m.add({title : 'Some title', 'class' : 'mceMenuItemTitle'}).setDisabled(1);
+     *
+     *                     m.add({title : 'Some item 1', onclick : function() {
+     *                         alert('Some item 1 was clicked.');
+     *                     }});
+     *
+     *                     m.add({title : 'Some item 2', onclick : function() {
+     *                         alert('Some item 2 was clicked.');
+     *                     }});
+     *               });
+     *
+     *               // Return the new menubutton instance
+     *               return c;
+     *         }
+     *
+     *         return null;
+     *     }
+     * });
+     */
     tinymce.create('tinymce.ui.MenuButton:tinymce.ui.Button', {
       /**
-  		 * Constructs a new split button control instance.
-  		 *
-  		 * @constructor
-  		 * @method MenuButton
-  		 * @param {String} id Control id for the split button.
-  		 * @param {Object} s Optional name/value settings object.
-  		 * @param {Editor} ed Optional the editor instance this button is for.
-  		 */
+       * Constructs a new split button control instance.
+       *
+       * @constructor
+       * @method MenuButton
+       * @param {String} id Control id for the split button.
+       * @param {Object} s Optional name/value settings object.
+       * @param {Editor} ed Optional the editor instance this button is for.
+       */
       MenuButton: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         /**
-  			 * Fires when the menu is rendered.
-  			 *
-  			 * @event onRenderMenu
-  			 */
+         * Fires when the menu is rendered.
+         *
+         * @event onRenderMenu
+         */
         this.onRenderMenu = new tinymce.util.Dispatcher(this);
 
         s.menu_container = s.menu_container || DOM.doc.body;
       },
 
       /**
-  		 * Shows the menu.
-  		 *
-  		 * @method showMenu
-  		 */
+       * Shows the menu.
+       *
+       * @method showMenu
+       */
       showMenu: function () {
         var self = this,
           pos, e = DOM.get(self.id),
@@ -24677,10 +28300,10 @@
       },
 
       /**
-  		 * Renders the menu to the DOM.
-  		 *
-  		 * @method renderMenu
-  		 */
+       * Renders the menu to the DOM.
+       *
+       * @method renderMenu
+       */
       renderMenu: function () {
         var self = this,
           m;
@@ -24691,7 +28314,8 @@
           max_width: this.settings.max_width,
           max_height: this.settings.max_height,
           keyboard_focus: true,
-          onselect: this.settings.onselect
+          onselect: this.settings.onselect,
+          title: this.settings.title
         });
 
         m.onHideMenu.add(function () {
@@ -24704,12 +28328,12 @@
       },
 
       /**
-  		 * Hides the menu. The optional event parameter is used to check where the event occurred so it
-  		 * doesn'self close them menu if it was a event inside the menu.
-  		 *
-  		 * @method hideMenu
-  		 * @param {Event} e Optional event object.
-  		 */
+       * Hides the menu. The optional event parameter is used to check where the event occurred so it
+       * doesn'self close them menu if it was a event inside the menu.
+       *
+       * @method hideMenu
+       * @param {Event} e Optional event object.
+       */
       hideMenu: function (e) {
         var self = this;
 
@@ -24733,14 +28357,16 @@
       },
 
       /**
-  		 * Post render handler. This function will be called after the UI has been
-  		 * rendered so that events can be added.
-  		 *
-  		 * @method postRender
-  		 */
+       * Post render handler. This function will be called after the UI has been
+       * rendered so that events can be added.
+       *
+       * @method postRender
+       */
       postRender: function () {
         var self = this,
           s = self.settings;
+
+        this._super();
 
         Event.add(self.id, 'click', function () {
           if (!self.isDisabled()) {
@@ -24819,7 +28445,7 @@
   		 * @param {Editor} ed Optional the editor instance this button is for.
   		 */
       SplitButton: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
         this.classPrefix = 'mceSplitButton';
       },
 
@@ -24930,10 +28556,12 @@
         Event.add([self.id, self.id + '_open'], 'blur', function () {
           self._focused = 0;
         });
+
+        this.rendered = true;
       },
 
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id + '_action');
         Event.clear(this.id + '_open');
@@ -24976,7 +28604,7 @@
   		 * @param {Editor} editor The editor instance this button is for.
   		 */
       ColorSplitButton: function (id, settings, editor) {
-        this.parent(id, settings, editor);
+        this._super(id, settings, editor);
 
         /**
   			 * Settings object.
@@ -25117,9 +28745,9 @@
   		 */
       renderMenu: function () {
         var self = this,
-          menu, i = 0,
+          menu,
           settings = this.settings,
-          node, tb, tr, list, context;
+          node, list;
 
         list = DOM.add(settings.menu_container, 'div', {
           role: 'listbox',
@@ -25128,76 +28756,45 @@
         });
 
         menu = DOM.add(list, 'div', {
-          'class': settings['class']
-        });
-
-        node = DOM.add(menu, 'table', {
           role: 'presentation',
-          'class': 'mceColorSplitMenu'
+          'class': 'mceColorSplitMenu' + ' ' + settings['class']
         });
-
-        tb = DOM.add(node, 'tbody');
 
         // Generate color grid
-        i = 0;
-
         each(is(settings.colors, 'array') ? settings.colors : settings.colors.split(','), function (color) {
           color = color.replace(/^#/, '');
 
-          if (!i--) {
-            tr = DOM.add(tb, 'tr');
-            i = settings.grid_width - 1;
-          }
+          var val = '#' + color;
 
-          node = DOM.add(tr, 'td');
+          if (color.indexOf('--') == 0) {
+            val = 'var(' + color + ')';
+          }
 
           var args = {
             style: {
-              backgroundColor: '#' + color
+              backgroundColor: val
             },
-            'title': self.editor.getLang('colors.' + color, '#' + color),
-            'data-mce-color': '#' + color
+            'title': self.editor.getLang('colors.' + color, val),
+            'data-mce-color': val,
+            'class': 'mceColorButton'
           };
 
           // adding a proper ARIA role = button causes JAWS to read things incorrectly on IE.
           args.role = 'option';
 
-          node = DOM.add(node, 'button', args);
-
-          if (self.editor.forcedHighContrastMode) {
-            node = DOM.add(node, 'canvas', {
-              width: 16,
-              height: 16,
-              'aria-hidden': 'true'
-            });
-            if (node.getContext && (context = node.getContext("2d"))) {
-              context.fillStyle = '#' + color;
-              context.fillRect(0, 0, 16, 16);
-            } else {
-              // No point leaving a canvas element around if it'settings not supported for drawing on anyway.
-              DOM.remove(node);
-            }
-          }
+          node = DOM.add(menu, 'button', args);
         });
 
-        node = DOM.add(tr, 'td', {
-          'class': 'mceRemoveColor'
-        });
-
-        node = DOM.add(node, 'button', {
+        node = DOM.add(menu, 'button', {
           'title': this.editor.getLang('advanced.no_color', 'No Colour'),
           'data-mce-color': '',
-          role: 'option'
-        });
+          role: 'option',
+          'class': 'mceRemoveColor'
+        }, '&cross;');
 
         if (settings.more_colors_func) {
-          node = DOM.add(tb, 'tr');
-          node = DOM.add(node, 'td', {
-            colspan: settings.grid_width,
-            'class': 'mceMoreColors'
-          });
 
-          node = DOM.add(node, 'button', {
+          node = DOM.add(menu, 'button', {
             role: 'option',
             id: this.id + '_more',
             'class': 'mceMoreColors'
@@ -25218,7 +28815,7 @@
         });
 
         Event.add(this.id + '_menu', 'click', function (e) {
-          var elm = DOM.getParent(e.target, 'button', tb);
+          var elm = DOM.getParent(e.target, 'button', menu);
 
           var color = elm.getAttribute('data-mce-color');
 
@@ -25258,12 +28855,12 @@
 
       /**
   		 * Post render event. This will be executed after the control has been rendered and can be used to
-  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this.parent().
+  		 * set states, add events to the control etc. It's recommended for subclasses of the control to call this method by using this._super().
   		 *
   		 * @method postRender
   		 */
       postRender: function () {
-        this.parent();
+        this._super();
 
         DOM.add(this.id + '_action', 'span', {
           id: this.id + '_preview',
@@ -25281,7 +28878,7 @@
   		 * @method destroy
   		 */
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id + '_menu');
         Event.clear(this.id + '_more');
@@ -25373,7 +28970,7 @@
       },
 
       destroy: function () {
-        this.parent();
+        this._super();
         this.keyNav.destroy();
         Event.clear(this.id);
       }
@@ -25504,7 +29101,7 @@
            * @param {Editor} ed Optional the editor instance this button is for.
            */
       Panel: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         this.settings = s = tinymce.extend({
           content: '',
@@ -25567,7 +29164,7 @@
         my = vp.y + vp.h;
 
         if ((x + w) > mx) {
-          x =  Math.max(0, mx - w);
+          x = Math.max(0, mx - w);
         }
 
         if ((y + h) > my) {
@@ -25775,7 +29372,7 @@
       },
 
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id);
         DOM.remove(this.id);
@@ -25808,7 +29405,7 @@
            * @param {Editor} ed Optional the editor instance this button is for.
            */
       ContextPanel: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         this.settings = s = tinymce.extend({
           content: '',
@@ -25821,7 +29418,7 @@
       renderPanel: function () {
         var self = this;
 
-        this.parent();
+        this._super();
 
         DOM.addClass(DOM.select('.mcePanel', DOM.get(this.id)), 'mceContextPanel');
 
@@ -25844,7 +29441,7 @@
            * @method showPanel
            */
       showPanel: function (elm) {
-        this.parent(elm);
+        this._super(elm);
 
         this.target = elm;
 
@@ -25914,7 +29511,7 @@
 
       destroy: function () {
         Event.remove(this.editor.getWin(), 'scroll', self.scrollFunc);
-        this.parent();
+        this._super();
       }
     });
   })();
@@ -25944,7 +29541,7 @@
            * @param {Editor} ed Optional the editor instance this button is for.
            */
       PanelButton: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
 
         this.settings = s = tinymce.extend({
         }, this.settings);
@@ -26059,7 +29656,7 @@
       },
 
       destroy: function () {
-        this.parent();
+        this._super();
 
         Event.clear(this.id + '_panel');
         DOM.remove(this.id + '_panel');
@@ -26091,7 +29688,7 @@
            * @param {Editor} ed Optional the editor instance this button is for.
            */
       PanelSplitButton: function (id, s, ed) {
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
       },
 
       /**
@@ -26236,7 +29833,7 @@
         this.onShowDialog = new Dispatcher(this);
         this.onHideDialog = new Dispatcher(this);
 
-        this.parent(id, s, ed);
+        this._super(id, s, ed);
       },
 
       showDialog: function () {
@@ -26254,6 +29851,305 @@
       hideDialog: function (e) {
         this.hidePanel(e);
         this.onHideDialog.dispatch(this);
+      }
+    });
+  })(tinymce);
+
+  /**
+   * Form.js
+   *
+   * Copyright, Moxiecode Systems AB
+   * Released under LGPL License.
+   *
+   * License: http://www.tinymce.com/license
+   * Contributing: http://www.tinymce.com/contributing
+   */
+  (function (tinymce) {
+    // Shorten class names
+    var DOM = tinymce.DOM, count = 0;
+    /**
+     * This class is used to create layouts. A layout is a container for other controls like buttons etc.
+     *
+     * @class tinymce.ui.Repeatable
+     * @extends tinymce.ui.Container
+     */
+    tinymce.create('tinymce.ui.RepeatableItem:tinymce.ui.Container', {
+
+      RepeatableItem: function (id, settings) {            
+        this._super(id, settings);
+
+        // add integer increment
+        var id = settings.controls[0].id + '_' + (count++);
+
+        delete this.lookup[id];
+
+        this.controls[0].id = id;
+      },
+
+      /**
+         * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
+         * creating a whole toolbar with buttons it does make a lot of difference.
+         *
+         * @method renderHTML
+         * @return {String} HTML for the toolbar control.
+         */
+      renderHTML: function () {
+        var html = '';
+
+        html += this.controls[0].renderHTML();
+        html += '<button class="mceButton"><span role="presentation" class="mceIcon mce_plus"></span><span role="presentation" class="mceIcon mce_trash"></span></button>';
+
+        return DOM.createHTML('div', {
+          id: this.id,
+          class: 'mceRepeatableItem mceForm mceFormRow'
+        }, html);
+      },
+
+      value: function (value) {
+        if (arguments.length) {
+
+          if (Array.isArray(value)) {
+            value = value.shift();
+          }
+
+          this.controls[0].value(value);
+
+          return this;
+        }
+
+        return this.controls[0].value();
+      }
+    });
+  })(tinymce);
+
+  /**
+   * Form.js
+   *
+   * Copyright, Moxiecode Systems AB
+   * Released under LGPL License.
+   *
+   * License: http://www.tinymce.com/license
+   * Contributing: http://www.tinymce.com/contributing
+   */
+  (function (tinymce) {
+    // Shorten class names
+    var dom = tinymce.DOM, each = tinymce.each, count = 0;
+    /**
+     * This class is used to create layouts. A layout is a container for other controls like buttons etc.
+     *
+     * @class tinymce.ui.Repeatable
+     * @extends tinymce.ui.Container
+     */
+    tinymce.create('tinymce.ui.Repeatable:tinymce.ui.Container', {
+      /**
+         * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
+         * creating a whole toolbar with buttons it does make a lot of difference.
+         *
+         * @method renderHTML
+         * @return {String} HTML for the toolbar control.
+         */
+      renderHTML: function () {
+        var settings = this.settings, i, html = '', controls = this.controls;
+
+        for (i = 0; i < controls.length; i++) {
+          html += controls[i].renderHTML();
+        }
+
+        return dom.createHTML('div', {
+          id: this.id,
+          'class': 'mceForm mceRepeatable' + (settings['class'] ? ' ' + settings['class'] : ''),
+          role: 'group'
+        }, html);
+      },
+
+      value: function (values) {
+        var self = this, i, controls = this.controls;
+
+        if (arguments.length) {
+          // update all items with values
+          for (i = 0; i < controls.length; i++) {
+            controls[i].value(values.shift());
+          }
+
+          // for each set of remaining values, create a repeatable item
+          each(values, function (val) {
+            self.addItem(val);
+          });
+
+          return this;
+        }
+
+        var values = [];
+
+        for (i = 0; i < this.controls.length; i++) {
+          var value = this.controls[i].value();
+
+          if (value) {
+            values = values.concat(value);
+          }
+        }
+
+        return values;
+      },
+
+      getItemControl: function () {
+        var settings = this.settings;
+
+        var item = settings.item || { type : 'TextBox', settings : {} }, cls = tinymce.ui[item.type || 'TextBox'];
+
+        return new cls(this.id + '_item_' + item.id, item.settings || {}, this.editor);
+      },
+
+      addItem: function (value) {
+        var self = this;
+
+        var item = this.getItemControl();
+
+        var ctrl = new tinymce.ui.RepeatableItem(self.id + '_item_' + (count++), {
+          controls: [item]
+        });
+
+        self.add(ctrl);
+        ctrl.renderTo(dom.get(self.id));
+
+        if (value) {
+          ctrl.value(value);
+        }
+
+        return ctrl;
+      },
+
+      postRender: function () {
+        var self = this, elm = dom.get(this.id);
+
+        dom.bind(elm, 'click', function (e) {
+          e.preventDefault();
+
+          var btn = dom.getParent(e.target, 'button');
+
+          if (!btn) {
+            return;
+          }
+
+          var ctrlElm = btn.parentNode, index = dom.nodeIndex(ctrlElm);
+
+          if (index == 0) {
+            self.addItem();
+          } else {
+            self.get(ctrlElm.id).remove();
+          }
+        });
+
+        this.addItem();
+      },
+
+      destroy: function () {
+        this._super();
+        this.controls = [];
+      }
+    });
+  })(tinymce);
+
+  /**
+   * CustomValue.js
+   */
+
+  (function (tinymce) {
+    var each = tinymce.each;
+
+    /**
+     * This class is used to create text / input boxes.
+     *
+     * @class tinymce.ui.CustomValue
+     * @extends tinymce.ui.Control
+     * @example
+     */
+    tinymce.create('tinymce.ui.CustomValue:tinymce.ui.Form', {
+      /**
+       * Constructs a new textbox control instance.
+       *
+       * @constructor
+       * @method TextBox
+       * @param {String} id Control id for the list box.
+       * @param {Object} s Optional name/value settings object.
+       * @param {Editor} ed Optional the editor instance this button is for.
+       */
+      CustomValue: function (id, settings, ed) {
+        settings = tinymce.extend(settings, {
+          class: 'mceFormRow'
+        });
+
+        this._super(id, settings, ed);
+
+        var name = new tinymce.ui.TextBox(this.id + '_name', {
+          name: 'name',
+          label: ed.getLang('label_name', 'Name'),
+          attributes: {
+            autocomplete: false
+          }
+        });
+
+        var value = new tinymce.ui.TextBox(this.id + '_value', {
+          name: 'value',
+          label: ed.getLang('label_value', 'Value'),
+          attributes: {
+            autocomplete: false
+          }
+        });
+
+        if (settings.values && settings.values.length) {
+          name = new tinymce.ui.ListBox(this.id + '_name', {
+            name: 'name',
+            label: ed.getLang('label_name', 'Name'),
+            combobox: true
+          });
+
+          each(settings.values, function (val) {
+            name.add(val, val);
+          });
+        }
+
+        this.add(name);
+        this.add(value);
+      },
+
+      renderHTML: function () {
+        var self = this;
+        
+        for (var i = 0; i < this.controls.length; i++) {
+          var ctrl = this.controls[i];
+          ctrl.id = self.id + '_' + ctrl.name;
+        }
+
+        return this._super();
+      },
+
+      value: function (values) {
+        if (arguments.length) {
+
+          if (typeof values != "object") {
+            return this;
+          }
+
+          for (var key in values) {
+            this.controls[0].value(key);
+            this.controls[1].value(values[key]);
+          }
+
+          return this;
+        }
+
+        var key = this.controls[0].value();
+
+        if (key) {
+          var data = {};
+
+          data[key] = this.controls[1].value();
+
+          return data;
+        }
+
+        return '';
       }
     });
   })(tinymce);
@@ -26884,10 +30780,13 @@
 
         function initEditors() {
           var initCount = 0,
+            editors = [],
             targets;
 
           function createEditor(id, settings, targetElm) {
             var editor = new tinymce.Editor(id, settings, self);
+
+            editors.push(editor);
 
             editor.onInit.add(function () {
               if (++initCount === targets.length) ;
@@ -27268,11 +31167,9 @@
           editor.onSelectionChange.add(function (ed, e) {
               var startElm = ed.selection.getStart(true);
 
-              console.log(e);
-
               lastPath = [startElm];
 
-              if (lastPath.length && !isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
+              if (!isSameElementPath(ed, startElm) && ed.dom.isChildOf(startElm, ed.getBody())) {
                   nodeChanged(ed, e);
               }
           });
@@ -27342,6 +31239,7 @@
                   args = args || {};
                   args.element = node;
                   args.parents = parents;
+                  args.contenteditable = !node.hasAttribute('contenteditable') || tinymce.dom.NodeType.isContentEditableTrue(node);
 
                   editor.onNodeChange.dispatch(
                       editor,
@@ -27393,8 +31291,8 @@
     };
     /*eslint no-unused-vars:0*/
     var focusEditor = function (editor) {
-      var controlElm, contentEditableHost, rng, doc = editor.getDoc(),
-        body = editor.getBody(),
+      var contentEditableHost, rng; editor.getDoc();
+        var body = editor.getBody(),
         contentEditable = editor.settings.content_editable,
         selection = editor.selection;
 
@@ -27402,7 +31300,7 @@
       rng = selection.getRng();
 
       if (rng.item) {
-        controlElm = rng.item(0);
+        rng.item(0);
       }
 
       // Move focus to contentEditable=true child if needed
@@ -28201,8 +32099,8 @@
           }
         });
 
-        // Keep scripts from executing
-        self.parser.addNodeFilter('script', function (nodes) {
+        // Keep scripts from executing - removed as this is handled by the Code plugin by placeholder conversion
+        /*self.parser.addNodeFilter('script', function (nodes) {
           var i = nodes.length,
             node;
 
@@ -28210,7 +32108,7 @@
             node = nodes[i];
             node.attr('type', 'mce-' + (node.attr('type') || 'text/javascript'));
           }
-        });
+        });*/
 
         self.parser.addNodeFilter('#cdata', function (nodes) {
           var i = nodes.length,
@@ -28274,6 +32172,14 @@
         self.formatter = new tinymce.Formatter(self);
 
         /**
+        * Textpattern instance.
+        *
+        * @property textpattern
+        * @type tinymce.Textpattern
+        */
+        self.textpattern = new tinymce.TextPattern(self);
+
+        /**
          * Undo manager instance, responsible for handling undo levels.
          /
          * @property undoManager
@@ -28286,10 +32192,13 @@
 
         self.forceBlocks = new tinymce.ForceBlocks(self);
         self.enterKey = new tinymce.EnterKey(self);
+        // internal with no external interface
         self._nodeChangeDispatcher = new tinymce.NodeChange(self);
         self.editorCommands = new tinymce.EditorCommands(self);
-
+        // internal with no external interface
         self._selectionOverrides = new tinymce.SelectionOverrides(self);
+        // internal with no external interface
+        self._clipBoard = new tinymce.Clipboard(self);
 
         self.onExecCommand.add(function (editor, command) {
           // Don't refresh the select lists until caret move
@@ -28385,12 +32294,18 @@
           // Handle auto focus
           if (settings.auto_focus) {
             setTimeout(function () {
-              var ed = tinymce.get(settings.auto_focus);
 
-              ed.selection.select(ed.getBody(), 1);
-              ed.selection.collapse(1);
-              ed.getBody().focus();
-              ed.getWin().focus();
+              var focusEditor;
+
+              if (settings.auto_focus === true) {
+                focusEditor = self;
+              } else {
+                focusEditor = tinymce.get(settings.auto_focus);
+              }
+
+              if (!focusEditor.destroyed) {
+                focusEditor.focus();
+              }
             }, 100);
           }
         }
@@ -31564,6 +35479,11 @@
           formatter.remove(value.name, value.args || {}, value.node || null);
         },
 
+        ToggleFormat: function (command, ui, value) {
+          value = value || { name: command };
+          formatter.toggle(value.name, value.args || {}, value.node || null);
+        },
+
         mceBlockQuote: function () {
           toggleFormat('blockquote');
         },
@@ -31598,8 +35518,10 @@
         mceSelectNodeDepth: function (command, ui, value) {
           var counter = 0;
 
-          dom.getParent(selection.getNode(), function (node) {
-            if (node.nodeType == 1 && counter++ == value) {
+          value = parseInt(value, 10);
+
+          dom.getParent(selection.getNode(), function (node) {          
+            if (node.nodeType == 1 && counter++ == value) {            
               selection.select(node);
               return FALSE;
             }
@@ -32090,7 +36012,13 @@
         // Override justify commands
         'JustifyLeft,JustifyCenter,JustifyRight,JustifyFull': function (command) {
           var name = 'align' + command.substring(7);
-          var nodes = selection.isCollapsed() ? [dom.getParent(selection.getNode(), dom.isBlock)] : selection.getSelectedBlocks();
+          var node = selection.getNode(), nodes = selection.isCollapsed() ? [dom.getParent(node, dom.isBlock)] : selection.getSelectedBlocks();
+
+          // special case for figcaption
+          if (node.nodeName == 'FIGCAPTION') {
+            nodes = [node];
+          }
+
           var matches = tinymce.map(nodes, function (node) {
             return !!formatter.matchNode(node, name);
           });
@@ -32662,7 +36590,8 @@
     // Shorten names
     var Event = tinymce.dom.Event,
       each = tinymce.each,
-      extend = tinymce.extend;
+      extend = tinymce.extend,
+      PreviewCss = tinymce.util.PreviewCss;
 
     tinymce.ControlManager = function (ed, s) {
       var self = this;
@@ -32727,7 +36656,7 @@
        * @return {tinymce.ui.Control} Control instance that got disabled or null if it wasn't found.
        */
       setDisabled: function (id, s) {
-        var c = c = this.get(id);
+        var c = this.get(id);
 
         if (c) {
           c.setDisabled(s);
@@ -32822,20 +36751,23 @@
 
         s["class"] += ' ' + (ed.settings.skin_class || 'mceDefaultSkin');
 
-        id = self.prefix + id;
+        if (id.indexOf(self.prefix) == -1) {
+          id = self.prefix + id;
+        }
+
         cls = cc || self._cls.dropmenu || tinymce.ui.DropMenu;
         c = self.controls[id] = new cls(id, s);
 
         c.onAddItem.add(function (c, o) {
           var s = o.settings;
 
-          s.title = ed.getLang(s.title, s.title);
+          if (s.title) {
+            s.title = ed.getLang(s.title, s.title);
+          }
 
-          if (!s.onclick) {
+          if (!s.onclick && s.cmd) {
             s.onclick = function () {
-              if (s.cmd) {
-                ed.execCommand(s.cmd, s.ui || false, s.value);
-              }
+              ed.execCommand(s.cmd, s.ui || false, s.value);
             };
           }
         });
@@ -32983,10 +36915,13 @@
             each(classes, function (cls) {
               ctrl.add(cls, cls, {
                 style: function () {
-                  return tinymce.util.PreviewCss(ed, { classes: cls });
+                  return item.style || PreviewCss.getCssText(ed, { classes: cls });
                 }
               });
             });
+
+            PreviewCss.reset();
+
           });
 
           if (Array.isArray(ed.settings.importcss_classes)) {
@@ -33260,6 +37195,45 @@
         return self.add(c);
       },
 
+      createCustomValue: function (id, s) {
+        var self = this,
+          ed = self.editor,
+          c;
+
+        id = self.prefix + id;
+
+        c = new tinymce.ui.CustomValue(id, s, ed);
+
+        return self.add(c);
+      },
+
+      createRepeatable: function (id, s) {
+        var self = this,
+          ed = self.editor,
+          c, cls;
+
+        id = self.prefix + id;
+
+        c = self.get(id);
+
+        if (c) {
+          return c;
+        }
+
+        s.scope = s.scope || ed;
+
+        s = extend({
+          'class': 'mce_' + id,
+          scope: s.scope,
+          control_manager: self
+        }, s);
+
+        cls = tinymce.ui.Repeatable;
+        c = new cls(id, s, ed);
+
+        return self.add(c);
+      },
+
       /**
        * Creates a panel container control instance by id.
        *
@@ -33359,21 +37333,14 @@
        * @method createLayout
        * @param {String} id Unique id for the new toolbar container control instance. For example "toolbar1".
        * @param {Object} s Optional settings object for the control.
-       * @param {Object} cc Optional control class to use instead of the default one.
        * @return {tinymce.ui.Control} Control instance that got created and added.
        */
-      createForm: function (id, s, cc) {
+      createForm: function (id, s) {
         var c, self = this,
           cls;
 
-        c = self.get(id);
-
-        if (c) {
-          return c;
-        }
-
         id = self.prefix + id;
-        cls = cc || self._cls.form || tinymce.ui.Form;
+        cls = tinymce.ui.Form;
         c = new cls(id, s, self.editor);
 
         return self.add(c);
@@ -33594,6 +37561,8 @@
           });
         }
 
+        f.buttons = f.buttons || [];
+
         url = f.url || f.file;
 
         if (url) {
@@ -33617,73 +37586,13 @@
             DOM.addClass(id, 'mceModal' + ucfirst(f.type));
           }
 
-          f.buttons = f.buttons || [
-            {
+          if (!f.buttons.length) {
+            f.buttons.push({
               id: 'cancel',
               title: self.editor.getLang('cancel', 'Cancel'),
               onclick: function (e) {
                 Event.cancel(e);
                 self.close(null, id);
-              }
-            }
-          ];
-
-          if (f.buttons.length) {
-            // add footer
-            DOM.add(DOM.select('.mceModalContainer', id), 'div', { 'class': 'mceModalFooter', id: id + '_footer' });
-
-            // add buttons
-            each(f.buttons, function (button) {
-
-              // patch in close function for cancel button
-              if (button.id === 'cancel') {
-                button.onclick = function (e) {
-                  self.close(null, id);
-                };
-              }
-
-              var attribs = {
-                id: id + '_' + button.id,
-                'class': 'mceButton',
-                type: 'button'
-              };
-
-              if (button.autofocus) {
-                attribs.autofocus = true;
-              }
-
-              button.title = button.title || 'OK';
-
-              var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
-
-              if (button.icon) {
-                DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
-              }
-
-              each(tinymce.explode(button.classes), function (cls) {
-                DOM.addClass(btn, 'mceButton' + ucfirst(cls));
-              });
-
-              // process passed in onclick
-              if (button.onclick) {
-                Event.add(btn, 'click', function (e) {
-                  Event.cancel(e);
-                  button.onclick.call(self, e);
-                });
-              }
-
-              // a submit is simply an onclick with a built in close
-              if (button.onsubmit) {
-                Event.add(btn, 'click', function (e) {
-                  Event.cancel(e);
-                  button.onsubmit.call(self, e);
-
-                  if (e.cancelSubmit) {
-                    return;
-                  }
-
-                  self.close(null, id);
-                });
               }
             });
           }
@@ -33707,12 +37616,13 @@
             }
 
             each(f.items, function (ctrl) {
-              DOM.add(id + '_content', 'form', {}, ctrl.renderHTML());
-              ctrl.postRender();
+              var form = DOM.add(id + '_content', 'form');
+
+              ctrl.renderTo(form);
 
               // add onClose event to destroy controls
-              self.onClose.add(function () {
-                if (this.id === id) {
+              self.onClose.add(function (e, win) {              
+                if (win.id == id) {
                   ctrl.destroy();
                 }
               });
@@ -33765,6 +37675,66 @@
 
               e.preventDefault();
               e.stopImmediatePropagation();
+            }
+          });
+        }
+
+        if (f.buttons.length) {
+          // add footer
+          DOM.add(DOM.select('.mceModalContainer', id), 'div', { 'class': 'mceModalFooter', id: id + '_footer' });
+
+          // add buttons
+          each(f.buttons, function (button) {
+
+            // patch in close function for cancel button
+            if (button.id === 'cancel') {
+              button.onclick = function (e) {
+                self.close(null, id);
+              };
+            }
+
+            var attribs = {
+              id: id + '_' + button.id,
+              'class': 'mceButton',
+              type: 'button'
+            };
+
+            if (button.autofocus) {
+              attribs.autofocus = true;
+            }
+
+            button.title = button.title || 'OK';
+
+            var btn = DOM.add(id + '_footer', 'button', attribs, button.title);
+
+            if (button.icon) {
+              DOM.add(btn, 'span', { 'class': 'mceIcon mce_' + button.icon, 'role': 'presentation' });
+            }
+
+            each(tinymce.explode(button.classes), function (cls) {
+              DOM.addClass(btn, 'mceButton' + ucfirst(cls));
+            });
+
+            // process passed in onclick
+            if (button.onclick) {
+              Event.add(btn, 'click', function (e) {
+                Event.cancel(e);
+                button.onclick.call(self, e);
+              });
+            }
+
+            // a submit is simply an onclick with a built in close
+            if (button.onsubmit) {
+              Event.add(btn, 'click', function (e) {
+                Event.cancel(e);
+                button.onsubmit.call(self, e);
+
+                if (e.cancelSubmit) {
+                  return;
+                }
+
+                self.close(null, id);
+              });
             }
           });
         }
@@ -33918,7 +37888,7 @@
           self.editor.focus();
         }
 
-        self.onClose.dispatch(self);
+        self.onClose.dispatch(self, win);
 
         var f = win.features || {};
 
@@ -34289,6 +38259,38 @@
         undef,
         getContentEditable = dom.getContentEditable;
 
+      var hasCaretNodeSibling = function (node) {
+        var sibling = node.parentNode.firstChild;
+
+        while (sibling) {
+          if (sibling !== node && isCaretNode(sibling)) {
+            return true;
+          }
+
+          sibling = sibling.nextSibling;
+        }
+
+        return false;
+      };
+
+      var canFormatBR = function (editor, format, node, parentName) {
+        // TINY-6483: Can format 'br' if it is contained in a valid empty block and an inline format is being applied
+        if (editor.settings.format_empty_lines !== false && format.inline && node.parentNode) {
+          
+          // allow links to wrap br tags
+          if (format.inline == 'a') {
+            return true;
+          }
+
+          var validBRParentElements = editor.schema.getTextRootBlockElements();
+
+          // If a caret node is present, the format should apply to that, not the br (applicable to collapsed selections)
+          return validBRParentElements[parentName] && !editor.dom.isEmpty(node.parentNode) && !hasCaretNodeSibling(node);
+        }
+
+        return false;
+      };
+
       function isTextBlock(name) {
         if (name.nodeType) {
           name = name.nodeName;
@@ -34356,7 +38358,7 @@
 
           alignleft: [
             {
-              selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+              selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
               styles: {
                 textAlign: 'left'
               },
@@ -34382,7 +38384,7 @@
 
           aligncenter: [
             {
-              selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+              selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
               styles: {
                 textAlign: 'center'
               },
@@ -34420,7 +38422,7 @@
 
           alignright: [
             {
-              selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
+              selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,tr,div,ul,ol,li',
               styles: {
                 textAlign: 'right'
               },
@@ -34446,7 +38448,7 @@
 
           alignfull: [
             {
-              selector: 'figure,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
+              selector: 'figure,figcaption,p,h1,h2,h3,h4,h5,h6,td,th,div,ul,ol,li',
               styles: {
                 textAlign: 'justify'
               },
@@ -34558,7 +38560,7 @@
 
           blockquote: {
             block: 'blockquote',
-            wrapper: 1,
+            wrapper: true,
             remove: 'all'
           },
 
@@ -34629,28 +38631,6 @@
         // Register user defined formats
         register(ed.settings.formats);
       }
-
-      /*function addKeyboardShortcuts() {
-        // Add some inline shortcuts
-        ed.addShortcut('ctrl+b', 'bold_desc', 'Bold');
-        ed.addShortcut('ctrl+i', 'italic_desc', 'Italic');
-        ed.addShortcut('ctrl+u', 'underline_desc', 'Underline');
-
-        // BlockFormat shortcuts keys
-        for (var i = 1; i <= 6; i++) {
-          //ed.addShortcut('alt+shift+' + i, '', ['FormatBlock', false, 'h' + i]);
-          // keep legacy shortcuts
-          ed.addShortcut('ctrl+' + i, '', ['FormatBlock', false, 'h' + i]);
-
-        }
-
-        each(['p', 'div', 'address'], function (name, i) {
-          var n = 7 + i;
-
-          //ed.addShortcut('alt+shift+' + n, '', ['FormatBlock', false, name]);
-          ed.addShortcut('ctrl+' + n, '', ['FormatBlock', false, name]);
-        });
-      }*/
 
       function addKeyboardShortcuts() {
         // Add some inline shortcuts
@@ -34916,7 +38896,7 @@
             function process(node) {
               var nodeName, parentName, found, hasContentEditableState, lastContentEditable;
 
-              if (isBogusBr(node) || isCaretNode(node)) {
+              if (isBogusBr(node) || isBookmarkNode(node)) {
                 return;
               }
 
@@ -34931,8 +38911,8 @@
                 hasContentEditableState = !isShortEnded(node); // We don't want to wrap the container only it's children
               }
 
-              // Stop wrapping on br elements - not sure if this should still be used... TODO
-              /*if (isEq(nodeName, 'br')) {
+              // Stop wrapping on br elements, but skip links
+              if (isEq(nodeName, 'br') && !canFormatBR(ed, format, node, parentName)) {
                 currentWrapElm = 0;
 
                 // Remove any br elements when we wrap things
@@ -34941,7 +38921,7 @@
                 }
 
                 return;
-              }*/
+              }
 
               // If node is wrapper type
               if (format.wrapper && matchNode(node, name, vars)) {
@@ -34982,7 +38962,9 @@
                 !isBOM(node) &&
                 !isCaretNode(node) &&
                 !isBogusBr(node) &&
+                !isBookmarkNode(node) &&
                 (!format.inline || !isBlock(node))) {
+
                 // Start wrapping
                 if (!currentWrapElm) {
                   // Wrap the node
@@ -35079,6 +39061,11 @@
               return;
             }
 
+            // remove leading linebreak, eg: <div><br />Some text</div>
+            if (childCount > 1 && isEq(node.firstChild.nodeName, 'BR')) {
+              dom.remove(node.firstChild);
+            }
+
             // fontSize defines the line height for the whole branch of nested style wrappers,
             // therefore it should be set on the outermost wrapper
             /*if (!isBlock(node) && !getStyle(node, 'fontSize')) {
@@ -35149,7 +39136,8 @@
         }
 
         if (format) {
-          if (node) {
+          // check for parent node for active node?
+          if (node && node.parentNode) {
             if (node.nodeType) {
               if (!applyNodeStyle(formatList, node)) {
                 rng = dom.createRng();
@@ -35365,27 +39353,27 @@
                 });
                 splitToFormatRoot(startContainer);
                 startContainer = unwrap(TRUE);
-                return;
+              } else {
+                // Wrap start/end nodes in span element since these might be cloned/moved
+                startContainer = wrap(startContainer, 'span', {
+                  id: '_start',
+                  'data-mce-type': 'bookmark'
+                });
+
+                endContainer = wrap(endContainer, 'span', {
+                  id: '_end',
+                  'data-mce-type': 'bookmark'
+                });
+
+                // Split start/end
+                splitToFormatRoot(startContainer);
+                splitToFormatRoot(endContainer);
+
+                // Unwrap start/end to get real elements again
+                startContainer = unwrap(TRUE);
+                endContainer = unwrap();
               }
 
-              // Wrap start/end nodes in span element since these might be cloned/moved
-              startContainer = wrap(startContainer, 'span', {
-                id: '_start',
-                'data-mce-type': 'bookmark'
-              });
-
-              endContainer = wrap(endContainer, 'span', {
-                id: '_end',
-                'data-mce-type': 'bookmark'
-              });
-
-              // Split start/end
-              splitToFormatRoot(startContainer);
-              splitToFormatRoot(endContainer);
-
-              // Unwrap start/end to get real elements again
-              startContainer = unwrap(TRUE);
-              endContainer = unwrap();
             } else {
               startContainer = endContainer = splitToFormatRoot(startContainer);
             }
@@ -35598,12 +39586,14 @@
 
         // Check selected node
         node = selection.getNode();
+
         if (matchParents(node)) {
           return TRUE;
         }
 
         // Check start node if it's different
         startNode = selection.getStart();
+
         if (startNode != node) {
           if (matchParents(startNode)) {
             return TRUE;
@@ -36989,7 +40979,7 @@
         var container = rng.startContainer,
           offset = rng.startOffset,
           isAtEndOfText,
-          walker, node, nodes, tmpNode;
+          walker, node, nodes;
 
         if (rng.startContainer == rng.endContainer) {
           if (isInlineBlock(rng.startContainer.childNodes[rng.startOffset])) {
@@ -37018,18 +41008,9 @@
 
           for (node = walker.current(); node; node = walker.next()) {
             if (node.nodeType == 3 && !isWhiteSpaceNode(node)) {
-              // IE has a "neat" feature where it moves the start node into the closest element
-              // we can avoid this by inserting an element before it and then remove it after we set the selection
-              tmpNode = dom.create('a', {
-                'data-mce-bogus': 'all'
-              }, INVISIBLE_CHAR);
-              node.parentNode.insertBefore(tmpNode, node);
-
-              // Set selection and remove tmpNode
+              // Set selection
               rng.setStart(node, 0);
               selection.setRng(rng);
-              dom.remove(tmpNode);
-
               return;
             }
           }
@@ -37144,10 +41125,12 @@
         // Returns true if the block can be split into two blocks or not
         function canSplitBlock(node) {
           return node &&
-                      dom.isBlock(node) &&
-                      !/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
-                      !/^(fixed|absolute)/i.test(node.style.position) &&
-                      dom.getContentEditable(node) !== "true";
+            dom.isBlock(node) &&
+            !/^(TD|TH|CAPTION|FORM)$/.test(node.nodeName) &&
+            !/^(fixed|absolute)/i.test(node.style.position) &&
+            dom.getContentEditable(node) !== "true" &&
+            // prevent splitting of internal
+            !node.hasAttribute('data-mce-type');
         }
 
         function isTableCell(node) {
@@ -37458,10 +41441,12 @@
 
           // Not in a block element or in a table cell or caption
           parentBlock = dom.getParent(container, dom.isBlock);
+
           if (!parentBlock || !canSplitBlock(parentBlock)) {
             parentBlock = parentBlock || editableRoot;
 
-            if (parentBlock == editor.getBody() || isTableCell(parentBlock)) {
+            // check if parentBlock is root, ie: <body> or fake root
+            if (parentBlock == editableRoot || isTableCell(parentBlock)) {
               rootBlockName = parentBlock.nodeName.toLowerCase();
             } else {
               rootBlockName = parentBlock.parentNode.nodeName.toLowerCase();
@@ -37616,7 +41601,9 @@
 
           // Get all parents until we hit a non editable parent or the root
           parent = node;
-          while (parent !== root && dom.getContentEditable(parent) !== "false") {
+
+          while (parent && parent !== root && dom.getContentEditable(parent) !== "false") {
+
             if (dom.getContentEditable(parent) === "true") {
               editableRoot = parent;
             }
@@ -37731,6 +41718,7 @@
 
         // Find parent block and setup empty block paddings
         parentBlock = dom.getParent(container, dom.isBlock);
+
         containerBlock = parentBlock ? dom.getParent(parentBlock.parentNode, dom.isBlock) : null;
 
         // Setup block names
@@ -37840,6 +41828,278 @@
   })(tinymce);
 
   /**
+   * DragDropOverrides.js
+   *
+   * Released under LGPL License.
+   * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+   *
+   * License: http://www.tinymce.com/license
+   * Contributing: http://www.tinymce.com/contributing
+   */
+
+  /**
+   * This module contains logic overriding the drag/drop logic of the editor.
+   *
+   * @private
+   * @class tinymce.DragDropOverrides
+   */
+  (function (tinymce) {
+
+    var NodeType = tinymce.dom.NodeType;
+    var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr, Delay = tinymce.util.Delay, MousePosition = tinymce.dom.MousePosition;
+    var isContentEditableFalse = NodeType.isContentEditableFalse,
+      isContentEditableTrue = NodeType.isContentEditableTrue;
+
+    var isDraggable = function (rootElm, elm) {
+      return isContentEditableFalse(elm) && elm !== rootElm;
+    };
+
+    var isValidDropTarget = function (editor, targetElement, dragElement) {
+      if (targetElement === dragElement || editor.dom.isChildOf(targetElement, dragElement)) {
+        return false;
+      }
+
+      if (isContentEditableFalse(targetElement)) {
+        return false;
+      }
+
+      return true;
+    };
+
+    var cloneElement = function (elm) {
+      var cloneElm = elm.cloneNode(true);
+      cloneElm.removeAttribute('data-mce-selected');
+      return cloneElm;
+    };
+
+    var createGhost = function (editor, elm, width, height) {
+      var clonedElm = elm.cloneNode(true);
+
+      editor.dom.setStyles(clonedElm, { width: width, height: height });
+      editor.dom.setAttrib(clonedElm, 'data-mce-selected', null);
+
+      var ghostElm = editor.dom.create('div', {
+        'class': 'mce-drag-container',
+        'data-mce-bogus': 'all',
+        unselectable: 'on',
+        contenteditable: 'false'
+      });
+
+      editor.dom.setStyles(ghostElm, {
+        position: 'absolute',
+        opacity: 0.5,
+        overflow: 'hidden',
+        border: 0,
+        padding: 0,
+        margin: 0,
+        width: width,
+        height: height
+      });
+
+      editor.dom.setStyles(clonedElm, {
+        margin: 0,
+        boxSizing: 'border-box'
+      });
+
+      ghostElm.appendChild(clonedElm);
+
+      return ghostElm;
+    };
+
+    var appendGhostToBody = function (ghostElm, bodyElm) {
+      if (ghostElm.parentNode !== bodyElm) {
+        bodyElm.appendChild(ghostElm);
+      }
+    };
+
+    var moveGhost = function (ghostElm, position, width, height, maxX, maxY) {
+      var overflowX = 0, overflowY = 0;
+
+      ghostElm.style.left = position.pageX + 'px';
+      ghostElm.style.top = position.pageY + 'px';
+
+      if (position.pageX + width > maxX) {
+        overflowX = (position.pageX + width) - maxX;
+      }
+
+      if (position.pageY + height > maxY) {
+        overflowY = (position.pageY + height) - maxY;
+      }
+
+      ghostElm.style.width = (width - overflowX) + 'px';
+      ghostElm.style.height = (height - overflowY) + 'px';
+    };
+
+    var removeElement = function (elm) {
+      if (elm && elm.parentNode) {
+        elm.parentNode.removeChild(elm);
+      }
+    };
+
+    var isLeftMouseButtonPressed = function (e) {
+      return e.button === 0;
+    };
+
+    var hasDraggableElement = function (state) {
+      return state.element;
+    };
+
+    var applyRelPos = function (state, position) {
+      return {
+        pageX: position.pageX - state.relX,
+        pageY: position.pageY + 5
+      };
+    };
+
+    var start = function (state, editor) {
+      return function (e) {
+        if (isLeftMouseButtonPressed(e)) {
+          var ceElm = Arr.find(editor.dom.getParents(e.target), Fun.or(isContentEditableFalse, isContentEditableTrue));
+
+          if (isDraggable(editor.getBody(), ceElm)) {
+            var elmPos = editor.dom.getPos(ceElm);
+            var bodyElm = editor.getBody();
+            var docElm = editor.getDoc().documentElement;
+
+            state.element = ceElm;
+            state.screenX = e.screenX;
+            state.screenY = e.screenY;
+            state.maxX = (editor.inline ? bodyElm.scrollWidth : docElm.offsetWidth) - 2;
+            state.maxY = (editor.inline ? bodyElm.scrollHeight : docElm.offsetHeight) - 2;
+            state.relX = e.pageX - elmPos.x;
+            state.relY = e.pageY - elmPos.y;
+            state.width = ceElm.offsetWidth;
+            state.height = ceElm.offsetHeight;
+            state.ghost = createGhost(editor, ceElm, state.width, state.height);
+          }
+        }
+      };
+    };
+
+    var move = function (state, editor) {
+      // Reduces laggy drag behavior on Gecko
+      var throttledPlaceCaretAt = Delay.throttle(function (clientX, clientY) {
+        editor._selectionOverrides.hideFakeCaret();
+        editor.selection.placeCaretAt(clientX, clientY);
+      }, 0);
+
+      return function (e) {
+        var movement = Math.max(Math.abs(e.screenX - state.screenX), Math.abs(e.screenY - state.screenY));
+
+        if (hasDraggableElement(state) && !state.dragging && movement > 10) {
+          var args = editor.dom.fire(editor.getBody(), 'dragstart', { target: state.element });
+          if (args.isDefaultPrevented()) {
+            return;
+          }
+
+          state.dragging = true;
+          editor.focus();
+        }
+
+        if (state.dragging) {
+          var targetPos = applyRelPos(state, MousePosition.calc(editor, e));
+
+          appendGhostToBody(state.ghost, editor.getBody());
+          moveGhost(state.ghost, targetPos, state.width, state.height, state.maxX, state.maxY);
+
+          throttledPlaceCaretAt(e.clientX, e.clientY);
+        }
+      };
+    };
+
+    // Returns the raw element instead of the fake cE=false element
+    var getRawTarget = function (selection) {
+      var rng = selection.getSel().getRangeAt(0);
+      var startContainer = rng.startContainer;
+      return startContainer.nodeType === 3 ? startContainer.parentNode : startContainer;
+    };
+
+    var drop = function (state, editor) {
+      return function (e) {
+        if (state.dragging) {
+          if (isValidDropTarget(editor, getRawTarget(editor.selection), state.element)) {
+            var targetClone = cloneElement(state.element);
+
+            var args = editor.dom.fire(editor.getBody(), 'drop', {
+              targetClone: targetClone,
+              clientX: e.clientX,
+              clientY: e.clientY
+            });
+
+            if (!args.isDefaultPrevented()) {
+              targetClone = args.targetClone;
+
+              editor.undoManager.transact(function () {
+                removeElement(state.element);
+                editor.insertContent(editor.dom.getOuterHTML(targetClone));
+                editor._selectionOverrides.hideFakeCaret();
+              });
+            }
+          }
+        }
+
+        removeDragState(state);
+      };
+    };
+
+    var stop = function (state, editor) {
+      return function () {
+        removeDragState(state);
+        if (state.dragging) {
+          editor.dom.fire(editor.getBody(), 'dragend');
+        }
+      };
+    };
+
+    var removeDragState = function (state) {
+      state.dragging = false;
+      state.element = null;
+      removeElement(state.ghost);
+    };
+
+    var bindFakeDragEvents = function (editor) {
+      var state = {}, pageDom, dragStartHandler, dragHandler, dropHandler, dragEndHandler, rootDocument;
+
+      pageDom = tinymce.DOM;
+      rootDocument = document;
+      dragStartHandler = start(state, editor);
+      dragHandler = move(state, editor);
+      dropHandler = drop(state, editor);
+      dragEndHandler = stop(state, editor);
+
+     editor.dom.bind(editor.getBody(), 'mousedown', dragStartHandler);
+     editor.dom.bind(editor.getBody(), 'mousemove', dragHandler);
+     editor.dom.bind(editor.getBody(), 'mouseup', dropHandler);
+
+      pageDom.bind(rootDocument, 'mousemove', dragHandler);
+      pageDom.bind(rootDocument, 'mouseup', dragEndHandler);
+
+     editor.dom.bind(editor.getBody(), 'remove', function () {
+        pageDom.unbind(rootDocument, 'mousemove', dragHandler);
+        pageDom.unbind(rootDocument, 'mouseup', dragEndHandler);
+      });
+    };
+
+    var blockIeDrop = function (editor) {
+     editor.dom.bind(editor.getBody(), 'drop', function (e) {
+        // FF doesn't pass out clientX/clientY for drop since this is for IE we just use null instead
+        var realTarget = typeof e.clientX !== 'undefined' ? editor.getDoc().elementFromPoint(e.clientX, e.clientY) : null;
+
+        if (isContentEditableFalse(realTarget) || isContentEditableFalse(editor.dom.getContentEditableParent(realTarget))) {
+          e.preventDefault();
+        }
+      });
+    };
+
+    tinymce.DragDropOverrides = {
+        init : function (editor) {
+          bindFakeDragEvents(editor);
+          blockIeDrop(editor);
+        }
+    };
+  })(tinymce);
+
+  /**
    * SelectionOverrides.js
    *
    * Released under LGPL License.
@@ -37870,7 +42130,7 @@
     var NodeType = tinymce.dom.NodeType, RangeUtils = tinymce.dom.RangeUtils;
     var VK = tinymce.VK, Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
 
-    var Dispatcher = tinymce.util.Dispatcher;
+    var Dispatcher = tinymce.util.Dispatcher, DragDropOverrides = tinymce.DragDropOverrides;
 
     var curry = Fun.curry,
       isContentEditableTrue = NodeType.isContentEditableTrue,
@@ -38459,14 +42719,16 @@
           editor.dom.bind(editor.getBody(), 'touchend', function (e) {
             var contentEditableRoot = getContentEditableRoot(e.target);
 
-            if (isContentEditableFalse(contentEditableRoot)) {
-              if (!moved) {
-                e.preventDefault();
-                setContentEditableSelection(selectNode(contentEditableRoot));
-
-                // fire fake event
-                editor.onContentEditableSelect.dispatch(editor, e);
+            if (contentEditableRoot) {
+              if (isContentEditableFalse(contentEditableRoot)) {
+                if (!moved) {
+                  e.preventDefault();
+                  setContentEditableSelection(selectNode(contentEditableRoot));
+                }
               }
+
+              // fire fake event
+              editor.onContentEditableSelect.dispatch(editor, e);
             }
           });
         }
@@ -38520,8 +42782,7 @@
               e.preventDefault();
               setContentEditableSelection(selectNode(contentEditableRoot));
 
-              // fire fake event
-              editor.onContentEditableSelect.dispatch(editor, e);
+
             } else {
               /*if (!isXYWithinRange(e.clientX, e.clientY, editor.selection.getRng())) {
                 editor.selection.placeCaretAt(e.clientX, e.clientY);
@@ -38531,6 +42792,9 @@
                 editor.selection.placeCaretAt(e.clientX, e.clientY);
               }
             }
+
+            // fire fake event
+            editor.onContentEditableSelect.dispatch(editor, e);
           } else {
             // Remove needs to be called here since the mousedown might alter the selection without calling selection.setRng
             // and therefore not fire the AfterSetSelectionRange event.
@@ -38720,6 +42984,8 @@
             }
           }
         });
+
+        DragDropOverrides.init(editor);
       }
 
       function isWithinCaretContainer(node) {
@@ -38860,4 +43126,4 @@
 
   })(tinymce);
 
-}());
+})();

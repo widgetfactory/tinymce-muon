@@ -4,8 +4,9 @@
  * Copyright, Moxiecode Systems AB
  * Released under LGPL License.
  *
- * License: http://www.tinymce.com/license
- * Contributing: http://www.tinymce.com/contributing
+ * License: http://www.tinymce.com/license - Inactive
+ * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+ * Contributing: http://www.tinymce.com/contributing - Inactive
  */
 
 (function (tinymce) {
@@ -187,7 +188,7 @@
 
         DOM.addClass(id + '_content', 'mceModalContentIframe');
 
-        var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'javascript:""', frameBorder: 0, 'aria-label': 'Dialog Content Iframe' });
+        var iframe = DOM.add(id + '_content', 'iframe', { id: id + '_ifr', src: 'about:blank', frameBorder: 0, 'aria-label': 'Dialog Content Iframe' });
         DOM.setAttrib(iframe, 'src', url);
 
         Event.add(iframe, 'load', function () {
@@ -510,7 +511,7 @@
 
       Event.clear(id);
       Event.clear(id + '_ifr');
-      DOM.setAttrib(id + '_ifr', 'src', 'javascript:""'); // Prevent leak
+      DOM.setAttrib(id + '_ifr', 'src', 'about:blank'); // Prevent leak
 
       // remove frame
       DOM.remove(id + '_frame');
