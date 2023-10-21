@@ -34,30 +34,6 @@
 	 */
   var tinymce = {
     /**
-		 * Major version of TinyMCE build.
-		 *
-		 * @property majorVersion
-		 * @type String
-		 */
-    majorVersion: '@@tinymce_major_version@@',
-
-    /**
-		 * Major version of TinyMCE build.
-		 *
-		 * @property minorVersion
-		 * @type String
-		 */
-    minorVersion: '@@tinymce_minor_version@@',
-
-    /**
-		 * Release date of TinyMCE build.
-		 *
-		 * @property releaseDate
-		 * @type String
-		 */
-    releaseDate: '@@tinymce_release_date@@',
-
-    /**
 		 * Initializes the TinyMCE global namespace this will setup browser detection and figure out where TinyMCE is running from.
 		 */
     _init: function () {
