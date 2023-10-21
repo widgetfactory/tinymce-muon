@@ -11,7 +11,7 @@ export default [
 
     output: {
       format: 'iife',
-      file: "tiny_mce_dev.js",
+      file: "tinymce.dev.js",
       globals: {
         wfe: 'wfe'
       },
