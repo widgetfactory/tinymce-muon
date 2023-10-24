@@ -28,7 +28,7 @@
         format: 'raw',
         no_events: 1,
         undo: true
-      }).replace(/<span[^>]+data-mce-bogus[^>]+>[\u200B\uFEFF]+<\/span>/g, ''));
+      }));
     }
 
     function addNonTypingUndoLevel() {
