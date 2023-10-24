@@ -937,6 +937,50 @@
 			equal(writer.getContent(), '<b data-mce-type="test" id="x" style="color: red"></b>');
 			deepEqual(counter.counts, { start: 1, end: 1 });
 		});
+
+		test('TINY-7756: should prevent dom clobbering overriding document/form properties', () => {
+			counter = createCounter(writer);
+			parser = new tinymce.html.SaxParser(counter, schema);
+
+			writer.reset();
+			parser.parse(
+				'<img src="x" name="getElementById" />' +
+				'<form>' +
+				'<input id="attributes" />' +
+				'<output id="style"></output>' +
+				'<button name="action"></button>' +
+				'<select name="getElementsByName"></select>' +
+				'<fieldset name="method"></fieldset>' +
+				'<textarea name="click"></textarea>' +
+				'</form>'
+			);
+			equal(writer.getContent(),
+				'<img src="x" />' +
+				'<form>' +
+				'<input />' +
+				'<output></output>' +
+				'<button></button>' +
+				'<select></select>' +
+				'<fieldset></fieldset>' +
+				'<textarea></textarea>' +
+				'</form>'
+			);
+		});
+
+		test('TINY-7589: Handles unmatched apostrophes in HTML comments', () => {
+			counter = createCounter(writer);
+			parser = new tinymce.html.SaxParser(counter, schema);
+
+			writer.reset();
+			const inner =
+				'<div>' +
+				'<!--  This is the issue: \'  -->' +
+				'<div><div><div>The matching apostophe \'</div></div></div>' +
+				'<div>Content B</div>' +
+				'</div>';
+			parser.parse(`${inner}<div data-mce-bogus="all">${inner}</div>`);
+			equal(writer.getContent(), inner);
+		});
 	</script>
 </head>
 

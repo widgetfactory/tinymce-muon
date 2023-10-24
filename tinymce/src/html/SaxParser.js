@@ -11,59 +11,80 @@
 
 (function (tinymce) {
   /**
-	 * This class parses HTML code using pure JavaScript and executes various events for each item it finds. It will
-	 * always execute the events in the right order for tag soup code like <b><p></b></p>. It will also remove elements
-	 * and attributes that doesn't fit the schema if the validate setting is enabled.
-	 *
-	 * @example
-	 * var parser = new tinymce.html.SaxParser({
-	 *     validate: true,
-	 *
-	 *     comment: function(text) {
-	 *         console.log('Comment:', text);
-	 *     },
-	 *
-	 *     cdata: function(text) {
-	 *         console.log('CDATA:', text);
-	 *     },
-	 *
-	 *     text: function(text, raw) {
-	 *         console.log('Text:', text, 'Raw:', raw);
-	 *     },
-	 *
-	 *     start: function(name, attrs, empty) {
-	 *         console.log('Start:', name, attrs, empty);
-	 *     },
-	 *
-	 *     end: function(name) {
-	 *         console.log('End:', name);
-	 *     },
-	 *
-	 *     pi: function(name, text) {
-	 *         console.log('PI:', name, text);
-	 *     },
-	 *
-	 *     doctype: function(text) {
-	 *         console.log('DocType:', text);
-	 *     }
-	 * }, schema);
-	 * @class tinymce.html.SaxParser
-	 * @version 3.4
-	 */
+   * This class parses HTML code using pure JavaScript and executes various events for each item it finds. It will
+   * always execute the events in the right order for tag soup code like <b><p></b></p>. It will also remove elements
+   * and attributes that doesn't fit the schema if the validate setting is enabled.
+   *
+   * @example
+   * var parser = new tinymce.html.SaxParser({
+   *     validate: true,
+   *
+   *     comment: function(text) {
+   *         console.log('Comment:', text);
+   *     },
+   *
+   *     cdata: function(text) {
+   *         console.log('CDATA:', text);
+   *     },
+   *
+   *     text: function(text, raw) {
+   *         console.log('Text:', text, 'Raw:', raw);
+   *     },
+   *
+   *     start: function(name, attrs, empty) {
+   *         console.log('Start:', name, attrs, empty);
+   *     },
+   *
+   *     end: function(name) {
+   *         console.log('End:', name);
+   *     },
+   *
+   *     pi: function(name, text) {
+   *         console.log('PI:', name, text);
+   *     },
+   *
+   *     doctype: function(text) {
+   *         console.log('DocType:', text);
+   *     }
+   * }, schema);
+   * @class tinymce.html.SaxParser
+   * @version 3.4
+   */
 
   var each = tinymce.each,
     Entities = tinymce.html.Entities;
 
+  // A list of form control or other elements whereby a name/id would override a form or document property
+  // https://developer.mozilla.org/en-US/docs/Web/API/HTMLFormElement/elements#value
+  // https://portswigger.net/research/dom-clobbering-strikes-back
+  var filteredClobberElements = tinymce.makeMap('button,fieldset,form,iframe,img,image,input,object,output,select,textarea');
+
+  // Create a temp document and return a cached version of it in subsequent calls
+  var getTempDocument = (function () {
+    var cachedDocument = null;
+
+    return function () {
+
+      if (!cachedDocument) {
+        cachedDocument = document.implementation.createHTMLDocument('parser');
+      }
+
+      return cachedDocument;
+    };
+  })();
+  
   /**
-	 * Constructs a new SaxParser instance.
-	 *
-	 * @constructor
-	 * @method SaxParser
-	 * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
-	 * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
-	 */
+   * Constructs a new SaxParser instance.
+   *
+   * @constructor
+   * @method SaxParser
+   * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
+   * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
+   */
   tinymce.html.SaxParser = function (settings, schema) {
     var self = this;
+
+    var doc = getTempDocument(), form = doc.createElement('form');
 
     function noop() { }
 
@@ -90,16 +111,16 @@
     });
 
     /**
-		 * Returns the index of the end tag for a specific start tag. This can be
-		 * used to skip all children of a parent element from being processed.
-		 *
-		 * @private
-		 * @method findEndTag
-		 * @param {tinymce.html.Schema} schema Schema instance to use to match short ended elements.
-		 * @param {String} html HTML string to find the end tag in.
-		 * @param {Number} startIndex Indext to start searching at should be after the start tag.
-		 * @return {Number} Index of the end tag.
-		 */
+     * Returns the index of the end tag for a specific start tag. This can be
+     * used to skip all children of a parent element from being processed.
+     *
+     * @private
+     * @method findEndTag
+     * @param {tinymce.html.Schema} schema Schema instance to use to match short ended elements.
+     * @param {String} html HTML string to find the end tag in.
+     * @param {Number} startIndex Indext to start searching at should be after the start tag.
+     * @return {Number} Index of the end tag.
+     */
     self.findEndTag = function (schema, html, startIndex) {
       var count = 1,
         index, matches, tokenRegExp, shortEndedElements;
@@ -130,13 +151,13 @@
     };
 
     /**
-		 * Parses the specified HTML string and executes the callbacks for each item it finds.
-		 *
-		 * @example
-		 * new SaxParser({...}).parse('<b>text</b>');
-		 * @method parse
-		 * @param {String} html Html string to sax parse.
-		 */
+     * Parses the specified HTML string and executes the callbacks for each item it finds.
+     *
+     * @example
+     * new SaxParser({...}).parse('<b>text</b>');
+     * @method parse
+     * @param {String} html Html string to sax parse.
+     */
     self.parse = function (html, format) {
       var self = this,
         matches, index = 0,
@@ -148,7 +169,7 @@
       var anyAttributesRequired, selfClosing, tokenRegExp, attrRegExp, specialElements, attrValue, idCount = 0;
       var decode = Entities.decode,
         fixSelfClosing, filteredUrlAttrs = tinymce.makeMap('src,href,data,background,formaction,poster,xlink:href');
-      var scriptUriRegExp = /((java|vb)script|mhtml):/i;
+      //var scriptUriRegExp = /((java|vb)script|mhtml):/i;
       var processHtml;
 
       // parser format - html, xml
@@ -181,7 +202,7 @@
         }
       }
 
-      function isInvalidUri(settings, uri) {
+      /*function isInvalidUri(settings, uri) {
         if (settings.allow_html_data_urls) {
           return false;
         } else if (/^data:image\//i.test(uri)) {
@@ -189,7 +210,7 @@
         } else {
           return /^data:/i.test(uri);
         }
-      }
+      }*/
 
       // a data attribute is any attribute with a hyphen, eg: data- or ng- or v-
       function isDataAttribute(name) {
@@ -198,6 +219,10 @@
 
       function isEventAttribute(name) {
         return name.indexOf('on') == 0;
+      }
+
+      function isFilterdUrlAttribute(name) {
+        return name in filteredUrlAttrs;
       }
 
       function processComment(value) {
@@ -276,8 +301,8 @@
         }
       }
 
-      function parseAttribute(match, name, value, val2, val3) {
-        var attrRule, i, trimRegExp = /[\s\u0000-\u001F]+/g;
+      function parseAttribute(tagName, name, value, val2, val3) {
+        var attrRule, i;// trimRegExp = /[\s\u0000-\u001F]+/g;
 
         name = name.toLowerCase();
         value = name in fillAttrsMap ? name : decode(value || val2 || val3 || ''); // Handle boolean attribute than value attribute
@@ -319,8 +344,21 @@
           }
         }
 
+        // Attempt to block any dom clobbering on document or forms
+        // See https://www.slideshare.net/x00mario/in-the-dom-no-one-will-hear-you-scream
+        var isNameOrId = name === 'name' || name === 'id';
+
+        if (isNameOrId && tagName in filteredClobberElements && (value in doc || value in form)) {
+          return;
+        }
+
         // Block any javascript: urls or non image data uris
-        if (filteredUrlAttrs[name] && !settings.allow_script_urls) {
+        if (isFilterdUrlAttribute(name) && !tinymce.util.URI.isDomSafe(value, tagName, settings)) {
+          return;
+        }
+
+        // Block any javascript: urls or non image data uris
+        /*if (filteredUrlAttrs[name] && !settings.allow_script_urls) {
           var uri = value.replace(trimRegExp, '');
 
           try {
@@ -338,12 +376,18 @@
           if (isInvalidUri(settings, uri)) {
             return;
           }
-        }
+        }*/
 
         // Block data or event attributes on elements marked as internal
-        /*if (isInternalElement && (name in filteredUrlAttrs || name.indexOf('on') === 0)) {
-					return;
-				}*/
+        if (isInternalElement) {
+          if (isFilterdUrlAttribute(name)) {
+            return;
+          }
+          // only allow event attributes if enabled
+          if (isEventAttribute(name) && !settings.allow_event_attributes) {
+            return;
+          }
+        }
 
         // Add attribute to list and map
         attrList.map[name] = value;
@@ -355,13 +399,13 @@
 
       // Precompile RegExps and map objects
       tokenRegExp = new RegExp('<(?:' +
-				'(?:!--([\\w\\W]*?)--!?>)|' + // Comment
-				'(?:!\\[CDATA\\[([\\w\\W]*?)\\]\\]>)|' + // CDATA
-				'(?:![Dd][Oo][Cc][Tt][Yy][Pp][Ee]([\\w\\W]*?)>)|' + // DOCTYPE (case insensitive)
-				'(?:\\?([^\\s\\/<>]+) ?([\\w\\W]*?)[?/]>)|' + // PI
-				'(?:\\/([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)>)|' + // End element
-				'(?:([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)((?:\\s+[^"\'>]+(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>]*))*|\\/|\\s+)>)' + // Start element
-				')', 'g');
+        '(?:!--([\\w\\W]*?)--!?>)|' + // Comment
+        '(?:!\\[CDATA\\[([\\w\\W]*?)\\]\\]>)|' + // CDATA
+        '(?:![Dd][Oo][Cc][Tt][Yy][Pp][Ee]([\\w\\W]*?)>)|' + // DOCTYPE (case insensitive)
+        '(?:\\?([^\\s\\/<>]+) ?([\\w\\W]*?)[?/]>)|' + // PI
+        '(?:\\/([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)>)|' + // End element
+        '(?:([A-Za-z][A-Za-z0-9\\-_\\:\\.]*)((?:\\s+[^"\'>]+(?:(?:"[^"]*")|(?:\'[^\']*\')|[^>]*))*|\\/|\\s+)>)' + // Start element
+        ')', 'g');
 
       attrRegExp = /([\w:\-]+)(?:\s*=\s*(?:(?:\"((?:[^\"])*)\")|(?:\'((?:[^\'])*)\')|([^>\s]+)))?/g;
 
@@ -447,7 +491,12 @@
               attrList = [];
               attrList.map = {};
 
-              attribsValue.replace(attrRegExp, parseAttribute);
+              //attribsValue.replace(attrRegExp, parseAttribute);
+              // eslint-disable-next-line no-loop-func
+              attribsValue.replace(attrRegExp, (match, name, val, val2, val3) => {
+                parseAttribute(value, name, val, val2, val3);
+                return '';
+              });
             } else {
               attrList = [];
               attrList.map = {};
@@ -601,15 +650,15 @@
           self.pi(value, matches[5]);
 
           /*if (format === 'xml') {
-						self.pi(value, matches[5]);
-					} else {
-						// Processing Instructions aren't valid in HTML so it should be treated as a bogus comment.
-						// See https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
-						index = processMalformedComment('?', matches.index + 2); // <? === 2 chars
+            self.pi(value, matches[5]);
+          } else {
+            // Processing Instructions aren't valid in HTML so it should be treated as a bogus comment.
+            // See https://html.spec.whatwg.org/multipage/parsing.html#tag-open-state
+            index = processMalformedComment('?', matches.index + 2); // <? === 2 chars
 
-						tokenRegExp.lastIndex = index;
-						continue;
-					}*/
+            tokenRegExp.lastIndex = index;
+            continue;
+          }*/
         }
 
         index = matches.index + matches[0].length;
