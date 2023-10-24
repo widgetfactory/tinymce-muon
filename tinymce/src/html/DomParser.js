@@ -17,25 +17,25 @@
     makeMap = tinymce.makeMap;
 
   /**
-	 * This class parses HTML code into a DOM like structure of nodes it will remove redundant whitespace and make
-	 * sure that the node tree is valid according to the specified schema. So for example: <p>a<p>b</p>c</p> will become <p>a</p><p>b</p><p>c</p>
-	 *
-	 * @example
-	 * var parser = new tinymce.html.DomParser({validate: true}, schema);
-	 * var rootNode = parser.parse('<h1>content</h1>');
-	 *
-	 * @class tinymce.html.DomParser
-	 * @version 3.4
-	 */
+   * This class parses HTML code into a DOM like structure of nodes it will remove redundant whitespace and make
+   * sure that the node tree is valid according to the specified schema. So for example: <p>a<p>b</p>c</p> will become <p>a</p><p>b</p><p>c</p>
+   *
+   * @example
+   * var parser = new tinymce.html.DomParser({validate: true}, schema);
+   * var rootNode = parser.parse('<h1>content</h1>');
+   *
+   * @class tinymce.html.DomParser
+   * @version 3.4
+   */
 
   /**
-	 * Constructs a new DomParser instance.
-	 *
-	 * @constructor
-	 * @method DomParser
-	 * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
-	 * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
-	 */
+   * Constructs a new DomParser instance.
+   *
+   * @constructor
+   * @method DomParser
+   * @param {Object} settings Name/value collection of settings. comment, cdata, text, start and end are callbacks.
+   * @param {tinymce.html.Schema} schema HTML Schema class to use when parsing.
+   */
   tinymce.html.DomParser = function (settings, schema) {
     var self = this,
       nodeFilters = {},
@@ -56,6 +56,24 @@
       nonEmptyElements = schema.getNonEmptyElements();
       textBlockElements = schema.getTextBlockElements();
       specialElements = schema.getSpecialElements();
+
+      var removeOrUnwrapInvalidNode = function (node, originalNodeParent) {
+        if (specialElements[node.name]) {
+          node.empty().remove();
+        } else {
+          // are the children of `node` valid children of the top level parent?
+          // if not, remove or unwrap them too
+          var children = node.children();
+
+          for (var childNode of children) {
+            if (!schema.isValidChild(originalNodeParent.name, childNode.name)) {
+              removeOrUnwrapInvalidNode(childNode, originalNodeParent);
+            }
+          }
+
+          node.unwrap();
+        }
+      };
 
       for (ni = 0; ni < nodes.length; ni++) {
         node = nodes[ni];
@@ -89,49 +107,55 @@
 
         // Get list of all parent nodes until we find a valid parent to stick the child into
         parents = [node];
+
         for (parent = node.parent; parent && !schema.isValidChild(parent.name, node.name) &&
-					!nonSplitableElements[parent.name]; parent = parent.parent) {
+          !nonSplitableElements[parent.name]; parent = parent.parent) {
           parents.push(parent);
         }
 
         // Found a suitable parent
         if (parent && parents.length > 1) {
-          // Reverse the array since it makes looping easier
-          parents.reverse();
+          // If the node is a valid child of the parent, then try to move it. Otherwise unwrap it
+          if (schema.isValidChild(parent.name, node.name)) {
+            // Reverse the array since it makes looping easier
+            parents.reverse();
 
-          // Clone the related parent and insert that after the moved node
-          newParent = currentNode = self.filterNode(parents[0].clone());
+            // Clone the related parent and insert that after the moved node
+            newParent = currentNode = self.filterNode(parents[0].clone());
 
-          // Start cloning and moving children on the left side of the target node
-          for (i = 0; i < parents.length - 1; i++) {
-            if (schema.isValidChild(currentNode.name, parents[i].name)) {
-              tempNode = self.filterNode(parents[i].clone());
-              currentNode.append(tempNode);
+            // Start cloning and moving children on the left side of the target node
+            for (i = 0; i < parents.length - 1; i++) {
+              if (schema.isValidChild(currentNode.name, parents[i].name)) {
+                tempNode = self.filterNode(parents[i].clone());
+                currentNode.append(tempNode);
+              } else {
+                tempNode = currentNode;
+              }
+
+              for (childNode = parents[i].firstChild; childNode && childNode != parents[i + 1];) {
+                nextNode = childNode.next;
+                tempNode.append(childNode);
+                childNode = nextNode;
+              }
+
+              currentNode = tempNode;
+            }
+
+            if (!newParent.isEmpty(nonEmptyElements)) {
+              parent.insert(newParent, parents[0], true);
+              parent.insert(node, newParent);
             } else {
-              tempNode = currentNode;
+              parent.insert(node, parents[0], true);
             }
 
-            for (childNode = parents[i].firstChild; childNode && childNode != parents[i + 1];) {
-              nextNode = childNode.next;
-              tempNode.append(childNode);
-              childNode = nextNode;
+            // Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
+            parent = parents[0];
+
+            if (parent.isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
+              parent.empty().remove();
             }
-
-            currentNode = tempNode;
-          }
-
-          if (!newParent.isEmpty(nonEmptyElements)) {
-            parent.insert(newParent, parents[0], true);
-            parent.insert(node, newParent);
           } else {
-            parent.insert(node, parents[0], true);
-          }
-
-          // Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
-          parent = parents[0];
-
-          if (parent.isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
-            parent.empty().remove();
+            removeOrUnwrapInvalidNode(node, node.parent);
           }
         } else if (node.parent) {
           // If it's an LI try to find a UL/OL for it or wrap it
@@ -156,24 +180,20 @@
           if (schema.isValidChild(node.parent.name, 'div') && schema.isValidChild('div', node.name)) {
             node.wrap(self.filterNode(new Node('div', 1)));
           } else {
-            // We failed wrapping it, then remove or unwrap it
-            if (specialElements[node.name]) {
-              node.empty().remove();
-            } else {
-              node.unwrap();
-            }
+            // We failed wrapping it, remove or unwrap it
+            removeOrUnwrapInvalidNode(node, node.parent);
           }
         }
       }
     }
 
     /**
-		 * Runs the specified node though the element and attributes filters.
-		 *
-		 * @method filterNode
-		 * @param {tinymce.html.Node} Node the node to run filters on.
-		 * @return {tinymce.html.Node} The passed in node.
-		 */
+     * Runs the specified node though the element and attributes filters.
+     *
+     * @method filterNode
+     * @param {tinymce.html.Node} Node the node to run filters on.
+     * @return {tinymce.html.Node} The passed in node.
+     */
     self.filterNode = function (node) {
       var i, name, list;
 
@@ -208,19 +228,19 @@
     };
 
     /**
-		 * Adds a node filter function to the parser, the parser will collect the specified nodes by name
-		 * and then execute the callback ones it has finished parsing the document.
-		 *
-		 * @example
-		 * parser.addNodeFilter('p,h1', function(nodes, name) {
-		 *		for (var i = 0; i < nodes.length; i++) {
-		 *			console.log(nodes[i].name);
-		 *		}
-		 * });
-		 * @method addNodeFilter
-		 * @method {String} name Comma separated list of nodes to collect.
-		 * @param {function} callback Callback function to execute once it has collected nodes.
-		 */
+     * Adds a node filter function to the parser, the parser will collect the specified nodes by name
+     * and then execute the callback ones it has finished parsing the document.
+     *
+     * @example
+     * parser.addNodeFilter('p,h1', function(nodes, name) {
+     *		for (var i = 0; i < nodes.length; i++) {
+     *			console.log(nodes[i].name);
+     *		}
+     * });
+     * @method addNodeFilter
+     * @method {String} name Comma separated list of nodes to collect.
+     * @param {function} callback Callback function to execute once it has collected nodes.
+     */
     self.addNodeFilter = function (name, callback) {
       each(explode(name), function (name) {
         var list = nodeFilters[name];
@@ -234,19 +254,19 @@
     };
 
     /**
-		 * Adds a attribute filter function to the parser, the parser will collect nodes that has the specified attributes
-		 * and then execute the callback ones it has finished parsing the document.
-		 *
-		 * @example
-		 * parser.addAttributeFilter('src,href', function(nodes, name) {
-		 *		for (var i = 0; i < nodes.length; i++) {
-		 *			console.log(nodes[i].name);
-		 *		}
-		 * });
-		 * @method addAttributeFilter
-		 * @method {String} name Comma separated list of nodes to collect.
-		 * @param {function} callback Callback function to execute once it has collected nodes.
-		 */
+     * Adds a attribute filter function to the parser, the parser will collect nodes that has the specified attributes
+     * and then execute the callback ones it has finished parsing the document.
+     *
+     * @example
+     * parser.addAttributeFilter('src,href', function(nodes, name) {
+     *		for (var i = 0; i < nodes.length; i++) {
+     *			console.log(nodes[i].name);
+     *		}
+     * });
+     * @method addAttributeFilter
+     * @method {String} name Comma separated list of nodes to collect.
+     * @param {function} callback Callback function to execute once it has collected nodes.
+     */
     self.addAttributeFilter = function (name, callback) {
       each(explode(name), function (name) {
         var i;
@@ -266,15 +286,15 @@
     };
 
     /**
-		 * Parses the specified HTML string into a DOM like node tree and returns the result.
-		 *
-		 * @example
-		 * var rootNode = new DomParser({...}).parse('<b>text</b>');
-		 * @method parse
-		 * @param {String} html Html string to sax parse.
-		 * @param {Object} args Optional args object that gets passed to all filter functions.
-		 * @return {tinymce.html.Node} Root node containing the tree.
-		 */
+     * Parses the specified HTML string into a DOM like node tree and returns the result.
+     *
+     * @example
+     * var rootNode = new DomParser({...}).parse('<b>text</b>');
+     * @method parse
+     * @param {String} html Html string to sax parse.
+     * @param {Object} args Optional args object that gets passed to all filter functions.
+     * @return {tinymce.html.Node} Root node containing the tree.
+     */
     self.parse = function (html, args) {
       var parser, rootNode, node, nodes, i, l, fi, fl, list, name, validate;
       var blockElements, startWhiteSpaceRegExp, invalidChildren = [],
@@ -581,14 +601,14 @@
               // Trim start white space
               // Removed due to: #5424
               /*textNode = node.prev;
-							if (textNode && textNode.type === 3) {
-								text = textNode.value.replace(startWhiteSpaceRegExp, '');
+              if (textNode && textNode.type === 3) {
+                text = textNode.value.replace(startWhiteSpaceRegExp, '');
 
-								if (text.length > 0)
-									textNode.value = text;
-								else
-									textNode.remove();
-							}*/
+                if (text.length > 0)
+                  textNode.value = text;
+                else
+                  textNode.remove();
+              }*/
             }
 
             // Check if we exited a whitespace preserved element

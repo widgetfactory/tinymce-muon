@@ -337,7 +337,7 @@
 		});
 
 		test('Remove redundant br elements', function () {
-			var parser, root, schema = new tinymce.html.Schema({remove_empty_spans : true});
+			var parser, root, schema = new tinymce.html.Schema({ remove_empty_spans: true });
 
 			expect(1);
 
@@ -562,6 +562,63 @@
 					'<iframe><textarea></iframe><img src="a" onerror="alert(document.domain)" />')
 				),
 				'<iframe><textarea></iframe><img src="a" alt="" />'
+			);
+		});
+
+		test('TINY-7756: Parsing invalid nested children', function () {
+			var serializer = new tinymce.html.Serializer();
+
+			equal(
+				serializer.serialize(new tinymce.html.DomParser().parse(
+					'<table><button><a><meta></meta></a></button></table>')
+				),
+				'<table></table>'
+			);
+		});
+
+		test('TINY-7756: Parsing invalid nested children with a valid child between', function () {
+			var serializer = new tinymce.html.Serializer();
+
+			const html =
+				'<table>' +
+				'<tbody>' +
+				'<tr>' +
+				'<td>' +
+				'<meta>' +
+				'<button>' +
+				'<img/>' +
+				'<button>' +
+				'<a>' +
+				'<meta></meta>' +
+				'</a>' +
+				'</button>' +
+				'<img/>' +
+				'</button>' +
+				'</meta>' +
+				'</td>' +
+				'</tr>' +
+				'</tbody>' +
+				'</table>';
+
+			equal(
+				serializer.serialize(new tinymce.html.DomParser().parse(
+					html)
+				),
+				'<table>' +
+				'<tbody>' +
+				'<tr>' +
+				'<td>' +
+				'<button>' +
+				'<img alt="" />' +
+				'<button>' +
+				'<a></a>' +
+				'</button>' +
+				'<img alt="" />' +
+				'</button>' +
+				'</td>' +
+				'</tr>' +
+				'</tbody>' +
+				'</table>'
 			);
 		});
 	</script>
