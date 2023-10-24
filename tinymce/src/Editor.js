@@ -21,7 +21,9 @@
     ThemeManager = tinymce.ThemeManager,
     PluginManager = tinymce.PluginManager,
     EditorFocus = tinymce.EditorFocus,
-    explode = tinymce.explode;
+    explode = tinymce.explode,
+    Zwsp = tinymce.text.Zwsp,
+    TrimBody = tinymce.dom.TrimBody;
 
   /**
    * This class contains the core logic for a TinyMCE editor.
@@ -1841,7 +1843,7 @@
 
       // Get raw contents or by default the cleaned contents
       if (args.format == 'raw') {
-        content = body.innerHTML;
+        content = tinymce.trim(Zwsp.trim(TrimBody.trim(body, self.serializer.getTempAttrs()).innerHTML));
       } else if (args.format == 'text') {
         content = body.innerText || body.textContent;
       } else {

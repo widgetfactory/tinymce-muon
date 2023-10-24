@@ -56,6 +56,50 @@
 			editor.selection.onGetContent.remove(handler);
 		});
 
+		const testGetContentRaw = (initial, expected) => () => {
+			editor.getBody().innerHTML = initial;
+			strictEqual(editor.getContent({ format: 'raw' }), expected, 'Should be expected html');
+			strictEqual(editor.getBody().innerHTML, initial, 'Should not have modified the editor body');
+		};
+
+		test('getContent raw should preserve non-temporary internal nodes',
+			testGetContentRaw(
+				'<p>test0<span data-mce-bogus="1">bogus</span></p><p>test1</p><p data-mce-bogus="1">test2</p>',
+				'<p>test0<span data-mce-bogus="1">bogus</span></p><p>test1</p><p data-mce-bogus="1">test2</p>'));
+
+		test('getContent raw should not preserve temporary internal nodes or ZWNBSP',
+			testGetContentRaw(
+				'<p>te\ufeffst0<span data-mce-bogus="1">bogus</span></p><p data-mce-selected="true">test1</p><p data-mce-bogus="all">test2</p><p>test3</p>',
+				'<p>test0<span data-mce-bogus="1">bogus</span></p><p>test1</p><p>test3</p>'));
+
+		test('TINY-10236: getContent raw should not preserve comment nodes containing ZWNBSP',
+			testGetContentRaw(
+				'<p>test0</p><!-- te\uFEFFst1 --><!-- test2 --><!-- te\uFEFFst3 -->',
+				'<p>test0</p><!-- test2 -->'));
+
+		const testGetContentRawMxss = (content) => () => {
+
+			let hasXssOccurred = false;
+			editor.getWin()[xssFnName] = function() {
+    			hasXssOccurred = true;
+			};
+			editor.getBody().innerHTML = content;
+			editor.getBody().innerHTML = editor.getContent({ format: 'raw' });
+			equal(hasXssOccurred, false, 'XSS should not have occurred');
+			editor.getWin()[xssFnName] = null;
+		};
+
+		const xssFnName = 'xssfn';
+
+		test('TINY-10236: Excluding data-mce-bogus="all" elements does not cause comment node mXSS',
+			testGetContentRawMxss(`<!--<br data-mce-bogus="all">><iframe onload="window.${xssFnName}();">->`));
+
+		test('TINY-10236: Excluding temporary attributes does not cause comment node mXSS',
+			testGetContentRawMxss(`<!--data-mce-selected="x"><iframe onload="window.${xssFnName}();">->`));
+
+		test('TINY-10236: Excluding ZWNBSP does not cause comment node mXSS',
+			testGetContentRawMxss(`<!--\uFEFF><iframe onload="window.${xssFnName}();">->`));
+
 		test('setContent', function () {
 			var rng, eventObj;
 
@@ -84,7 +128,7 @@
 			rng.setEnd(editor.getBody(), 0);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('<div>test</div>');
-			equal(editor.getContent(), '<div>test</div>\n<p>text</p>', 'Set contents at selection (collapsed)');
+			equal(editor.getContent(), '<div>test</div><p>text</p>', 'Set contents at selection (collapsed)');
 
 			// Insert in middle of paragraph
 			editor.setContent('<p>beforeafter</p>');
@@ -147,6 +191,68 @@
 			editor.selection.setContent('<div>text</div>');
 			equal(eventObj.content, '<div>text</div>', 'Set selected contents, onSetContent event');
 			editor.selection.onSetContent.remove(handler);
+		});
+
+		test('TINY-7756: Content with nested elements that will be invalid if parent is unwrapped', () => {
+			editor.setContent('');
+			rng = editor.dom.createRng();
+			rng.setStart(editor.getBody(), 0);
+			rng.setEnd(editor.getBody(), 1);
+			editor.selection.setRng(rng);
+			editor.selection.setContent(
+				'<table>' +
+				'<button>' +
+				'<a>' +
+				'<meta>' +
+				'</meta>' +
+				'</a>' +
+				'</button>' +
+				'</table>'
+			);
+			equal(editor.getContent(), '');
+
+			editor.setContent('');
+			rng = editor.dom.createRng();
+			rng.setStart(editor.getBody(), 0);
+			rng.setEnd(editor.getBody(), 1);
+			editor.selection.setRng(rng);
+			editor.selection.setContent(
+				'<table>' +
+				'<tbody>' +
+				'<tr>' +
+				'<td>' +
+				'<meta>' +
+				'<button>' +
+				'<img alt="" />' +
+				'<button>' +
+				'<a>' +
+				'<meta></meta>' +
+				'</a>' +
+				'</button>' +
+				'<img alt="" />' +
+				'</button>' +
+				'</meta>' +
+				'</td>' +
+				'</tr>' +
+				'</tbody>' +
+				'</table>'
+			);
+
+			equal(editor.getContent().replace(/[\r\n]/g, ''),
+				'<table>' +
+				'<tbody>' +
+				'<tr>' +
+				'<td>' +
+				'<button>' +
+				'<img alt="" />' +
+				'</button>' +
+				'<button></button>' +
+				'<img alt="" />' +
+				'</td>' +
+				'</tr>' +
+				'</tbody>' +
+				'</table>'
+			);
 		});
 
 		test('getStart/getEnd', function () {
@@ -218,7 +324,7 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(1);
-			equal(editor.getContent(), '<p>text</p>\n<p>text</p>', 'Editor contents (elements)');
+			equal(editor.getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
 		});
@@ -267,7 +373,7 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2);
-			equal(editor.getContent(), '<p>text</p>\n<p>text</p>', 'Editor contents (elements)');
+			equal(editor.getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
 		});
@@ -288,9 +394,9 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2);
-			equal(editor.getContent(), '<p>textaaatext</p>\n<p>text</p>', 'Editor contents (fragmented, elements)');
+			equal(editor.getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
 			editor.selection.moveToBookmark(bookmark);
-			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (fragmented, elements)');
+			equal(editor.selection.getContent(), '<p>ext</p><p>tex</p>', 'Selected contents (fragmented, elements)');
 		});
 
 		test('getBookmark/setBookmark (nonintrusive) - fragmentext text (normalized)', function () {
@@ -310,9 +416,9 @@
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2, true);
 			editor.setContent(editor.getContent());
-			equal(editor.getContent(), '<p>textaaatext</p>\n<p>text</p>', 'Editor contents (fragmented, elements)');
+			equal(editor.getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
 			editor.selection.moveToBookmark(bookmark);
-			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (fragmented, elements)');
+			equal(editor.selection.getContent(), '<p>ext</p><p>tex</p>', 'Selected contents (fragmented, elements)');
 		});
 
 		test('getBookmark/setBookmark (nonintrusive) - Get bookmark before image', function () {
