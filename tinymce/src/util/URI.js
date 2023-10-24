@@ -7,6 +7,8 @@
  * License: http://www.tinymce.com/license - Inactive
  * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
  * Contributing: http://www.tinymce.com/contributing - Inactive
+ * 
+ * Include modified and updated code from https://github.com/tinymce/tinymce/blob/release/5.10/modules/tinymce/src/core/main/ts/api/util/URI.ts
  */
 
 (function (tinymce) {
@@ -20,19 +22,25 @@
     'mailto': 25
   };
 
+  var safeSvgDataUrlElements = [ 'img', 'video' ];
+
+  function isNonNullable(value) {
+    return value !== null && value !== undefined;
+  }
+
   /**
-	 * This class handles parsing, modification and serialization of URI/URL strings.
-	 * @class tinymce.util.URI
-	 */
+   * This class handles parsing, modification and serialization of URI/URL strings.
+   * @class tinymce.util.URI
+   */
   tinymce.create('tinymce.util.URI', {
     /**
-		 * Constucts a new URI instance.
-		 *
-		 * @constructor
-		 * @method URI
-		 * @param {String} u URI string to parse.
-		 * @param {Object} s Optional settings object.
-		 */
+     * Constucts a new URI instance.
+     *
+     * @constructor
+     * @method URI
+     * @param {String} u URI string to parse.
+     * @param {Object} s Optional settings object.
+     */
     URI: function (url, settings) {
       var self = this,
         baseUri, base_url;
@@ -110,11 +118,11 @@
     },
 
     /**
-		 * Sets the internal path part of the URI.
-		 *
-		 * @method setPath
-		 * @param {string} path Path string to set.
-		 */
+     * Sets the internal path part of the URI.
+     *
+     * @method setPath
+     * @param {string} path Path string to set.
+     */
     setPath: function (path) {
       var self = this;
 
@@ -131,15 +139,15 @@
     },
 
     /**
-		 * Converts the specified URI into a relative URI based on the current URI instance location.
-		 *
-		 * @method toRelative
-		 * @param {String} uri URI to convert into a relative path/URI.
-		 * @return {String} Relative URI from the point specified in the current URI instance.
-		 * @example
-		 * // Converts an absolute URL to an relative URL url will be somedir/somefile.htm
-		 * var url = new tinymce.util.URI('http://www.site.com/dir/').toRelative('http://www.site.com/dir/somedir/somefile.htm');
-		 */
+     * Converts the specified URI into a relative URI based on the current URI instance location.
+     *
+     * @method toRelative
+     * @param {String} uri URI to convert into a relative path/URI.
+     * @return {String} Relative URI from the point specified in the current URI instance.
+     * @example
+     * // Converts an absolute URL to an relative URL url will be somedir/somefile.htm
+     * var url = new tinymce.util.URI('http://www.site.com/dir/').toRelative('http://www.site.com/dir/somedir/somefile.htm');
+     */
     toRelative: function (uri) {
       var self = this,
         output;
@@ -154,7 +162,7 @@
 
       // Not on same domain/port or protocol
       if ((uri.host != 'mce_host' && self.host != uri.host && uri.host) || self.port != uri.port ||
-				(self.protocol != uri.protocol && uri.protocol !== "")) {
+        (self.protocol != uri.protocol && uri.protocol !== "")) {
         return uri.getURI();
       }
 
@@ -182,16 +190,16 @@
     },
 
     /**
-		 * Converts the specified URI into a absolute URI based on the current URI instance location.
-		 *
-		 * @method toAbsolute
-		 * @param {String} uri URI to convert into a relative path/URI.
-		 * @param {Boolean} noHost No host and protocol prefix.
-		 * @return {String} Absolute URI from the point specified in the current URI instance.
-		 * @example
-		 * // Converts an relative URL to an absolute URL url will be http://www.site.com/dir/somedir/somefile.htm
-		 * var url = new tinymce.util.URI('http://www.site.com/dir/').toAbsolute('somedir/somefile.htm');
-		 */
+     * Converts the specified URI into a absolute URI based on the current URI instance location.
+     *
+     * @method toAbsolute
+     * @param {String} uri URI to convert into a relative path/URI.
+     * @param {Boolean} noHost No host and protocol prefix.
+     * @return {String} Absolute URI from the point specified in the current URI instance.
+     * @example
+     * // Converts an relative URL to an absolute URL url will be http://www.site.com/dir/somedir/somefile.htm
+     * var url = new tinymce.util.URI('http://www.site.com/dir/').toAbsolute('somedir/somefile.htm');
+     */
     toAbsolute: function (uri, noHost) {
       uri = new tinymce.util.URI(uri, {
         base_uri: this
@@ -201,14 +209,14 @@
     },
 
     /**
-		 * Determine whether the given URI has the same origin as this URI.  Based on RFC-6454.
-		 * Supports default ports for protocols listed in DEFAULT_PORTS.  Unsupported protocols will fail safe: they
-		 * won't match, if the port specifications differ.
-		 *
-		 * @method isSameOrigin
-		 * @param {tinymce.util.URI} uri Uri instance to compare.
-		 * @returns {Boolean} True if the origins are the same.
-		 */
+     * Determine whether the given URI has the same origin as this URI.  Based on RFC-6454.
+     * Supports default ports for protocols listed in DEFAULT_PORTS.  Unsupported protocols will fail safe: they
+     * won't match, if the port specifications differ.
+     *
+     * @method isSameOrigin
+     * @param {tinymce.util.URI} uri Uri instance to compare.
+     * @returns {Boolean} True if the origins are the same.
+     */
     isSameOrigin: function (uri) {
       if (this.host == uri.host && this.protocol == uri.protocol) {
         if (this.port == uri.port) {
@@ -225,12 +233,12 @@
     },
 
     /**
-		 * Converts a absolute path into a relative path.
-		 *
-		 * @method toRelPath
-		 * @param {String} base Base point to convert the path from.
-		 * @param {String} path Absolute path to convert into a relative path.
-		 */
+     * Converts a absolute path into a relative path.
+     *
+     * @method toRelPath
+     * @param {String} base Base point to convert the path from.
+     * @param {String} path Absolute path to convert into a relative path.
+     */
     toRelPath: function (base, path) {
       var items, breakPoint = 0,
         out = '',
@@ -279,12 +287,12 @@
     },
 
     /**
-		 * Converts a relative path into a absolute path.
-		 *
-		 * @method toAbsPath
-		 * @param {String} base Base point to convert the path from.
-		 * @param {String} path Relative path to convert into an absolute path.
-		 */
+     * Converts a relative path into a absolute path.
+     *
+     * @method toAbsPath
+     * @param {String} base Base point to convert the path from.
+     * @param {String} path Relative path to convert into an absolute path.
+     */
     toAbsPath: function (base, path) {
       var i, nb = 0,
         o = [],
@@ -349,11 +357,11 @@
     },
 
     /**
-		 * Returns the full URI of the internal structure.
-		 *
-		 * @method getURI
-		 * @param {Boolean} noProtoHost Optional no host and protocol part. Defaults to false.
-		 */
+     * Returns the full URI of the internal structure.
+     *
+     * @method getURI
+     * @param {Boolean} noProtoHost Optional no host and protocol part. Defaults to false.
+     */
     getURI: function (noProtoHost) {
       var s, self = this;
 
@@ -400,6 +408,25 @@
     }
   });
 
+  var blockSvgDataUris = function (allowSvgDataUrls, tagName) {
+    if (isNonNullable(allowSvgDataUrls)) {
+      return !allowSvgDataUrls;
+    } else {
+      // Only allow SVGs by default on images/videos since the browser won't execute scripts on those elements
+      return isNonNullable(tagName) ? tinymce.inArray(safeSvgDataUrlElements, tagName) == -1 : true;
+    }
+  };
+
+  var isInvalidUri = function (settings, uri, tagName) {
+    if (settings.allow_html_data_urls) {
+      return false;
+    } else if (/^data:image\//i.test(uri)) {
+      return blockSvgDataUris(settings.allow_svg_data_urls, tagName) && /^data:image\/svg\+xml/i.test(uri);
+    } else {
+      return /^data:/i.test(uri);
+    }
+  };
+
   tinymce.util.URI.parseDataUri = function (uri) {
     var type, matches;
 
@@ -435,5 +462,40 @@
     }
 
     return baseUrl;
+  };
+
+  /**
+   * Check to see if a URI is safe to use in the Document Object Model (DOM). This will return
+   * true if the URI can be used in the DOM without potentially triggering a security issue.
+   *
+   * @method isDomSafe
+   * @static
+   * @param {String} uri The URI to be validated.
+   * @param {Object} context An optional HTML tag name where the element is being used.
+   * @param {Object} options An optional set of options to use when determining if the URI is safe.
+   * @return {Boolean} True if the URI is safe, otherwise false.
+   */
+  tinymce.util.URI.isDomSafe = function (uri, context, options) {
+    if (options.allow_script_urls) {
+      return true;
+    } else {
+      // eslint-disable-next-line no-control-regex
+      let decodedUri = tinymce.html.Entities.decode(uri).replace(/[\s\u0000-\u001F]+/g, '');
+
+      try {
+        // Might throw malformed URI sequence
+        decodedUri = decodeURIComponent(decodedUri);
+      } catch (ex) {
+        // Fallback to non UTF-8 decoder
+        decodedUri = unescape(decodedUri);
+      }
+
+      // Ensure we don't have a javascript URI, as that is not safe since it allows arbitrary JavaScript execution
+      if (/((java|vb)script|mhtml):/i.test(decodedUri)) {
+        return false;
+      }
+
+      return !isInvalidUri(options, decodedUri, context);
+    }
   };
 })(tinymce);
