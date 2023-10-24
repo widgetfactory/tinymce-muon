@@ -44,7 +44,9 @@ import './src/dom/Dimensions.js';
 
 import './src/dom/RangeUtils.js';
 
-import './src/dom/MousePosition';
+import './src/dom/MousePosition.js';
+
+import './src/dom/TrimBody.js';
 
 // tinymce.text.*
 import './src/text/ExtendingChar.js';
