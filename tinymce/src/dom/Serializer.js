@@ -42,6 +42,8 @@
     settings.entity_encoding = settings.entity_encoding || 'named';
     settings.remove_trailing_brs = "remove_trailing_brs" in settings ? settings.remove_trailing_brs : true;
 
+    var tempAttrs = ['data-mce-selected'];
+
     /**
      * IE 11 has a fantastic bug where it will produce two trailing BR elements to iframe bodies when
      * the iframe is hidden by display: none on a parent container. The DOM is actually out of sync
@@ -491,6 +493,24 @@
        */
       setRules: function (rules) {
         schema.setValidElements(rules);
+      },
+
+      addTempAttr: function (name) {
+        if (tinymce.inArray(tempAttrs, name) === -1) {
+          htmlParser.addAttributeFilter(name, function (nodes, name) {
+            var i = nodes.length;
+
+            while (i--) {
+              nodes[i].attr(name, null);
+            }
+          });
+
+          tempAttrs.push(name);
+        }
+      },
+
+      getTempAttrs: function () {
+        return tempAttrs;
       }
     };
   };
