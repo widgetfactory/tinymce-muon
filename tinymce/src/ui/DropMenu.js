@@ -190,6 +190,10 @@
     selectItem: function (item, state) {
       var self = this;
 
+      if (!item) {
+        return false;
+      }
+
       item.setSelected(state);
 
       if (state) {
