@@ -647,6 +647,8 @@
             autofocus: true,
             onsubmit: function () {
               var value = DOM.getValue(self.editor.id + '_prompt_input');
+              // encode
+              value = DOM.encode(value);
 
               if (cb) {
                 cb.call(s || self, value);
