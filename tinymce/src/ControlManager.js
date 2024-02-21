@@ -11,7 +11,8 @@
 
 (function (tinymce) {
   // Shorten names
-  var Event = tinymce.dom.Event,
+  var DOM = tinymce.DOM,
+  Event = tinymce.dom.Event,
     each = tinymce.each,
     extend = tinymce.extend,
     PreviewCss = tinymce.util.PreviewCss;
@@ -307,7 +308,8 @@
         max_height: 384,
         combobox: true,
         multiple: true,
-        seperator: ' '
+        seperator: ' ',
+        menu_class: 'mceStylesBoxMenu'
       }, s || {});
 
       function loadClasses(ctrl) {
