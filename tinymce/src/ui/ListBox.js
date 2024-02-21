@@ -531,8 +531,10 @@
       var self = this,
         menu;
 
+        var cls = this.classPrefix + 'Menu' + (this.settings.menu_class ? ' ' + this.settings.menu_class : '');
+
       menu = this.settings.control_manager.createDropMenu(this.id + '_menu', {
-        class: this.classPrefix + 'Menu',
+        class: cls,
         max_width: this.settings.max_width || 250,
         max_height: this.settings.max_height || '',
         filter: !!this.settings.filter,
