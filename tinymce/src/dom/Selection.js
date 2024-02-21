@@ -779,7 +779,7 @@
      */
     setRng: function (rng, forward) {
       var self = this,
-        sel, node;
+        sel, node, doc = self.win.document;
 
       if (!rng) {
         return;
@@ -811,7 +811,11 @@
 
         try {
           sel.removeAllRanges();
-          sel.addRange(rng);
+
+          if (doc.contains(rng.startContainer)) {
+            sel.addRange(rng);
+          }
+          
         } catch (ex) {
           // IE might throw errors here if the editor is within a hidden container and selection is changed
         }
