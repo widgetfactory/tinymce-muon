@@ -320,6 +320,7 @@
         return this.editors;
       }
 
+      // eslint-disable-next-line no-prototype-builtins
       if (!this.editors.hasOwnProperty(id)) {
         return undef;
       }

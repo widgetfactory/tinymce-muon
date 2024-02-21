@@ -546,6 +546,7 @@
       o += '<' + n;
 
       for (k in a) {
+        // eslint-disable-next-line no-prototype-builtins
         if (a.hasOwnProperty(k) && a[k] != '') {
           o += ' ' + k + '="' + self.encode(a[k]) + '"';
         }
