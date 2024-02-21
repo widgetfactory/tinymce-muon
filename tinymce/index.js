@@ -1,6 +1,7 @@
 import './src/tinymce.js';
 // tinymce.util.*
-import './src/util/Uuid';
+import './src/util/Env.js';
+import './src/util/Uuid.js';
 import './src/util/Delay.js';
 import './src/util/Dispatcher.js';
 import './src/util/URI.js';
