@@ -81,17 +81,22 @@ var getData = function (editor) {
     };
 };
 
+var isTableSelection = function (editor) {
+    return !!editor.dom.getParent(editor.selection.getStart(), 'td.mceSelected,th.mceSelected', editor.getBody());
+};
+
+var hasSelectedContent = function (editor) {
+    return !editor.selection.isCollapsed() || isTableSelection(editor);
+};
+
 var cut = function (editor, evt) {
-    
-    if (evt.isDefaultPrevented()) {
-        return;
-    }
-    
-    if (editor.selection.isCollapsed() === false) {
+    if (!evt.isDefaultPrevented() && hasSelectedContent(editor)) {
         setClipboardData(evt, getData(editor), fallback(editor), function () {
+            var rng = editor.selection.getRng();
             // Chrome fails to execCommand from another execCommand with this message:
             // "We don't execute document.execCommand() this time, because it is called recursively.""
             setTimeout(function () { // detach
+                editor.selection.setRng(rng);
                 editor.execCommand('Delete');
             }, 0);
         });
@@ -99,11 +104,7 @@ var cut = function (editor, evt) {
 };
 
 var copy = function (editor, evt) {
-    if (evt.isDefaultPrevented()) {
-        return;
-    }
-    
-    if (editor.selection.isCollapsed() === false) {
+    if (!evt.isDefaultPrevented() && hasSelectedContent(editor)) {
         setClipboardData(evt, getData(editor), fallback(editor), noop);
     }
 };
