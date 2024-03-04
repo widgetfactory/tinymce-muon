@@ -93,12 +93,16 @@
 		DOM.remove('test');
 	});
 
-	test('removeClass', 4, function() {
+	test('removeClass', 5, function() {
 		DOM.add(document.body, 'div', {id : 'test'});
 
 		DOM.get('test').className = 'abc 123 xyz';
 		DOM.removeClass('test', '123');
 		equal(DOM.get('test').className, 'abc xyz');
+
+		DOM.get('test').className = 'abc 123 xyz';
+		DOM.removeClass('test', '123 xyz');
+		equal(DOM.get('test').className, 'abc');
 
 		DOM.get('test').innerHTML = '<span id="test2" class="test1"></span><span id="test3" class="test test1 test"></span><span id="test4" class="test1 test"></span>';
 		DOM.removeClass(DOM.select('span', 'test'), 'test1');
