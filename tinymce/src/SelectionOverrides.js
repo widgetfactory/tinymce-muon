@@ -971,7 +971,8 @@
 
       range = dom.createRng();
 
-      dom.empty($realSelectionContainer);
+      //dom.empty($realSelectionContainer);
+      $realSelectionContainer.innerHTML = '';
 
       $realSelectionContainer.appendChild(document.createTextNode('\u00a0'));
       $realSelectionContainer.appendChild(targetClone);
