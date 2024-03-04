@@ -19,6 +19,18 @@
     simpleSelectorRe = /^([a-z0-9],?)+$/i,
     whiteSpaceRegExp = /^[ \t\r\n]*$/;
 
+  function stringToArray(value) {
+    if (Array.isArray(value)) {
+      return value;
+    }
+
+    if (typeof value === "string") {
+      return value.split(' ');
+    }
+
+    return [];
+  }
+
   /**
    * Utility class for various DOM manipulation and retrival functions.
    *
@@ -161,7 +173,7 @@
       var self = this,
         s = self.settings;
 
-        return (s && self.get(s.root_element)) || self.doc.body;
+      return (s && self.get(s.root_element)) || self.doc.body;
     },
 
     /**
@@ -1288,21 +1300,9 @@
         return '';
       }
 
-      function valueToArray(value) {
-        if (Array.isArray(value)) {
-          return value;
-        }
-
-        if (typeof value === "string") {
-          return value.split(' ');
-        }
-
-        return [];
-      }
+      var values = stringToArray(c);
 
       return this.run(e, function (e) {
-        var values = valueToArray(c);
-
         each(values, function (cls) {
           // remove whitespace
           cls.trim();
@@ -1336,8 +1336,24 @@
     removeClass: function (e, c) {
       var self = this;
 
+      if (!c) {
+        return '';
+      }
+
+      var values = stringToArray(c);
+
       return self.run(e, function (e) {
-        e.classList.remove(c);
+        each(values, function (cls) {
+          // remove whitespace
+          cls.trim();
+
+          // skip empty value
+          if (!cls) {
+            return true;
+          }
+
+          e.classList.remove(cls);
+        });
 
         // Empty class attr
         if (!e.className) {
