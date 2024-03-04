@@ -7,7 +7,8 @@ var each = tinymce.each,
     VK = tinymce.VK,
     DomParser = tinymce.html.DomParser,
     Serializer = tinymce.html.Serializer,
-    BlobCache = tinymce.file.BlobCache;
+    BlobCache = tinymce.file.BlobCache,
+    Env = tinymce.util.Env;
 
 // IE flag to include Edge
 var isIE = tinymce.isIE || tinymce.isIE12;
@@ -418,7 +419,7 @@ function pasteImageData(editor, e, lastRng) {
 
                         reader.readAsDataURL(blob);
                     } else {
-                        pasteHtml(editor, '<img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-mce-upload-marker="1" />', true);
+                        pasteHtml(editor, '<img src="' + Env.transparentSrc + '" data-mce-upload-marker="1" />', true);
                     }
                 }
             }
