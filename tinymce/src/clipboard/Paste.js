@@ -306,6 +306,10 @@ function pasteHtml(editor, content, internal, pasteAsPlainText) {
 
     editor.onPasteBeforeInsert.dispatch(editor, o);
 
+    if (o.terminate) {
+        return;
+    }
+
     insertData(editor, o.content);
 }
 
