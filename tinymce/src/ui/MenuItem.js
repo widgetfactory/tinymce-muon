@@ -39,7 +39,7 @@
 		 */
 		setSelected: function (state) {
 			this.setState('Selected', state);
-			this.setAriaProperty('checked', !!state);
+			this.setAriaProperty('selected', !!state);
 			this.selected = state;
 		},
 
@@ -61,6 +61,21 @@
 		 */
 		postRender: function () {
 			this._super();
+
+			var state;
+
+			// Set pending states
+			if (tinymce.is(this.disabled)) {
+				state = this.disabled;
+				this.disabled = -1;
+				this.setDisabled(state);
+			}
+
+			if (tinymce.is(this.active)) {
+				state = this.active;
+				this.active = -1;
+				this.setActive(state);
+			}
 
 			// Set pending state
 			if (tinymce.is(this.selected)) {

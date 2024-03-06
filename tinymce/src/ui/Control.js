@@ -46,7 +46,7 @@
       var element = DOM.get(this.id + '_aria') || DOM.get(this.id);
 
       if (element) {
-        DOM.setAttrib(element, 'aria-' + property, !!value);
+        element.setAttribute('aria-' + property, '' + !!value);
       }
     },
 
@@ -94,7 +94,7 @@
       if (s != this.active) {
         this.setState('Active', s);
         this.active = s;
-        this.setAriaProperty('pressed', s);
+        this.setAriaProperty('current', s);
       }
     },
 
@@ -181,8 +181,6 @@
         this.active = -1;
         this.setActive(state);
       }
-
-      this._elm = DOM.get(this.id);
 
       this.onRender.dispatch();
     },
