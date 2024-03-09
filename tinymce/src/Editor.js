@@ -610,7 +610,8 @@
         self.onLoad.dispatch();
       };
 
-      DOM.setAttrib(ifr, "src", url || 'about:blank');
+      // remove src attribute
+      //DOM.setAttrib(ifr, "src", url || '');
 
       self.contentAreaContainer = o.iframeContainer;
 

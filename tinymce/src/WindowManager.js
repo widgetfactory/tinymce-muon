@@ -511,7 +511,7 @@
 
       Event.clear(id);
       Event.clear(id + '_ifr');
-      DOM.setAttrib(id + '_ifr', 'src', 'about:blank'); // Prevent leak
+      //DOM.setAttrib(id + '_ifr', 'src', 'about:blank'); // Prevent leak
 
       // remove frame
       DOM.remove(id + '_frame');
