@@ -38,6 +38,7 @@
     self.schema = schema = schema || new tinymce.html.Schema();
     self.writer = writer;
 
+    var boolAttrMap = schema.getBoolAttrs();
     /**
 		 * Serializes the specified node into a string.
 		 *
@@ -116,9 +117,11 @@
               if (attrName in attrs.map) {
                 attrValue = attrs.map[attrName];
                 sortedAttrs.map[attrName] = attrValue;
+
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue
+                  value: attrValue,
+                  "boolean": boolAttrMap[attrName] ? true : false
                 });
               }
             }
@@ -129,9 +132,11 @@
               if (!(attrName in sortedAttrs.map)) {
                 attrValue = attrs.map[attrName];
                 sortedAttrs.map[attrName] = attrValue;
+
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue
+                  value: attrValue,
+                  "boolean": boolAttrMap[attrName] ? true : false
                 });
               }
             }
