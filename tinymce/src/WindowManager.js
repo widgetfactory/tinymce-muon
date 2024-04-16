@@ -142,7 +142,8 @@
       var html = '' +
         '<div class="mceModalBody" id="' + id + '" dir="' + ed.settings.skin_directionality + '">' +
         '   <div class="mceModalContainer">' +
-        '       <div class="mceModalHeader" id="' + id + '_header">' +
+        '       <div class="mceModalHeader" id="' + id + '_header">' + 
+        //'            <div class="mceModalLogo">' + (ed.settings.logo || '') + '</div>' +
         '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
         '           <button class="mceModalClose" type="button" title="' + ed.getLang('close', 'Close') + '"></button>' +
         '       </div>' +
@@ -558,11 +559,19 @@
      *       tinyMCE.activeEditor.windowManager.alert("Cancel");
      * });
      */
-    confirm: function (txt, cb, s) {
+    confirm: function (options, cb, s) {
       var self = this;
 
+      if (tinymce.is(options, 'string')) {
+        options = { text: options };
+      }
+
+      options = tinymce.extend({
+        title: ''
+      }, options);
+
       self.open({
-        title: '',
+        title: self.editor.getLang(options.title, options.title),
         type: 'confirm',
         buttons: [
           {
@@ -581,7 +590,7 @@
             }
           }
         ],
-        content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
+        content: '<p>' + DOM.encode(self.editor.getLang(options.text, options.text)) + '</p>'
       });
     },
 
@@ -589,18 +598,26 @@
      * Creates a alert dialog
      *
      * @method alert
-     * @param {String} t Title for the new alert dialog.
+     * @param {String} options Text of options object.
      * @param {function} cb Callback function to be executed after the user has selected ok.
      * @param {Object} s Optional scope to execute the callback in.
      * @example
      * // Displays an alert box using the active editors window manager instance
      * tinyMCE.activeEditor.windowManager.alert('Hello world!');
      */
-    alert: function (txt, cb, s) {
+    alert: function (options, cb, s) {
       var self = this;
 
+      if (tinymce.is(options, 'string')) {
+        options = { text: options };
+      }
+
+      options = tinymce.extend({
+        title: ''
+      }, options);
+
       self.open({
-        title: '',
+        title: self.editor.getLang(options.title, options.title),
         type: 'alert',
         buttons: [
           {
@@ -619,12 +636,20 @@
             }
           }
         ],
-        content: '<p>' + DOM.encode(self.editor.getLang(txt, txt)) + '</p>'
+        content: '<p>' + DOM.encode(self.editor.getLang(options.text, options.text)) + '</p>'
       });
     },
 
-    prompt: function (txt, cb, s) {
+    prompt: function (options, cb, s) {
       var self = this;
+
+      if (tinymce.is(options, 'string')) {
+        options = { text: options };
+      }
+
+      options = tinymce.extend({
+        title: ''
+      }, options);
 
       var html = '<div class="mceModalRow">' +
         '   <div class="mceModalControl">' +
@@ -633,7 +658,7 @@
         '</div>';
 
       self.open({
-        title: '',
+        title: self.editor.getLang(options.title, options.title),
         type: 'prompt',
         buttons: [
           {
