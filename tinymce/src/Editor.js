@@ -363,8 +363,10 @@
         });
 
         each(s.external_plugins, function (url, name) {
-          PluginManager.load(name, url);
-          s.plugins += ',' + name;
+          if (url) {
+            PluginManager.load(name, url);
+            s.plugins += ',' + name;
+          }
         });
 
         // Init when que is loaded
