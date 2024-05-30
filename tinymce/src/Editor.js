@@ -1808,6 +1808,10 @@
       return args.content;
     },
 
+    insertContent: function (value) {
+      this.execCommand('mceInsertContent', false, value);
+    },
+
     getSelection: function () {
       return this.selection.getContent();
     },
