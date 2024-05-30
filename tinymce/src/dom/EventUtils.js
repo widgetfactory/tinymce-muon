@@ -470,6 +470,8 @@ tinymce.dom = {};
         target = target.parentNode || target.ownerDocument || target.defaultView || target.parentWindow;
       } while (target && !args.isPropagationStopped());
 
+      self.args = args;
+
       return self;
     };
 
@@ -590,6 +592,16 @@ tinymce.dom = {};
       }
 
       return self.clean(target);
+    };
+
+    self.preventDefault = function (e) {
+      if (e) {
+        e.preventDefault();
+      }
+    };
+
+    self.isDefaultPrevented = function (e) {
+      return e.isDefaultPrevented();
     };
   }
 
