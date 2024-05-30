@@ -672,6 +672,16 @@
 
       handleTouchSelect(editor);
 
+      /*function isXYWithinRange(clientX, clientY, range) {
+        if (range.collapsed) {
+          return false;
+        }
+
+        return Arr.reduce(range.getClientRects(), function (state, rect) {
+          return state || CaretUtils.containsXY(rect, clientX, clientY);
+        }, false);
+      }*/
+
       editor.onMouseDown.add(function (editor, e) {
         var contentEditableRoot;
 
@@ -681,8 +691,6 @@
           if (isContentEditableFalse(contentEditableRoot)) {
             e.preventDefault();
             setContentEditableSelection(selectNode(contentEditableRoot));
-
-
           } else {
             /*if (!isXYWithinRange(e.clientX, e.clientY, editor.selection.getRng())) {
               editor.selection.placeCaretAt(e.clientX, e.clientY);
@@ -915,7 +923,8 @@
           caretPosition = getNormalizedRangeEndPoint(1, range);
 
           if (isContentEditableFalse(caretPosition.getNode())) {
-            return showCaret(1, caretPosition.getNode(), !caretPosition.isAtEnd());
+            //return showCaret(1, caretPosition.getNode(), !caretPosition.isAtEnd());
+            return showCaret(1, caretPosition.getNode(), false);
           }
 
           if (isContentEditableFalse(caretPosition.getNode(true))) {
