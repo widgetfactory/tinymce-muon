@@ -371,7 +371,7 @@
   var processValue = function (value) {
     var details;
 
-    if (typeof value !== 'string') {
+    if (value && typeof value !== 'string') {      
       details = tinymce.extend({
         paste: value.paste,
         data: {
