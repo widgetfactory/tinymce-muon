@@ -75,7 +75,7 @@
       return calculatePosition(getBodyPosition(editor), getScrollPosition(editor), getMousePosition(editor, event));
     };
 
-    return {
+    tinymce.dom.MousePosition = {
       calc: calc
     };
 })(tinymce);
