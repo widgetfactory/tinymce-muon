@@ -160,7 +160,8 @@
 
       if (hasDraggableElement(state) && !state.dragging && movement > 10) {
         var args = editor.dom.fire(editor.getBody(), 'dragstart', { target: state.element });
-        if (args.isDefaultPrevented()) {
+
+        if (args.preventDefault(e)) {
           return;
         }
 
@@ -168,7 +169,7 @@
         editor.focus();
       }
 
-      if (state.dragging) {
+      if (state.dragging) {        
         var targetPos = applyRelPos(state, MousePosition.calc(editor, e));
 
         appendGhostToBody(state.ghost, editor.getBody());
@@ -192,20 +193,20 @@
         if (isValidDropTarget(editor, getRawTarget(editor.selection), state.element)) {
           var targetClone = cloneElement(state.element);
 
-          var args = editor.dom.fire(editor.getBody(), 'drop', {
+          var evt = editor.dom.fire(editor.getBody(), 'drop', {
             targetClone: targetClone,
             clientX: e.clientX,
             clientY: e.clientY
           });
 
-          if (!args.isDefaultPrevented()) {
-            targetClone = args.targetClone;
+          if (!evt.isDefaultPrevented(e)) {
+            targetClone = evt.args.targetClone;
 
-            editor.undoManager.transact(function () {
-              removeElement(state.element);
-              editor.insertContent(editor.dom.getOuterHTML(targetClone));
-              editor._selectionOverrides.hideFakeCaret();
-            });
+            editor.undoManager.add();
+
+            removeElement(state.element);
+            editor.insertContent(editor.dom.getOuterHTML(targetClone));
+            editor._selectionOverrides.hideFakeCaret();
           }
         }
       }
