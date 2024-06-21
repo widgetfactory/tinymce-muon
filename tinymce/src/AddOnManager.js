@@ -63,11 +63,11 @@
 		 * @param {String} n Short name of the add-on.
 		 */
     requireLangPack: function (n) {
-      var s = tinymce.settings;
+      /*var s = tinymce.settings;
 
       if (s && s.language && s.language_load !== false) {
         tinymce.ScriptLoader.add(this.urls[n] + '/langs/' + s.language + '.js');
-      }
+      }*/
     },
 
     /**

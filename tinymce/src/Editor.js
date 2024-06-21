@@ -330,10 +330,6 @@
 
       // Load scripts
       function loadScripts() {
-        if (s.language && s.language_load !== false) {
-          sl.add(tinymce.baseURL + '/langs/' + s.language + '.js');
-        }
-
         if (s.theme && typeof s.theme != "function" && s.theme.charAt(0) != '-' && !ThemeManager.urls[s.theme]) {
           ThemeManager.load(s.theme, 'themes/' + s.theme + '/theme' + tinymce.suffix + '.js');
         }
