@@ -145,7 +145,7 @@
         '       <div class="mceModalHeader" id="' + id + '_header">' + 
         //'            <div class="mceModalLogo">' + (ed.settings.logo || '') + '</div>' +
         '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
-        '           <button class="mceModalClose" type="button" title="' + ed.getLang('close', 'Close') + '"></button>' +
+        '           <button class="mceModalClose" type="button" title="' + ed.getLang('close', 'Close') + '" aria-label="' + ed.getLang('close', 'Close') + '"></button>' +
         '       </div>' +
         '       <div class="mceModalContent" id="' + id + '_content"></div>' +
         '   </div>' +
