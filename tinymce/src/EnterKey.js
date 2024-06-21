@@ -375,7 +375,8 @@
 
           // Find parent that is the first child of parentBlock
           node = container;
-          while (node.parentNode != parentBlock) {
+
+          while (node && node.parentNode != parentBlock) {
             node = node.parentNode;
           }
 
