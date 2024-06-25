@@ -432,8 +432,9 @@
 
           if (po.init) {
             po.init(self, u);
-            initializedPlugins.push(p);
           }
+
+          initializedPlugins.push(p);
         }
       }
 
