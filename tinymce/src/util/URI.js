@@ -32,17 +32,8 @@
    * This class handles parsing, modification and serialization of URI/URL strings.
    * @class tinymce.util.URI
    */
-  tinymce.create('tinymce.util.URI', {
-    /**
-     * Constucts a new URI instance.
-     *
-     * @constructor
-     * @method URI
-     * @param {String} u URI string to parse.
-     * @param {Object} s Optional settings object.
-     */
-    URI: function (url, settings) {
-      var self = this,
+  tinymce.util.URI = function (url, settings) {
+    var self = this,
         baseUri, base_url;
 
       url = trim(url);
@@ -115,8 +106,9 @@
       if (isProtocolRelative) {
         self.protocol = '';
       }
-    },
+  };
 
+  tinymce.util.URI.prototype = {
     /**
      * Sets the internal path part of the URI.
      *
@@ -406,7 +398,7 @@
 
       return self.source;
     }
-  });
+  };
 
   var blockSvgDataUris = function (allowSvgDataUrls, tagName) {
     if (isNonNullable(allowSvgDataUrls)) {

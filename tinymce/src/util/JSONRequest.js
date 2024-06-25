@@ -15,51 +15,44 @@
     XHR = tinymce.util.XHR;
 
   /**
-	 * This class enables you to use JSON-RPC to call backend methods.
-	 *
-	 * @class tinymce.util.JSONRequest
-	 * @example
-	 * var json = new tinymce.util.JSONRequest({
-	 * 		url : 'somebackend.php'
-	 * });
-	 *
-	 * // Send RPC call 1
-	 * json.send({
-	 *     method : 'someMethod1',
-	 *     params : ['a', 'b'],
-	 *     success : function(result) {
-	 *         console.dir(result);
-	 * 	   }
-	 * });
-	 *
-	 * // Send RPC call 2
-	 * json.send({
-	 *     method : 'someMethod2',
-	 *     params : ['a', 'b'],
-	 *     success : function(result) {
-	 *         console.dir(result);
-	 *     }
-	 * });
-	 */
-  tinymce.create('tinymce.util.JSONRequest', {
-    /**
-		 * Constructs a new JSONRequest instance.
-		 *
-		 * @constructor
-		 * @method JSONRequest
-		 * @param {Object} s Optional settings object.
-		 */
-    JSONRequest: function (s) {
-      this.settings = extend({}, s);
-      this.count = 0;
-    },
+   * This class enables you to use JSON-RPC to call backend methods.
+   *
+   * @class tinymce.util.JSONRequest
+   * @example
+   * var json = new tinymce.util.JSONRequest({
+   * 		url : 'somebackend.php'
+   * });
+   *
+   * // Send RPC call 1
+   * json.send({
+   *     method : 'someMethod1',
+   *     params : ['a', 'b'],
+   *     success : function(result) {
+   *         console.dir(result);
+   * 	   }
+   * });
+   *
+   * // Send RPC call 2
+   * json.send({
+   *     method : 'someMethod2',
+   *     params : ['a', 'b'],
+   *     success : function(result) {
+   *         console.dir(result);
+   *     }
+   * });
+   */
+  tinymce.util.JSONRequest = function (settings) {
+    this.settings = extend({}, settings);
+    this.count = 0;
+  };
 
+  tinymce.util.JSONRequest.prototype = {
     /**
-		 * Sends a JSON-RPC call. Consult the Wiki API documentation for more details on what you can pass to this function.
-		 *
-		 * @method send
-		 * @param {Object} o Call object where there are three field id, method and params this object should also contain callbacks etc.
-		 */
+     * Sends a JSON-RPC call. Consult the Wiki API documentation for more details on what you can pass to this function.
+     *
+     * @method send
+     * @param {Object} o Call object where there are three field id, method and params this object should also contain callbacks etc.
+     */
     send: function (o) {
       var ecb = o.error,
         scb = o.success;
@@ -98,20 +91,19 @@
       o.content_type = 'application/json';
 
       XHR.send(o);
-    },
-
-    'static': {
-      /**
-			 * Simple helper function to send a JSON-RPC request without the need to initialize an object.
-			 * Consult the Wiki API documentation for more details on what you can pass to this function.
-			 *
-			 * @method sendRPC
-			 * @static
-			 * @param {Object} o Call object where there are three field id, method and params this object should also contain callbacks etc.
-			 */
-      sendRPC: function (o) {
-        return new tinymce.util.JSONRequest().send(o);
-      }
     }
-  });
+  };
+
+  /**
+       * Simple helper function to send a JSON-RPC request without the need to initialize an object.
+       * Consult the Wiki API documentation for more details on what you can pass to this function.
+       *
+       * @method sendRPC
+       * @static
+       * @param {Object} o Call object where there are three field id, method and params this object should also contain callbacks etc.
+       */
+  tinymce.util.JSONRequest.sendRPC = function (o) {
+    return new tinymce.util.JSONRequest().send(o);
+  };
+
 })(tinymce);

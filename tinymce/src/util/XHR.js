@@ -22,7 +22,7 @@
  *    }
  * });
  */
-tinymce.create('static tinymce.util.XHR', {
+tinymce.util.XHR = {
   /**
      * Sends a XMLHTTPRequest.
      * Consult the Wiki for details on what settings this method takes.
@@ -79,4 +79,4 @@ tinymce.create('static tinymce.util.XHR', {
       window.setTimeout(ready, 10);
     }
   }
-});
+};

@@ -21,23 +21,16 @@
  * // Dispatch/fire the event
  * this.onSomething.dispatch('some string');
  */
-tinymce.create('tinymce.util.Dispatcher', {
-  scope: null,
-  listeners: null,
-  inDispatch: false,
 
-  /**
-     * Constructs a new event dispatcher object.
-     *
-     * @constructor
-     * @method Dispatcher
-     * @param {Object} scope Optional default execution scope for all observer functions.
-     */
-  Dispatcher: function (scope) {
-    this.scope = scope || this;
-    this.listeners = [];
-  },
+tinymce.util.Dispatcher = function (scope) {
+  var self = this;
 
+  self.scope = scope || self;
+  self.listeners = [];
+  self.inDispatch = false;
+};
+
+tinymce.util.Dispatcher.prototype = {
   /**
      * Add an observer function to be executed when a dispatch call is done.
      *
@@ -132,6 +125,4 @@ tinymce.create('tinymce.util.Dispatcher', {
 
     return returnValue;
   }
-
-  /**#@-*/
-});
+};

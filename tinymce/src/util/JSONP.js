@@ -9,10 +9,9 @@
  * Contributing: http://www.tinymce.com/contributing - Inactive
  */
 
-tinymce.create('static tinymce.util.JSONP', {
+tinymce.util.JSOP = {
   callbacks: {},
   count: 0,
-
   send: function (o) {
     var self = this,
       dom = tinymce.DOM,
@@ -33,4 +32,4 @@ tinymce.create('static tinymce.util.JSONP', {
 
     this.count++;
   }
-});
+};

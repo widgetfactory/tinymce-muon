@@ -25,7 +25,7 @@
      * // Sets a hash table cookie to the browser
      * tinymce.util.Storage.setHash({x : '1', y : '2'});
      */
-  tinymce.create('static tinymce.util.Storage', {
+  tinymce.util.Storage = {
     /**
       * Parses the specified query string into an name/value object.
       *
@@ -108,9 +108,9 @@
 
       sessionStorage.setItem(n, v);
     }
-  });
+  };
 
-  tinymce.create('static tinymce.util.Cookie', {
+  tinymce.util.Cookie = {
     getHash: function (n) {
       return tinymce.util.Storage.getHash(n);
     },
@@ -126,5 +126,5 @@
     set: function (n, v) {
       return tinymce.util.Storage.set(n, v);
     }
-  });
+  };
 })(tinymce);
