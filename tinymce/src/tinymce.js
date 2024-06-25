@@ -841,4 +841,6 @@
    *
    * @namespace tinymce.plugins
    */
+
+  tinymce.plugins = {};
 })(window);
