@@ -205,46 +205,6 @@
           return [settings.target];
         }
 
-        // Fallback to old setting
-        switch (settings.mode) {
-          case "exact":
-            l = settings.elements || '';
-
-            if (l.length > 0) {
-              each(explode(l), function (id) {
-                var elm;
-
-                if ((elm = DOM.get(id))) {
-                  targets.push(elm);
-                } else {
-                  each(document.forms, function (f) {
-                    each(f.elements, function (e) {
-                      if (e.name === id) {
-                        id = 'mce_editor_' + instanceCounter++;
-                        DOM.setAttrib(e, 'id', id);
-                        targets.push(e);
-                      }
-                    });
-                  });
-                }
-              });
-            }
-            break;
-
-          case "textareas":
-          case "specific_textareas":
-            each(DOM.select('textarea'), function (elm) {
-              if (settings.editor_deselector && hasClass(elm, settings.editor_deselector)) {
-                return;
-              }
-
-              if (!settings.editor_selector || hasClass(elm, settings.editor_selector)) {
-                targets.push(elm);
-              }
-            });
-            break;
-        }
-
         return targets;
       }
 
