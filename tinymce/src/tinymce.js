@@ -805,6 +805,14 @@
   tinymce.caret = {};
 
   /**
+   * Contains various tools for the clipboard.
+   *
+   * @namespace tinymce.clipboard
+   */
+
+  tinymce.clipboard = {};
+
+  /**
    * Contains html parser and serializer logic.
    *
    * @namespace tinymce.html
