@@ -2,6 +2,7 @@ import * as Newlines from './Newlines';
 import * as InternalHtml from './InternalHtml';
 import * as Utils from './Utils';
 import * as WordFilter from './WordFilter';
+import * as FakeClipboard from './FakeClipboard';
 
 var each = tinymce.each,
     VK = tinymce.VK,
@@ -153,6 +154,14 @@ function convertURLs(editor, content) {
  * @return {Object} Object with mime types and data for those mime types.
  */
 function getClipboardContent(editor, clipboardEvent) {
+    if (FakeClipboard.hasData()) {
+        content = FakeClipboard.getData();
+
+        FakeClipboard.clearData();
+
+        return content;
+    }
+    
     var content = Utils.getDataTransferItems(clipboardEvent.clipboardData || clipboardEvent.dataTransfer || editor.getDoc().dataTransfer);
     //var content = getDataTransferItems(clipboardEvent.clipboardData || editor.getDoc().dataTransfer);
 
@@ -579,7 +588,7 @@ var setup = function (editor, pasteBin) {
 
     // Grab contents on paste event
     editor.onPaste.add(function (editor, e) {
-        if (e.isDefaultPrevented() || isBrokenAndroidClipboardEvent(e)) {
+        if (e.isDefaultPrevented() || isBrokenAndroidClipboardEvent(e) && !FakeClipboard.hasData()) {
             pasteBin.remove();
             return false;
         }
@@ -619,7 +628,17 @@ var setup = function (editor, pasteBin) {
             });
         }
     });
+
+    editor.addCommand('mcePasteFakeClipboard', function (ui, e) {
+        var content = FakeClipboard.getData();
+
+        insertClipboardContent(editor, content, true, e.isPlainText === true);
+
+        FakeClipboard.clearData();
+    });
 };
+
+tinymce.clipboard.FakeClipboard = FakeClipboard;
 
 export {
     setup,

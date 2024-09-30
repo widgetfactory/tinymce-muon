@@ -1,4 +1,5 @@
 import * as InternalHtml from './InternalHtml.js';
+import * as FakeClipboard from './FakeClipboard.js';
 
 var noop = function () { };
 
@@ -8,12 +9,19 @@ var hasWorkingClipboardApi = function (clipboardData) {
 };
 
 var setHtml5Clipboard = function (clipboardData, html, text) {
+    // set FakeClipboard data for all instances
+    FakeClipboard.clearData();
+    FakeClipboard.setData('text/html', html);
+    FakeClipboard.setData('text/plain', text);
+    FakeClipboard.setData(InternalHtml.internalHtmlMime(), html);
+    
     if (hasWorkingClipboardApi(clipboardData)) {
         try {
             clipboardData.clearData();
             clipboardData.setData('text/html', html);
             clipboardData.setData('text/plain', text);
             clipboardData.setData(InternalHtml.internalHtmlMime(), html);
+
             return true;
         } catch (e) {
             return false;
