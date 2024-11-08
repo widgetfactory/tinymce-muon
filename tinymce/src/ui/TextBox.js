@@ -133,7 +133,7 @@
           s.button.click.apply(self);
         });
       }
-
+      
       this.onPostRender.dispatch(this, DOM.get(this.id));
     },
 
@@ -146,7 +146,12 @@
      */
     setDisabled: function (state) {
       this._super(state);
-      DOM.get(this.id).disabled = state;
+
+      var elm = DOM.get(this.id);
+
+      if (elm) {
+        elm.disabled = state;
+      }
     },
 
     /**
