@@ -34,6 +34,11 @@
       for (i = 0; i < this.controls.length; i++) {
         var ctrl = this.controls[i], s = ctrl.settings;
 
+        if (s.subtype && s.subtype == 'hidden') {
+          html += ctrl.renderHTML();
+          continue;
+        }
+
         html += '<div class="mceFormRow">';
 
         if (s.label) {
