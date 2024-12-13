@@ -706,6 +706,8 @@
       var top = Math.round(Math.max(vp.y + 10, vp.y + (vp.h / 2.0) - (p.h / 2.0)));
       var left = Math.round(Math.max(vp.x + 10, vp.x + (vp.w / 2.0) - (p.w / 2.0)));
 
+      left = Math.max(0, left - 10);
+
       DOM.setStyles(id, { 'left': left, 'top': top });
     },
 
