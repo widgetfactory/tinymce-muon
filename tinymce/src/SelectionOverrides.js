@@ -1017,8 +1017,17 @@
     }
 
     function destroy() {
+      var dom = editor.dom,
+        $realSelectionContainer;
+      
       fakeCaret.destroy();
       selectedContentEditableNode = null;
+
+      $realSelectionContainer = dom.get(realSelectionId);
+
+      if ($realSelectionContainer) {
+        dom.remove($realSelectionContainer);
+      }
     }
 
     function hideFakeCaret() {
