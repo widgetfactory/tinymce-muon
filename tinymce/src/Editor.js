@@ -1840,6 +1840,9 @@
       args.get = true;
       args.getInner = true;
 
+      self._selectionOverrides.hideFakeCaret();
+      self._selectionOverrides.destroy();
+
       // Do preprocessing
       if (!args.no_events) {
         self.onBeforeGetContent.dispatch(self, args);
