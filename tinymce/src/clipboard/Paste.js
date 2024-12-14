@@ -72,8 +72,11 @@ function convertURLs(editor, content) {
     var ex = '([-!#$%&\'\*\+\\./0-9=?A-Z^_`a-z{|}~]+@[-!#$%&\'\*\+\\/0-9=?A-Z^_`a-z{|}~]+\.[-!#$%&\'*+\\./0-9=?A-Z^_`a-z{|}~]+)';
     var ux = '((?:news|telnet|nttp|file|http|ftp|https)://[-!#$%&\'\*\+\\/0-9=?A-Z^_`a-z{|}~;]+\.[-!#$%&@\'\*\+\\./0-9=?A-Z^_`a-z{|}~;]+)';
 
-    var attribRe = '(?:(?:[a-z0-9_-]+)=["\'])'; // match attribute before url, eg: href="url"
-    var bracketRe = '(?:\}|\].?)'; // match shortcode and markdown, eg: {url} or [url] or [text](url)
+    // Match attribute patterns, e.g., href="url"
+    var attribRe = '(?:[a-zA-Z0-9_-]+=["\'])';
+
+    // Match shortcode/markdown brackets, e.g., {url}, [url], [text](url)
+    var bracketRe = '(?:\}|\].?)';
 
     function createLink(url) {
         // create attribs and decode url to prevent double encoding in dom.createHTML
@@ -86,7 +89,7 @@ function convertURLs(editor, content) {
 
     function wrapContent(content) {
         if (content.indexOf('data-mce-convert="url"') === -1) {
-            return editor.dom.createHTML('div', { 'data-mce-convert': 'url' }, content);
+            return '<div data-mce-convert="url">' + content + '</div>';
         }
 
         return content;
@@ -104,7 +107,7 @@ function convertURLs(editor, content) {
         return content;
     }
 
-    if (editor.settings.autolink_url !== false) {
+    if (editor.settings.autolink_url !== false) {        
         if (new RegExp('^' + ux + '$').test(content)) {
             content = createLink(content);
             return content;
@@ -113,13 +116,13 @@ function convertURLs(editor, content) {
         // wrap content - this seems to be required to prevent repeats of link conversion
         content = wrapContent(content);
 
-        // find and link url if not already linked
+        // Replace URLs with links if not already linked
         content = content.replace(new RegExp('(' + attribRe + '|' + bracketRe + ')?' + ux, 'gi'), function (match, extra, url) {
             if (extra) {
-                return match;
+                return match; // Skip if part of an attribute or shortcode
             }
 
-            // only if not already a link or shortcode
+            // Create a link for the detected URL
             return createLink(url);
         });
     }
@@ -133,13 +136,12 @@ function convertURLs(editor, content) {
         // wrap content - this seems to be required to prevent repeats of link conversion
         content = wrapContent(content);
 
-        content = content.replace(new RegExp('(href=["\']mailto:)*' + ex, 'g'), function (match, attrib, email) {
-            // only if not already a mailto: link
+        content = content.replace(new RegExp('(?:href=["\'][^"\']*["\']|mailto:[^ ]*)?(' + ex + ')', 'g'), function (match, attrib, email) {
+            // Only process if the match is not already part of a link
             if (!attrib) {
                 return '<a href="mailto:' + email + '">' + email + '</a>';
             }
-
-            return match;
+            return match; // Return the original match if it's part of a link
         });
     }
 
@@ -326,7 +328,7 @@ function pasteHtml(editor, content, internal, pasteAsPlainText) {
 function insertClipboardContent(editor, clipboardContent, internal, pasteAsPlainText) {
     var content, isPlainTextHtml;
 
-    editor.onGetClipboardContent.dispatch(editor, clipboardContent);
+    editor.onGetClipboardContent.dispatch(editor, clipboardContent, pasteAsPlainText);
 
     // get html content
     content = clipboardContent['x-tinymce/html'] || clipboardContent['text/html'];
