@@ -105,11 +105,27 @@
       return false;
     },
 
+    show: function (ctrl) {
+      var elm = dom.get(ctrl.id), row = dom.getParent(elm, '.mceFormRow');
+
+      if (row) {
+        row.style.display = '';
+      }
+    },
+
+    hide: function (ctrl) {
+      var elm = dom.get(ctrl.id), row = dom.getParent(elm, '.mceFormRow');
+
+      if (row) {
+        row.style.display = 'none';
+      }
+    },
+
     postRender: function () {
       var i;
-  
+
       this._super();
-  
+
       for (i = 0; i < this.controls.length; i++) {
         this.controls[i].postRender();
       }
