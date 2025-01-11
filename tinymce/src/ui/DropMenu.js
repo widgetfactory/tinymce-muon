@@ -584,7 +584,7 @@
     selectAndClear : function (value) {
       var self = this;
 
-      self.settings.onselect(value);
+      self.settings.onselect.call(self, value);
       self.clearFilterInput();
     },
 
@@ -632,7 +632,7 @@
             }
           } else {
             if (self.settings.onselect) {
-              self.settings.onselect(e.target);
+              self.settings.onselect.call(self, e.target);
             }
             
             self.hideMenu();
