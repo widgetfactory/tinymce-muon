@@ -183,10 +183,10 @@
 
       this._super();
 
-      Event.add(self.id, 'click', function () {
+      Event.add(self.id, 'click', function (evt) {
         if (!self.isDisabled()) {
           if (s.onclick) {
-            s.onclick(self.value);
+            s.onclick(evt, self.value);
           }
 
           self.showMenu();
