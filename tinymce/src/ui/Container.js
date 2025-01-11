@@ -87,5 +87,25 @@ tinymce.create('tinymce.ui.Container:tinymce.ui.Control', {
 	 */
 	get: function (id) {
 		return this.lookup[id];
+	},
+
+	/**
+	 * Returns a control by name from the containers collection.
+	 * @param {String} name Name for the control to retrieve.
+	 * @return {tinymce.ui.Control} Control instance by the specified name or undefined if it wasn't found.
+	 */
+	find: function (name) {
+		var i;
+
+		// Check if it's a id selector
+		if (name.charAt(0) === '#') {
+			return this.get(name.substring(1));
+		}
+
+		for (i = 0; i < this.controls.length; i++) {
+			if (this.controls[i].name === name) {
+				return this.controls[i];
+			}
+		}
 	}
 });
