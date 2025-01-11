@@ -238,6 +238,7 @@
       }
 
       this.select(val);
+      this.settings.onselect.call(this, val);
     },
 
     /**
