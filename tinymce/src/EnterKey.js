@@ -11,7 +11,8 @@
 
 (function (tinymce) {
   var TreeWalker = tinymce.dom.TreeWalker,
-    RangeUtils = tinymce.dom.RangeUtils;
+    RangeUtils = tinymce.dom.RangeUtils,
+    NodeType = tinymce.dom.NodeType;
 
   /**
      * Contains logic for handling the enter key to split/generate block elements.
@@ -311,6 +312,11 @@
           return (isAfterLastNodeInContainer && !start) || (!isAfterLastNodeInContainer && start);
         }
 
+        // Caret can be before/after a contenteditable|false
+        if (NodeType.isContentEditableFalse(container) || (container.previousSibling && NodeType.isContentEditableFalse(container.previousSibling))) {
+          return (isAfterLastNodeInContainer && !start) || (!isAfterLastNodeInContainer && start);
+        }
+
         // Walk the DOM and look for text nodes or non empty elements
         walker = new TreeWalker(container, parentBlock);
 
@@ -596,6 +602,7 @@
         isAfterLastNodeInContainer = offset > container.childNodes.length - 1;
 
         container = container.childNodes[Math.min(offset, container.childNodes.length - 1)] || container;
+
         if (isAfterLastNodeInContainer && container.nodeType == 3) {
           offset = container.nodeValue.length;
         } else {
@@ -693,7 +700,7 @@
         // Insert new block before
         newBlock = parentBlock.parentNode.insertBefore(createNewBlock(), parentBlock);
         renderBlockOnIE(newBlock);
-        moveToCaretPosition(parentBlock);
+        moveToCaretPosition(newBlock);
       } else {
         // Extract after fragment and insert it after the current block
         tmpRng = rng.cloneRange();
