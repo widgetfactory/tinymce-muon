@@ -32,7 +32,7 @@
   function compileSchema(type) {
     var schema = {},
       globalAttributes, blockContent;
-    var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, eventAttributes;
+    var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
 
     function add(name, attributes, children) {
       var ni, i, attributesOrder, args = arguments;
@@ -105,6 +105,11 @@
 
     // Attributes present on all elements
     globalAttributes = split("id accesskey class dir lang style tabindex title");
+
+    microdataAttributes = split("itemprop itemscope itemtype itemid itemref");
+
+    // microdata attributes
+    globalAttributes.push.apply(globalAttributes, microdataAttributes);
 
     // global event attributes
     eventAttributes = split("onclick ondblclick onmousedown " +
