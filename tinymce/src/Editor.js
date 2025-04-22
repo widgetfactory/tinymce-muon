@@ -10,6 +10,7 @@
  */
 
 (function (tinymce) {
+  
   // Shorten these names
   var DOM = tinymce.DOM,
     Event = tinymce.dom.Event,
@@ -416,7 +417,8 @@
         }
       }
 
-      function initPlugin(p) {
+
+      function initPlugin(p) {                
         var c = PluginManager.get(p),
           u = PluginManager.urls[p] || tinymce.documentBaseURL.replace(/\/$/, ''),
           po;
@@ -439,6 +441,10 @@
       }
 
       // Create all plugins
+      if (Array.isArray(s.plugins)) {
+        s.plugins = s.plugins.join(',');
+      }
+
       each(explode(s.plugins.replace(/\-/g, '')), initPlugin);
 
       /**
