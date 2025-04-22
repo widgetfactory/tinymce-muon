@@ -103,6 +103,22 @@
 	 */
   tinymce.onRemoveEditor = new Dispatcher(tinymce);
 
+  tinymce.on = function (name, handler) {
+    name = name.toLowerCase();
+
+    var wrapped = function (ed, arg) {
+      handler({ editor: tinymce.activeEditor });
+    };
+    
+    if (name == 'addeditor') {
+      tinymce.onAddEditor.add(wrapped);
+    }
+
+    if (name == 'removeeditor') {
+      tinymce.onRemoveEditor.add(wrapped);
+    }
+  };
+
   tinymce.EditorManager = extend(tinymce, {
     /**
 		 * Collection of editor instances.
