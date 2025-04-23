@@ -235,6 +235,7 @@
      */
     getContent: function (s) {
       var self = this,
+      ed = self.editor,
         r = self.getRng(),
         e = self.dom.create("body"),
         se = self.getSel(),
@@ -246,6 +247,10 @@
       s.format = s.format || 'html';
       s.forced_root_block = '';
       self.onBeforeGetContent.dispatch(self, s);
+
+      s.selection = true;
+
+      ed.onBeforeGetContent.dispatch(ed, s);
 
       if (s.format == 'text') {
         return self.isCollapsed() ? '' : (r.text || (se.toString ? se.toString() : ''));
@@ -288,6 +293,8 @@
 
       self.onGetContent.dispatch(self, s);
 
+      ed.onGetContent.dispatch(ed, s);
+
       return s.content;
     },
 
@@ -305,6 +312,7 @@
      */
     setContent: function (content, args) {
       var self = this,
+      ed = self.editor,
         rng = self.getRng(),
         caretNode, doc = self.win.document;
 
@@ -314,9 +322,13 @@
       args.set = true;
       args.content = content;
 
+      args.selection = true;
+
       // Dispatch before set content event
       if (!args.no_events) {
-        self.onBeforeSetContent.dispatch(self, args);
+        //self.onBeforeSetContent.dispatch(self, args);
+
+        ed.onBeforeSetContent.dispatch(ed, args);
       }
 
       content = args.content;
@@ -374,7 +386,9 @@
 
       // Dispatch set content event
       if (!args.no_events) {
-        self.onSetContent.dispatch(self, args);
+        //self.onSetContent.dispatch(self, args);
+
+        ed.onSetContent.dispatch(ed, args);
       }
     },
 
