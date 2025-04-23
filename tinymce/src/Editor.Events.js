@@ -12,6 +12,56 @@
 (function (tinymce) {
 	var each = tinymce.each;
 
+	var legacyEventMap = {
+		preinit: 'onPreInit',
+		beforerenderui: 'onBeforeRenderUI',
+		postrender: 'onPostRender',
+		load: 'onLoad',
+		init: 'onInit',
+		remove: 'onRemove',
+		activate: 'onActivate',
+		deactivate: 'onDeactivate',
+		show: 'onShow',
+		hide: 'onHide',
+		click: 'onClick',
+		event: 'onEvent',
+		mouseup: 'onMouseUp',
+		mousedown: 'onMouseDown',
+		dblclick: 'onDblClick',
+		keydown: 'onKeyDown',
+		keyup: 'onKeyUp',
+		keypress: 'onKeyPress',
+		contextmenu: 'onContextMenu',
+		submit: 'onSubmit',
+		reset: 'onReset',
+		paste: 'onPaste',
+		cut: 'onCut',
+		copy: 'onCopy',
+		preprocess: 'onPreProcess',
+		postprocess: 'onPostProcess',
+		beforesetcontent: 'onBeforeSetContent',
+		beforegetcontent: 'onBeforeGetContent',
+		setcontent: 'onSetContent',
+		getcontent: 'onGetContent',
+		loadcontent: 'onLoadContent',
+		savecontent: 'onSaveContent',
+		nodechange: 'onNodeChange',
+		change: 'onChange',
+		beforeexeccmd: 'onBeforeExecCommand',
+		execcmd: 'onExecCommand',
+		undo: 'onUndo',
+		redo: 'onRedo',
+		visualaid: 'onVisualAid',
+		setprogressstate: 'onSetProgressState',
+		setattrib: 'onSetAttrib',
+		selectionchange: 'onSelectionChange',
+		blur: 'onBlur',
+		focus: 'onFocus',
+		focusin: 'onFocusIn',
+		focusout: 'onFocusOut',
+		input: 'onInput'
+	};
+
 	/**
 	 * Creates all event dispatcher instances for the editor instance and also adds
 	 * passthoughs for legacy callback handlers.
@@ -847,7 +897,15 @@
 			 * @event onFocusOut
 			 * @param {tinymce.Editor} sender Editor instance.
 			 */
-			'onFocusOut'
+			'onFocusOut',
+
+			/**
+			 * Fires when the editor input is changed.
+			 *
+			 * @event onInput
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onInput'
 
 		], function (name) {
 			self[name] = new tinymce.util.Dispatcher(self);
@@ -879,6 +937,56 @@
 				}
 			});
 		}
+
+		// proxy "on" function for legacy code
+		self.on = function (name, handler, prepend) {
+			// split into an array by space
+			var names = name.split(' ');
+
+			var names = name.toLowerCase().split(' ');
+			var i = names.length;
+
+			while (i--) {
+				name = names[i];
+
+				var evt = legacyEventMap[name] || name;
+
+				// Wrap the handler so it receives a modern-style event object
+				var wrapped = function (ed, arg) {
+					var eventObj = (typeof arg === 'object' && arg !== null) ? tinymce.extend({ editor: ed }, arg) : { editor: ed, data: arg };
+					handler(eventObj);
+				};
+
+				if (prepend) {
+					self[evt].addToTop(wrapped);
+				} else {
+					self[evt].add(wrapped);
+				}
+			}
+		};
+
+		self.fire = function (name, arg) {
+			name = name.toLocaleLowerCase();
+
+			var evt = legacyEventMap[name] || name;
+
+			// Wrap the arg to simulate modern signature
+			var eventObj = (typeof arg === 'object' && arg !== null) ? tinymce.extend({ editor: self }, arg) : { editor: self, data: arg };
+
+			self[evt].dispatch(self, eventObj);
+		};
+
+		self.off = function (name, handler) {
+			name = name.toLocaleLowerCase();
+
+			var evt = legacyEventMap[name] || name;
+
+			if (handler) {
+				self[evt].remove(handler);
+			} else {
+				self[evt].removeAll();
+			}
+		};
 	};
 
 	/**
@@ -907,7 +1015,8 @@
 			copy: 'onCopy',
 			selectionchange: 'onSelectionChange',
 			focusin: 'onFocusIn',
-			focusout: 'onFocusOut'
+			focusout: 'onFocusOut',
+			input: 'onInput'
 		};
 
 		// Handler that takes a native event and sends it out to a dispatcher like onKeyDown
