@@ -72,14 +72,19 @@ tinymce.html.Writer = function (settings, schema) {
           attr = attrs[i];
 
           if (attr["boolean"]) {
-            if (settings.schema == 'html5-strict') {
+            if (settings.schema != 'html4') {
               // boolean attributes in HTML5 are written without a value
               bool.push(' ', attr.name);
             } else {
               bool.push(' ', attr.name, '="', encode('' + attr.name, true), '"');
             }
           } else {
-            html.push(' ', attr.name, '="', encode('' + attr.value, true), '"');
+            // treat as a boolean
+            if (attr.name == attr.value) {
+              bool.push(' ', attr.name);
+            } else {
+              html.push(' ', attr.name, '="', encode('' + attr.value, true), '"');
+            }
           }
         }
         // add boolean attributes at the end. This is primarily for readability and because the Joomla Text Filter will remove boolean attributes if they are not at the end of the tag.
