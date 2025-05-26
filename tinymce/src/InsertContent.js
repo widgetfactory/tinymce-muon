@@ -363,6 +363,8 @@
     moveSelectionToMarker(dom.get('mce_marker'));
     umarkFragmentElements(editor.getBody());
 
+    args.selection = true;
+
     selection.onSetContent.dispatch(selection, args);
 
     editor.addVisual();
