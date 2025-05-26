@@ -1761,11 +1761,6 @@
       // Do preprocessing
       if (!args.no_events) {
         self.onBeforeSetContent.dispatch(self, args);
-
-        // dispatch to selection event
-        if (args.selection) {
-          self.selection.onBeforeSetContent.dispatch(self, args);
-        }
       }
 
       content = args.content;
@@ -1805,11 +1800,6 @@
         // Do post processing
         if (!args.no_events) {
           self.onSetContent.dispatch(self, args);
-
-          // dispatch to selection event
-          if (args.selection) {
-            self.selection.onSetContent.dispatch(self, args);
-          }
         }
 
         // Don't normalize selection if the focused element isn't the body in content editable mode since it will steal focus otherwise
