@@ -1288,7 +1288,6 @@
           // Non indexed object
           if (items.length === undef) {
             for (key in items) {
-              // eslint-disable-next-line no-prototype-builtins
               if (items.hasOwnProperty(key)) {
                 if (item_name === 'attributes') {
                   value = dom.getAttrib(node, key);
@@ -2342,7 +2341,6 @@
 
           for (name in obj1) {
             // Obj1 has item obj2 doesn't have
-            // eslint-disable-next-line no-prototype-builtins
             if (obj1.hasOwnProperty(name)) {
               value = obj2[name];
 
@@ -2364,7 +2362,6 @@
           // Check if obj 2 has something obj 1 doesn't have
           for (name in obj2) {
             // Obj2 has item obj1 doesn't have
-            // eslint-disable-next-line no-prototype-builtins
             if (obj2.hasOwnProperty(name)) {
               return FALSE;
             }
@@ -2754,11 +2751,7 @@
         });
 
         // Remove bogus state if they got filled by contents using editor.selection.setContent
-        ed.onSetContent.add(function (ed, e) {
-          if (e.selection) {
-            unmarkBogusCaretParents(dom, selection);
-          }
-        });
+        selection.onSetContent.add(unmarkBogusCaretParents);
 
         ed._hasCaretEvents = true;
       }

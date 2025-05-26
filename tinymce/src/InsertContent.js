@@ -243,7 +243,7 @@
       selection: true
     };
 
-    editor.onBeforeSetContent.dispatch(editor, args);
+    selection.onBeforeSetContent.dispatch(selection, args);
     value = args.content;
 
     // Add caret at end of contents if it's missing
@@ -363,8 +363,7 @@
     moveSelectionToMarker(dom.get('mce_marker'));
     umarkFragmentElements(editor.getBody());
 
-    args.selection = true;
-    editor.onSetContent.dispatch(editor, args);
+    selection.onSetContent.dispatch(selection, args);
 
     editor.addVisual();
   };

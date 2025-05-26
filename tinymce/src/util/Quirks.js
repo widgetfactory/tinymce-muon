@@ -1212,7 +1212,7 @@ tinymce.util.Quirks = function (editor) {
       }
     });
 
-    editor.onSetContent.add(fixLinks);
+    editor.onSetContent.add(selection.onSetContent.add(fixLinks));
   }
 
   /**
