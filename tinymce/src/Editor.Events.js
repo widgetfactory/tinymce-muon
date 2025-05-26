@@ -938,6 +938,13 @@
 			});
 		}
 
+		var selectionEvents = [
+			'onSetContent',
+			'onBeforeSetContent',
+			'onGetContent',
+			'onBeforeGetContent'
+		];
+
 		// proxy "on" function for legacy code
 		self.on = function (name, handler, prepend) {
 			// split into an array by space
@@ -961,6 +968,28 @@
 					self[evt].addToTop(wrapped);
 				} else {
 					self[evt].add(wrapped);
+				}
+
+				// Special case: if this is a content event with a selection flag, also attach to editor.selection
+				if (tinymce.inArray(selectionEvents, evt) !== -1 &&
+					self.selection &&
+					typeof self.selection[evt] === 'object' &&
+					typeof self.selection[evt].add === 'function'
+				) {
+					// eslint-disable-next-line no-loop-func
+					var selectionWrapped = function (sel, arg) {						
+						// Only fire if the event was dispatched with selection: true
+						if (arg && arg.selection === true) {
+							var eventObj = (typeof arg === 'object' && arg !== null) ? tinymce.extend({ editor: self }, arg) : { editor: self, data: arg };
+							handler(eventObj);
+						}
+					};
+
+					if (prepend) {
+						self.selection[evt].add(selectionWrapped);
+					} else {
+						self.selection[evt].addToTop(selectionWrapped);
+					}
 				}
 			}
 		};
