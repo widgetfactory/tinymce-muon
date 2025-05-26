@@ -128,9 +128,6 @@
     // Event attributes can be opt-in/opt-out
     globalAttributes.push.apply(globalAttributes, eventAttributes);
 
-    // schema.org attributes
-    globalAttributes.push.apply(globalAttributes, split("itemscope itemtype itemid itemprop itemref"));
-
     // aria attributes
     globalAttributes.push.apply(globalAttributes, split("role"));
 
