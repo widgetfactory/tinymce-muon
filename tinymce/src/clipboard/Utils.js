@@ -12,6 +12,20 @@ var resetStyleAttribute = function (content) {
   return div.innerHTML;
 };
 
+var updateInternalStyleAttribute = function (content) {
+  var div = DOM.create('div', {}, content);
+
+  each(DOM.select('[style]', div), function (elm) {
+    var style = elm.getAttribute('style');
+
+    if (style) {
+      elm.setAttribute('data-mce-style', style);
+    }
+  });
+
+  return div.innerHTML;
+};
+
 var parseCssToRules = function (content) {
   var doc = document.implementation.createHTMLDocument(""),
     styleElement = document.createElement("style");
@@ -299,5 +313,6 @@ export {
   parseCssToRules,
   processStylesheets,
   hasHtmlOrText,
-  resetStyleAttribute
+  resetStyleAttribute,
+  updateInternalStyleAttribute
 };
