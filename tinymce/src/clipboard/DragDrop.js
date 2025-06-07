@@ -79,7 +79,7 @@ var setup = function (editor) {
 
                     if (!dropContent['text/html']) {
                         data.text = content;
-                    } else {
+                    } else {                        
                         // reset styles, replacing style attribute with data-mce-style value or remove
                         content = Utils.resetStyleAttribute(content);
 
@@ -100,6 +100,20 @@ var setup = function (editor) {
             e.dataTransfer.effectAllowed = "copy";
             e.dataTransfer.dropEffect = "copy";
         }
+
+        var content = editor.selection.getContent({
+            contextual: true
+        });
+
+        if (!content) {
+            return;
+        }
+
+        // update the content to have the internal style attribute, ie: data-mce-style
+        content = Utils.updateInternalStyleAttribute(content);
+
+        // set clipboard data for all instances
+        e.dataTransfer.setData(InternalHtml.internalHtmlMime(), content);
     });
 
     editor.dom.bind(editor.getBody(), ['dragover', 'dragend'], function (e) {
