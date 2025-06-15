@@ -744,5 +744,9 @@
         }
       }
     });
+
+    return {
+      handleEnterKey: handleEnterKey
+    };
   };
 })(tinymce);
