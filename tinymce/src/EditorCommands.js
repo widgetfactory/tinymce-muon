@@ -328,8 +328,8 @@
 
         value = parseInt(value, 10);
 
-        dom.getParent(selection.getNode(), function (node) {          
-          if (node.nodeType == 1 && counter++ == value) {            
+        dom.getParent(selection.getNode(), function (node) {
+          if (node.nodeType == 1 && counter++ == value) {
             selection.select(node);
             return FALSE;
           }
@@ -780,8 +780,20 @@
           }
         }
 
-        if (container && container.nodeType == 3 && offset >= container.nodeValue.length) {
-          // Insert extra BR element at the end block elements
+        if (container && container.nodeType === 3 && offset >= container.nodeValue.length) {
+          var parentAnchor = dom.getParent(container, 'a');
+
+          if (parentAnchor) {
+            // Check if there's no content after the anchor
+            var nextSibling = parentAnchor.nextSibling;
+            if (!nextSibling || (nextSibling.nodeType === 3 && /^\s*$/.test(nextSibling.nodeValue))) {
+              // Move the range outside the <a> before inserting
+              rng.setStartAfter(parentAnchor);
+              rng.setEndAfter(parentAnchor);
+              container = parentAnchor.parentNode;
+            }
+          }
+
           if (!hasRightSideContent()) {
             brElm = dom.create('br');
             rng.insertNode(brElm);
