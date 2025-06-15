@@ -1544,10 +1544,9 @@ tinymce.util.Quirks = function (editor) {
       }
 
       function moveToMarker() {
-        // Move the caret to the end of the marker
-        rng = dom.createRng();
-        rng.setStart(marker, 0);
-        rng.setEnd(marker, 0);
+        var rng = dom.createRng();
+        rng.setStartAfter(marker);
+        rng.setEndAfter(marker);
         rng.collapse();
         selection.setRng(rng);
       }
@@ -1569,12 +1568,16 @@ tinymce.util.Quirks = function (editor) {
             if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
               node = node.nextSibling;
             }
+
             node.insertAdjacentElement('afterend', marker);
 
             moveToMarker();
+            dom.remove(marker);
           }
 
+          // cancel event
           e.preventDefault();
+
           editor.nodeChanged();
         }
       }
@@ -1589,9 +1592,8 @@ tinymce.util.Quirks = function (editor) {
       }
     });
 
-    editor.onMouseDown.add(function (editor, e) {
+    editor.onMouseUp.add(function (editor, e) {
       dom.remove(marker);
-
       moveCursorToEnd(e);
     });
   }
