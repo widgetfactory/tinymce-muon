@@ -1,14 +1,13 @@
 /**
- * Originally part of TinyMCE 4.x
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
- * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
+ * Copyright (c) Moxiecode Systems AB. All rights reserved.
+ * Copyright (c) 1999–2015 Ephox Corp. All rights reserved.
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
+ * @note    Forked or includes code from TinyMCE 3.x/4.x/5.x (originally under LGPL 2.1) and relicensed under GPL v2+ per LGPL 2.1 § 3.
  *
- * This version:
- * Copyright (c) 2025 Ryan Demmer
- * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
- *
- * See LICENSE for GPL terms.
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
+
 
 var internalMimeType = 'x-tinymce/html';
 var internalMark = '<!-- ' + internalMimeType + ' -->';

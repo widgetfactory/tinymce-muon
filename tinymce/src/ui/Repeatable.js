@@ -1,13 +1,10 @@
 /**
- * Form.js
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
  *
- * Copyright, Moxiecode Systems AB
- * Released under LGPL License.
- *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
+
 (function (tinymce) {
   // Shorten class names
   var dom = tinymce.DOM, each = tinymce.each, count = 0;

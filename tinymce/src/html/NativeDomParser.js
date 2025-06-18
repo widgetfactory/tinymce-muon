@@ -1,5 +1,5 @@
 /**
- * Originally based on TinyMCE 3.x and TinyMCE 4.x.
+ * Originally based on TinyMCE 3.x/4.x/5.x
  * Includes modified code from TinyMCE 7.x, licensed under the GNU General Public License v2.0 or later
  *
  * Copyright (c) Moxiecode Systems AB

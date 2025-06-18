@@ -1,14 +1,11 @@
 /**
- * URI.js
+ * Copyright (c) Moxiecode Systems AB. All rights reserved.
+ * Copyright (c) 1999–2015 Ephox Corp. All rights reserved.
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
+ * @note    Forked or includes code from TinyMCE 3.x/4.x/5.x (originally under LGPL 2.1) and relicensed under GPL v2+ per LGPL 2.1 § 3.
  *
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
- * Released under LGPL License.
- *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
- * 
- * Include modified and updated code from https://github.com/tinymce/tinymce/blob/release/5.10/modules/tinymce/src/core/main/ts/api/util/URI.ts
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 (function (tinymce) {

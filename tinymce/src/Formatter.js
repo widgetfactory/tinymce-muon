@@ -1,13 +1,11 @@
 /**
- * Formatter.js
+ * Copyright (c) Moxiecode Systems AB. All rights reserved.
+ * Copyright (c) 1999–2015 Ephox Corp. All rights reserved.
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
+ * @note    Forked or includes code from TinyMCE 3.x/4.x/5.x (originally under LGPL 2.1) and relicensed under GPL v2+ per LGPL 2.1 § 3.
  *
- * Copyright, Moxiecode Systems AB
- * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
- * Released under LGPL License.
- *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 (function (tinymce) {
@@ -1288,6 +1286,7 @@
           // Non indexed object
           if (items.length === undef) {
             for (key in items) {
+              // eslint-disable-next-line no-prototype-builtins
               if (items.hasOwnProperty(key)) {
                 if (item_name === 'attributes') {
                   value = dom.getAttrib(node, key);
@@ -2341,6 +2340,7 @@
 
           for (name in obj1) {
             // Obj1 has item obj2 doesn't have
+            // eslint-disable-next-line no-prototype-builtins
             if (obj1.hasOwnProperty(name)) {
               value = obj2[name];
 
@@ -2362,6 +2362,7 @@
           // Check if obj 2 has something obj 1 doesn't have
           for (name in obj2) {
             // Obj2 has item obj1 doesn't have
+            // eslint-disable-next-line no-prototype-builtins
             if (obj2.hasOwnProperty(name)) {
               return FALSE;
             }

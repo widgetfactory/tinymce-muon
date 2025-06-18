@@ -1,3 +1,8 @@
+/*!
+ * DOMPurify v3.x (c) Cure53 — licensed under MPL-2.0 (compatible with our GPL 2+).
+ * See https://github.com/cure53/DOMPurify/blob/main/LICENSE
+ */
+
 import DOMPurify from "dompurify";
 
 tinymce.html.Purifier = function (settings, schema) {

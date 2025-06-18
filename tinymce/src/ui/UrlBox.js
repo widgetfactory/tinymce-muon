@@ -1,5 +1,8 @@
 /**
- * UrlBox.js
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
+ *
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 (function (tinymce) {

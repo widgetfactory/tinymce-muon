@@ -1,9 +1,10 @@
 /**
- * Copyright (c) 2025 Ryan Demmer
- * Licensed under the GNU General Public License v2.0 or later.
+ * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
  *
- * See the LICENSE file for details.
+ * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * https://www.gnu.org/licenses/gpl-2.0.html
  */
+
 
 function convertToPixels(v) {
     // return pixel value
