@@ -1,13 +1,15 @@
 /**
- * CaretContainerRemove.js
+ * Originally part of TinyMCE 4.x
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
  *
- * Released under LGPL License.
- * Copyright (c) 1999-2017 Ephox Corp. All rights reserved
+ * This version:
+ * Copyright (c) 2025 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
  *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
+ * See LICENSE for GPL terms.
  */
+
 (function (tinymce) {
   var NodeType = tinymce.dom.NodeType, Zwsp = tinymce.text.Zwsp, CaretContainer = tinymce.caret.CaretContainer, CaretPosition = tinymce.caret.CaretPosition;
   var Arr = tinymce.util.Arr;

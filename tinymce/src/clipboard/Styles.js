@@ -1,3 +1,10 @@
+/**
+ * Copyright (c) 2025 Ryan Demmer
+ * Licensed under the GNU General Public License v2.0 or later.
+ *
+ * See the LICENSE file for details.
+ */
+
 function convertToPixels(v) {
     // return pixel value
     if (v.indexOf('px') !== -1) {

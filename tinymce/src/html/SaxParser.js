@@ -1,12 +1,13 @@
 /**
- * SaxParser.js
+ * Originally part of TinyMCE 3.x
+ * Copyright © Moxiecode Systems AB
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
  *
- * Copyright, Moxiecode Systems AB
- * Released under LGPL License.
+ * This version:
+ * Copyright © 2025 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
  *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
+ * See LICENSE for GPL terms.
  */
 
 (function (tinymce) {

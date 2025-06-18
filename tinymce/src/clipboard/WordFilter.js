@@ -1,3 +1,15 @@
+/**
+ * Originally based on TinyMCE 3.x
+ * Copyright © Moxiecode Systems AB
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
+ *
+ * This version:
+ * Copyright © 2024 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
+ *
+ * See LICENSE for GPL terms.
+ */
+
 import * as Utils from './Utils';
 import * as Styles from './Styles';
 

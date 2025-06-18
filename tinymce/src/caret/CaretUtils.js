@@ -1,12 +1,13 @@
 /**
- * CaretUtils.js
- *
- * Released under LGPL License.
+ * Originally part of TinyMCE 4.x
  * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
  *
- * License: http://www.tinymce.com/license - Inactive
- * Licence: GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * Contributing: http://www.tinymce.com/contributing - Inactive
+ * This version:
+ * Copyright (c) 2025 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
+ *
+ * See LICENSE for GPL terms.
  */
 
 /**

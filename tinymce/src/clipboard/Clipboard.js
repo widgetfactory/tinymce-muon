@@ -1,12 +1,13 @@
 /**
- * @package   	JCE
- * @copyright 	Copyright (c) 2009-2022 Ryan Demmer. All rights reserved.
- * @copyright   Copyright (c) 1999-2017 Ephox Corp. All rights reserved
- * @license   	GNU/LGPL 2.1 or later - http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
- * JCE is free software. This version may have been modified pursuant
- * to the GNU General Public License, and as distributed it includes or
- * is derivative of works licensed under the GNU General Public License or
- * other free or open source software licenses.
+ * Originally part of TinyMCE 4.x
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
+ *
+ * This version:
+ * Copyright (c) 2025 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
+ *
+ * See LICENSE for GPL terms.
  */
 
 import * as CutCopy from './CutCopy';

@@ -1,3 +1,15 @@
+/**
+ * Originally part of TinyMCE 4.x
+ * Copyright (c) 1999-2015 Ephox Corp. All rights reserved
+ * Licensed under LGPL-2.1-or-later (see LICENSE.TXT in the original project)
+ *
+ * This version:
+ * Copyright (c) 2025 Ryan Demmer
+ * Relicensed under GPL-2.0-or-later as permitted by Section 3 of the LGPL.
+ *
+ * See LICENSE for GPL terms.
+ */
+
 var DomParser = tinymce.html.DomParser, Schema = tinymce.html.Schema, each = tinymce.each, DOM = tinymce.DOM;
 
 var mceInternalUrlPrefix = 'data:text/mce-internal,';
