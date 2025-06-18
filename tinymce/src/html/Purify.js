@@ -5,6 +5,7 @@ tinymce.html.Purifier = function (settings, schema) {
 
     var config = {
         IN_PLACE: true,
+        RETURN_DOM: true,
         FORCE_BODY: true,
         ALLOW_UNKNOWN_PROTOCOLS: !!settings.allow_script_urls,
         ALLOWED_TAGS: ['#comment', '#cdata-section', 'body'],
@@ -22,7 +23,7 @@ tinymce.html.Purifier = function (settings, schema) {
         });
 
         // allow script tags via FORCE_BODY
-        if (name === 'script') {
+        if (name === 'script' || name == 'style') {
             config.FORCE_BODY = true;
         }
     });
