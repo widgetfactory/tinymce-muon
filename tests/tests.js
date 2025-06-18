@@ -50,7 +50,8 @@ provide([
 				{ "title": "EditorCommands", "url": "tinymce.EditorCommands.html" },
 				{ "title": "ForceBlocks", "url": "tinymce.ForceBlocks.html" },
 				{ "title": "EnterKey", "url": "tinymce.EnterKey.html" },
-				{ "title": "SelectionOverrides", "url": "tinymce.SelectionOverrides.html" }
+				{ "title": "SelectionOverrides", "url": "tinymce.SelectionOverrides.html" },
+				{ "title": "Editor Content", "url" : "tinymce.EditorContent.html" }
 			]
 		}
 	], [
