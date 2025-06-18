@@ -185,8 +185,8 @@
     add("base", "href target");
     add("link", "href rel media hreflang type sizes");
     add("meta", "name http-equiv content charset");
-    add("style", "media type scoped");
-    add("script", "src async defer type charset");
+    add("style", "media type scoped", '#text #cdata-section');
+    add("script", "src async defer type charset", '#text #cdata-section');
     add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
       "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
       "onpopstate onresize onscroll onstorage onunload", flowContent);
@@ -1000,9 +1000,8 @@
      * @param {String} child Element child to verify.
      * @return {Boolean} True/false if the element is a valid child of the specified parent.
      */
-    self.isValidChild = function (name, child) {
+    self.isValidChild = function (name, child) {      
       var parent = children[name];
-
       return !!(parent && parent[child]);
     };
 
