@@ -39,7 +39,9 @@
 			assertRange = Utils.assertRange;
 
 		function getRoot() {
-			return document.getElementById('view');
+			//return document.getElementById('view');
+
+			return editor.getBody();
 		}
 
 		function setupHtml(html) {
