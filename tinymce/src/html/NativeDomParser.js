@@ -645,11 +645,10 @@
 
         function filterAttributes(node) {
           var attributes = node.attributes;
-          var attrName, attrValue;
+          var attrName;
 
           for (var i = attributes.length - 1; i >= 0; i--) {
             attrName = attributes[i].name.toLowerCase();
-            attrValue = attributes[i].value;
 
             // Allow all data-*, aria-*, uk-*, etc.
             if (/-/.test(attrName)) {
