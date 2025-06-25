@@ -32,7 +32,7 @@
   function compileSchema(type) {
     var schema = {},
       globalAttributes, blockContent;
-    var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
+    var phrasingContent, flowContent, transparentContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
 
     function add(name, attributes, children) {
       var ni, i, attributesOrder, args = arguments;
@@ -143,11 +143,19 @@
       "textarea u var link style #text #comment"
     );
 
+    // transparent content elements
+    transparentContent = split(
+      "a ins del canvas map"
+    );
+
     // Add HTML5 items to globalAttributes, blockContent, phrasingContent
     if (type != "html4") {
       globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
         "hidden spellcheck translate"));
       blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
+
+      blockContent.push.apply(blockContent, transparentContent);
+
       phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
         "progress time wbr video ruby bdi keygen"));
     }
@@ -185,8 +193,8 @@
     add("base", "href target");
     add("link", "href rel media hreflang type sizes");
     add("meta", "name http-equiv content charset");
-    add("style", "media type scoped", '#text #cdata-section');
-    add("script", "src async defer type charset", '#text #cdata-section');
+    add("style", "media type scoped");
+    add("script", "src async defer type charset");
     add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
       "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
       "onpopstate onresize onscroll onstorage onunload", flowContent);
@@ -389,7 +397,7 @@
       patternElements = [],
       validStyles, invalidStyles, schemaItems;
     var whiteSpaceElementsMap, selfClosingElementsMap, shortEndedElementsMap, boolAttrMap, validClasses;
-    var blockElementsMap, nonEmptyElementsMap, moveCaretBeforeOnEnterElementsMap, textBlockElementsMap, textInlineElementsMap;
+    var blockElementsMap, nonEmptyElementsMap, moveCaretBeforeOnEnterElementsMap, textBlockElementsMap, textInlineElementsMap, transparentElementsMap;
     var customElementsMap = {},
       specialElements = {};
 
@@ -416,6 +424,7 @@
     }
 
     settings = settings || {};
+
     schemaItems = compileSchema(settings.schema);
 
     // Allow all elements and attributes if verify_html is set to false
@@ -428,7 +437,7 @@
     validClasses = compileElementMap(settings.valid_classes, 'map');
 
     // Setup map objects
-    whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object');
+    whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object code');
 
     selfClosingElementsMap = createLookupTable('self_closing_elements', 'colgroup dd dt li option p td tfoot th thead tr');
 
@@ -450,6 +459,8 @@
 
     textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
       'dfn code mark q sup sub samp');
+
+    transparentElementsMap = createLookupTable('transparent_elements', 'a ins del canvas map');
 
     each((settings.special || 'script noscript iframe noframes noembed title style textarea xmp').split(' '), function (name) {
       specialElements[name] = new RegExp('<\/' + name + '[^>]*>', 'gi');
@@ -768,8 +779,8 @@
         children[name] = element.children;
       });
 
-      // Switch these on HTML4
-      if (settings.schema === "html4") {
+      // Switch these in HTML4
+      if (settings.schema === "html4" || settings.prefer_strong_and_em) {
         each(split('strong/b em/i'), function (item) {
           item = split(item, '/');
           elements[item[1]].outputName = item[0];
@@ -992,6 +1003,16 @@
     };
 
     /**
+     * Returns a map with transparent elements.
+     *
+     * @method getTransparentElements
+     * @return {Object} Name/value lookup map for transparent elements.
+     */
+    self.getTransparentElements = function () {
+      return transparentElementsMap;
+    };
+
+    /**
      * Returns true/false if the specified element and it's child is valid or not
      * according to the schema.
      *
@@ -1000,7 +1021,7 @@
      * @param {String} child Element child to verify.
      * @return {Boolean} True/false if the element is a valid child of the specified parent.
      */
-    self.isValidChild = function (name, child) {      
+    self.isValidChild = function (name, child) {
       var parent = children[name];
       return !!(parent && parent[child]);
     };
