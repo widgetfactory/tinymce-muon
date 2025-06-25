@@ -20,6 +20,35 @@
       '#document-fragment': 11
     };
 
+  function isNonEmptyElement(node) {
+    var isNamedAnchor = node.name === 'a' && !node.attr('href') && (node.attr('id'));
+
+    return (node.attr('name') || (node.attr('id') && !node.firstChild) || node.attr('data-mce-bookmark') || isNamedAnchor);
+  }
+
+  function isWhitespaceText(text) {
+    // Check if the text is only whitespace
+    return whiteSpaceRegExp.test(text);
+  }
+
+  function isEmptyTextNode(node) {
+    var text = node.value || '';
+
+    // Non whitespace content
+    if (!isWhitespaceText(text)) {
+      return false;
+    }
+
+    // Parent is not a span and only spaces or is a span but has styles
+    var parentNode = node.parent;
+
+    if (parentNode && (parentNode.name !== 'span' || parentNode.attr('style')) && /^[ ]+$/.test(text)) {
+      return false;
+    }
+
+    return true;
+  }
+
   // Walks the tree left/right
   function walk(node, root_node, prev) {
     var sibling, parent, startName = prev ? 'lastChild' : 'firstChild',
@@ -484,11 +513,11 @@
     },
 
     /**
-		 * Removes all children of the current node.
-		 *
-		 * @method empty
-		 * @return {tinymce.html.Node} The current node that got cleared.
-		 */
+     * Removes all children of the current node.
+     *
+     * @method empty
+     * @return {tinymce.html.Node} The current node that got cleared.
+     */
     empty: function () {
       var self = this,
         nodes, i, node;
@@ -524,10 +553,14 @@
      * @param {Object} elements Name/value object with elements that are automatically treated as non empty elements.
      * @return {Boolean} true/false if the node is empty or not.
      */
-    isEmpty: function (elements) {
+    isEmpty: function (elements, whitespace) {
       var self = this,
         node = self.firstChild,
         i, name;
+
+      if (isNonEmptyElement(self)) {
+        return false;
+      }
 
       function isValidAttribute(name) {
         // allow for anchors and html templating
@@ -555,12 +588,16 @@
         do {
           if (node.type === 1) {
             // Ignore bogus elements
-            if (node.attributes.map['data-mce-bogus']) {
+            if (node.attr('data-mce-bogus')) {
               continue;
             }
 
             // Keep empty elements like <img />
             if (elements[node.name]) {
+              return false;
+            }
+
+            if (isNonEmptyElement(node)) {
               return false;
             }
 
@@ -587,9 +624,17 @@
           }
 
           // Keep non whitespace text nodes
-          if ((node.type === 3 && !whiteSpaceRegExp.test(node.value))) {
+          if (node.type === 3 && !isEmptyTextNode(node)) {
             return false;
           }
+
+          // Keep whitespace preserve elements
+          if (whitespace) {
+            if (node.type === 3 && node.parent && whitespace[node.parent.name] && isWhitespaceText(node.value || '')) {
+              return false;
+            }
+          }
+          
         } while ((node = walk(node, self)));
       }
 
