@@ -120,6 +120,142 @@
     return lvl >= 2;
   }
 
+  /**
+ * Correct ES5 RGB→HSL conversion (keeps saturation in HSL space)
+ */
+  function rgbToHsl(r, g, b) {
+    r /= 255; g /= 255; b /= 255;
+    var max = Math.max(r, g, b),
+      min = Math.min(r, g, b),
+      l = (max + min) / 2,
+      d = max - min,
+      h = 0,
+      s = 0;
+
+    if (d !== 0) {
+      // H
+      switch (max) {
+        case r: h = ((g - b) / d + (g < b ? 6 : 0)); break;
+        case g: h = ((b - r) / d + 2); break;
+        case b: h = ((r - g) / d + 4); break;
+      }
+      h = h * 60;
+
+      // S (correct for HSL)
+      //   = d / (1 - |2L - 1|)
+      s = d / (1 - Math.abs(2 * l - 1));
+    }
+
+    return [h, s, l];
+  }
+
+  /**
+   * Convert HSL [0–360,0–1,0–1] back to RGB [0–255].
+   */
+  function hslToRgb(h, s, l) {
+    h /= 360;
+    function hue2rgb(p, q, t) {
+      if (t < 0) {
+        t += 1;
+      }
+      if (t > 1) {
+        t -= 1;
+      }
+      if (t < 1 / 6) {
+        return p + (q - p) * 6 * t;
+      }
+      if (t < 1 / 2) {
+        return q;
+      }
+      if (t < 2 / 3) {
+        return p + (q - p) * (2 / 3 - t) * 6;
+      }
+      return p;
+    }
+    var r, g, b;
+    if (s === 0) {
+      r = g = b = l;
+    } else {
+      var q = (l < 0.5) ? (l * (1 + s)) : (l + s - l * s);
+      var p = 2 * l - q;
+      r = hue2rgb(p, q, h + 1 / 3);
+      g = hue2rgb(p, q, h);
+      b = hue2rgb(p, q, h - 1 / 3);
+    }
+    return [
+      Math.round(r * 255),
+      Math.round(g * 255),
+      Math.round(b * 255)
+    ];
+  }
+
+  /**
+   * Compute contrast ratio between two CSS colors.
+   */
+  function getContrastRatio(c1, c2) {
+    var l1 = getLuminance(c1);
+    var l2 = getLuminance(c2);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+
+  /**
+   * Adjust a foreground color so that its contrast ratio against a background
+   * meets the targetContrast, by tweaking HSL lightness via binary search.
+   *
+   * @param {string} fgColor       - any CSS color string
+   * @param {string} bgColor       - any CSS color string
+   * @param {number} targetContrast - desired contrast ratio, e.g. 2.0
+   * @param {number} iterations    - binary search steps (default 20)
+   * @returns {string}              - new foreground as "#rrggbb"
+   */
+  function adjustContrastColor(fgColor, bgColor, targetContrast, iterations) {
+    if (iterations == null) {
+      iterations = 20;
+    }
+
+    // Early exit if already readable
+    if (getContrastRatio(fgColor, bgColor) >= targetContrast) {
+      return fgColor;
+    }
+
+    // Parse FG to RGBA object via your existing helper
+    var col = getRGBA(fgColor);
+    var r = col.r, g = col.g, b = col.b;
+
+    // Determine whether to lighten (fgLum > bgLum) or darken
+    var lighten = getLuminance(fgColor) > getLuminance(bgColor);
+
+    // Convert FG to HSL
+    var hsl = rgbToHsl(r, g, b);
+    var h = hsl[0], s = hsl[1], origL = hsl[2];
+
+    var low = 0, high = 1, bestL = origL;
+
+    for (var i = 0; i < iterations; i++) {
+      var mid = (low + high) / 2;
+      var testL = lighten ? origL + mid * (1 - origL) : origL - mid * origL;
+      var rgb = hslToRgb(h, s, testL);
+      var hex = '#' +
+        ('0' + rgb[0].toString(16)).slice(-2) +
+        ('0' + rgb[1].toString(16)).slice(-2) +
+        ('0' + rgb[2].toString(16)).slice(-2);
+
+      if (getContrastRatio(hex, bgColor) >= targetContrast) {
+        bestL = testL;
+        high = mid;
+      } else {
+        low = mid;
+      }
+    }
+
+    var finalRgb = hslToRgb(h, s, bestL);
+
+    return '#' +
+      ('0' + finalRgb[0].toString(16)).slice(-2) +
+      ('0' + finalRgb[1].toString(16)).slice(-2) +
+      ('0' + finalRgb[2].toString(16)).slice(-2);
+  }
+
   var resetElm = function () {
     if (previewElm && previewElm.parentNode) {
       previewElm.parentNode.removeChild(previewElm);
@@ -227,7 +363,7 @@
           if (value && isReadable(value, bodybg)) {
             value = bodybg;
           } else {
-            value = 'inherit';
+            value = adjustContrastColor(value, elmbg, 2.0);
           }
         }
       }
