@@ -27,8 +27,9 @@ import './src/html/Styles.js';
 import './src/html/Schema.js';
 import './src/html/SaxParser.js';
 import './src/html/Node.js';
-//import './src/html/Purify.js';
-import './src/html/DomParser.js';
+import './src/html/Sanitizer.js';
+import './src/html/NativeDomParser.js';
+//import './src/html/DomParser.js';
 import './src/html/Serializer.js';
 import './src/html/Writer.js';
 
