@@ -19,7 +19,7 @@
     'mailto': 25
   };
 
-  var safeSvgDataUrlElements = [ 'img', 'video' ];
+  var safeSvgDataUrlElements = ['img', 'video'];
 
   function isNonNullable(value) {
     return value !== null && value !== undefined;
@@ -31,78 +31,78 @@
    */
   tinymce.util.URI = function (url, settings) {
     var self = this,
-        baseUri, base_url;
+      baseUri, base_url;
 
-      url = trim(url);
-      settings = self.settings = settings || {};
-      baseUri = settings.base_uri;
+    url = trim(url);
+    settings = self.settings = settings || {};
+    baseUri = settings.base_uri;
 
-      // Strange app protocol that isn't http/https or local anchor
-      // For example: mailto,skype,tel etc.
-      if (/^([\w\-]+):([^\/]{2})/i.test(url) || /^\s*#/.test(url)) {
-        self.source = url;
-        return;
+    // Strange app protocol that isn't http/https or local anchor
+    // For example: mailto,skype,tel etc.
+    if (/^([\w\-]+):([^\/]{2})/i.test(url) || /^\s*#/.test(url)) {
+      self.source = url;
+      return;
+    }
+
+    var isProtocolRelative = url.indexOf('//') === 0;
+
+    // Absolute path with no host, fake host and protocol
+    if (url.indexOf('/') === 0 && !isProtocolRelative) {
+      url = (baseUri ? baseUri.protocol || 'http' : 'http') + '://mce_host' + url;
+    }
+
+    // Relative path http:// or protocol relative //path
+    if (!/^[\w\-]*:?\/\//.test(url)) {
+      base_url = settings.base_uri ? settings.base_uri.path : new tinymce.util.URI(location.href).directory;
+      if (settings.base_uri.protocol === "") {
+        url = '//mce_host' + self.toAbsPath(base_url, url);
+      } else {
+        url = /([^#?]*)([#?]?.*)/.exec(url);
+        url = ((baseUri && baseUri.protocol) || 'http') + '://mce_host' + self.toAbsPath(base_url, url[1]) + url[2];
+      }
+    }
+
+    // Parse URL (Credits goes to Steave, http://blog.stevenlevithan.com/archives/parseuri)
+    url = url.replace(/@@/g, '(mce_at)'); // Zope 3 workaround, they use @@something
+
+    /*jshint maxlen: 255 */
+    /*eslint max-len: 0 */
+    url = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(url);
+
+    each(queryParts, function (v, i) {
+      var part = url[i];
+
+      // Zope 3 workaround, they use @@something
+      if (part) {
+        part = part.replace(/\(mce_at\)/g, '@@');
       }
 
-      var isProtocolRelative = url.indexOf('//') === 0;
+      self[v] = part;
+    });
 
-      // Absolute path with no host, fake host and protocol
-      if (url.indexOf('/') === 0 && !isProtocolRelative) {
-        url = (baseUri ? baseUri.protocol || 'http' : 'http') + '://mce_host' + url;
+    if (baseUri) {
+      if (!self.protocol) {
+        self.protocol = baseUri.protocol;
       }
 
-      // Relative path http:// or protocol relative //path
-      if (!/^[\w\-]*:?\/\//.test(url)) {
-        base_url = settings.base_uri ? settings.base_uri.path : new tinymce.util.URI(location.href).directory;
-        if (settings.base_uri.protocol === "") {
-          url = '//mce_host' + self.toAbsPath(base_url, url);
-        } else {
-          url = /([^#?]*)([#?]?.*)/.exec(url);
-          url = ((baseUri && baseUri.protocol) || 'http') + '://mce_host' + self.toAbsPath(base_url, url[1]) + url[2];
-        }
+      if (!self.userInfo) {
+        self.userInfo = baseUri.userInfo;
       }
 
-      // Parse URL (Credits goes to Steave, http://blog.stevenlevithan.com/archives/parseuri)
-      url = url.replace(/@@/g, '(mce_at)'); // Zope 3 workaround, they use @@something
-
-      /*jshint maxlen: 255 */
-      /*eslint max-len: 0 */
-      url = /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@\/]*):?([^:@\/]*))?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/.exec(url);
-
-      each(queryParts, function (v, i) {
-        var part = url[i];
-
-        // Zope 3 workaround, they use @@something
-        if (part) {
-          part = part.replace(/\(mce_at\)/g, '@@');
-        }
-
-        self[v] = part;
-      });
-
-      if (baseUri) {
-        if (!self.protocol) {
-          self.protocol = baseUri.protocol;
-        }
-
-        if (!self.userInfo) {
-          self.userInfo = baseUri.userInfo;
-        }
-
-        if (!self.port && self.host === 'mce_host') {
-          self.port = baseUri.port;
-        }
-
-        if (!self.host || self.host === 'mce_host') {
-          self.host = baseUri.host;
-        }
-
-        self.source = '';
+      if (!self.port && self.host === 'mce_host') {
+        self.port = baseUri.port;
       }
 
-      if (isProtocolRelative) {
-        self.protocol = '';
+      if (!self.host || self.host === 'mce_host') {
+        self.host = baseUri.host;
       }
+
+      self.source = '';
+    }
+
+    if (isProtocolRelative) {
+      self.protocol = '';
+    }
   };
 
   tinymce.util.URI.prototype = {
@@ -397,6 +397,16 @@
     }
   };
 
+  var decodeUri = function (encodedUri) {
+    try {
+      // Might throw malformed URI sequence
+      return decodeURIComponent(encodedUri);
+    } catch (ex) {
+      // Fallback to non UTF-8 decoder
+      return unescape(encodedUri);
+    }
+  };
+
   var blockSvgDataUris = function (allowSvgDataUrls, tagName) {
     if (isNonNullable(allowSvgDataUrls)) {
       return !allowSvgDataUrls;
@@ -407,12 +417,20 @@
   };
 
   var isInvalidUri = function (settings, uri, tagName) {
-    if (settings.allow_html_data_urls) {
+    // remove all whitespaces from decoded uri to prevent impact on regex matching
+    var decodedUri = decodeUri(uri).replace(/\s/g, '');
+
+    if (settings.allow_script_urls) {
       return false;
-    } else if (/^data:image\//i.test(uri)) {
-      return blockSvgDataUris(settings.allow_svg_data_urls, tagName) && /^data:image\/svg\+xml/i.test(uri);
+      // Ensure we don't have a javascript URI, as that is not safe since it allows arbitrary JavaScript execution
+    } else if (/((java|vb)script|mhtml):/i.test(decodedUri)) {
+      return true;
+    } else if (settings.allow_html_data_urls) {
+      return false;
+    } else if (/^data:image\//i.test(decodedUri)) {
+      return blockSvgDataUris(settings.allow_svg_data_urls, tagName) && /^data:image\/svg\+xml/i.test(decodedUri);
     } else {
-      return /^data:/i.test(uri);
+      return /^data:/i.test(decodedUri);
     }
   };
 
