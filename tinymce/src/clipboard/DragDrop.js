@@ -106,6 +106,14 @@ var setup = function (editor) {
     });
 
     editor.dom.bind(editor.getBody(), 'dragstart', function (e) {
+        if (e.isDefaultPrevented()) {
+            return;
+        }
+        
+        if (!e.dataTransfer) {
+            return;
+        }
+        
         draggingInternallyState = true;
 
         if (e.altKey) {
