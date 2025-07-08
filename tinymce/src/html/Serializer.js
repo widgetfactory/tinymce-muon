@@ -120,8 +120,7 @@
 
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue,
-                  "boolean": boolAttrMap[attrName] ? true : false
+                  value: attrValue
                 });
               }
             }
@@ -135,13 +134,18 @@
 
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue,
-                  "boolean": boolAttrMap[attrName] ? true : false
+                  value: attrValue
                 });
               }
             }
 
             attrs = sortedAttrs;
+          }
+
+          if (attrs) {
+            for (i = 0, l = attrs.length; i < l; i++) {
+              attrs[i]['boolean'] = attrs[i].name in boolAttrMap ? true : false;
+            }
           }
 
           writer.start(node.name, attrs, isEmpty);
