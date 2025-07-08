@@ -1,6 +1,9 @@
 /**
  * Originally based on TinyMCE 3.x/4.x/5.x
  * Includes modified code from TinyMCE 7.x, licensed under the GNU General Public License v2.0 or later
+ * @code https://github.com/tinymce/tinymce/tree/main/modules/tinymce/src/core/main/ts/api/html/DomParser.ts
+ * @code https://github.com/tinymce/tinymce/tree/main/modules/tinymce/src/core/main/ts/html/InvalidNodes.ts
+ * @code https://github.com/tinymce/tinymce/tree/main/modules/tinymce/src/core/main/ts/html/ParserFilters.ts
  *
  * Copyright (c) Moxiecode Systems AB
  * Copyright (c) 1999–2025 Ephox Corporation. All rights reserved.
@@ -53,23 +56,62 @@
     settings.root_name = settings.root_name || 'body';
     self.schema = schema = schema || new tinymce.html.Schema();
 
-    self.purifier = new tinymce.html.Purifier(settings, schema);
+    settings.purify_html = "purify_html" in settings ? settings.purify_html : true;
+
+    var Sanitizer = new tinymce.html.Sanitizer(settings, schema);
+    var DomParser = new DOMParser();
+
+    var hasClosest = function (node, parentName) {
+      var tempNode = node;
+
+      while (tempNode) {
+
+        if (tempNode.name === parentName) {
+          return true;
+        }
+
+        tempNode = tempNode.parent;
+      }
+
+      return false;
+    };
+
+    function isInvalid(node, parent) {
+      parent = parent || node.parent;
+
+      if (!parent) {
+        return false;
+      }
+
+      // Check if the node is a valid child of the parent node. If the child is
+      // unknown we don't collect it since it's probably a custom element
+      if (schema.children[node.name] && !schema.isValidChild(parent.name, node.name)) {
+        return true;
+      }
+
+      // Anchors are a special case and cannot be nested
+      if (node.name === 'a' && hasClosest(parent, 'a')) {
+        return true;
+      }
+
+      // heading element is valid if it is the only one child of summary
+      if (parent.name == 'summary' && ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.name)) {
+        return !(parent.firstChild === node && parent.lastChild === node);
+      }
+
+      return false;
+    }
 
     /**
-     * Recursively finds invalid children of a node according to the schema.
+     * Finds invalid children of a node according to the schema.
      * Populates the `invalids` array with nodes that are not allowed in their parent.
      *
      * @param {Node} node - The root node to validate from.
      * @param {Array} invalids - Accumulator array for invalid children.
      */
     function findInvalidChildren(node, invalids) {
-      for (var child = node.firstChild; child; child = child.next) {
-
-        if (!schema.isValidChild(node.name, child.name)) {
-          invalids.push(child);
-        }
-
-        findInvalidChildren(child, invalids);
+      if (isInvalid(node)) {
+        invalids.push(node);
       }
     }
 
@@ -164,12 +206,13 @@
      */
     function fixInvalidChildren(nodes) {
       var ni, node, parent, parents, newParent, currentNode, tempNode, childNode, i;
-      var nonEmptyElements, nonSplitableElements, textBlockElements, specialElements, sibling, nextNode;
+      var nonEmptyElements, nonSplitableElements, textBlockElements, specialElements, whitespaceElements, sibling, nextNode;
 
       nonSplitableElements = makeMap('tr,td,th,tbody,thead,tfoot,table');
       nonEmptyElements = schema.getNonEmptyElements();
       textBlockElements = schema.getTextBlockElements();
       specialElements = schema.getSpecialElements();
+      whitespaceElements = schema.getWhiteSpaceElements();
 
       var removeOrUnwrapInvalidNode = function (node, originalNodeParent) {
         if (specialElements[node.name]) {
@@ -202,6 +245,7 @@
         if (textBlockElements[node.name] && node.parent.name == 'li') {
           // Move sibling text blocks after LI element
           sibling = node.next;
+
           while (sibling) {
             if (textBlockElements[sibling.name]) {
               sibling.name = 'li';
@@ -255,7 +299,7 @@
               currentNode = tempNode;
             }
 
-            if (!newParent.isEmpty(nonEmptyElements)) {
+            if (!newParent.isEmpty(nonEmptyElements, whitespaceElements)) {
               parent.insert(newParent, parents[0], true);
               parent.insert(node, newParent);
             } else {
@@ -265,7 +309,7 @@
             // Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
             parent = parents[0];
 
-            if (parent.isEmpty(nonEmptyElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
+            if (parent.isEmpty(nonEmptyElements, whitespaceElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
               parent.empty().remove();
             }
           } else {
@@ -275,13 +319,15 @@
           // If it's an LI try to find a UL/OL for it or wrap it
           if (node.name === 'li') {
             sibling = node.prev;
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ul')) {
+
+            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
               sibling.append(node);
               continue;
             }
 
             sibling = node.next;
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ul')) {
+
+            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
               sibling.insert(node, sibling.firstChild, true);
               continue;
             }
@@ -379,17 +425,19 @@
       var rootNode, validate;
       var blockElements, startWhiteSpaceRegExp, invalidChildren = [];
 
-      var endWhiteSpaceRegExp, allWhiteSpaceRegExp, whitespaceElements, textRootBlockElements;
+      var endWhiteSpaceRegExp, allWhiteSpaceRegExp, whitespaceElements, textRootBlockElements, shortEndedElements, transparentElements;
       var nonEmptyElements, rootBlockName;
 
       args = args || {};
       blockElements = extend(makeMap('script,style,head,html,body,title,meta,param'), schema.getBlockElements());
       nonEmptyElements = schema.getNonEmptyElements();
+      shortEndedElements = schema.getShortEndedElements();
+      transparentElements = schema.getTransparentElements();
       validate = settings.validate;
       rootBlockName = "forced_root_block" in args ? args.forced_root_block : settings.forced_root_block;
 
       whitespaceElements = schema.getWhiteSpaceElements();
-      textRootBlockElements = schema.getTextRootBlockElements(schema);
+      textRootBlockElements = schema.getTextRootBlockElements();
 
       startWhiteSpaceRegExp = /^[ \t\r\n]+/;
       endWhiteSpaceRegExp = /[ \t\r\n]+$/;
@@ -401,14 +449,16 @@
        * @returns {boolean} True if any parent element preserves whitespace.
        */
       function hasWhitespaceParent(node) {
-        var tempNode = node.parent;
+        var temp = node.parent;
 
-        while (tempNode) {
-          if (whitespaceElements[tempNode.name]) {
+        while (temp) {
+          // `whitespaceElements` comes from schema.getWhiteSpaceElements(),
+          // and includes script, style, pre, textarea, etc.
+          if (whitespaceElements[temp.name]) {
             return true;
           }
 
-          tempNode = tempNode.parent;
+          temp = temp.parent;
         }
 
         return false;
@@ -422,13 +472,20 @@
        */
       function isTextRootBlockEmpty(node) {
         var tempNode = node;
+
         while (tempNode) {
           if (textRootBlockElements[tempNode.name]) {
+            console.log(tempNode.name, isEmpty(tempNode));
             return isEmpty(tempNode);
           }
+
           tempNode = tempNode.parent;
         }
         return false;
+      }
+
+      function isTransparentBlock(node) {
+        return node.type == 1 && node.name in transparentElements && !!node.attr('data-mce-block');
       }
 
       /**
@@ -437,7 +494,7 @@
        * @returns {boolean} True if the node is a block element.
        */
       function isBlock(node) {
-        return blockElements[node.name];
+        return node.name in blockElements || isTransparentBlock(node);
       }
 
       /**
@@ -448,14 +505,14 @@
        * @param {tinymce.html.Node} root - Root context node.
        * @returns {boolean} True if node is at specified edge of block.
        */
-      function isAtEdgeOfBlock(node, start, root) {
+      function isAtEdgeOfBlock(node, start) {
         var neighbour = start ? node.prev : node.next;
 
         if (neighbour || !node.parent) {
           return false;
         }
 
-        return isBlock(node.parent) && (node.parent !== root || args.isRootContent === true);
+        return isBlock(node.parent) && (node.parent !== rootNode || args.isRootContent === true);
       }
 
       /**
@@ -502,6 +559,7 @@
 
         if (brPreferred && isBlock(node)) {
           var newNode = new Node('br', 1);
+          newNode.shortEnded = true;
 
           if (args.insert) {
             newNode.attr('data-mce-bogus', '1');
@@ -523,7 +581,7 @@
        */
       function hasOnlyChild(node, name) {
         var firstChild = node.firstChild;
-        return firstChild && firstChild === node.lastChild && firstChild.name === name;
+        return !!firstChild && firstChild === node.lastChild && firstChild.name === name;
       }
 
       /**
@@ -551,7 +609,7 @@
        * @returns {boolean} True if node is empty.
        */
       function isEmpty(node) {
-        return node.isEmpty(nonEmptyElements);
+        return node.isEmpty(nonEmptyElements, whitespaceElements);
       }
 
       /**
@@ -565,6 +623,7 @@
 
         function preprocess(node) {
           if (node.type === 3) {
+
             if (!hasWhitespaceParent(node)) {
               var text = node.value || '';
               text = text.replace(allWhiteSpaceRegExp, ' ');
@@ -585,6 +644,7 @@
         function postprocess(node) {
           if (node.type === 1) {
             var elementRule = schema.getElementRule(node.name);
+
             if (validate && elementRule) {
               var isNodeEmpty = isEmpty(node);
 
@@ -618,76 +678,6 @@
         }
 
         return [preprocess, postprocess];
-      }
-
-      const DomParser = new DOMParser();
-
-      settings.purify_html = false;
-
-      /**
-       * Sanitizes the body element using DomPurify if configured.
-       * @param {Element} body - The body element to sanitize.
-       * @returns {Element} Sanitized body element.
-       */
-      function sanitize(body) {
-        
-        function isValidNode(node) {
-          if (node.tagName === 'body' || node.nodeType !== 1) {
-                return true;
-            }
-
-            if (schema.isValid(node.tagName)) {
-                return true;
-            }
-
-            return false;
-        }
-
-        function filterAttributes(node) {
-          var attributes = node.attributes;
-          var attrName, attrValue;
-
-          for (var i = attributes.length - 1; i >= 0; i--) {
-            attrName = attributes[i].name.toLowerCase();
-            attrValue = attributes[i].value;
-
-            // Allow all data-*, aria-*, uk-*, etc.
-            if (/-/.test(attrName)) {
-              continue;
-            }
-
-            // Allow on* if permitted in settings
-            if (settings.allow_event_attributes && /^on[a-z]+/i.test(attrName)) {
-              continue;
-            }
-
-            // Check if the attribute is valid according to the schema
-            if (!schema.isValid(node.tagName, attrName)) {
-              node.removeAttribute(attrName);
-            }
-          }
-        }
-        
-        if (settings.purify_html) {
-          return self.purifier.purify(body);
-        } else {
-          var nodeIterator = document.createNodeIterator(body, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT | NodeFilter.SHOW_TEXT);
-
-          var node;
-
-          while ((node = nodeIterator.nextNode())) {
-            if (!isValidNode(node)) {
-              node.parentNode && node.parentNode.removeChild(node);
-              continue;
-            }
-            
-            if (node.nodeType == 1) {
-              filterAttributes(node);
-            }
-          }
-
-          return body;
-        }
       }
 
       /**
@@ -725,7 +715,7 @@
         var body = DomParser.parseFromString(wrappedHtml, mimeType).body;
 
         // sanitize the body content with DomPurify
-        body = sanitize(body, mimeType);
+        body = Sanitizer.sanitize(body, mimeType);
 
         return isSpecialRoot ? body.firstChild : body;
       }
@@ -743,39 +733,32 @@
 
         // Exclude the special elements where the content is RCDATA as their content needs to be parsed instead of being left as plain text
         // See: https://html.spec.whatwg.org/multipage/parsing.html#parsing-html-fragments
-        var isSpecial = parentName in specialElements && parentName !== 'title' && parentName !== 'textarea';
+        var isSpecial = parentName in specialElements && parentName !== 'title' && parentName !== 'textarea' && parentName !== 'noscript';
 
         var childNodes = nativeParent.childNodes;
 
         for (var ni = 0, nl = childNodes.length; ni < nl; ni++) {
           var nativeChild = childNodes[ni], nodeType = nativeChild.nodeType, nodeName = nativeChild.nodeName.toLowerCase();
 
+          var newNode = new Node(nodeName, nodeType);
+
           if (nodeType == 1) { // ELEMENT_NODE
-            var attributes = nativeChild.attributes;
+            var attributes = Array.from(nativeChild.attributes);
 
-            var newNode, elementRule;
-
-            elementRule = validate ? schema.getElementRule(nodeName) : {};
-
-            if (elementRule) {
-              newNode = new Node(nodeName, nodeType);
-
-              for (var ai = 0, al = attributes.length; ai < al; ai++) {
-                var attr = attributes[ai];
-
-                // Skip event attributes
-                if (!settings.allow_event_attributes && /^on[a-z]+/i.test(attr.name)) {
-                  continue;
-                }
-
-                newNode.attr(attr.name, attr.value);
-              }
+            if (settings.purify_html) {
+              // DOMPurify will reverse the order of attributes, so we need to reverse it back
+              attributes.reverse();
             }
+
+            for (var ai = 0, al = attributes.length; ai < al; ai++) {
+              var attr = attributes[ai];
+              newNode.attr(attr.name, attr.value);
+            }
+
+            newNode.shortEnded = nodeName in shortEndedElements || false;
           }
 
           if (nodeType == 3) { // TEXT_NODE
-            newNode = new Node('#text', nodeType);
-
             newNode.value = nativeChild.data;
 
             if (isSpecial) {
@@ -783,9 +766,7 @@
             }
           }
 
-          if (nodeType == 8 || nodeType == 4 || nodeType == 7) { // COMMENT_NODE, CDATA_SECTION_NODE, PROCESSING_INSTRUCTION_NODE
-            newNode = new Node(nodeName, nodeType);
-
+          if (nodeType == 8 || nodeType == 4 || nodeType == 7) { // COMMENT_NODE, CDATA_SECTION_NODE, PROCESSING_INSTRUCTION_NODE            
             var value = nativeChild.data;
 
             if (nodeType == 8) { // COMMENT_NODE
@@ -798,10 +779,8 @@
             newNode.value = value;
           }
 
-          if (newNode) {
-            transferChildren(newNode, nativeChild, specialElements);
-            parent.append(newNode);
-          }
+          transferChildren(newNode, nativeChild, specialElements);
+          parent.append(newNode);
         }
       }
 
@@ -813,35 +792,38 @@
        * @method addRootBlocks
        * @private
        */
-      function addRootBlocks() {
-        var node = rootNode.firstChild,
-          next, rootBlockNode;
+      function addRootBlocks(rootNode, rootBlockName) {
+        var node = rootNode.firstChild, rootBlockNode = null;
+
+        function isWrappableNode(node) {
+          return (node.type == 3 && tinymce.trim(node.value)) || (node.type == 1 && node.name !== 'p' && !blockElements[node.name] && !node.attr('data-mce-type'));
+        }
 
         // Removes whitespace at beginning and end of block so:
         // <p> x </p> -> <p>x</p>
-        function trim(rootBlockNode) {
-          if (rootBlockNode) {
-            node = rootBlockNode.firstChild;
-            if (node && node.type == 3) {
+        function trim(rootBlock) {
+          if (rootBlock) {
+            node = rootBlock.firstChild;
+            if (node && node.type === 3) {
               node.value = node.value.replace(startWhiteSpaceRegExp, '');
             }
 
-            node = rootBlockNode.lastChild;
-            if (node && node.type == 3) {
+            node = rootBlock.lastChild;
+            if (node && node.type === 3) {
               node.value = node.value.replace(endWhiteSpaceRegExp, '');
             }
           }
         }
 
-        // Check if rootBlock is valid within rootNode for example if P is valid in H1 if H1 is the contentEditabe root
+        // Check if rootBlock is valid within rootNode for example if P is valid in H1 if H1 is the contentEditable root
         if (!schema.isValidChild(rootNode.name, rootBlockName.toLowerCase())) {
           return;
         }
 
         while (node) {
-          next = node.next;
+          var next = node.next;
 
-          if ((node.type == 3 && tinymce.trim(node.value)) || (node.type == 1 && node.name !== 'p' && !blockElements[node.name] && !node.attr('data-mce-type'))) {
+          if (isWrappableNode(node)) {
             if (!rootBlockNode) {
               // Create a new root block element
               rootBlockNode = new Node(rootBlockName, 1);
@@ -862,7 +844,7 @@
         trim(rootBlockNode);
       }
 
-      var element = parseAndSanitizeWithContext(html, settings.root_name, settings.format);
+      var element = parseAndSanitizeWithContext(html, settings.root_name, args.format);
 
       rootNode = new Node(args.context || settings.root_name, 11);
 
@@ -891,16 +873,30 @@
 
       // Fix invalid children or report invalid children in a contextual parsing
       if (validate && invalidChildren.length) {
-        if (!args.context) {
-          fixInvalidChildren(invalidChildren);
+        if (args.context) {
+          var topLevelChildren = [];
+          var otherChildren = [];
+
+          for (var i = 0; i < invalidChildren.length; i++) {
+            var child = invalidChildren[i];
+            if (child.parent === rootNode) {
+              topLevelChildren.push(child);
+            } else {
+              otherChildren.push(child);
+            }
+          }
+
+          fixInvalidChildren(otherChildren);
+
+          args.invalid = topLevelChildren.length > 0;
         } else {
-          args.invalid = true;
+          fixInvalidChildren(invalidChildren);
         }
       }
 
       // Wrap nodes in the root into block elements if the root is body
       if (rootBlockName && (rootNode.name == 'body' || args.isRootContent)) {
-        addRootBlocks();
+        addRootBlocks(rootNode, rootBlockName);
       }
 
       // Run filters only when the contents is valid
@@ -918,37 +914,37 @@
       self.addNodeFilter('br', function (nodes) {
         var i, l = nodes.length,
           node, blockElements = extend({}, schema.getBlockElements());
-        var nonEmptyElements = schema.getNonEmptyElements(),
-          parent, lastParent, prev, prevName;
+        var nonEmptyElements = schema.getNonEmptyElements(), whitespaceElements = schema.getWhiteSpaceElements(), transparentElements = schema.getTransparentElements(),
+          parent, prev, prevName;
         var textNode, elementRule;
 
         // Remove brs from body element as well
         blockElements.body = 1;
+
+        function isBlock(node) {
+          return node.name in blockElements || node.name in transparentElements;
+        }
 
         // Must loop forwards since it will otherwise remove all brs in <p>a<br><br><br></p>
         for (i = 0; i < l; i++) {
           node = nodes[i];
           parent = node.parent;
 
-          if (blockElements[node.parent.name] && node === parent.lastChild) {
+          if (parent && isBlock(parent) && node === parent.lastChild) {
             // Loop all nodes to the left of the current node and check for other BR elements
             // excluding bookmarks since they are invisible
             prev = node.prev;
+
             while (prev) {
               prevName = prev.name;
 
               // Ignore bookmarks
-              if (prevName !== "span" || prev.attr('data-mce-type') !== 'bookmark') {
-                // Found a non BR element
-                if (prevName !== "br") {
-                  break;
-                }
-
+              if (prevName !== 'span' || prev.attr('data-mce-type') !== 'bookmark') {
                 // Found another br it's a <br><br> structure then don't remove anything
                 if (prevName === 'br') {
                   node = null;
-                  break;
                 }
+                break;
               }
 
               prev = prev.prev;
@@ -964,7 +960,7 @@
               node.remove();
 
               // Is the parent to be considered empty after we removed the BR
-              if (parent.isEmpty(nonEmptyElements)) {
+              if (parent.isEmpty(nonEmptyElements, whitespaceElements)) {
                 elementRule = schema.getElementRule(parent.name);
 
                 // Remove or padd the element depending on schema rule
@@ -980,7 +976,7 @@
           } else {
             // Replaces BR elements inside inline elements like <p><b><i><br></i></b></p>
             // so they become <p><b><i>&nbsp;</i></b></p>
-            lastParent = node;
+            let lastParent = node;
             while (parent && parent.firstChild === lastParent && parent.lastChild === lastParent) {
               lastParent = parent;
 
@@ -992,9 +988,30 @@
             }
 
             if (lastParent === parent) {
-              textNode = new Node('#text', 3);
+              var textNode = new Node('#text', 3);
               textNode.value = '\u00a0';
               node.replace(textNode);
+            }
+          }
+        }
+      });
+    }
+
+    if (settings.fix_list_elements) {
+      self.addNodeFilter('ul,ol', function (nodes) {
+        let i = nodes.length, node, parentNode;
+
+        while (i--) {
+          node = nodes[i];
+          parentNode = node.parent;
+
+          if (parentNode && (parentNode.name === 'ul' || parentNode.name === 'ol')) {
+            if (node.prev && node.prev.name === 'li') {
+              node.prev.append(node);
+            } else {
+              const li = new Node('li', 1);
+              li.attr('style', 'list-style-type: none');
+              node.wrap(li);
             }
           }
         }
