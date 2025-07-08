@@ -124,9 +124,9 @@
                     node = root;
                 }
 
-                if (node.nodeType !== 1 || node.getAttribute('data-mce-bogus')) {
+                /*if (node.nodeType !== 1 || node.getAttribute('data-mce-bogus')) {
                     node = node.parentNode;
-                }
+                }*/
 
                 // Get parents and add them to object
                 parents = [];
