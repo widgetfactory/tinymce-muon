@@ -19,6 +19,10 @@
 			autostart: false
 		});
 
+		function getContent() {
+			return editor.getContent();
+		}
+
 		test('getContent', function () {
 			var rng, eventObj;
 
@@ -110,7 +114,7 @@
 			rng.setEnd(editor.getBody(), 1);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('<div>test</div>');
-			equal(editor.getContent(), '<div>test</div>', 'Set contents at selection');
+			equal(getContent(), '<div>test</div>', 'Set contents at selection');
 
 			// Insert XSS at selection
 			editor.setContent('<p>text</p>');
@@ -119,7 +123,7 @@
 			rng.setEnd(editor.getBody(), 1);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('<img src="a" onerror="alert(1)" />');
-			equal(editor.getContent(), '<img src="a" alt="" />', 'Set XSS at selection');
+			equal(getContent(), '<img src="a" alt="" />', 'Set XSS at selection');
 
 			// Set contents at selection (collapsed)
 			editor.setContent('<p>text</p>');
@@ -128,7 +132,7 @@
 			rng.setEnd(editor.getBody(), 0);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('<div>test</div>');
-			equal(editor.getContent(), '<div>test</div><p>text</p>', 'Set contents at selection (collapsed)');
+			equal(getContent(), '<div>test</div><p>text</p>', 'Set contents at selection (collapsed)');
 
 			// Insert in middle of paragraph
 			editor.setContent('<p>beforeafter</p>');
@@ -137,7 +141,7 @@
 			rng.setEnd(editor.getBody().firstChild.firstChild, 'before'.length);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('<br />');
-			equal(editor.getContent(), '<p>before<br />after</p>', 'Set contents at selection (inside paragraph)');
+			equal(getContent(), '<p>before<br />after</p>', 'Set contents at selection (inside paragraph)');
 
 			// Check the caret is left in the correct position.
 			rng = editor.selection.getRng(true);
@@ -160,7 +164,7 @@
 			rng.setEnd(editor.getBody(), 0);
 			editor.selection.setRng(rng);
 			editor.selection.setContent('');
-			equal(editor.getContent(), '<p>text</p>', 'Set contents to empty at selection (collapsed)');
+			equal(getContent(), '<p>text</p>', 'Set contents to empty at selection (collapsed)');
 			rng = editor.selection.getRng(true);
 			if (!document.createRange) {
 				// The old IE selection can only be positioned in text nodes
@@ -209,7 +213,7 @@
 				'</button>' +
 				'</table>'
 			);
-			equal(editor.getContent(), '');
+			equal(getContent(), '');
 
 			editor.setContent('');
 			rng = editor.dom.createRng();
@@ -238,7 +242,7 @@
 				'</table>'
 			);
 
-			equal(editor.getContent().replace(/[\r\n]/g, ''),
+			equal(getContent(),
 				'<table>' +
 				'<tbody>' +
 				'<tr>' +
@@ -287,7 +291,7 @@
 			rng.setEnd(editor.getBody().firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark();
-			equal(editor.getContent(), 'text', 'Editor contents (text)');
+			equal(getContent(), 'text', 'Editor contents (text)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), 'ex', 'Selected contents (text)');
 
@@ -298,7 +302,7 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark();
-			equal(editor.getContent(), '<p>text</p>\n<p>text</p>', 'Editor contents (elements)');
+			equal(getContent(), '<p>text</p>\n<p>text</p>', 'Editor contents (elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
 		});
@@ -313,7 +317,7 @@
 			rng.setEnd(editor.getBody().firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(1);
-			equal(editor.getContent(), 'text', 'Editor contents (text)');
+			equal(getContent(), 'text', 'Editor contents (text)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), 'ex', 'Selected contents (text)');
 
@@ -324,7 +328,7 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(1);
-			equal(editor.getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
+			equal(getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
 		});
@@ -340,7 +344,7 @@
 			rng.setEnd(editor.getBody().firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2);
-			equal(editor.getContent(), 'text', 'Editor contents (text)');
+			equal(getContent(), 'text', 'Editor contents (text)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), 'ex', 'Selected contents (text)');
 		});
@@ -373,9 +377,9 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2);
-			equal(editor.getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
+			equal(getContent(), '<p>text</p><p>text</p>', 'Editor contents (elements)');
 			editor.selection.moveToBookmark(bookmark);
-			equal(editor.selection.getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
+			equal(getContent(), '<p>ext</p>\n<p>tex</p>', 'Selected contents (elements)');
 		});
 
 		test('getBookmark/setBookmark (nonintrusive)', function () {
@@ -394,7 +398,7 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2);
-			equal(editor.getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
+			equal(getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p><p>tex</p>', 'Selected contents (fragmented, elements)');
 		});
@@ -415,8 +419,8 @@
 			rng.setEnd(editor.getBody().firstChild.nextSibling.firstChild, 3);
 			editor.selection.setRng(rng);
 			bookmark = editor.selection.getBookmark(2, true);
-			editor.setContent(editor.getContent());
-			equal(editor.getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
+			editor.setContent(getContent());
+			equal(getContent(), '<p>textaaatext</p><p>text</p>', 'Editor contents (fragmented, elements)');
 			editor.selection.moveToBookmark(bookmark);
 			equal(editor.selection.getContent(), '<p>ext</p><p>tex</p>', 'Selected contents (fragmented, elements)');
 		});
@@ -925,6 +929,8 @@
 				newState = state;
 				newArgs = args;
 			});
+
+			console.log('selectorChanged', newState, newArgs);
 
 			editor.getBody().innerHTML = '<p><a href="#">text</a></p>';
 			Utils.setSelection('a', 0, 'a', 4);
