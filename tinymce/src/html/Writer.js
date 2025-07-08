@@ -69,13 +69,18 @@ tinymce.html.Writer = function (settings, schema) {
           attr = attrs[i];
 
           // treat as boolean attribute
-          if (attr.name === attr.value) {
+          if (attr.name == attr.value) {
             attr["boolean"] = true;
           }
 
-          if (attr["boolean"] && settings.schema == 'html5-strict') {
+          if (attr["boolean"]) {
+            if (settings.schema == 'html5-strict') {
               // boolean attributes in HTML5 are written without a value
               html.push(' ', attr.name);
+            } else {
+              // boolean attributes in HTML4 are written with a value
+              html.push(' ', attr.name, '="', encode('' + attr.name, true), '"');
+            }
           } else {
             html.push(' ', attr.name, '="', encode('' + attr.value, true), '"');
           }
