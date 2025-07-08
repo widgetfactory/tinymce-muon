@@ -211,9 +211,9 @@
     add("img", "src sizes srcset alt usemap ismap width height");
     add("iframe", "src name width height", flowContent);
     add("embed", "src type width height");
-    add("object", "data type typemustmatch name usemap form width height", flowContent, "param");
+    add("object", "data type typemustmatch name usemap form width height", [ flowContent, 'param' ].join(' '));
     add("param", "name value");
-    add("map", "name", flowContent, "area");
+    add("map", "name", [ flowContent, 'area' ].join(' '));
     add("area", "alt coords shape href target rel media hreflang type");
     add("table", "border", "caption colgroup thead tfoot tbody tr" + (type == "html4" ? " col" : ""));
     add("colgroup", "span", "col");
@@ -223,7 +223,7 @@
     add("td", "colspan rowspan headers", flowContent);
     add("th", "colspan rowspan headers scope abbr", flowContent);
     add("form", "accept-charset action autocomplete enctype method name novalidate target", flowContent);
-    add("fieldset", "disabled form name", flowContent, "legend");
+    add("fieldset", "disabled form name", [ flowContent, 'legend' ].join(' '));
     add("label", "form for", phrasingContent);
     add("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate " +
       "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
@@ -242,27 +242,27 @@
     // Extend with HTML5 elements
     if (type != "html4") {
       add("wbr");
-      add("ruby", "", phrasingContent, "rt rp");
+      add("ruby", "", [ phrasingContent, 'rt rp' ].join(' '));
       add("figcaption", "", flowContent);
       add("mark rt rp summary bdi", "", phrasingContent);
       add("canvas", "width height", flowContent);
       add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-        "muted controls width height buffered controlslist playsinline", flowContent, "track source");
-      add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
+        "muted controls width height buffered controlslist playsinline", [ flowContent, 'track source' ].join(' '));
+      add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", [ flowContent, 'track source' ].join(' '));
       add("picture", "", "img source");
       add("source", "src srcset type media sizes");
       add("track", "kind src srclang label default");
-      add("datalist", "", phrasingContent, "option");
+      add("datalist", "", [ phrasingContent, 'option' ].join(' '));
       add("article section nav aside header footer", "", flowContent);
       add("hgroup", "", "h1 h2 h3 h4 h5 h6");
-      add("figure", "", flowContent, "figcaption");
+      add("figure", "", [ flowContent, 'figcaption' ].join(' '));
       add("time", "datetime", phrasingContent);
       add("dialog", "open", flowContent);
       add("command", "type label icon disabled checked radiogroup command");
       add("output", "for form name", phrasingContent);
       add("progress", "value max", phrasingContent);
       add("meter", "value min max low high optimum", phrasingContent);
-      add("details", "open", flowContent, "summary");
+      add("details", "open", [ flowContent, 'summary' ].join(' '));
       add("keygen", "autofocus challenge disabled form keytype name");
 
       // update with flowContent
@@ -457,7 +457,7 @@
       'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
       'datalist select optgroup figcaption details summary', textBlockElementsMap);
 
-    textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
+    textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font s strike u var cite' +
       'dfn code mark q sup sub samp');
 
     transparentElementsMap = createLookupTable('transparent_elements', 'a ins del canvas map');
@@ -788,20 +788,34 @@
       }
 
       // Add default alt attribute for images
-      elements.img.attributesDefault = [{
-        name: 'alt',
-        value: ''
-      }];
+      if (settings.img_default_alt_attribute !== false) {
+        elements.img.attributesDefault = [{
+          name: 'alt',
+          value: ''
+        }];
+      }
+
+      // By default,
+      // - padd the text inline element if it is empty and also a child of an empty root block
+      // - in all other cases, remove the text inline element if it is empty
+      each(textInlineElementsMap, function (_val, name) {
+        if (elements[name]) {          
+          if (settings.padd_empty_block_inline_children) {
+            elements[name].paddInEmptyBlock = true;
+          }
+          elements[name].removeEmpty = true;
+        }
+      });
 
       // Remove these if they are empty by default
-      each(split('ol ul sub sup blockquote font table tbody tr strong b'), function (name) {
+      each(split('ol ul blockquote a table tbody'), function (name) {
         if (elements[name]) {
           elements[name].removeEmpty = true;
         }
       });
 
       // Padd these by default
-      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
+      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption li summary'), function (name) {
         elements[name].paddEmpty = true;
       });
 
@@ -839,8 +853,8 @@
 
     // If the user didn't allow span only allow internal spans
     if (!getElementRule('span')) {
-      //addValidElements('span[!data-mce-type|*]');
-      addValidElements('span[*]');
+      addValidElements('span[!data-mce-type|*]');
+      //addValidElements('span[*]');
     }
 
     /**
