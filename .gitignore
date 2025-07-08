@@ -31,3 +31,5 @@ jscripts/tiny_mce/tiny_mce_dev.js
 jscripts/tiny_mce/rollup.config.js
 .eslintrc
 tests/js/tiny_mce_loader.js
+tests/js/tiny_mce_loader.js
+tinymce/rollup.config.js
