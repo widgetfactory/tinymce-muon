@@ -41,6 +41,8 @@
     settings.entity_encoding = settings.entity_encoding || 'named';
     settings.remove_trailing_brs = "remove_trailing_brs" in settings ? settings.remove_trailing_brs : true;
 
+    settings.element_format = settings.element_format || 'xhtml';
+
     var tempAttrs = ['data-mce-selected'];
 
     /**
@@ -201,9 +203,11 @@
     // Force script into CDATA sections and remove the mce- prefix also add comments around styles
     htmlParser.addNodeFilter('script,style', function (nodes, name) {
       var i = nodes.length,
-        node, value, type;
+        node, firstChild, value, type;
 
       function trim(value) {
+        /* jshint maxlen:255 */
+        /* eslint max-len:0 */
         return value.replace(/(<!--\[CDATA\[|\]\]-->)/g, '\n')
           .replace(/^[\r\n]*|[\r\n]*$/g, '')
           .replace(/^\s*((<!--)?(\s*\/\/)?\s*<!\[CDATA\[|(<!--\s*)?\/\*\s*<!\[CDATA\[\s*\*\/|(\/\/)?\s*<!--|\/\*\s*<!--\s*\*\/)\s*[\r\n]*/gi, '')
@@ -212,7 +216,8 @@
 
       while (i--) {
         node = nodes[i];
-        value = node.firstChild ? node.firstChild.value : '';
+        firstChild = node.firstChild;
+        value = firstChild ? firstChild.value : '';
 
         if (name === "script") {
           // Remove mce- prefix from script elements and remove default type since the user specified
@@ -223,14 +228,13 @@
             node.attr('type', type == 'mce-no/type' ? null : type.replace(/^mce\-/, ''));
           }
 
-          if (value.length > 0) {
-            //node.firstChild.value = '// <![CDATA[\n' + trim(value) + '\n// ]]>';
-            node.firstChild.value = trim(value);
+          if (settings.element_format === 'xhtml' && firstChild && value.length > 0) {
+            firstChild.value = '// <![CDATA[\n' + trim(value) + '\n// ]]>';
           }
+
         } else {
-          if (value.length > 0) {
-            //node.firstChild.value = '<!--\n' + trim(value) + '\n-->';
-            node.firstChild.value = trim(value);
+          if (settings.element_format === 'xhtml' && firstChild && value.length > 0) {
+            firstChild.value = '<!--\n' + trim(value) + '\n-->';
           }
         }
       }
