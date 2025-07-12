@@ -1478,8 +1478,8 @@ tinymce.util.Quirks = function (editor) {
     };
 
     // Normalize selection for example <b>a</b><i>|a</i> becomes <b>a|</b><i>a</i> except for Ctrl+A since it selects everything
-    editor.onKeyUp.add(normalize);
-    editor.onMouseUp.add(normalize);
+    editor.onKeyUp.addToTop(normalize);
+    editor.onMouseUp.addToTop(normalize);
   }
 
   function inlineBoundary() {
