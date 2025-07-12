@@ -12,7 +12,8 @@
 (function (tinymce) {
   var TreeWalker = tinymce.dom.TreeWalker,
     RangeUtils = tinymce.dom.RangeUtils,
-    NodeType = tinymce.dom.NodeType;
+    NodeType = tinymce.dom.NodeType,
+    CaretContainer = tinymce.caret.CaretContainer;
 
   /**
      * Contains logic for handling the enter key to split/generate block elements.
@@ -25,8 +26,6 @@
       schema = editor.schema;
     var nonEmptyElementsMap = schema.getNonEmptyElements(),
       moveCaretBeforeOnEnterElementsMap = schema.getMoveCaretBeforeOnEnterElements();
-
-    var isIE = tinymce.isIE && tinymce.isIE < 11;
 
     editor.onNewBlock = new tinymce.util.Dispatcher();
 
@@ -48,39 +47,6 @@
 
       function isTableCell(node) {
         return node && /^(TD|TH|CAPTION)$/.test(node.nodeName);
-      }
-
-      function isBogus(node) {
-        return !!node && node.nodeType === 1 && node.hasAttribute('data-mce-bogus');
-      }
-
-      function trimBogusBr(elm) {
-        var brs = elm.getElementsByTagName('br');
-        var lastBr = brs[brs.length - 1];
-        if (isBogus(lastBr)) {
-          lastBr.parentNode.removeChild(lastBr);
-        }
-      }
-
-      function isCaretContainerBlock(node) {
-        if (!!node && node.nodeType === 3) {
-          node = node.parentNode;
-        }
-
-        return (!!node && node.nodeType === 1) && node.hasAttribute('data-mce-caret');
-      }
-
-      function showCaretContainerBlock(caretContainer) {
-        if (caretContainer && caretContainer.hasAttribute('data-mce-caret')) {
-          trimBogusBr(caretContainer);
-          caretContainer.removeAttribute('data-mce-caret');
-          caretContainer.removeAttribute('data-mce-bogus');
-          caretContainer.removeAttribute('style');
-          caretContainer.removeAttribute('_moz_abspos');
-          return caretContainer;
-        }
-
-        return null;
       }
 
       // Renders empty block on IE
@@ -151,15 +117,6 @@
           return;
         }
 
-        // Old IE versions doesn't properly render blocks with br elements in them
-        // For example <p><br></p> wont be rendered correctly in a contentEditable area
-        // until you remove the br producing <p></p>
-        if (isIE && parentBlock && parentBlock.firstChild) {
-          if (parentBlock.firstChild == parentBlock.lastChild && parentBlock.firstChild.tagName == 'BR') {
-            dom.remove(parentBlock.firstChild);
-          }
-        }
-
         if (/^(LI|DT|DD)$/.test(root.nodeName)) {
           var firstChild = firstNonWhiteSpaceNodeSibling(root.firstChild);
 
@@ -173,9 +130,7 @@
         // Normalize whitespace to remove empty text nodes. Fix for: #6904
         // Gecko will be able to place the caret in empty text nodes but it won't render propery
         // Older IE versions will sometimes crash so for now ignore all IE versions
-        if (!isIE) {
-          root.normalize();
-        }
+        root.normalize();
 
         if (root.hasChildNodes()) {
           walker = new TreeWalker(root, root);
@@ -204,12 +159,6 @@
         } else {
           if (root.nodeName == 'BR') {
             if (root.nextSibling && dom.isBlock(root.nextSibling)) {
-              // Trick on older IE versions to render the caret before the BR between two lists
-              if (!documentMode || documentMode < 9) {
-                tempElm = dom.create('br');
-                root.parentNode.insertBefore(tempElm, root);
-              }
-
               rng.setStartBefore(root);
               rng.setEndBefore(root);
             } else {
@@ -239,7 +188,7 @@
 
       function emptyBlock(elm) {
         // BR is needed in empty blocks on non IE browsers
-        elm.innerHTML = !isIE ? '<br data-mce-bogus="1">' : '';
+        elm.innerHTML = '<br data-mce-bogus="1">';
       }
 
       // Creates a new block element by cloning the current one or creating a new one if the name is specified
@@ -278,12 +227,13 @@
               }
             }
           } while ((node = node.parentNode) && node != editableRoot);
+        } else {
+          dom.setAttrib(block, 'style', null); // wipe out any styles that came over with the block
+          dom.setAttrib(block, 'class', null);
         }
 
         // BR is needed in empty blocks on non IE browsers
-        if (!isIE) {
-          caretNode.innerHTML = '<br data-mce-bogus="1">';
-        }
+        caretNode.innerHTML = '<br data-mce-bogus="1">';
 
         return block;
       }
@@ -538,15 +488,13 @@
       function addBrToBlockIfNeeded(block) {
         var lastChild;
 
-        // IE will render the blocks correctly other browsers needs a BR
-        if (!isIE) {
-          block.normalize(); // Remove empty text nodes that got left behind by the extract
 
-          // Check if the block is empty or contains a floated last child
-          lastChild = block.lastChild;
-          if (!lastChild || (/^(left|right)$/gi.test(dom.getStyle(lastChild, 'float', true)))) {
-            dom.add(block, 'br');
-          }
+        block.normalize(); // Remove empty text nodes that got left behind by the extract
+
+        // Check if the block is empty or contains a floated last child
+        lastChild = block.lastChild;
+        if (!lastChild || (/^(left|right)$/gi.test(dom.getStyle(lastChild, 'float', true)))) {
+          dom.add(block, 'br');
         }
       }
 
@@ -594,7 +542,6 @@
       }
 
       newBlockName = newBlockName ? newBlockName.toUpperCase() : '';
-      documentMode = dom.doc.documentMode;
       shiftKey = evt.shiftKey;
 
       // Resolve node index
@@ -688,8 +635,8 @@
       newBlockName = newBlockName || 'P';
 
       // Insert new block before/after the parent block depending on caret location
-      if (isCaretContainerBlock(parentBlock)) {
-        newBlock = showCaretContainerBlock(parentBlock);
+      if (CaretContainer.isCaretContainerBlock(parentBlock)) {
+        newBlock = CaretContainer.showCaretContainerBlock(parentBlock);
         if (dom.isEmpty(parentBlock)) {
           emptyBlock(parentBlock);
         }
@@ -734,6 +681,7 @@
       // Allow custom handling of new blocks
       editor.onNewBlock.dispatch(editor, newBlock);
 
+      undoManager.typing = false;
       undoManager.add();
     }
 
