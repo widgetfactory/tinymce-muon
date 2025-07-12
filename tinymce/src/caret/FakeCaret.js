@@ -63,7 +63,7 @@
       var contentEditableFalseNodes, node, sibling, i, data;
 
       contentEditableFalseNodes = DOM.select('*[contentEditable=false]', rootNode);
-
+      
       for (i = 0; i < contentEditableFalseNodes.length; i++) {
         node = contentEditableFalseNodes[i];
 
@@ -141,26 +141,19 @@
       }
 
       if ($lastVisualCaret) {
-        DOM.remove($lastVisualCaret);
+        $lastVisualCaret.remove();
         $lastVisualCaret = null;
       }
 
       clearInterval(cursorInterval);
     }
 
-    var hasFocus = function () {
-      return rootNode.ownerDocument.activeElement === rootNode;
-    };
-
     function startBlink() {
       cursorInterval = setInterval(function () {
         var caret = DOM.select('div.mce-visual-caret', rootNode)[0];
 
-        if (hasFocus()) {
-          DOM.toggleClass(caret, 'mce-visual-caret-hidden');
-        } else {
-          DOM.addClass(caret, 'mce-visual-caret-hidden');
-        }
+        DOM.toggleClass(caret, 'mce-visual-caret-hidden');
+        
       }, 500);
     }
 
