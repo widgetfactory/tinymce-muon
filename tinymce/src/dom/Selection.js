@@ -711,6 +711,10 @@
 
       self.onGetSelectionRange.dispatch(self, evt);
 
+      if (evt.range !== rng) {
+        return evt.range; // If the range was modified by the event handler
+      }
+
       // No range found then create an empty one
       // This can occur when the editor is placed in a hidden container element on Gecko
       // Or on IE when there was an exception
