@@ -41,7 +41,7 @@
     resolveIndex = RangeUtils.getNode;
 
   function createRange(doc) {
-    return "createRange" in doc ? doc.createRange() : DOMUtils.createRng();
+    return "createRange" in doc ? doc.createRange() : DOMUtils.DOM.createRng();
   }
 
   function isWhiteSpace(chr) {
@@ -68,6 +68,24 @@
     var clientRects = [],
       beforeNode, node;
 
+    // Hack for older WebKit versions that doesn't
+    // support getBoundingClientRect on BR elements
+    function getBrClientRect(brNode) {
+      var doc = brNode.ownerDocument,
+        rng = createRange(doc),
+        nbsp = doc.createTextNode('\u00a0'),
+        parentNode = brNode.parentNode,
+        clientRect;
+
+      parentNode.insertBefore(nbsp, brNode);
+      rng.setStart(nbsp, 0);
+      rng.setEnd(nbsp, 1);
+      clientRect = ClientRect.clone(rng.getBoundingClientRect());
+      parentNode.removeChild(nbsp);
+
+      return clientRect;
+    }
+
     function getBoundingClientRect(item) {
       var clientRect, clientRects;
 
@@ -76,6 +94,10 @@
         clientRect = ClientRect.clone(clientRects[0]);
       } else {
         clientRect = ClientRect.clone(item.getBoundingClientRect());
+      }
+
+      if (isBr(item) && clientRect.left === 0) {
+        return getBrClientRect(item);
       }
 
       return clientRect;

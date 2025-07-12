@@ -206,7 +206,6 @@
 
     return null;
   }
-
   tinymce.caret.CaretWalker = function (rootNode) {
     return {
       /**

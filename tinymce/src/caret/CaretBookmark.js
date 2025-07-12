@@ -29,7 +29,6 @@
 (function (tinymce) {
   var NodeType = tinymce.dom.NodeType, DOMUtils = tinymce.DOM;
   var Fun = tinymce.util.Fun, Arr = tinymce.util.Arr;
-
   var isText = NodeType.isText,
     isBogus = NodeType.isBogus,
     nodeIndex = DOMUtils.nodeIndex;
