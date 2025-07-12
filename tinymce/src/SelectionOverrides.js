@@ -576,6 +576,7 @@
         var contentEditableRoot;
 
         contentEditableRoot = getContentEditableRoot(e.target);
+
         if (contentEditableRoot) {
           // Prevent clicks on links in a cE=false element
           if (isContentEditableFalse(contentEditableRoot)) {
@@ -731,7 +732,7 @@
             override(e, backspace);
             break;
 
-          default:
+          default:          
             if (isContentEditableFalse(editor.selection.getNode()) && isContentKey(e)) {
               e.preventDefault();
             }
@@ -792,10 +793,15 @@
       }
 
       // Must be added to "top" since undoManager needs to be executed after
-      editor.dom.bind(editor.getBody(), 'keyup compositionstart', function (e) {
+      editor.onCompositionStart.addToTop(function (editor, e) {
         handleBlockContainer(e);
         handleEmptyBackspaceDelete(e);
-      }, true);
+      });
+
+      editor.onKeyUp.addToTop(function (editor, e) {
+        handleBlockContainer(e);
+        handleEmptyBackspaceDelete(e);
+      });
 
       editor.onCut.add(function () {
         var node = editor.selection.getNode();
@@ -861,7 +867,12 @@
           if (realSelectionElement) {
             e.preventDefault();
             clipboardData.clearData();
-            clipboardData.setData('text/html', realSelectionElement.outerHTML);
+
+            var html = realSelectionElement.outerHTML || '';
+
+            clipboardData.setData('text/html', html);
+            // set internal html data
+            clipboardData.setData('x-tinymce/html', html);
             clipboardData.setData('text/plain', realSelectionElement.outerText);
           }
         }
