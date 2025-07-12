@@ -59,7 +59,8 @@
 		focus: 'onFocus',
 		focusin: 'onFocusIn',
 		focusout: 'onFocusOut',
-		input: 'onInput'
+		input: 'onInput',
+		compositionstart: 'onCompositionStart'
 	};
 
 	/**
@@ -905,7 +906,15 @@
 			 * @event onInput
 			 * @param {tinymce.Editor} sender Editor instance.
 			 */
-			'onInput'
+			'onInput',
+
+			/**
+			 * Fires when a composition event starts, such as when the user starts typing in an input method editor (IME).
+			 * 
+			 * @event onCompositionStart
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onCompositionStart'
 
 		], function (name) {
 			self[name] = new tinymce.util.Dispatcher(self);
