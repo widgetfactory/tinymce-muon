@@ -31,7 +31,7 @@
 
     function handleEnterKey(evt) {
       var rng = selection.getRng(true),
-        tmpRng, editableRoot, container, offset, parentBlock, documentMode, shiftKey,
+        tmpRng, editableRoot, container, offset, parentBlock, shiftKey,
         newBlock, fragment, containerBlock, parentBlockName, containerBlockName, newBlockName, isAfterLastNodeInContainer;
 
       // Returns true if the block can be split into two blocks or not
