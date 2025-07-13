@@ -17,6 +17,10 @@ import './src/util/Preview.js';
 import './src/util/Arr.js';
 import './src/util/Fun.js';
 
+// tinymce.text.*
+import './src/text/ExtendingChar.js';
+import './src/text/Zwsp.js';
+
 // tinymce.file.*
 import './src/file/BlobCache.js';
 import './src/file/Conversions';
@@ -39,37 +43,31 @@ import './src/geom/Rect.js';
 import './src/dom/EventUtils.js';
 import './src/dom/TreeWalker.js';
 import './src/dom/DOMUtils.js';
-
+import './src/dom/TrimBody.js';
 import './src/dom/NodeType.js';
 import './src/dom/Dimensions.js';
-
-import './src/dom/RangeUtils.js';
-
 import './src/dom/MousePosition.js';
-
-import './src/dom/TrimBody.js';
-
-// tinymce.text.*
-import './src/text/ExtendingChar.js';
-import './src/text/Zwsp.js';
-
-// tinymce.textpattern.*
-import './src/TextPattern.js';
-
-// tinymce.clipboard.*
-import './src/clipboard/Clipboard.js';
 
 // tinymce.caret.*
 import './src/caret/CaretBookmark.js';
 import './src/caret/CaretContainer.js';
 import './src/caret/CaretCandidate.js';
 import './src/caret/CaretContainerRemove.js';
+
+import './src/dom/RangeUtils.js';
+
 import './src/caret/CaretPosition.js';
 import './src/caret/CaretUtils.js';
 import './src/caret/CaretWalker.js';
 import './src/caret/FakeCaret.js';
 import './src/caret/LineUtils.js';
 import './src/caret/LineWalker.js';
+
+// tinymce.textpattern.*
+import './src/TextPattern.js';
+
+// tinymce.clipboard.*
+import './src/clipboard/Clipboard.js';
 
 import './src/dom/Sizzle.js';
 import './src/dom/ScrollIntoView.js';
