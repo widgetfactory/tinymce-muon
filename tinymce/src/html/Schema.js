@@ -32,7 +32,7 @@
   function compileSchema(type) {
     var schema = {},
       globalAttributes, blockContent;
-    var phrasingContent, flowContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
+    var phrasingContent, flowContent, transparentContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
 
     function add(name, attributes, children) {
       var ni, i, attributesOrder, args = arguments;
@@ -143,11 +143,19 @@
       "textarea u var link style #text #comment"
     );
 
+    // transparent content elements
+    transparentContent = split(
+      "a ins del canvas map"
+    );
+
     // Add HTML5 items to globalAttributes, blockContent, phrasingContent
     if (type != "html4") {
       globalAttributes.push.apply(globalAttributes, split("contenteditable contextmenu draggable dropzone " +
         "hidden spellcheck translate"));
       blockContent.push.apply(blockContent, split("article aside details dialog figure header footer hgroup section nav"));
+
+      blockContent.push.apply(blockContent, transparentContent);
+
       phrasingContent.push.apply(phrasingContent, split("audio canvas command datalist mark meter output picture " +
         "progress time wbr video ruby bdi keygen"));
     }
@@ -185,8 +193,8 @@
     add("base", "href target");
     add("link", "href rel media hreflang type sizes");
     add("meta", "name http-equiv content charset");
-    add("style", "media type scoped", '#text #cdata-section');
-    add("script", "src async defer type charset", '#text #cdata-section');
+    add("style", "media type scoped");
+    add("script", "src async defer type charset");
     add("body", "onafterprint onbeforeprint onbeforeunload onblur onerror onfocus " +
       "onhashchange onload onmessage onoffline ononline onpagehide onpageshow " +
       "onpopstate onresize onscroll onstorage onunload", flowContent);
@@ -203,9 +211,9 @@
     add("img", "src sizes srcset alt usemap ismap width height");
     add("iframe", "src name width height", flowContent);
     add("embed", "src type width height");
-    add("object", "data type typemustmatch name usemap form width height", flowContent, "param");
+    add("object", "data type typemustmatch name usemap form width height", [ flowContent, 'param' ].join(' '));
     add("param", "name value");
-    add("map", "name", flowContent, "area");
+    add("map", "name", [ flowContent, 'area' ].join(' '));
     add("area", "alt coords shape href target rel media hreflang type");
     add("table", "border", "caption colgroup thead tfoot tbody tr" + (type == "html4" ? " col" : ""));
     add("colgroup", "span", "col");
@@ -215,7 +223,7 @@
     add("td", "colspan rowspan headers", flowContent);
     add("th", "colspan rowspan headers scope abbr", flowContent);
     add("form", "accept-charset action autocomplete enctype method name novalidate target", flowContent);
-    add("fieldset", "disabled form name", flowContent, "legend");
+    add("fieldset", "disabled form name", [ flowContent, 'legend' ].join(' '));
     add("label", "form for", phrasingContent);
     add("input", "accept alt autocomplete checked dirname disabled form formaction formenctype formmethod formnovalidate " +
       "formtarget height list max maxlength min multiple name pattern readonly required size src step type value width"
@@ -234,27 +242,27 @@
     // Extend with HTML5 elements
     if (type != "html4") {
       add("wbr");
-      add("ruby", "", phrasingContent, "rt rp");
+      add("ruby", "", [ phrasingContent, 'rt rp' ].join(' '));
       add("figcaption", "", flowContent);
       add("mark rt rp summary bdi", "", phrasingContent);
       add("canvas", "width height", flowContent);
       add("video", "src crossorigin poster preload autoplay mediagroup loop " +
-        "muted controls width height buffered controlslist playsinline", flowContent, "track source");
-      add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", flowContent, "track source");
+        "muted controls width height buffered controlslist playsinline", [ flowContent, 'track source' ].join(' '));
+      add("audio", "src crossorigin preload autoplay mediagroup loop muted controls buffered volume controlslist", [ flowContent, 'track source' ].join(' '));
       add("picture", "", "img source");
       add("source", "src srcset type media sizes");
       add("track", "kind src srclang label default");
-      add("datalist", "", phrasingContent, "option");
+      add("datalist", "", [ phrasingContent, 'option' ].join(' '));
       add("article section nav aside header footer", "", flowContent);
       add("hgroup", "", "h1 h2 h3 h4 h5 h6");
-      add("figure", "", flowContent, "figcaption");
+      add("figure", "", [ flowContent, 'figcaption' ].join(' '));
       add("time", "datetime", phrasingContent);
       add("dialog", "open", flowContent);
       add("command", "type label icon disabled checked radiogroup command");
       add("output", "for form name", phrasingContent);
       add("progress", "value max", phrasingContent);
       add("meter", "value min max low high optimum", phrasingContent);
-      add("details", "open", flowContent, "summary");
+      add("details", "open", [ flowContent, 'summary' ].join(' '));
       add("keygen", "autofocus challenge disabled form keytype name");
 
       // update with flowContent
@@ -391,7 +399,7 @@
       patternElements = [],
       validStyles, invalidStyles, schemaItems;
     var whiteSpaceElementsMap, selfClosingElementsMap, shortEndedElementsMap, boolAttrMap, validClasses;
-    var blockElementsMap, nonEmptyElementsMap, moveCaretBeforeOnEnterElementsMap, textBlockElementsMap, textInlineElementsMap;
+    var blockElementsMap, nonEmptyElementsMap, moveCaretBeforeOnEnterElementsMap, textBlockElementsMap, textInlineElementsMap, transparentElementsMap;
     var customElementsMap = {},
       specialElements = {};
 
@@ -418,6 +426,7 @@
     }
 
     settings = settings || {};
+
     schemaItems = compileSchema(settings.schema);
 
     // Allow all elements and attributes if verify_html is set to false
@@ -430,7 +439,7 @@
     validClasses = compileElementMap(settings.valid_classes, 'map');
 
     // Setup map objects
-    whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object');
+    whiteSpaceElementsMap = createLookupTable('whitespace_elements', 'pre script noscript style textarea video audio iframe object code');
 
     selfClosingElementsMap = createLookupTable('self_closing_elements', 'colgroup dd dt li option p td tfoot th thead tr');
 
@@ -450,8 +459,10 @@
       'th tr td li ol ul caption dl dt dd noscript menu isindex option ' +
       'datalist select optgroup figcaption details summary', textBlockElementsMap);
 
-    textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font strike u var cite ' +
+    textInlineElementsMap = createLookupTable('text_inline_elements', 'span strong b em i font s strike u var cite' +
       'dfn code mark q sup sub samp');
+
+    transparentElementsMap = createLookupTable('transparent_elements', 'a ins del canvas map');
 
     each((settings.special || 'script noscript iframe noframes noembed title style textarea xmp').split(' '), function (name) {
       specialElements[name] = new RegExp('<\/' + name + '[^>]*>', 'gi');
@@ -770,8 +781,8 @@
         children[name] = element.children;
       });
 
-      // Switch these on HTML4
-      if (settings.schema === "html4") {
+      // Switch these in HTML4
+      if (settings.schema === "html4" || settings.prefer_strong_and_em) {
         each(split('strong/b em/i'), function (item) {
           item = split(item, '/');
           elements[item[1]].outputName = item[0];
@@ -779,20 +790,34 @@
       }
 
       // Add default alt attribute for images
-      elements.img.attributesDefault = [{
-        name: 'alt',
-        value: ''
-      }];
+      if (settings.img_default_alt_attribute !== false) {
+        elements.img.attributesDefault = [{
+          name: 'alt',
+          value: ''
+        }];
+      }
+
+      // By default,
+      // - padd the text inline element if it is empty and also a child of an empty root block
+      // - in all other cases, remove the text inline element if it is empty
+      each(textInlineElementsMap, function (_val, name) {
+        if (elements[name]) {          
+          if (settings.padd_empty_block_inline_children) {
+            elements[name].paddInEmptyBlock = true;
+          }
+          elements[name].removeEmpty = true;
+        }
+      });
 
       // Remove these if they are empty by default
-      each(split('ol ul sub sup blockquote font table tbody tr strong b'), function (name) {
+      each(split('ol ul blockquote a table tbody'), function (name) {
         if (elements[name]) {
           elements[name].removeEmpty = true;
         }
       });
 
       // Padd these by default
-      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption'), function (name) {
+      each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption li summary'), function (name) {
         elements[name].paddEmpty = true;
       });
 
@@ -830,8 +855,8 @@
 
     // If the user didn't allow span only allow internal spans
     if (!getElementRule('span')) {
-      //addValidElements('span[!data-mce-type|*]');
-      addValidElements('span[*]');
+      addValidElements('span[!data-mce-type|*]');
+      //addValidElements('span[*]');
     }
 
     /**
@@ -994,6 +1019,16 @@
     };
 
     /**
+     * Returns a map with transparent elements.
+     *
+     * @method getTransparentElements
+     * @return {Object} Name/value lookup map for transparent elements.
+     */
+    self.getTransparentElements = function () {
+      return transparentElementsMap;
+    };
+
+    /**
      * Returns true/false if the specified element and it's child is valid or not
      * according to the schema.
      *
@@ -1002,7 +1037,7 @@
      * @param {String} child Element child to verify.
      * @return {Boolean} True/false if the element is a valid child of the specified parent.
      */
-    self.isValidChild = function (name, child) {      
+    self.isValidChild = function (name, child) {
       var parent = children[name];
       return !!(parent && parent[child]);
     };

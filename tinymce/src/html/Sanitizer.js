@@ -6,6 +6,16 @@
 import DOMPurify from "dompurify";
 
 /**
+ * Copyright (c) 2025 Ryan Demmer
+ * Licensed under the GNU General Public License v2.0 or later
+ * Includes modified code from TinyMCE 7.x, licensed under the GNU General Public License v2.0 or later
+ * @code https://github.com/tinymce/tinymce/tree/main/modules/tinymce/src/core/main/ts/api/html/Sanitization.ts
+ * Copyright (c) 2025 Ephox Corporation DBA Tiny Technologies, Inc.
+ *  
+ * See LICENSE.txt
+ */
+
+/**
  * tinymce.html.Sanitizer
  *
  * A custom HTML sanitizer integrating DOMPurify and schema-based filtering.
@@ -20,7 +30,7 @@ import DOMPurify from "dompurify";
 (function (tinymce) {
     var each = tinymce.each;
     var isDomSafe = tinymce.util.URI.isDomSafe;
-    var filteredUrlAttrs = tinymce.makeMap('src,href,data,background,formaction,poster,xlink:href');
+    var filteredUrlAttrs = tinymce.makeMap('src,href,data,background,action,formaction,poster,xlink:href');
 
     /**
      * Constructs a new Sanitizer instance.
@@ -36,6 +46,44 @@ import DOMPurify from "dompurify";
         function isBooleanAttribute(name) {
             var boolAttrMap = schema.getBoolAttrs();
             return boolAttrMap[name] || boolAttrMap[name.toLowerCase()] || false;
+        }
+
+        function shouldKeepAttribute(attrName, attrValue, tagName) {
+            attrName = attrName.toLowerCase();
+            tagName = tagName.toLowerCase();
+
+
+            // always disallow dangerous URLs
+            if (attrName in filteredUrlAttrs && !isDomSafe(attrValue, tagName, settings)) {
+                return false;
+            }
+
+            if (!settings.validate) {
+                return true;
+            }
+
+            // Preserve custom data-* or other dashed attributes including internal attributes eg: data-mce-type
+            if (/-/.test(attrName)) {
+                return true;
+            }
+
+            // Event handlers: only keep if allowed and defined in schema
+            if (/^on[a-z]+/i.test(attrName)) {
+                if (settings.allow_event_attributes && schema.isValid(tagName, attrName)) {
+                    return true;
+                }
+
+                return false;
+            }
+
+
+
+            // Remove attributes not in schema
+            if (schema.isValid(tagName, attrName)) {
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -60,26 +108,34 @@ import DOMPurify from "dompurify";
          *    replaced with a new element of that name, preserving its children.
          * 11. Remaining attributes are filtered via filterAttributes().
          */
-        function processNode(node) {
+        function processNode(node, evt) {
             if (node.nodeType !== 1) {
-                return true;
+                return;
             }
 
             var tag = node.tagName.toLowerCase();
 
             // skip body tag
             if (tag === 'body') {
-                return true;
+                return;
             }
 
             // keep custom root nodes
             if (node.hasAttribute('data-mce-root')) {
-                return true;
+                if (evt) {
+                    evt.allowedTags[tag] = true;
+                }
+
+                return;
             }
 
             // keep internal nodes
             if (node.hasAttribute('data-mce-type')) {
-                return true;
+                if (evt) {
+                    evt.allowedTags[tag] = true;
+                }
+
+                return;
             }
 
             // always remove bogus nodes
@@ -88,66 +144,71 @@ import DOMPurify from "dompurify";
                 return;
             }
 
-            // skip if we are not validating content
-            if (!settings.validate) {
-                return;
-            }
-
             var rule = schema.getElementRule(tag);
 
-            if (!rule) {
-                // If no rule, remove the invalid node
-                removeNode(node);
-                return;
+            if (settings.validate && !rule) {
+                if (tag in special) {
+                    // Special elements are always removed
+                    removeNode(node);
+                    return;
+                } else {
+                    // unwrap others
+                    removeNode(node, true);
+                }
+            } else {
+                if (evt) {
+                    evt.allowedTags[tag] = true;
+                }
             }
 
-            // Enforce forced attributes
-            each(rule.attributesForced, function (attr) {
-                node.setAttribute(
-                    attr.name,
-                    attr.value === '{$uid}' ? 'mce_' + uid++ : attr.value
-                );
-            });
-
-            // Apply default attributes
-            each(rule.attributesDefault, function (attr) {
-                if (!node.hasAttribute(attr.name)) {
+            if (settings.validate && rule) {
+                // Enforce forced attributes
+                each(rule.attributesForced, function (attr) {
                     node.setAttribute(
                         attr.name,
                         attr.value === '{$uid}' ? 'mce_' + uid++ : attr.value
                     );
+                });
+
+                // Apply default attributes
+                each(rule.attributesDefault, function (attr) {
+                    if (!node.hasAttribute(attr.name)) {
+                        node.setAttribute(
+                            attr.name,
+                            attr.value === '{$uid}' ? 'mce_' + uid++ : attr.value
+                        );
+                    }
+                });
+
+                // Unwrap and remove if required attributes are missing
+                if (
+                    rule.attributesRequired &&
+                    !rule.attributesRequired.some(function (attr) {
+                        return node.hasAttribute(attr.name);
+                    })
+                ) {
+                    removeNode(node, true);
+                    return;
                 }
-            });
 
-            // Unwrap and remove if required attributes are missing
-            if (
-                rule.attributesRequired &&
-                !rule.attributesRequired.some(function (attr) {
-                    return node.hasAttribute(attr.name);
-                })
-            ) {
-                removeNode(node, true);
-                return;
-            }
-
-            // Unwrap and remove if all attributes should be stripped and none remain
-            if (rule.removeEmptyAttrs && node.attributes.length === 0) {
-                removeNode(node, true);
-                return;
-            }
-
-            // Rename element if schema defines a different outputName
-            if (rule.outputName && rule.outputName !== tag) {
-                var newNode = document.createElement(rule.outputName);
-                while (node.firstChild) {
-                    newNode.appendChild(node.firstChild);
+                // Unwrap and remove if all attributes should be stripped and none remain
+                if (rule.removeEmptyAttrs && node.attributes.length === 0) {
+                    removeNode(node, true);
+                    return;
                 }
-                node.parentNode.replaceChild(newNode, node);
-                node = newNode;
-            }
 
-            // Finally, filter remaining attributes
-            filterAttributes(node);
+                // Rename element if schema defines a different outputName
+                if (rule.outputName && rule.outputName !== tag) {
+                    var newNode = document.createElement(rule.outputName);
+
+                    while (node.firstChild) {
+                        newNode.appendChild(node.firstChild);
+                    }
+
+                    node.parentNode.replaceChild(newNode, node);
+                    node = newNode;
+                }
+            }
         }
 
         /**
@@ -169,6 +230,7 @@ import DOMPurify from "dompurify";
          */
         function removeNode(node, unwrap) {
             var parent = node.parentNode;
+
             if (!parent) {
                 return; // No parent, nothing to do
             }
@@ -179,15 +241,17 @@ import DOMPurify from "dompurify";
             }
 
             // Bogus content should always be unwrapped so its children remain
-            if (node.getAttribute('data-mce-bogus') != 'all') {
+            if (node.hasAttribute('data-mce-bogus') && node.getAttribute('data-mce-bogus') != 'all') {
                 unwrap = true;
             }
 
             if (unwrap) {
                 var frag = document.createDocumentFragment();
+
                 while (node.firstChild) {
                     frag.appendChild(node.firstChild);
                 }
+
                 parent.insertBefore(frag, node);
                 parent.removeChild(node);
             } else {
@@ -205,35 +269,15 @@ import DOMPurify from "dompurify";
 
             for (var i = attrs.length - 1; i >= 0; i--) {
                 var name = attrs[i].name;
-                var lower = name.toLowerCase();
                 var value = attrs[i].value;
 
-                // Preserve custom data-* or other dashed attributes including internal attributes eg: data-mce-type
-                if (/-/.test(lower)) {
-                    continue;
-                }
+                if (!shouldKeepAttribute(name, value, tag)) {
 
-                // Event handlers: only keep if allowed and defined in schema
-                if (/^on[a-z]+/i.test(lower)) {
-                    if (settings.allow_event_attributes && schema.isValid(tag, name)) {
-                        continue;
+                    if (node.hasAttribute('data-mce-type') && ['id', 'class', 'style'].includes(name)) {
+                        continue; // always keep id, class, style of internal attributes
                     }
 
                     node.removeAttribute(name);
-                    continue;
-                }
-
-                // Disallow dangerous URLs
-                if (filteredUrlAttrs[lower] && !isDomSafe(value, tag, settings)) {
-                    node.removeAttribute(name);
-                    continue;
-                }
-
-                // Remove attributes not in schema
-                if (schema.isValid(tag, name) === false) {
-                    node.removeAttribute(name);
-
-                    continue;
                 }
 
                 if (isBooleanAttribute(name)) {
@@ -247,14 +291,15 @@ import DOMPurify from "dompurify";
          * @private
          * @returns {Object} Configuration object.
          */
-        function getPurifyConfig() {
+        function getPurifyConfig(mimeType) {
+
             var config = {
                 IN_PLACE: true,
                 RETURN_DOM: true,
-                FORCE_BODY: true,
-                ALLOW_UNKNOWN_PROTOCOLS: !!settings.allow_script_urls,
+                ALLOW_UNKNOWN_PROTOCOLS: true,
                 ALLOWED_TAGS: ['#comment', '#cdata-section', 'body'],
-                ALLOWED_ATTR: []
+                ALLOWED_ATTR: [],
+                PARSER_MEDIA_TYPE: mimeType
             };
 
             // Allow any URI when allowing script urls
@@ -265,23 +310,9 @@ import DOMPurify from "dompurify";
                 config.ALLOWED_URI_REGEXP = /^(?!(\w+script|mhtml):)/i;
             }
 
-            var attrNames = {};
-
-            each(schema.elements, function (element, name) {
-                config.ALLOWED_TAGS.push(name);
-
-                each(element.attributes, function (_, attrName) {
-                    attrNames[attrName] = true;
-                });
-
-                if (name === 'script' || name === 'style') {
-                    config.FORCE_BODY = true;
-                }
-            });
-
-            each(attrNames, function (_, attrName) {
-                config.ALLOWED_ATTR.push(attrName);
-            });
+            if (schema.isValid('script') || schema.isValid('style')) {
+                config.FORCE_BODY = true; // Force body to be present for script/style tags
+            }
 
             return config;
         }
@@ -289,37 +320,44 @@ import DOMPurify from "dompurify";
         /**
          * Runs DOMPurify on the given HTML or element, using custom hooks.
          * @private
-         * @param {String|Element} html - Input HTML to sanitize.
+         * @param {String|Element} body - Input HTML or Body element to sanitize.
          * @returns {Element} Sanitized DOM fragment.
          */
-        function purify(html) {
+        function purify(body, mimeType) {
             var purifier = DOMPurify();
             purifier.removeAllHooks();
 
             purifier.addHook('uponSanitizeElement', function (node, data) {
-                processNode(node);
+                processNode(node, data);
             });
 
             purifier.addHook('uponSanitizeAttribute', function (node, data) {
-                var attrName = data.attrName.toLowerCase(), tag = node.tagName.toLowerCase();
+                var attrName = data.attrName.toLowerCase(), attrValue = data.attrValue, tag = node.tagName.toLowerCase();
 
-                if (/-/.test(attrName) || (settings.allow_event_attributes && /^on[a-z]+/i.test(attrName))) {
-                    data.keepAttr = true;
+                data.keepAttr = shouldKeepAttribute(attrName, attrValue, tag);
+
+                if (data.keepAttr) {
+                    // We need to tell DOMPurify to forcibly keep the attribute if it's an SVG data URI and svg data URIs are allowed
+                    if (settings.allow_svg_data_urls && data.attrValue.startsWith('data:image/svg+xml')) {
+                        data.forceKeepAttr = true;
+                        return;
+                    }
+
+                    if (isBooleanAttribute(attrName)) {
+                        data.attrValue = attrName;
+                    }
+
+                    data.allowedAttributes[attrName] = true;
+                } else if (node.hasAttribute('data-mce-type') && ['id', 'class', 'style'].includes(attrName)) {
+                    data.forceKeepAttr = true; // always keep id, class, style of internal attributes
                     return;
-                }
-
-                // We need to tell DOMPurify to forcibly keep the attribute if it's an SVG data URI and svg data URIs are allowed
-                if (settings.allow_svg_data_urls && data.attrValue.startsWith('data:image/svg+xml')) {
-                    data.forceKeepAttr = true;
-                    return;
-                }
-
-                if (!schema.isValid(tag, attrName)) {
-                    node.removeAttribute(data.attrName);
                 }
             });
 
-            return purifier.sanitize(html, getPurifyConfig());
+            purifier.sanitize(body, getPurifyConfig(mimeType));
+            purifier.removed = [];
+
+            return body;
         }
 
         /**
@@ -333,8 +371,8 @@ import DOMPurify from "dompurify";
                 return body;
             }
 
-            if (settings.purify_html) {
-                return purify(body);
+            if (settings.purify_html !== false) {
+                return purify(body, mimeType);
             }
 
             var iterator = document.createNodeIterator(
@@ -345,10 +383,13 @@ import DOMPurify from "dompurify";
             var node;
 
             while ((node = iterator.nextNode())) {
+                processNode(node);
+
                 if (node.nodeType === 1) {
-                    processNode(node);
+                    filterAttributes(node);
                 }
             }
+
             return body;
         };
     };

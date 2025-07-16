@@ -1,13 +1,8 @@
 /*
-/tests/
-/tests/**
-!.gitignore
 !tinymce
-!tinymce/**
-tinymce/tinymce.dev.js
-tinymce/rollup.config.js
-!LICENSE.txt
+!LICENSE.TXT
+!LICENCE.LGPL-2.1.TXT
 !README.md
 !readme.md
-!LICENSE.LGPL-2.1.txt
-**/.DS_Store
+tinymce/tinymce.dev.js
+tinymce/rollup.config.js

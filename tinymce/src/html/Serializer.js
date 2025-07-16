@@ -11,23 +11,23 @@
 
 (function (tinymce) {
   /**
-	 * This class is used to serialize down the DOM tree into a string using a Writer instance.
-	 *
-	 *
-	 * @example
-	 * new tinymce.html.Serializer().serialize(new tinymce.html.DomParser().parse('<p>text</p>'));
-	 * @class tinymce.html.Serializer
-	 * @version 3.4
-	 */
+   * This class is used to serialize down the DOM tree into a string using a Writer instance.
+   *
+   *
+   * @example
+   * new tinymce.html.Serializer().serialize(new tinymce.html.DomParser().parse('<p>text</p>'));
+   * @class tinymce.html.Serializer
+   * @version 3.4
+   */
 
   /**
-	 * Constructs a new Serializer instance.
-	 *
-	 * @constructor
-	 * @method Serializer
-	 * @param {Object} settings Name/value settings object.
-	 * @param {tinymce.html.Schema} schema Schema instance to use.
-	 */
+   * Constructs a new Serializer instance.
+   *
+   * @constructor
+   * @method Serializer
+   * @param {Object} settings Name/value settings object.
+   * @param {tinymce.html.Schema} schema Schema instance to use.
+   */
   tinymce.html.Serializer = function (settings, schema) {
     var self = this,
       writer = new tinymce.html.Writer(settings, schema);
@@ -40,14 +40,14 @@
 
     var boolAttrMap = schema.getBoolAttrs();
     /**
-		 * Serializes the specified node into a string.
-		 *
-		 * @example
-		 * new tinymce.html.Serializer().serialize(new tinymce.html.DomParser().parse('<p>text</p>'));
-		 * @method serialize
-		 * @param {tinymce.html.Node} node Node instance to serialize.
-		 * @return {String} String with HTML based on DOM tree.
-		 */
+     * Serializes the specified node into a string.
+     *
+     * @example
+     * new tinymce.html.Serializer().serialize(new tinymce.html.DomParser().parse('<p>text</p>'));
+     * @method serialize
+     * @param {tinymce.html.Node} node Node instance to serialize.
+     * @return {String} String with HTML based on DOM tree.
+     */
     self.serialize = function (node) {
       var handlers, validate;
 
@@ -56,12 +56,12 @@
       handlers = {
         // #text
         3: function (node) {
-          writer.text(node.value, node.raw);
+          writer.text(node.value || '', node.raw);
         },
 
         // #comment
         8: function (node) {
-          writer.comment(node.value);
+          writer.comment(node.value || '');
         },
 
         // Processing instruction
@@ -71,12 +71,12 @@
 
         // Doctype
         10: function (node) {
-          writer.doctype(node.value);
+          writer.doctype(node.value || '');
         },
 
         // CDATA
         4: function (node) {
-          writer.cdata(node.value);
+          writer.cdata(node.value || '');
         },
 
         // Document fragment
@@ -120,8 +120,7 @@
 
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue,
-                  "boolean": boolAttrMap[attrName] ? true : false
+                  value: attrValue
                 });
               }
             }
@@ -135,8 +134,7 @@
 
                 sortedAttrs.push({
                   name: attrName,
-                  value: attrValue,
-                  "boolean": boolAttrMap[attrName] ? true : false
+                  value: attrValue
                 });
               }
             }
@@ -144,13 +142,28 @@
             attrs = sortedAttrs;
           }
 
+          if (attrs) {
+            for (i = 0, l = attrs.length; i < l; i++) {
+              attrs[i]['boolean'] = attrs[i].name in boolAttrMap ? true : false;
+            }
+          }
+
           writer.start(node.name, attrs, isEmpty);
 
           if (!isEmpty) {
-            if ((node = node.firstChild)) {
+            var child = node.firstChild;
+
+            if (child) {
+              // Pre and textarea elements treat the first newline character as optional and will omit it. As such, if the content starts
+              // with a newline we need to add in an additional newline to prevent the current newline in the value being treated as optional
+              // See https://html.spec.whatwg.org/multipage/syntax.html#element-restrictions
+              if ((name === 'pre' || name === 'textarea') && child.type === 3 && child.value && child.value.charAt(0) === '\n') {
+                writer.text('\n', true);
+              }
+
               do {
-                walk(node);
-              } while ((node = node.next));
+                walk(child);
+              } while ((child = child.next));
             }
 
             writer.end(name);
@@ -161,8 +174,10 @@
       }
 
       // Serialize element and treat all non elements as fragments
-      if (node.type == 1 && !settings.inner) {
+      if (node.type === 1 && !settings.inner) {
         walk(node);
+      } else if (node.type === 3) {
+        handlers[3](node);
       } else {
         handlers[11](node);
       }
