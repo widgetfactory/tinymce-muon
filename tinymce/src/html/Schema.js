@@ -1121,6 +1121,10 @@
      */
     self.setValidElements = setValidElements;
 
+    self.getValidElements = function () {
+      return elements;
+    };
+
     /**
      * Adds custom non HTML elements to the schema.
      *
