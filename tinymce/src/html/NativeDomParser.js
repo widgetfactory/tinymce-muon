@@ -56,7 +56,7 @@
     settings.root_name = settings.root_name || 'body';
     self.schema = schema = schema || new tinymce.html.Schema();
 
-    settings.purify_html = "purify_html" in settings ? settings.purify_html : true;
+    settings.sanitize_html = "sanitize_html" in settings ? settings.sanitize_html : true;
 
     var Sanitizer = new tinymce.html.Sanitizer(settings, schema);
     var DomParser = new DOMParser();
@@ -1021,7 +1021,7 @@
     self.addAttributeFilter('href', function (nodes) {
       var i = nodes.length,
         node;
-
+    
       var appendRel = function (rel) {
         var parts = rel.split(' ').filter(function (p) {
           return p.length > 0;
