@@ -144,6 +144,12 @@ import DOMPurify from "dompurify";
                 return;
             }
 
+            if (node && node.nodeName === 'IFRAME') {
+                while (node.firstChild) {
+                    node.removeChild(node.firstChild);
+                }
+            }
+
             var rule = schema.getElementRule(tag);
 
             if (settings.validate && !rule) {
@@ -299,7 +305,8 @@ import DOMPurify from "dompurify";
                 ALLOW_UNKNOWN_PROTOCOLS: true,
                 ALLOWED_TAGS: ['#comment', '#cdata-section', 'body'],
                 ALLOWED_ATTR: [],
-                PARSER_MEDIA_TYPE: mimeType
+                PARSER_MEDIA_TYPE: mimeType,
+                SAFE_FOR_XML: true
             };
 
             // Allow any URI when allowing script urls
@@ -313,6 +320,10 @@ import DOMPurify from "dompurify";
             if (schema.isValid('script') || schema.isValid('style')) {
                 config.FORCE_BODY = true; // Force body to be present for script/style tags
             }
+
+            each(schema.getValidElements(), function (rule, tag) {
+                config.ALLOWED_TAGS.push(tag);   
+            });
 
             return config;
         }
@@ -367,11 +378,7 @@ import DOMPurify from "dompurify";
          * @returns {Element} The sanitized root element.
          */
         this.sanitize = function (body, mimeType) {
-            if (settings.verify_html === false) {
-                return body;
-            }
-
-            if (settings.purify_html !== false) {
+            if (settings.sanitize_html !== false) {
                 return purify(body, mimeType);
             }
 
