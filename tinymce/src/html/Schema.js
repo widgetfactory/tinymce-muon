@@ -35,11 +35,10 @@
     var phrasingContent, flowContent, transparentContent, html4BlockContent, html4PhrasingContent, eventAttributes, microdataAttributes;
 
     function add(name, attributes, children) {
-      var ni, i, attributesOrder, args = arguments;
+      var i, args = arguments, ni, attributesOrder, baseAttrs, parts;
 
       function arrayToMap(array, obj) {
-        var map = {},
-          i, l;
+        var map = {}, i, l;
 
         for (i = 0, l = array.length; i < l; i++) {
           map[array[i]] = obj || {};
@@ -48,29 +47,50 @@
         return map;
       }
 
-      children = children || [];
       attributes = attributes || "";
 
+      // Normalize children (clone arrays to keep caller data immutable)
       if (typeof children === "string") {
         children = split(children);
+      } else if (Array.isArray(children)) {
+        children = children.slice();
+      } else {
+        children = [];
       }
 
-      // Split string children
+      // Collect any extra children from arg4+
       for (i = 3; i < args.length; i++) {
-        if (typeof args[i] === "string") {
-          args[i] = split(args[i]);
+        var extra = args[i];
+
+        if (!extra) {
+          continue;
         }
 
-        children.push.apply(children, args[i]);
+        if (typeof extra === "string") {
+          extra = split(extra);
+        } else if (Array.isArray(extra)) {
+          extra = extra.slice();
+        } else {
+          continue; // ignore non-string, non-array
+        }
+
+        // concat returns a new array (keeps input immutable)
+        children = children.concat(extra);
       }
 
-      name = split(name);
-      ni = name.length;
-      while (ni--) {
-        attributesOrder = [].concat(split(attributes), globalAttributes);
+      // Pre-split attributes once per call
+      parts = split(attributes);
+      attributesOrder = [].concat(parts, globalAttributes);
+      baseAttrs = arrayToMap(attributesOrder);
 
-        schema[name[ni]] = {
-          attributes: arrayToMap(attributesOrder),
+      // Support multiple element names in `name`
+      var names = split(name);
+      ni = names.length;
+
+      while (ni--) {
+        schema[names[ni]] =
+        {
+          attributes: baseAttrs,
           attributesOrder: attributesOrder,
           children: arrayToMap(children, dummyObj)
         };
@@ -801,7 +821,7 @@
       // - padd the text inline element if it is empty and also a child of an empty root block
       // - in all other cases, remove the text inline element if it is empty
       each(textInlineElementsMap, function (_val, name) {
-        if (elements[name]) {          
+        if (elements[name]) {
           if (settings.padd_empty_block_inline_children) {
             elements[name].paddInEmptyBlock = true;
           }
