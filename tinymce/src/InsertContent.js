@@ -1,13 +1,16 @@
 /**
  * Copyright (c) Moxiecode Systems AB. All rights reserved.
- * Copyright (c) 1999–2015 Ephox Corp. All rights reserved.
+ * Copyright (c) 1999–2015 Ephox Corporation. All rights reserved.
  * Copyright (c) 2009–2025 Ryan Demmer. All rights reserved.
- * @note    Forked or includes code from TinyMCE 3.x/4.x/5.x (originally under LGPL 2.1) and relicensed under GPL v2+ per LGPL 2.1 § 3.
  *
- * Licensed under the GNU General Public License version 2 or later (GPL v2+):
+ * @note Forked from or includes code from TinyMCE 3.x/4.x/5.x/6.x,
+ * originally licensed under the GNU Lesser General Public License v2.1
+ * and relicensed under the GNU General Public License v2.0 or later,
+ * as permitted by Section 3 of the LGPL v2.1.
+ *
+ * Licensed under the GNU General Public License v2.0 or later (GPL v2+):
  * https://www.gnu.org/licenses/gpl-2.0.html
  */
-
 
 /**
  * Handles inserts of contents into the editor instance.
@@ -21,7 +24,10 @@
     CaretPosition = tinymce.caret.CaretPosition,
     NodeType = tinymce.dom.NodeType,
     Serializer = tinymce.html.Serializer,
-    InsertList = tinymce.InsertList;
+    InsertList = tinymce.InsertList,
+    Arr = tinymce.util.Arr,
+    FilterNode = tinymce.html.FilterNode,
+    InvalidNodes = tinymce.html.InvalidNodes;
 
   var isTableCell = NodeType.matchNodeNames('td th');
 
@@ -34,6 +40,7 @@
       // Check if parent is empty or only has one BR element then set the innerHTML of that parent
       var node = parentNode.firstChild;
       var node2 = parentNode.lastChild;
+
       if (!node || (node === node2 && node.nodeName === 'BR')) { ///
         editor.dom.setHTML(parentNode, value);
       } else {
@@ -47,7 +54,7 @@
     var marker, rng, node, node2, bookmarkHtml, merge;
     var textInlineElements = editor.schema.getTextInlineElements();
     var selection = editor.selection,
-      dom = editor.dom;
+      dom = editor.dom, schema = editor.schema;
 
     function trimOrPaddLeftRight(html) {
       var rng, container, offset;
@@ -222,6 +229,18 @@
       selection.setRng(rng);
     }
 
+    function findMarkerNode(scope) {
+      var markerNode;
+
+      for (markerNode = scope; markerNode; markerNode = markerNode.walk()) {
+        if (markerNode.attr('id') === 'mce_marker') {
+          return [markerNode]; // "some"
+        }
+      }
+
+      return []; // "none"
+    }
+
     // Check for whitespace before/after value
     if (/^ | $/.test(value)) {
       value = trimOrPaddLeftRight(value);
@@ -283,6 +302,7 @@
       context: parentNode.nodeName.toLowerCase(),
       data: details.data
     };
+
     fragment = parser.parse(value, parserArgs);
 
     // Custom handling of lists
@@ -322,7 +342,7 @@
       // to parse and process the parent it's inserted into
 
       // Insert bookmark node and get the parent
-      selection.setContent(bookmarkHtml, { no_events : true });
+      selection.setContent(bookmarkHtml, { no_events: true });
       parentNode = selection.getNode();
       rootNode = editor.getBody();
 
@@ -340,16 +360,26 @@
       }
 
       // Get the outer/inner HTML depending on if we are in the root and parser and serialize that
-      value = parentNode == rootNode ? rootNode.innerHTML : dom.getOuterHTML(parentNode);
+      value = parentNode === rootNode ? rootNode.innerHTML : dom.getOuterHTML(parentNode);
+      var root = parser.parse(value);
 
-      value = serializer.serialize(
-        parser.parse(
-          // Need to replace by using a function since $ in the contents would otherwise be a problem
-          value.replace(/<span (id="mce_marker"|id=mce_marker).+?<\/span>/i, function () {
-            return serializer.serialize(fragment);
-          })
-        )
-      );
+      var markerNodes = findMarkerNode(root);
+
+      Arr.each(markerNodes, function (marker) {
+        marker.replace(fragment);
+      });
+
+      var toExtract = fragment.children();
+      var parent = fragment.parent ? fragment.parent : root;
+      fragment.unwrap();
+
+      var invalidChildren = Arr.filter(toExtract, function (node) {
+        return InvalidNodes.isInvalid(schema, node, parent);
+      });
+
+      InvalidNodes.cleanInvalidNodes(invalidChildren, schema, rootNode);
+      FilterNode.filter(parser.getNodeFilters(), parser.getAttributeFilters(), root);
+      value = serializer.serialize(root);
 
       // Set the inner/outer HTML depending on if we are in the root or not
       if (parentNode == rootNode) {
@@ -373,7 +403,7 @@
   var processValue = function (value) {
     var details;
 
-    if (value && typeof value !== 'string') {      
+    if (value && typeof value !== 'string') {
       details = tinymce.extend({
         paste: value.paste,
         data: {
