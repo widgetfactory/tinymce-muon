@@ -48,6 +48,10 @@
     settings.root_name = settings.root_name || 'body';
     self.schema = schema = schema || new tinymce.html.Schema();
 
+    settings.sanitize_html = "sanitize_html" in settings ? settings.sanitize_html : true;
+
+    var Sanitizer = new tinymce.html.Sanitizer(settings, schema);
+
     function fixInvalidChildren(nodes) {
       var ni, node, parent, parents, newParent, currentNode, tempNode, childNode, i;
       var nonEmptyElements, nonSplitableElements, textBlockElements, specialElements, sibling, nextNode;
@@ -161,13 +165,13 @@
           // If it's an LI try to find a UL/OL for it or wrap it
           if (node.name === 'li') {
             sibling = node.prev;
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ul')) {
+            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
               sibling.append(node);
               continue;
             }
 
             sibling = node.next;
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ul')) {
+            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
               sibling.insert(node, sibling.firstChild, true);
               continue;
             }
@@ -644,19 +648,24 @@
         }
       }, schema);
 
+      if (settings.sanitize_html !== false) {
+        html = Sanitizer.sanitize(html, 'text/html');
+      }
+
       rootNode = node = new Node(args.context || settings.root_name, 11);
 
       parser.parse(html);
-
+      
       // Fix invalid children or report invalid children in a contextual parsing
       if (validate && invalidChildren.length) {
+
         if (!args.context) {
           fixInvalidChildren(invalidChildren);
         } else {
           args.invalid = true;
         }
       }
-
+      // If the root node is empty then we need to remove it
       // Wrap nodes in the root into block elements if the root is body
       if (rootBlockName && (rootNode.name == 'body' || args.isRootContent)) {
         addRootBlocks();
@@ -893,5 +902,13 @@
         }
       });
     }
+
+    self.getNodeFilters = function () {
+      return nodeFilters;
+    };
+    
+    self.getAttributeFilters = function () {
+      return attributeFilters;
+    };
   };
 })(tinymce);
