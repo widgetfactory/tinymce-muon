@@ -584,6 +584,26 @@
         return false;
       }
 
+      if (self.type === 1) {
+        // Treat certain elements as non-empty regardless
+        if (elements && elements[self.name]) {
+          return false;
+        }
+
+        // If the element has any "significant" attribute, it's not empty
+        if (self.attributes && self.attributes.length) {
+          i = self.attributes.length;
+
+          while (i--) {
+            name = self.attributes[i].name;
+
+            if (isValidAttribute(name)) {
+              return false; // e.g. class, id, data-*
+            }
+          }
+        }
+      }
+
       if (node) {
         do {
           if (node.type === 1) {
@@ -634,7 +654,7 @@
               return false;
             }
           }
-          
+
         } while ((node = walk(node, self)));
       }
 
