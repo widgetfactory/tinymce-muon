@@ -838,7 +838,10 @@
 
       // Padd these by default
       each(split('p h1 h2 h3 h4 h5 h6 th td pre div address caption li summary'), function (name) {
-        elements[name].paddEmpty = true;
+        // check element is valid (summary is not in the HTML4 schema)
+        if (elements[name]) {
+          elements[name].paddEmpty = true;
+        }
       });
 
       // Remove these if they have no attributes
