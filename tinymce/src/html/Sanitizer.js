@@ -52,7 +52,6 @@ import DOMPurify from "dompurify";
             attrName = attrName.toLowerCase();
             tagName = tagName.toLowerCase();
 
-
             // always disallow dangerous URLs
             if (attrName in filteredUrlAttrs && !isDomSafe(attrValue, tagName, settings)) {
                 return false;
@@ -75,8 +74,6 @@ import DOMPurify from "dompurify";
 
                 return false;
             }
-
-
 
             // Remove attributes not in schema
             if (schema.isValid(tagName, attrName)) {
@@ -301,7 +298,7 @@ import DOMPurify from "dompurify";
 
             var config = {
                 IN_PLACE: true,
-                RETURN_DOM: true,
+                //RETURN_DOM: true,
                 ALLOW_UNKNOWN_PROTOCOLS: true,
                 ALLOWED_TAGS: ['#comment', '#cdata-section', 'body'],
                 ALLOWED_ATTR: [],
@@ -365,7 +362,13 @@ import DOMPurify from "dompurify";
                 }
             });
 
-            purifier.sanitize(body, getPurifyConfig(mimeType));
+            var purifyConfig = getPurifyConfig(mimeType);
+
+            if (typeof body === 'string') {
+                purifyConfig.RETURN_DOM = false; // Purify returns a string by default
+            }
+
+            purifier.sanitize(body, purifyConfig);
             purifier.removed = [];
 
             return body;
