@@ -20,6 +20,9 @@
 
 (function (tinymce) {
   var Node = tinymce.html.Node,
+    TransparentElements = tinymce.html.TransparentElements,
+    InvalidNodes = tinymce.html.InvalidNodes,
+    FilterNode = tinymce.html.FilterNode,
     each = tinymce.each,
     explode = tinymce.explode,
     extend = tinymce.extend,
@@ -61,47 +64,6 @@
     var Sanitizer = new tinymce.html.Sanitizer(settings, schema);
     var DomParser = new DOMParser();
 
-    var hasClosest = function (node, parentName) {
-      var tempNode = node;
-
-      while (tempNode) {
-
-        if (tempNode.name === parentName) {
-          return true;
-        }
-
-        tempNode = tempNode.parent;
-      }
-
-      return false;
-    };
-
-    function isInvalid(node, parent) {
-      parent = parent || node.parent;
-
-      if (!parent) {
-        return false;
-      }
-
-      // Check if the node is a valid child of the parent node. If the child is
-      // unknown we don't collect it since it's probably a custom element
-      if (schema.children[node.name] && !schema.isValidChild(parent.name, node.name)) {
-        return true;
-      }
-
-      // Anchors are a special case and cannot be nested
-      if (node.name === 'a' && hasClosest(parent, 'a')) {
-        return true;
-      }
-
-      // heading element is valid if it is the only one child of summary
-      if (parent.name == 'summary' && ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(node.name)) {
-        return !(parent.firstChild === node && parent.lastChild === node);
-      }
-
-      return false;
-    }
-
     /**
      * Finds invalid children of a node according to the schema.
      * Populates the `invalids` array with nodes that are not allowed in their parent.
@@ -110,240 +72,8 @@
      * @param {Array} invalids - Accumulator array for invalid children.
      */
     function findInvalidChildren(node, invalids) {
-      if (isInvalid(node)) {
+      if (InvalidNodes.isInvalid(schema, node)) {
         invalids.push(node);
-      }
-    }
-
-    var FilterNode = {
-      matchNode: function (nodeFilters, attributeFilters, node, matches) {
-        var name = node.name;
-
-        for (var ni = 0, nl = nodeFilters.length; ni < nl; ni++) {
-          var filter = nodeFilters[ni];
-
-          if (filter.name === name) {
-            var match = matches.nodes[name];
-
-            if (match) {
-              match.nodes.push(node);
-            } else {
-              matches.nodes[name] = { filter, nodes: [node] };
-            }
-          }
-        }
-
-        // Match attribute filters
-        if (node.attributes) {
-          for (var ai = 0, al = attributeFilters.length; ai < al; ai++) {
-            var filter = attributeFilters[ai];
-            var attrName = filter.name;
-
-            if (attrName in node.attributes.map) {
-              var match = matches.attributes[attrName];
-
-              if (match) {
-                match.nodes.push(node);
-              } else {
-                matches.attributes[attrName] = { filter, nodes: [node] };
-              }
-            }
-          }
-        }
-      }
-    };
-
-    /**
-     * Executes all node and attribute filters on matching nodes.
-     * Filters are only applied to nodes that still match after tree manipulation.
-     *
-     * @param {Object} matches - Contains { nodes, attributes } records of matched filters.
-     * @param {Object} args - Additional arguments passed to filter callbacks.
-     */
-    function runFilters(matches, args) {
-
-      function run(matchRecord, isAttributeFilter) {
-
-        each(matchRecord, function (match) {
-
-          var originalNodes = match.nodes;
-          var filterName = match.filter.name;
-          var callbacks = match.filter.callbacks;
-
-          // Copy the node array
-          var nodes = originalNodes.slice();
-
-          for (var ci = 0; ci < callbacks.length; ci++) {
-            var callback = callbacks[ci];
-            var validNodes = [];
-
-            for (var i = 0; i < nodes.length; i++) {
-              var node = nodes[i];
-
-              var stillMatches = isAttributeFilter ? node.attr(filterName) !== undefined : node.name === filterName;
-
-              if (stillMatches && node.parent != null) {
-                validNodes.push(node);
-              }
-            }
-
-            if (validNodes.length > 0) {
-              callback(validNodes, filterName, args);
-            }
-          }
-        });
-      }
-
-      run(matches.nodes, false);
-      run(matches.attributes, true);
-    }
-
-    /**
-     * Attempts to fix or remove invalid children in the DOM tree.
-     * It either unwraps, repositions, or removes invalid nodes depending on schema rules.
-     *
-     * @param {Array} nodes - List of invalid child nodes to process.
-     */
-    function fixInvalidChildren(nodes) {
-      var ni, node, parent, parents, newParent, currentNode, tempNode, childNode, i;
-      var nonEmptyElements, nonSplitableElements, textBlockElements, specialElements, whitespaceElements, sibling, nextNode;
-
-      nonSplitableElements = makeMap('tr,td,th,tbody,thead,tfoot,table');
-      nonEmptyElements = schema.getNonEmptyElements();
-      textBlockElements = schema.getTextBlockElements();
-      specialElements = schema.getSpecialElements();
-      whitespaceElements = schema.getWhiteSpaceElements();
-
-      var removeOrUnwrapInvalidNode = function (node, originalNodeParent) {
-        if (specialElements[node.name]) {
-          node.empty().remove();
-        } else {
-          // are the children of `node` valid children of the top level parent?
-          // if not, remove or unwrap them too
-          var children = node.children();
-
-          for (var childNode of children) {
-            if (!schema.isValidChild(originalNodeParent.name, childNode.name)) {
-              removeOrUnwrapInvalidNode(childNode, originalNodeParent);
-            }
-          }
-
-          node.unwrap();
-        }
-      };
-
-      for (ni = 0; ni < nodes.length; ni++) {
-        node = nodes[ni];
-
-        // Already removed or fixed
-        if (!node.parent || node.fixed) {
-          continue;
-        }
-
-        // If the invalid element is a text block and the text block is within a parent LI element
-        // Then unwrap the first text block and convert other sibling text blocks to LI elements similar to Word/Open Office
-        if (textBlockElements[node.name] && node.parent.name == 'li') {
-          // Move sibling text blocks after LI element
-          sibling = node.next;
-
-          while (sibling) {
-            if (textBlockElements[sibling.name]) {
-              sibling.name = 'li';
-              sibling.fixed = true;
-              node.parent.insert(sibling, node.parent);
-            } else {
-              break;
-            }
-
-            sibling = sibling.next;
-          }
-
-          // Unwrap current text block
-          node.unwrap(node);
-          continue;
-        }
-
-        // Get list of all parent nodes until we find a valid parent to stick the child into
-        parents = [node];
-
-        for (parent = node.parent; parent && !schema.isValidChild(parent.name, node.name) &&
-          !nonSplitableElements[parent.name]; parent = parent.parent) {
-          parents.push(parent);
-        }
-
-        // Found a suitable parent
-        if (parent && parents.length > 1) {
-          // If the node is a valid child of the parent, then try to move it. Otherwise unwrap it
-          if (schema.isValidChild(parent.name, node.name)) {
-            // Reverse the array since it makes looping easier
-            parents.reverse();
-
-            // Clone the related parent and insert that after the moved node
-            newParent = currentNode = parents[0].clone();
-
-            // Start cloning and moving children on the left side of the target node
-            for (i = 0; i < parents.length - 1; i++) {
-              if (schema.isValidChild(currentNode.name, parents[i].name)) {
-                tempNode = parents[i].clone();
-                currentNode.append(tempNode);
-              } else {
-                tempNode = currentNode;
-              }
-
-              for (childNode = parents[i].firstChild; childNode && childNode != parents[i + 1];) {
-                nextNode = childNode.next;
-                tempNode.append(childNode);
-                childNode = nextNode;
-              }
-
-              currentNode = tempNode;
-            }
-
-            if (!newParent.isEmpty(nonEmptyElements, whitespaceElements)) {
-              parent.insert(newParent, parents[0], true);
-              parent.insert(node, newParent);
-            } else {
-              parent.insert(node, parents[0], true);
-            }
-
-            // Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
-            parent = parents[0];
-
-            if (parent.isEmpty(nonEmptyElements, whitespaceElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
-              parent.empty().remove();
-            }
-          } else {
-            removeOrUnwrapInvalidNode(node, node.parent);
-          }
-        } else if (node.parent) {
-          // If it's an LI try to find a UL/OL for it or wrap it
-          if (node.name === 'li') {
-            sibling = node.prev;
-
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
-              sibling.append(node);
-              continue;
-            }
-
-            sibling = node.next;
-
-            if (sibling && (sibling.name === 'ul' || sibling.name === 'ol')) {
-              sibling.insert(node, sibling.firstChild, true);
-              continue;
-            }
-
-            node.wrap(new Node('ul', 1));
-            continue;
-          }
-
-          // Try wrapping the element in a DIV
-          if (schema.isValidChild(node.parent.name, 'div') && schema.isValidChild('div', node.name)) {
-            node.wrap(new Node('div', 1));
-          } else {
-            // We failed wrapping it, remove or unwrap it
-            removeOrUnwrapInvalidNode(node, node.parent);
-          }
-        }
       }
     }
 
@@ -425,14 +155,13 @@
       var rootNode, validate;
       var blockElements, startWhiteSpaceRegExp, invalidChildren = [];
 
-      var endWhiteSpaceRegExp, allWhiteSpaceRegExp, whitespaceElements, textRootBlockElements, shortEndedElements, transparentElements;
+      var endWhiteSpaceRegExp, allWhiteSpaceRegExp, whitespaceElements, textRootBlockElements, shortEndedElements;
       var nonEmptyElements, rootBlockName;
 
       args = args || {};
       blockElements = extend(makeMap('script,style,head,html,body,title,meta,param'), schema.getBlockElements());
       nonEmptyElements = schema.getNonEmptyElements();
       shortEndedElements = schema.getShortEndedElements();
-      transparentElements = schema.getTransparentElements();
       validate = settings.validate;
       rootBlockName = "forced_root_block" in args ? args.forced_root_block : settings.forced_root_block;
 
@@ -475,7 +204,6 @@
 
         while (tempNode) {
           if (textRootBlockElements[tempNode.name]) {
-            console.log(tempNode.name, isEmpty(tempNode));
             return isEmpty(tempNode);
           }
 
@@ -484,17 +212,13 @@
         return false;
       }
 
-      function isTransparentBlock(node) {
-        return node.type == 1 && node.name in transparentElements && !!node.attr('data-mce-block');
-      }
-
       /**
        * Tests whether a node is block-level according to schema rules.
        * @param {tinymce.html.Node} node - Node to test.
        * @returns {boolean} True if the node is a block element.
        */
       function isBlock(node) {
-        return node.name in blockElements || isTransparentBlock(node);
+        return node.name in blockElements || TransparentElements.isTransparentBlock(schema, node);
       }
 
       /**
@@ -700,7 +424,6 @@
        */
       function parseAndSanitizeWithContext(html, rootName, format) {
         var mimeType = format === 'xhtml' ? 'application/xhtml+xml' : 'text/html';
-
         var specialElements = schema.getSpecialElements();
 
         // Determine the root element to wrap the HTML in when parsing. If we're dealing with a
@@ -714,7 +437,6 @@
 
         var body = DomParser.parseFromString(wrappedHtml, mimeType).body;
 
-        // sanitize the body content with DomPurify
         body = Sanitizer.sanitize(body, mimeType);
 
         return isSpecialRoot ? body.firstChild : body;
@@ -745,9 +467,9 @@
           if (nodeType == 1) { // ELEMENT_NODE
             var attributes = Array.from(nativeChild.attributes);
 
-            if (settings.purify_html) {
+            if (settings.sanitize_html) {
               // DOMPurify will reverse the order of attributes, so we need to reverse it back
-              attributes.reverse();
+              //attributes.reverse();
             }
 
             for (var ai = 0, al = attributes.length; ai < al; ai++) {
@@ -844,9 +566,13 @@
         trim(rootBlockNode);
       }
 
-      var element = parseAndSanitizeWithContext(html, settings.root_name, args.format);
+      var rootName = (args.context || settings.root_name).toLowerCase();
 
-      rootNode = new Node(args.context || settings.root_name, 11);
+      var element = parseAndSanitizeWithContext(html, rootName, args.format);
+
+      TransparentElements.updateChildren(schema, element);
+
+      rootNode = new Node(rootName, 11);
 
       transferChildren(rootNode, element, schema.getSpecialElements());
 
@@ -879,6 +605,7 @@
 
           for (var i = 0; i < invalidChildren.length; i++) {
             var child = invalidChildren[i];
+
             if (child.parent === rootNode) {
               topLevelChildren.push(child);
             } else {
@@ -886,11 +613,11 @@
             }
           }
 
-          fixInvalidChildren(otherChildren);
+          InvalidNodes.cleanInvalidNodes(otherChildren, schema, rootNode, matchFinder);
 
           args.invalid = topLevelChildren.length > 0;
         } else {
-          fixInvalidChildren(invalidChildren);
+          InvalidNodes.cleanInvalidNodes(invalidChildren, schema, rootNode, matchFinder);
         }
       }
 
@@ -901,7 +628,7 @@
 
       // Run filters only when the contents is valid
       if (!args.invalid) {
-        runFilters(matches, args);
+        FilterNode.runFilters(matches, args);
       }
 
       return rootNode;
@@ -1021,7 +748,7 @@
     self.addAttributeFilter('href', function (nodes) {
       var i = nodes.length,
         node;
-    
+
       var appendRel = function (rel) {
         var parts = rel.split(' ').filter(function (p) {
           return p.length > 0;
@@ -1116,5 +843,13 @@
         }
       });
     }
+
+    self.getAttributeFilters = function () {
+      return attributeFilters;
+    };
+
+    self.getNodeFilters = function () {
+      return nodeFilters;
+    };
   };
 })(tinymce);
