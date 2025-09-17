@@ -792,6 +792,8 @@
         }, s.tooltip);
 
         DOM.setAttrib(item, 'aria-describedby', o.id + '_sr_only');
+      } else {
+        DOM.setAttrib(item, 'title', s.title || ''); // set title if no tooltip
       }
 
       if (s.description) {
