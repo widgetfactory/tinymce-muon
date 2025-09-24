@@ -153,7 +153,7 @@
 
     // Block content elements
     blockContent = split(
-      "address blockquote div dl fieldset form h1 h2 h3 h4 h5 h6 hr menu ol p pre table ul"
+      "address blockquote div dl fieldset form h1 h2 h3 h4 h5 h6 hr menu ol p pre table ul template"
     );
 
     // Phrasing content elements from the HTML5 spec (inline)
@@ -287,6 +287,9 @@
 
       // update with flowContent
       add("a", "href target rel media hreflang type", flowContent);
+
+      // template - TODO
+      //add("template", "", flowContent);
     }
 
     // form events
