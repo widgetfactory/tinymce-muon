@@ -369,6 +369,7 @@ import DOMPurify from "dompurify";
             }
 
             purifier.sanitize(body, purifyConfig);
+
             purifier.removed = [];
 
             return body;
