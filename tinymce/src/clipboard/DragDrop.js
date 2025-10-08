@@ -71,6 +71,10 @@ var setup = function (editor) {
         if (rng && editor.settings.paste_filter_drop !== false) {
             var content = dropContent[InternalHtml.internalHtmlMime()] || dropContent['text/html'] || dropContent['text/plain'];
 
+            if (editor.settings.paste_plain_text) {
+                content = dropContent['text/plain'] || content;
+            }
+
             if (content) {
                 e.preventDefault();
 
@@ -89,7 +93,7 @@ var setup = function (editor) {
 
                     var data = {};
 
-                    if (!dropContent['text/html']) {
+                    if (!dropContent['text/html'] || editor.settings.paste_plain_text) {
                         data.text = content;
                     } else {                        
                         // reset styles, replacing style attribute with data-mce-style value or remove

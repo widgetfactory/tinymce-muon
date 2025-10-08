@@ -485,6 +485,18 @@ var setup = function (editor, pasteBin) {
     editor.addCommand('mceInsertClipboardContent', function (u, data) {        
         if (data.text) {
             pasteText(editor, data.text);
+            return true;
+        }
+
+        if (editor.settings.paste_plain_text && !data.internal) {
+
+            if (!data.text) {
+                data.text = Utils.innerText(data.content || '');
+            }
+
+            pasteText(editor, data.text);
+
+            return true;
         }
 
         if (data.content) {
@@ -514,6 +526,10 @@ var setup = function (editor, pasteBin) {
 
         var pasteAsPlainText = keyboardPastePlainTextState;
         keyboardPastePlainTextState = false;
+
+        if (editor.settings.paste_plain_text === true && !internal) {
+            pasteAsPlainText = true;
+        }
 
         if (e.isDefaultPrevented() || isBrokenAndroidClipboardEvent(e)) {
             pasteBin.remove();
