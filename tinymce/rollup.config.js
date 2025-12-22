@@ -1,7 +1,7 @@
 /* eslint-disable */
-
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
 import replace from '@rollup/plugin-replace';
-import {eslint} from 'rollup-plugin-eslint';
 
 export default [
   {
@@ -19,12 +19,11 @@ export default [
     },
 
     plugins: [
-      //uglify({mangle: false})
       replace({
         'tinymce$1': 'tinymce'
       }),
-      eslint({
-      })
+      resolve(),
+      commonjs()
     ]
   }
 
