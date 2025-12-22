@@ -34,6 +34,8 @@ import './src/html/Node.js';
 import './src/html/TransparentElements.js';
 import './src/html/FilterNode.js';
 import './src/html/InvalidNodes.js';
+import './src/html/InvalidAttributes.js';
+import './src/html/InvalidAttributeValue.js';
 import './src/html/Sanitizer.js';
 import './src/html/DomParser.js';
 import './src/html/NativeDomParser.js';
