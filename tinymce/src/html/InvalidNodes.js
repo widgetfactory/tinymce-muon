@@ -19,6 +19,16 @@
     var makeMap = tinymce.makeMap;
     var Node = tinymce.html.Node;
 
+    var hasOnlyChild = function (node, name) {
+        var child = node.firstChild;
+
+        if (!child) {
+            return false;
+        }
+
+        return child === node.lastChild && child.name === name;
+    };
+
     var hasClosest = function (node, parentName) {
         var tempNode = node;
 
@@ -175,7 +185,7 @@
                     // Check if the element is empty by looking through it's contents and special treatment for <p><br /></p>
                     parent = parents[0];
 
-                    if (parent.isEmpty(nonEmptyElements, whitespaceElements) || parent.firstChild === parent.lastChild && parent.firstChild.name === 'br') {
+                    if (parent.isEmpty(nonEmptyElements, whitespaceElements) || hasOnlyChild(parent, 'br')) {
                         parent.empty().remove();
                     }
                 } else {
