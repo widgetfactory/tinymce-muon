@@ -26,14 +26,17 @@ function hasData() {
 
 function getData(mimetype) {
     if (mimetype) {
-        return clipboardData[mimetype] || '';
+        return clipboardData[mimetype] || null;
     }
     
     return clipboardData;
 }
 
 function setData(mimetype, content) {
-    clipboardData[mimetype] = content;
+    clipboardData[mimetype] = {
+        timestamp: Date.now(),
+        content: content
+    };
 }
 
 function clearData() {
