@@ -32,6 +32,10 @@
 
       s["class"] = 'mceUrlBox';
 
+      if (s.upload && typeof s.upload !== 'function') {
+        s.upload = false;
+      }
+
       this._super(id, s, ed);
     },
 
