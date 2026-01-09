@@ -673,8 +673,6 @@ var setup = function (editor, pasteBin) {
     editor.addCommand('mcePasteFakeClipboard', function (ui, e) {
         var data = FakeClipboard.getData();
 
-        console.log(data);
-
         var content = data.content || '';
 
         // If the content is empty, we don't need to do anything
