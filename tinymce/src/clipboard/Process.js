@@ -84,7 +84,7 @@ function postProcess(editor, o) {
     // Remove all styles if none are retained
     if (settings.paste_remove_styles !== false && !settings.paste_retain_style_properties) {
         // Remove style attribute
-        each(dom.select('*[style]', o.node), function (el) {            
+        each(dom.select('*[style]', o.node), function (el) {
             el.removeAttribute('style');
             el.removeAttribute('data-mce-style');
         });
@@ -114,7 +114,7 @@ function postProcess(editor, o) {
             } else {
                 dom.remove(el);
             }
-             
+
         } else {
             dom.setAttrib(el, 'src', editor.convertURL(src));
         }
@@ -146,32 +146,48 @@ function postProcess(editor, o) {
         dom.remove(dom.select('span', o.node), 1);
         // remove empty spans
     } else {
-        dom.remove(dom.select('span:empty', o.node));
-
         each(dom.select('span', o.node), function (n) {
             // remove span without children eg: <span></span>
-            if (!n.childNodes || n.childNodes.length === 0) {
-                dom.remove(n);
-            }
-
-            // remove span without attributes
-            if (dom.getAttribs(n).length === 0) {
-                dom.remove(n, 1);
+            if (!n.hasChildNodes()) {
+                // remove span without attributes
+                if (dom.getAttribs(n).length === 0) {
+                    dom.remove(n, 1);
+                }
             }
         });
     }
 
     if (settings.paste_remove_empty_paragraphs !== false) {
-        dom.remove(dom.select('p:empty', o.node));
+        var paras = dom.select('p', o.node);
+        var i, p, text;
 
-        each(dom.select('p', o.node), function (n) {
-            var h = n.innerHTML;
+        for (i = paras.length - 1; i >= 0; i--) {
+            p = paras[i];
 
-            // remove paragraph without children eg: <p></p>
-            if (!n.childNodes || n.childNodes.length === 0 || /^(\s|&nbsp;|\u00a0)?$/.test(h)) {
-                dom.remove(n);
+            if (!p.hasChildNodes()) {
+                dom.remove(p);
+
+                continue;
             }
-        });
+
+            // Get visible text (ignores markup)
+            text = p.textContent || '';
+
+            // Normalise Office/Word junk:
+            // - NBSP -> space
+            // - zero-width chars -> removed
+            // - whitespace collapsed
+            text = text
+                .replace(/\u00a0/g, ' ')
+                // eslint-disable-next-line no-misleading-character-class
+                .replace(/[\u200B\u200C\u200D\uFEFF]/g, '')
+                .replace(/\s+/g, '');
+
+            // Remove if there's no text left
+            if (text === '') {
+                dom.remove(p);
+            }
+        }
     }
 
     // replace paragraphs with linebreaks
@@ -323,7 +339,7 @@ function processStyles(editor, node) {
 }
 
 const setup = function (editor) {
-    editor.onPastePreProcess.add(function (editor, o) {        
+    editor.onPastePreProcess.add(function (editor, o) {
         preProcess(editor, o);
     });
 
