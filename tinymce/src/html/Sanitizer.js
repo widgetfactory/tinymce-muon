@@ -141,23 +141,17 @@ import DOMPurify from "dompurify";
                 return;
             }
 
-            if (node && node.nodeName === 'IFRAME') {
-                while (node.firstChild) {
-                    node.removeChild(node.firstChild);
-                }
-            }
-
             var rule = schema.getElementRule(tag);
 
             if (settings.validate && !rule) {
                 if (tag in special) {
                     // Special elements are always removed
                     removeNode(node);
-                    return;
                 } else {
                     // unwrap others
                     removeNode(node, true);
                 }
+                return;
             } else {
                 if (evt) {
                     evt.allowedTags[tag] = true;
