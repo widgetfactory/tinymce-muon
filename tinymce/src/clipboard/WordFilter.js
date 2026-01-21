@@ -17,9 +17,6 @@ var each = tinymce.each,
     Serializer = tinymce.html.Serializer,
     Node = tinymce.html.Node;
 
-// Open Office
-var ooRe = /(Version:[\d\.]+)\s*?((Start|End)(HTML|Fragment):[\d]+\s*?){4}/;
-
 function cleanCssContent(content) {
     var classes = [],
         rules = Utils.parseCssToRules(content);
@@ -51,22 +48,66 @@ function cleanCssContent(content) {
 }
 
 function isWordContent(editor, content) {
-    // force word cleanup
+    // Force word cleanup
     if (editor.settings.paste_force_cleanup) {
         return true;
     }
 
-    // Open / Libre Office
-    if (/(content=\"OpenOffice.org[^\"]+\")/i.test(content) || ooRe.test(content) || /@page {/.test(content)) {
-        return true; // Mark the pasted contents as word specific content
+    console.log(content);
+
+    var groups = [
+        {
+            name: "pages",
+            tests: [
+                /<meta\s+content="Cocoa HTML Writer"/i,
+                /<meta\s+name="CocoaVersion"/i
+            ]
+        },
+        {
+            name: "openoffice",
+            tests: [
+                /<meta\s+content="OpenOffice\.org[^"]*"/i,
+                /Version:\d+(?:\.\d+)*[\s\S]*?StartHTML:\d+[\s\S]*?EndFragment:\d+/,
+                /@page\s*\{/i,
+                // LibreOffice generator meta tag
+                /<meta\s+name="generator"\s+content="LibreOffice\s+\d+(?:\.\d+)+(?:\s*\([^"]+\))?"/i
+            ]
+        },
+        {
+            name: "word",
+            tests: [
+                /<font\s+face="Times New Roman"|class="?Mso|style="[^"]*\bmso-|style='[^']*\bmso-|w:WordDocument|Excel\.Sheet|Microsoft Excel\s\d+/i,
+                // Microsoft Word / Excel namespaces
+                /xmlns:o=["']urn:schemas-microsoft-com:office:office["']/i,
+                /xmlns:x=["']urn:schemas-microsoft-com:office:(?:word|excel)["']/i
+            ]
+        },
+        {
+            name: "googledocs",
+            tests: [
+                /class="OutlineElement/i,
+                /id="?docs-internal-guid-/i
+            ]
+        },
+        {
+            name: "protondocs",
+            tests: [
+                /class=(?:"[^"]*\bLexical__\w+\b[^"]*"|'[^']*\bLexical__\w+\b[^']*')/i
+            ]
+        }
+    ];
+
+    var i, j;
+
+    for (i = 0; i < groups.length; i++) {
+        for (j = 0; j < groups[i].tests.length; j++) {
+            if (groups[i].tests[j].test(content)) {
+                return groups[i].name;
+            }
+        }
     }
 
-    // Word / Google Docs
-    return (
-        (/<font face="Times New Roman"|class="?Mso|style="[^"]*\bmso-|style='[^'']*\bmso-|w:WordDocument|Excel\.Sheet|Microsoft Excel\s\d+/i).test(content) ||
-        (/class="OutlineElement/).test(content) ||
-        (/id="?docs\-internal\-guid\-/.test(content))
-    );
+    return false;
 }
 
 /**
@@ -685,7 +726,7 @@ function WordFilter(editor, content) {
         valid_elements: validElements,
         valid_children: '-li[p]'
     });
-    
+
     // allow for extended table attributes
     if (settings.schema !== 'html5' && schema.getElementRule('table')) {
         schema.addValidElements('table[width|border|cellpadding|cellspacing]');
