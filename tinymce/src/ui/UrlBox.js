@@ -64,7 +64,7 @@
           return val;
         });
 
-        html += '<a class="mceButton mceButtonUpload" role="button" aria-label="' + DOM.encode(s.upload_label || '') + '"><span role="presentation" class="mceIcon mce_upload"></span><span role="presentation" class="mceIcon mce_spinner"></span><input id="' + this.id + '_upload" type="file" aria-hidden="true" title="' + DOM.encode(s.upload_label || '') + '" accept="' + accept.join(',') + '" /></a>';
+        html += '<a class="mceButton mceButtonUpload" role="button" aria-label="' + DOM.encode(s.upload_label || '') + '"><span role="presentation" class="mceIcon mce_cloud_upload"></span><span role="presentation" class="mceIcon mce_spinner"></span><input id="' + this.id + '_upload" type="file" aria-hidden="true" title="' + DOM.encode(s.upload_label || '') + '" accept="' + accept.join(',') + '" /></a>';
       }
 
       return html;
