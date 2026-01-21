@@ -203,7 +203,7 @@
     // Force script into CDATA sections and remove the mce- prefix also add comments around styles
     htmlParser.addNodeFilter('script,style', function (nodes, name) {
       var i = nodes.length,
-        node, firstChild, value, type;
+        node, firstChild, value, type, parent;
 
       function trim(value) {
         /* jshint maxlen:255 */
@@ -218,6 +218,13 @@
         node = nodes[i];
         firstChild = node.firstChild;
         value = firstChild ? firstChild.value : '';
+
+        parent = node.parent;
+
+        // If the parent is a pre element, skip it since we don't want to convert script elements inside pre elements
+        if (parent && parent.name === 'pre') {
+          continue;
+        }
 
         if (name === "script") {
           // Remove mce- prefix from script elements and remove default type since the user specified
