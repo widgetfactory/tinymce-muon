@@ -46,6 +46,7 @@ tinymce.ForceBlocks = function (editor) {
 
     // Get current selection
     rng = selection.getRng();
+
     if (rng.setStart) {
       startContainer = rng.startContainer;
       startOffset = rng.startOffset;
@@ -80,10 +81,10 @@ tinymce.ForceBlocks = function (editor) {
     // Wrap non block elements and text nodes
     node = rootNode.firstChild;
     rootNodeName = rootNode.nodeName.toLowerCase();
+
     while (node) {
       // TODO: Break this up, too complex
-      if (((node.nodeType === 3 || (node.nodeType == 1 && !blockElements[node.nodeName]))) &&
-                schema.isValidChild(rootNodeName, forcedRootBlock.toLowerCase())) {
+      if (((node.nodeType === 3 || (node.nodeType == 1 && !blockElements[node.nodeName]))) && schema.isValidChild(rootNodeName, forcedRootBlock.toLowerCase())) {
         // Remove empty text nodes
         if (node.nodeType === 3 && node.nodeValue.length === 0) {
           tempNode = node;
