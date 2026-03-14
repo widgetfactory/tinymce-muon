@@ -54,17 +54,11 @@
     },
 
     value: function (val) {
-      var elm = DOM.get(this.id);
-
       if (!arguments.length) {
-        if (elm.checked) {
-          return elm.value || 1;
-        }
-
-        return '';
+        return this.checked();
       }
 
-      elm.value = val;
+      this.checked(val);
     },
 
     /**
