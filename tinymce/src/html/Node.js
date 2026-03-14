@@ -500,7 +500,7 @@
      *
      * @method children
      * @return {Array} Array containing child nodes.
-   */
+     */
     children: function () {
       var self = this,
         node, collection = [];
