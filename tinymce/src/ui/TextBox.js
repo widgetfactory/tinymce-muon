@@ -68,6 +68,10 @@
       }
 
       DOM.setValue(this.id, val);
+
+      if (this.settings.subtype == 'color') {
+        DOM.setValue(this.id + '_color', val);
+      }
     },
 
     /**
@@ -101,6 +105,16 @@
       if (s.multiline) {
         html += DOM.createHTML('textarea', attribs, '');
       } else {
+        if (s.subtype == 'color') {
+          attribs.type = 'text';
+
+          html += DOM.createHTML('input', {
+            type: 'color',
+            id: this.id + '_color'
+          });
+
+        }
+
         html += DOM.createHTML('input', attribs);
       }
 
@@ -148,6 +162,16 @@
           e.preventDefault();
 
           s.button.click.apply(self);
+        });
+      }
+
+      if (s.subtype == 'color') {
+        Event.add(this.id, 'change', function (e) {
+          DOM.setValue(this.id + '_color', DOM.get(self.id).value);
+        });
+
+        Event.add(this.id + '_color', 'change', function (e) {
+          DOM.setValue(self.id, DOM.get(self.id + '_color').value);
         });
       }
       
