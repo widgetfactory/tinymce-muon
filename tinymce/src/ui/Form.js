@@ -20,11 +20,10 @@
   tinymce.create('tinymce.ui.Form:tinymce.ui.Container', {
 
     /**
-       * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
-       * creating a whole toolbar with buttons it does make a lot of difference.
+       * Renders the form as a HTML string.
        *
        * @method renderHTML
-       * @return {String} HTML for the toolbar control.
+       * @return {String} HTML for the form control.
        */
     renderHTML: function () {
       var html = '',
