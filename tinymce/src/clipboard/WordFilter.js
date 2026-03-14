@@ -53,8 +53,6 @@ function isWordContent(editor, content) {
         return true;
     }
 
-    console.log(content);
-
     var groups = [
         {
             name: "pages",
