@@ -623,6 +623,12 @@
 	tinymce.dom.RangeUtils.getCaretRangeFromPoint = function (clientX, clientY, doc) {
 		var rng, point;
 
+		var el = doc.elementFromPoint(clientX, clientY);
+		// if the element is null, it means that the point is outside the document
+		if (!el || el === doc.documentElement) {
+			return null;
+		}
+
 		if (doc.caretPositionFromPoint) {
 			point = doc.caretPositionFromPoint(clientX, clientY);
 			rng = doc.createRange();
