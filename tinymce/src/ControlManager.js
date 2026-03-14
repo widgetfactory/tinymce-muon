@@ -798,6 +798,29 @@
     },
 
     /**
+     * Creates a tab panel container control instance by id.
+     *
+     * @method createTabs
+     * @param {String} id Unique id for the new tab panel control instance. For example "tabs1".
+     * @param {Object} s Optional settings object for the control.
+     * @param {Object} cc Optional control class to use instead of the default one.
+     * @return {tinymce.ui.Control} Control instance that got created and added.
+     */
+    createTabs: function (id, s, cc) {
+      var c, self = this,
+        cls;
+
+      cls = cc || self._cls.tabPanel || tinymce.ui.TabPanel;
+      c = new cls(id, s, self.editor);
+
+      if (self.get(id)) {
+        return null;
+      }
+
+      return self.add(c);
+    },
+
+    /**
      * Creates a toolbar container control instance by id.
      *
      * @method createToolbar
@@ -862,7 +885,7 @@
     /**
      * Creates a form container control instance by id.
      *
-     * @method createLayout
+     * @method createForm
      * @param {String} id Unique id for the new toolbar container control instance. For example "toolbar1".
      * @param {Object} s Optional settings object for the control.
      * @return {tinymce.ui.Control} Control instance that got created and added.
