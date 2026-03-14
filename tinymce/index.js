@@ -89,6 +89,7 @@ import './src/dom/FocusManager.js';
 import './src/ui/KeyboardNavigation.js';
 import './src/ui/Control.js';
 import './src/ui/Container.js';
+import './src/ui/TabPanel.js';
 import './src/ui/Form.js';
 import './src/ui/Separator.js';
 import './src/ui/MenuItem.js';
