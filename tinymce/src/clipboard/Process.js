@@ -147,12 +147,9 @@ function postProcess(editor, o) {
         // remove empty spans
     } else {
         each(dom.select('span', o.node), function (n) {
-            // remove span without children eg: <span></span>
-            if (!n.hasChildNodes()) {
-                // remove span without attributes
-                if (dom.getAttribs(n).length === 0) {
-                    dom.remove(n, 1);
-                }
+            // remove span without attributes eg: <span>foo</span> or <span></span>
+            if (dom.getAttribs(n).length === 0) {
+                dom.remove(n, n.hasChildNodes() ? 1 : 0);
             }
         });
     }
