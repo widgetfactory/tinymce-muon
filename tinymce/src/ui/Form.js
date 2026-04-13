@@ -30,6 +30,10 @@
         settings = this.settings,
         i;
 
+      if (settings.label) {
+        html += '<legend>' + dom.encode(settings.label) + '</legend>';
+      }
+
       for (i = 0; i < this.controls.length; i++) {
         var ctrl = this.controls[i], s = ctrl.settings;
 
@@ -40,17 +44,22 @@
 
         html += '<div class="mceFormRow">';
 
-        if (s.label) {
-          html += '<label for="' + ctrl.id + '">' + s.label + '</label>';
+        if (s.label && ctrl.type !== 'checkbox') {
+          html += '<label for="' + ctrl.id + '" id="' + ctrl.id + '_label">' + dom.encode(s.label) + '</label>';
         }
 
         html += '	<div class="mceFormControl">';
         html += ctrl.renderHTML();
         html += '	</div>';
+
+        if (s.label && ctrl.type === 'checkbox') {
+          html += '<label for="' + ctrl.id + '" id="' + ctrl.id + '_label">' + dom.encode(s.label) + '</label>';
+        }
+
         html += '</div>';
       }
 
-      return dom.createHTML('div', {
+      return dom.createHTML('fieldset', {
         id: this.id,
         'class': 'mceForm' + (settings['class'] ? ' ' + settings['class'] : ''),
         role: 'group'
@@ -127,6 +136,8 @@
 
       for (i = 0; i < this.controls.length; i++) {
         this.controls[i].postRender();
+
+        this.controls[i].elm = dom.get(this.controls[i].id);
       }
     }
   });
