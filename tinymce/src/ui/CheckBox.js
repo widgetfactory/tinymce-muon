@@ -29,8 +29,9 @@
 		 * @param {Editor} ed Optional the editor instance this button is for.
 		 */
     CheckBox: function (id, s, ed) {
-
       this._super(id, s, ed);
+
+      this.type = 'checkbox';
 
       if (typeof s.value === 'undefined') {
         s.value = '';

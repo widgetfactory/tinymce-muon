@@ -37,6 +37,8 @@
 
       this._super(id, s, ed);
 
+      this.type = 'sizebox';
+
       /**
        * Fires when the selection has been changed.
        *

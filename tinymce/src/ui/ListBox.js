@@ -85,6 +85,9 @@
     ListBox: function (id, s, ed) {
       this._super(id, s, ed);
 
+      // set a control type
+      this.type = 'listbox';
+
       /**
        * Array of ListBox items.
        *

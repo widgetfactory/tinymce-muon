@@ -38,6 +38,8 @@
       this.active = 0;
       this.editor = editor;
 
+      this.type = 'control'; // default control type
+
       this.name = this.settings.name || id;
     },
 
