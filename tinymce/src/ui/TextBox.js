@@ -31,13 +31,14 @@
      * @param {Editor} ed Optional the editor instance this button is for.
      */
     TextBox: function (id, s, ed) {
-
       s = tinymce.extend({
         class: '',
         title: ''
       }, s);
 
       this._super(id, s, ed);
+
+      this.type = 'textbox';
 
       /**
        * Fires when the selection has been changed.
@@ -105,7 +106,7 @@
       if (s.multiline) {
         html += DOM.createHTML('textarea', attribs, '');
       } else {
-        if (s.subtype == 'color') {
+        if (type == 'color') {
           attribs.type = 'text';
 
           html += DOM.createHTML('input', {
@@ -174,7 +175,7 @@
           DOM.setValue(self.id, DOM.get(self.id + '_color').value);
         });
       }
-      
+
       this.onPostRender.dispatch(this, DOM.get(this.id));
     },
 
@@ -192,6 +193,15 @@
 
       if (elm) {
         elm.disabled = state;
+
+        if (this.settings.subtype && this.settings.subtype == 'color') {
+          var color = DOM.get(this.id + '_color');
+
+          if (color) {
+            color.disabled = state;
+          }
+
+        }
       }
     },
 
