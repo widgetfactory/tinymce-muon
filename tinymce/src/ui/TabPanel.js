@@ -65,8 +65,9 @@
 
       for (var i = 0; i < this.items.length; i++) {
         var tab = this.items[i], items = tab.items || [];
+        var cls = tab['class'] ? tab['class'] : '';
 
-        html += '<div id="' + self.id + '_panel_' + i + '" class="mceTab" role="tabpanel"' + (i === 0 ? '' : ' style="display:none"') + '>';
+        html += '<div id="' + self.id + '_panel_' + i + '" class="mceTab' + (cls ? ' ' + cls : '') + '" role="tabpanel"' + (i === 0 ? '' : ' style="display:none"') + '>';
 
         for (var x = 0; x < items.length; x++) {
           html += items[x].renderHTML();
@@ -113,31 +114,49 @@
     submit: function () {
       var data = {};
 
-      for (var i = 0; i < this.items.length; i++) {
-        var tab = this.items[i], items = tab.items || [];
+      function collect(items) {
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
 
-        for (var x = 0; x < items.length; x++) {
-          var values = items[x].submit();
+          if (typeof item.submit === 'function') {
+            var values = item.submit();
 
-          for (var key in values) {
-            // eslint-disable-next-line no-prototype-builtins
-            if (values.hasOwnProperty(key)) {
-              data[key] = values[key];
+            for (var key in values) {
+              // eslint-disable-next-line no-prototype-builtins
+              if (values.hasOwnProperty(key)) {
+                data[key] = values[key];
+              }
             }
+          } else if (item.controls && item.controls.length) {
+            collect(item.controls);
+          } else if (typeof item.value === 'function') {
+            data[item.name] = item.value();
           }
         }
+      }
+
+      for (var i = 0; i < this.items.length; i++) {
+        collect(this.items[i].items || []);
       }
 
       return data;
     },
 
     update: function (data) {
-      for (var i = 0; i < this.items.length; i++) {
-        var tab = this.items[i], items = tab.items || [];
+      function applyUpdate(items) {
+        for (var i = 0; i < items.length; i++) {
+          var item = items[i];
 
-        for (var x = 0; x < items.length; x++) {
-          items[x].update(data);
+          if (typeof item.update === 'function') {
+            item.update(data);
+          } else if (item.controls && item.controls.length) {
+            applyUpdate(item.controls);
+          }
         }
+      }
+
+      for (var i = 0; i < this.items.length; i++) {
+        applyUpdate(this.items[i].items || []);
       }
     },
 
@@ -164,6 +183,16 @@
           });
         })(i);
       }
+    },
+
+    destroy: function () {
+      this._super();
+
+      for (var i = 0; i < this.controls.length; i++) {
+        this.controls[i].destroy();
+      }
+
+      delete this.lookup[this.id];
     }
   });
 })(tinymce);
