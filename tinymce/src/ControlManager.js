@@ -479,7 +479,7 @@
         c, cls;
 
       if (self.get(id)) {
-        return null;
+        return self.get(id);
       }
       s.title = ed.translate(s.title);
       s.label = ed.translate(s.label);
@@ -543,7 +543,7 @@
         c, cls;
 
       if (self.get(id)) {
-        return null;
+        return self.get(id);
       }
 
       s.title = ed.translate(s.title);
@@ -604,7 +604,7 @@
         c, cls, bm;
 
       if (self.get(id)) {
-        return null;
+        return self.get(id);
       }
 
       s.title = ed.translate(s.title);
@@ -782,12 +782,10 @@
       s["class"] += ' ' + (ed.settings.skin_class || 'mceDefaultSkin');
 
       //id = self.prefix + id;
+      delete self.controls[id];
+
       cls = cc || self._cls.panel || tinymce.ui.Panel;
       c = new cls(id, s, self.editor);
-
-      if (self.get(id)) {
-        return null;
-      }
 
       return self.add(c);
     },
@@ -810,12 +808,10 @@
       var c, self = this,
         cls;
 
+      delete self.controls[id];
+
       cls = cc || self._cls.tabPanel || tinymce.ui.TabPanel;
       c = new cls(id, s, self.editor);
-
-      if (self.get(id)) {
-        return null;
-      }
 
       return self.add(c);
     },
@@ -834,12 +830,10 @@
         cls;
 
       id = self.prefix + id;
+      delete self.controls[id];
+
       cls = cc || self._cls.toolbar || tinymce.ui.Toolbar;
       c = new cls(id, s, self.editor);
-
-      if (self.get(id)) {
-        return null;
-      }
 
       return self.add(c);
     },
@@ -848,12 +842,10 @@
       var c, self = this,
         cls;
       id = self.prefix + id;
+      delete self.controls[id];
+
       cls = cc || this._cls.toolbarGroup || tinymce.ui.ToolbarGroup;
       c = new cls(id, s, self.editor);
-
-      if (self.get(id)) {
-        return null;
-      }
 
       return self.add(c);
     },
@@ -872,12 +864,10 @@
         cls;
 
       id = self.prefix + id;
+      delete self.controls[id];
+
       cls = cc || self._cls.layout || tinymce.ui.Layout;
       c = new cls(id, s, self.editor);
-
-      if (self.get(id)) {
-        return null;
-      }
 
       return self.add(c);
     },
@@ -895,6 +885,9 @@
         cls;
 
       id = self.prefix + id;
+
+      delete self.controls[id];
+
       cls = tinymce.ui.Form;
       c = new cls(id, s, self.editor);
 
