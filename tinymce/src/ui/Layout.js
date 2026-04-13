@@ -12,19 +12,19 @@
   // Shorten class names
   var dom = tinymce.DOM;
   /**
-	 * This class is used to create layouts. A layout is a container for other controls like buttons etc.
-	 *
-	 * @class tinymce.ui.Layout
-	 * @extends tinymce.ui.Container
-	 */
+   * This class is used to create layouts. A layout is a container for other controls like buttons etc.
+   *
+   * @class tinymce.ui.Layout
+   * @extends tinymce.ui.Container
+   */
   tinymce.create('tinymce.ui.Layout:tinymce.ui.Container', {
     /**
-		 * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
-		 * creating a whole toolbar with buttons it does make a lot of difference.
-		 *
-		 * @method renderHTML
-		 * @return {String} HTML for the toolbar control.
-		 */
+     * Renders the toolbar as a HTML string. This method is much faster than using the DOM and when
+     * creating a whole toolbar with buttons it does make a lot of difference.
+     *
+     * @method renderHTML
+     * @return {String} HTML for the toolbar control.
+     */
     renderHTML: function () {
       var html = '',
         settings = this.settings,
@@ -47,12 +47,22 @@
 
     postRender: function () {
       var i;
-  
+
       this._super();
-  
+
       for (i = 0; i < this.controls.length; i++) {
         this.controls[i].postRender();
       }
+    },
+
+    destroy: function () {
+      this._super();
+
+      for (var i = 0; i < this.controls.length; i++) {
+        this.controls[i].destroy();
+      }
+
+      delete this.lookup[this.id];
     }
   });
 })(tinymce);
