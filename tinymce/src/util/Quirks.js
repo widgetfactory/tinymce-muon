@@ -1552,16 +1552,81 @@ tinymce.util.Quirks = function (editor) {
 
       dom.remove(marker);
 
+      // nodeChange may not fire reliably after a programmatic range move, so
+      // clear the boundary marker directly now that the cursor has left the element.
+      dom.setAttrib(node, 'data-mce-selected', null);
+
       return true;
     }
 
-    // Attempt to move caret after a container element like <a> or <code>.
-    // Uses addToTop so the marker is removed and the cursor is corrected before EnterKey runs.
+    // Detects if the cursor is at the start of a matching inline element and repositions it
+    // just before it. Returns true if the cursor was moved, false otherwise.
+    function relocateCursorBeforeInline(selector) {
+      var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
+
+      if (!node || node == editor.dom.getRoot()) {
+        return false;
+      }
+
+      node = dom.getParent(node, selector);
+
+      if (!node && container.nodeType == 1) {
+        node = dom.getParent(container, selector);
+      }
+
+      if (!node) {
+        return false;
+      }
+
+      var atStart = false;
+
+      if (container.nodeType == 3 && rng.startOffset === 0) {
+        // Confirm this is the first non-empty text node within the inline element
+        var walker = new TreeWalker(node, node);
+        var current;
+        while ((current = walker.next())) {
+          if (current.nodeType == 3 && current.data.length > 0) {
+            atStart = current === container;
+            break;
+          }
+        }
+      } else if (container.nodeType == 1 && container == node && rng.startOffset === 0) {
+        atStart = true;
+      }
+
+      if (!atStart) {
+        return false;
+      }
+
+      marker = dom.create('span', { 'data-mce-type': "caret" }, '\uFEFF');
+      node.insertAdjacentElement('beforebegin', marker);
+
+      var newRng = dom.createRng();
+      newRng.setStartBefore(marker);
+      newRng.setEndBefore(marker);
+      selection.setRng(newRng);
+
+      dom.remove(marker);
+
+      // nodeChange may not fire reliably after a programmatic range move, so
+      // clear the boundary marker directly now that the cursor has left the element.
+      dom.setAttrib(node, 'data-mce-selected', null);
+
+      return true;
+    }
+
+    // Move caret past inline boundary elements on Left/Right Arrow and Enter.
+    // Uses addToTop so the marker is removed before any other keydown handler runs.
     editor.onKeyDown.addToTop(function (editor, e) {
       dom.remove(marker);
 
       if (e.keyCode == VK.RIGHT) {
         if (relocateCursorOutOfInline('a,span[data-mce-item="font"]')) {
+          e.preventDefault();
+          editor.nodeChanged();
+        }
+      } else if (e.keyCode == VK.LEFT) {
+        if (relocateCursorBeforeInline('a,span[data-mce-item="font"]')) {
           e.preventDefault();
           editor.nodeChanged();
         }
@@ -1574,10 +1639,41 @@ tinymce.util.Quirks = function (editor) {
       }
     });
 
-    editor.onMouseUp.add(function (editor) {
+    editor.onMouseUp.add(function (editor, e) {
       dom.remove(marker);
+
       if (relocateCursorOutOfInline('span[data-mce-item="font"]')) {
         editor.nodeChanged();
+      }
+    });
+
+    // Safety net: clear the boundary attribute on arrow keyUp in case nodeChange
+    // didn't fire (e.g. browser-native exit from the element without a synthetic
+    // nodeChange being dispatched).
+    editor.onKeyUp.add(function (_editor, e) {
+      if (e.keyCode === VK.LEFT || e.keyCode === VK.RIGHT) {
+        var currentNode = selection.getStart(true);
+
+        if (!dom.getParent(currentNode, 'a,span[data-mce-item="font"]')) {
+          each(dom.select('[data-mce-selected="inline-boundary"]', dom.getRoot()), function (el) {
+            dom.setAttrib(el, 'data-mce-selected', null);
+          });
+        }
+      }
+    });
+
+    // Track cursor position: mark the inline boundary element the cursor is inside,
+    // and clear the mark when the cursor leaves.
+    editor.onNodeChange.add(function (editor, cm, node) {
+      // Clear any previously marked elements
+      each(dom.select('[data-mce-selected="inline-boundary"]', dom.getRoot()), function (el) {
+        dom.setAttrib(el, 'data-mce-selected', null);
+      });
+
+      var inlineNode = dom.getParent(node, 'a,span[data-mce-item="font"]');
+
+      if (inlineNode) {
+        dom.setAttrib(inlineNode, 'data-mce-selected', 'inline-boundary');
       }
     });
   }
