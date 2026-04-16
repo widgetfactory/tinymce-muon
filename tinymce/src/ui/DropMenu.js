@@ -329,8 +329,12 @@
           }
 
           if (item.settings.onclick) {
-            item.settings.onclick(e);
-            self.close();
+            var state = item.settings.onclick(e);
+
+            if (state !== false) {
+              self.close();
+            }
+
           }
 
           self.clearFilterInput();
@@ -640,10 +644,12 @@
             }
           } else {
             if (self.settings.onselect) {
-              self.settings.onselect.call(self, e.target);
-            }
+              var state = self.settings.onselect.call(self, e.target);
 
-            self.hideMenu();
+              if (state !== false) {
+                self.hideMenu();
+              }
+            }
           }
 
           item = item || self.items[id];
