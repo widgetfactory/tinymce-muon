@@ -135,6 +135,7 @@
         activate = function (evt) {
           if (!self.isDisabled()) {
             s.onclick(evt, self.value);
+
             Event.cancel(evt);
 
             self.hideMenu();
