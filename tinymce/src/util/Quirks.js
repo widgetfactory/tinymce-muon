@@ -1489,33 +1489,6 @@ tinymce.util.Quirks = function (editor) {
       return node && node.nodeType == 1 && node.nodeName == 'BR';
     }
 
-    function isRootNode(node) {
-      return node == editor.dom.getRoot();
-    }
-
-    function isLastChild(node) {
-      var parent = node.parentNode;
-
-      if (isRootNode(parent)) {
-        return true;
-      }
-
-      if (node == parent.lastChild) {
-        return true;
-      }
-
-      if (node.nextSibling && isBr(node.nextSibling) && node.nextSibling == parent.lastChild) {
-        return true;
-      }
-
-      return false;
-    }
-
-    function isEmpty(node) {
-      // is linebreak or empty whitespace text node
-      return isBr(node) || (node && node.nodeType == 3 && /^[ \t\r\n]*$/.test(node.nodeValue));
-    }
-
     function isChildOf(container, node) {
       if (node.lastChild && node.lastChild.nodeType == 1) {
         node = node.lastChild;
@@ -1524,75 +1497,88 @@ tinymce.util.Quirks = function (editor) {
       return dom.isChildOf(container, node);
     }
 
-    function moveCursorToEnd(e) {
+    // Detects if the cursor is at the end of a matching inline element and repositions it
+    // just outside. Returns true if the cursor was moved, false otherwise.
+    function relocateCursorOutOfInline(selector) {
       var rng = selection.getRng(), container = rng.startContainer, node = container.parentNode;
 
       if (!node || node == editor.dom.getRoot()) {
-        return;
+        return false;
       }
 
-      node = dom.getParent(node, 'a,span[data-mce-item="font"]');
+      node = dom.getParent(node, selector);
+
+      // When the browser positions the cursor in the element node itself (not a text child),
+      // container.parentNode won't be the element, so also try from container directly.
+      if (!node && container.nodeType == 1) {
+        node = dom.getParent(container, selector);
+      }
 
       if (!node) {
-        return;
+        return false;
       }
 
-      if (!isLastChild(node) && !isEmpty(node.nextSibling)) {
-        return;
-      }
-
-      function moveToMarker() {
-        var rng = dom.createRng();
-        rng.setStartAfter(marker);
-        rng.setEndAfter(marker);
-        rng.collapse();
-        selection.setRng(rng);
-      }
+      var atEnd = false;
 
       if (container.nodeType == 3 && isChildOf(container, node)) {
         var text = container.data;
-
-        if (text && text.length && rng.startOffset == text.length) {
-          marker = dom.create('span', { 'data-mce-type': "caret" }, '\uFEFF');
-
-          if (dom.isBlock(node.parentNode) && isLastChild(node)) {
-            node.parentNode.appendChild(marker);
-
-            moveToMarker();
-            dom.remove(marker);
-
-          } else {
-            // edge case for - some text <a href="link.html">link</a><br />
-            if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
-              node = node.nextSibling;
-            }
-
-            node.insertAdjacentElement('afterend', marker);
-
-            moveToMarker();
-            dom.remove(marker);
-          }
-
-          // cancel event
-          e.preventDefault();
-
-          editor.nodeChanged();
-        }
+        atEnd = text && text.length && rng.startOffset == text.length;
+      } else if (container.nodeType == 1 && container == node && rng.startOffset >= container.childNodes.length) {
+        // Browser represented the end-of-element position using the element node itself as the container
+        atEnd = true;
       }
+
+      if (!atEnd) {
+        return false;
+      }
+
+      marker = dom.create('span', { 'data-mce-type': "caret" }, '\uFEFF');
+
+      // Insert marker immediately after the inline element (or after a trailing <br>).
+      // Always use insertAdjacentElement so the marker lands right after the <a>,
+      // whether it's the last child of its block or has siblings following it.
+      var insertAfter = node;
+      if (isBr(node.nextSibling) && node.nextSibling == node.parentNode.lastChild) {
+        insertAfter = node.nextSibling;
+      }
+
+      insertAfter.insertAdjacentElement('afterend', marker);
+
+      var newRng = dom.createRng();
+      newRng.setStartAfter(marker);
+      newRng.setEndAfter(marker);
+      newRng.collapse();
+      selection.setRng(newRng);
+
+      dom.remove(marker);
+
+      return true;
     }
 
-    // Attempt to move caret after a container element like <a> or <code> (use addToTop to remove marker before EnterKey)
+    // Attempt to move caret after a container element like <a> or <code>.
+    // Uses addToTop so the marker is removed and the cursor is corrected before EnterKey runs.
     editor.onKeyDown.addToTop(function (editor, e) {
       dom.remove(marker);
 
       if (e.keyCode == VK.RIGHT) {
-        moveCursorToEnd(e);
+        if (relocateCursorOutOfInline('a,span[data-mce-item="font"]')) {
+          e.preventDefault();
+          editor.nodeChanged();
+        }
+      } else if (e.keyCode == VK.ENTER) {
+        // Reposition cursor outside the <a> before EnterKey splits the block,
+        // but do NOT prevent default — Enter should still create a new paragraph.
+        if (relocateCursorOutOfInline('a,span[data-mce-item="font"]')) {
+          editor.nodeChanged();
+        }
       }
     });
 
-    editor.onMouseUp.add(function (editor, e) {
+    editor.onMouseUp.add(function (editor) {
       dom.remove(marker);
-      moveCursorToEnd(e);
+      if (relocateCursorOutOfInline('span[data-mce-item="font"]')) {
+        editor.nodeChanged();
+      }
     });
   }
 
