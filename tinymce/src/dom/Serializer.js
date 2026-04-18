@@ -26,7 +26,7 @@
    */
   tinymce.dom.Serializer = function (settings, dom, schema) {
     var self = this,
-      onPreProcess, onPostProcess, isIE = tinymce.isIE,
+      onPreProcess, onPostProcess,
       each = tinymce.each,
       htmlParser;
 
@@ -390,35 +390,28 @@
        * @param {Object} args Arguments option that gets passed to event handlers.
        */
       serialize: function (node, args) {
-        var impl, doc, oldDoc, htmlSerializer, content, rootNode;
+        var impl, doc, oldDoc, htmlSerializer, rootNode;
 
-        // Explorer won't clone contents of script and style and the
-        // selected index of select elements are cleared on a clone operation.
-        if (isIE && dom.select('script,style,select,map').length > 0) {
-          content = node.innerHTML;
-          node = node.cloneNode(false);
-          dom.setHTML(node, content);
-        } else {
-          node = node.cloneNode(true);
-        }
+        var clonedNode = node.cloneNode(true);
 
         // Nodes needs to be attached to something in WebKit/Opera
         // This fix will make DOM ranges and make Sizzle happy!
         impl = document.implementation;
+
         if (impl.createHTMLDocument) {
           // Create an empty HTML document
           doc = impl.createHTMLDocument("");
 
           // Add the element or it's children if it's a body element to the new document
-          each(node.nodeName == 'BODY' ? node.childNodes : [node], function (node) {
+          each(clonedNode.nodeName == 'BODY' ? clonedNode.childNodes : [clonedNode], function (node) {
             doc.body.appendChild(doc.importNode(node, true));
           });
 
           // Grab first child or body element for serialization
-          if (node.nodeName != 'BODY') {
-            node = doc.body.firstChild;
+          if (clonedNode.nodeName != 'BODY') {
+            clonedNode = doc.body.firstChild;
           } else {
-            node = doc.body;
+            clonedNode = doc.body;
           }
 
           // set the new document in DOMUtils so createElement etc works
@@ -436,12 +429,12 @@
 
         // Pre process
         if (!args.no_events) {
-          args.node = node;
+          args.node = clonedNode;
           onPreProcess.dispatch(self, args);
         }
 
         // Parse HTML
-        rootNode = htmlParser.parse(tinymce.trim(args.getInner ? node.innerHTML : dom.getOuterHTML(node)), args);
+        rootNode = htmlParser.parse(tinymce.trim(args.getInner ? clonedNode.innerHTML : dom.getOuterHTML(clonedNode)), args);
         trimTrailingBr(rootNode);
 
         // Serialize HTML
