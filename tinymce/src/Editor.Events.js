@@ -59,6 +59,7 @@
 		focus: 'onFocus',
 		focusin: 'onFocusIn',
 		focusout: 'onFocusOut',
+		beforeinput: 'onBeforeInput',
 		input: 'onInput',
 		compositionstart: 'onCompositionStart'
 	};
@@ -901,6 +902,14 @@
 			'onFocusOut',
 
 			/**
+			 * Fires before the editor input is changed.
+			 *
+			 * @event onBeforeInput
+			 * @param {tinymce.Editor} sender Editor instance.
+			 */
+			'onBeforeInput',
+
+			/**
 			 * Fires when the editor input is changed.
 			 *
 			 * @event onInput
@@ -1054,6 +1063,7 @@
 			selectionchange: 'onSelectionChange',
 			focusin: 'onFocusIn',
 			focusout: 'onFocusOut',
+			beforeinput: 'onBeforeInput',
 			input: 'onInput'
 		};
 
