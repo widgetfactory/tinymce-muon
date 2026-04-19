@@ -1486,40 +1486,38 @@ tinymce.util.Quirks = function (editor) {
     var marker;
 
     var Zwsp = tinymce.text.Zwsp;
+    var CaretPosition = tinymce.caret.CaretPosition;
+    var CaretContainer = tinymce.caret.CaretContainer;
+    var CaretWalker = tinymce.caret.CaretWalker;
 
     function isBr(node) {
       return node && node.nodeType == 1 && node.nodeName == 'BR';
     }
 
-    function isChildOf(container, node) {
-      if (node.lastChild && node.lastChild.nodeType == 1) {
-        node = node.lastChild;
+    // Normalizes a CaretPosition so that a cursor sitting immediately after a
+    // leading ZWSP (offset 1) is treated as offset 0 for start-boundary checks,
+    // and a cursor sitting immediately before a trailing ZWSP (offset length-1)
+    // is treated as offset length for end-boundary checks.
+    function normalizePos(pos, forEnd) {
+      var container = pos.container(), offset = pos.offset();
+      if (container.nodeType == 3) {
+        if (!forEnd && CaretContainer.startsWithCaretContainer(container) && offset === 1) {
+          return new CaretPosition(container, 0);
+        }
+        if (forEnd && CaretContainer.endsWithCaretContainer(container) && offset === container.data.length - 1) {
+          return new CaretPosition(container, container.data.length);
+        }
       }
-
-      return dom.isChildOf(container, node);
+      return pos;
     }
 
     // Returns the relevant anchor/inline node if the cursor is at its start, null otherwise.
-    // When node is null, also detects the case where the cursor is positioned just before
-    // an <a> (Chrome places it outside the element at the start boundary).
+    // Uses CaretWalker so boundary detection is browser-agnostic — no offset-value assumptions.
+    // When node is null, also detects the cursor positioned just before an <a>.
     function isCursorAtStart(rng, container, node) {
       if (node) {
-        if (rng.startOffset > 1) {
-          return null;
-        }
-
-        if (container.nodeType == 3) {
-          var walker = new TreeWalker(node, node), current;
-          while ((current = walker.next())) {
-            if (current.nodeType == 3 && current.data.length > 0) {
-              return current === container ? node : null;
-            }
-          }
-        } else if (container.nodeType == 1 && container === node) {
-          return node;
-        }
-
-        return null;
+        var pos = normalizePos(CaretPosition.fromRangeStart(rng), false);
+        return new CaretWalker(node).prev(pos) === null ? node : null;
       }
 
       // node is null: cursor is outside any inline — check if it sits just before an <a>.
@@ -1539,24 +1537,8 @@ tinymce.util.Quirks = function (editor) {
     }
 
     function isCursorAtEnd(rng, container, node) {
-      var atEnd = false;
-
-      if (container.nodeType == 3 && isChildOf(container, node)) {
-        var text = container.data, effectiveEnd = text.length;
-        // A trailing ZWSP may be present as a typing anchor — treat the position
-        // immediately before it as the logical end of the element.        
-        if (effectiveEnd > 0 && Zwsp.isZwsp(text[text.length - 1])) {
-          effectiveEnd = text.length - 1;
-        }
-
-        atEnd = effectiveEnd > 0 && rng.startOffset >= effectiveEnd;
-
-      } else if (container.nodeType == 1 && container == node && rng.startOffset >= container.childNodes.length) {
-        // Browser represented the end-of-element position using the element node itself as the container
-        atEnd = true;
-      }
-
-      return atEnd;
+      var pos = normalizePos(CaretPosition.fromRangeStart(rng), true);
+      return new CaretWalker(node).next(pos) === null;
     }
 
     // Detects if the cursor is at the end of a matching inline element and repositions it
@@ -1651,8 +1633,6 @@ tinymce.util.Quirks = function (editor) {
       return true;
     }
 
-    var anchorOffset = null;
-
     function ensureZwspAtAnchorStart() {
       var rng = selection.getRng();
 
@@ -1660,73 +1640,51 @@ tinymce.util.Quirks = function (editor) {
         return;
       }
 
-      var offset = rng.startOffset;
       var container = rng.startContainer;
       var anchor = dom.getParent(container, 'a');
 
+      // Find the anchor to act on: either we're inside one, or just before one.
+      var targetAnchor = anchor || isCursorAtStart(rng, container, null);
+
+      if (!targetAnchor) {
+        return;
+      }
+
+      // If inside the anchor, confirm the cursor is at the logical start using
+      // CaretWalker — no offset-value assumptions, works across Chrome and Gecko.
       if (anchor) {
-        var textNode = null;
-        var walker = new TreeWalker(anchor, anchor), current;
-
-        while ((current = walker.next())) {
-          if (current.nodeType == 3) {
-            textNode = current;
-            break;
-          }
+        var pos = normalizePos(CaretPosition.fromRangeStart(rng), false);
+        if (new CaretWalker(anchor).prev(pos) !== null) {
+          return; // not at start
         }
+      }
 
-        if (!textNode || textNode !== container) {
-          anchorOffset = null;
-          return;
+      // Ensure a leading ZWSP exists in the first text node so the browser treats
+      // the position as unambiguously inside the element when typing.
+      var firstText = null;
+      var walker = new TreeWalker(targetAnchor, targetAnchor), current;
+      while ((current = walker.next())) {
+        if (current.nodeType == 3) {
+          firstText = current;
+          break;
         }
+      }
 
-        // Track offset while inside the anchor so we know Chrome's minimum reachable
-        // position on the next call (when cursor may have jumped to adjacent text).
-        anchorOffset = offset;
+      if (!firstText) {
+        return;
+      }
 
-        // offset 0 only occurs when the anchor is at the start of a line with no
-        // preceding text — Chrome can reach it directly.
-        if (offset !== 0) {
-          return;
-        }
+      if (!Zwsp.isZwsp(firstText.data[0])) {
+        firstText.data = Zwsp.ZWSP + firstText.data;
+      }
 
-        if (!Zwsp.isZwsp(textNode.data[0])) {
-          textNode.data = Zwsp.ZWSP + textNode.data;
-        }
-
+      // Only reposition the cursor when we're inside the anchor — if we came from
+      // outside (adjacentAnchor case), the cursor stays in the adjacent text.
+      if (anchor) {
         var newRng = dom.createRng();
-        newRng.setStart(textNode, 1);
-        newRng.setEnd(textNode, 1);
+        newRng.setStart(firstText, 1);
+        newRng.setEnd(firstText, 1);
         selection.setRng(newRng);
-        anchorOffset = 1;
-
-      } else {
-        // Cursor is outside any anchor. For arrow keys, anchorOffset === 1 means we
-        // were at Chrome's minimum reachable offset inside an anchor with adjacent text,
-        // and Chrome just jumped the cursor to that adjacent text — treat this as
-        // "cursor is now just before the anchor". For clicks, anchorOffset may be null
-        // but isCursorAtStart can still detect the adjacent anchor directly.
-        if (anchorOffset === 1 || anchorOffset === null) {
-          var adjacentAnchor = isCursorAtStart(rng, container, null);
-
-          if (adjacentAnchor) {
-            var firstText = null;
-            var walker2 = new TreeWalker(adjacentAnchor, adjacentAnchor), cur;
-
-            while ((cur = walker2.next())) {
-              if (cur.nodeType == 3) {
-                firstText = cur;
-                break;
-              }
-            }
-
-            if (firstText && !Zwsp.isZwsp(firstText.data[0])) {
-              firstText.data = Zwsp.ZWSP + firstText.data;
-            }
-          }
-        }
-
-        anchorOffset = null;
       }
     }
 
