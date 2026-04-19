@@ -1651,6 +1651,43 @@ tinymce.util.Quirks = function (editor) {
       return true;
     }
 
+    function ensureZwspAtAnchorStart() {
+      var rng = selection.getRng();
+
+      if (!rng || !rng.collapsed) {
+        return;
+      }
+
+      var container = rng.startContainer;
+      var anchor = dom.getParent(container, 'a');
+
+      if (rng.startOffset === 0 && anchor) {
+        var textNode = null;
+        var walker = new TreeWalker(anchor, anchor), current;
+
+        // Walk FORWARD to find the first text node inside the anchor.
+        while ((current = walker.next())) {
+          if (current.nodeType == 3) {
+            textNode = current;
+            break;
+          }
+        }
+
+        if (!textNode) {
+          return;
+        }
+
+        if (textNode.data.length === 0 || textNode.data[0] !== Zwsp.ZWSP) {
+          textNode.data = Zwsp.ZWSP + textNode.data;
+        }
+
+        var newRng = dom.createRng();
+        newRng.setStart(textNode, 1);
+        newRng.setEnd(textNode, 1);
+        selection.setRng(newRng);
+      }
+    }
+
     // Move caret past inline boundary elements on Left/Right Arrow and Enter.
     // Uses addToTop so the marker is removed before any other keydown handler runs.
     editor.onKeyDown.addToTop(function (editor, e) {
@@ -1683,6 +1720,10 @@ tinymce.util.Quirks = function (editor) {
 
     editor.onMouseUp.add(function (editor, e) {
       dom.remove(marker);
+
+      if (tinymce.isWebKit) {
+        ensureZwspAtAnchorStart();
+      }
 
       if (relocateCursorOutOfInline('span[data-mce-item="font"]')) {
         editor.nodeChanged();
@@ -1720,6 +1761,8 @@ tinymce.util.Quirks = function (editor) {
         } else if (!anchor) {
           return;
         }
+
+        startAnchor = false;
 
         // Find the first/last text node and redirect the insertion point there.
         var textNode = null;
@@ -1786,6 +1829,10 @@ tinymce.util.Quirks = function (editor) {
     // nodeChange being dispatched).
     editor.onKeyUp.add(function (_editor, e) {
       if (e.keyCode === VK.LEFT || e.keyCode === VK.RIGHT) {
+        if (tinymce.isWebKit) {
+          ensureZwspAtAnchorStart();
+        }
+
         var currentNode = selection.getStart(true);
 
         if (!dom.getParent(currentNode, 'a,span[data-mce-item="font"]')) {
