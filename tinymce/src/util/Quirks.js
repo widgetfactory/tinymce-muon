@@ -1651,6 +1651,8 @@ tinymce.util.Quirks = function (editor) {
       return true;
     }
 
+    var anchorOffset = null;
+
     function ensureZwspAtAnchorStart() {
       var rng = selection.getRng();
 
@@ -1658,10 +1660,12 @@ tinymce.util.Quirks = function (editor) {
         return;
       }
 
+      var offset = rng.startOffset;
+
       var container = rng.startContainer;
       var anchor = dom.getParent(container, 'a');
 
-      if (rng.startOffset === 0 && anchor) {
+      if (anchor) {
         var textNode = null;
         var walker = new TreeWalker(anchor, anchor), current;
 
@@ -1673,8 +1677,22 @@ tinymce.util.Quirks = function (editor) {
           }
         }
 
-        if (!textNode) {
+        if (!textNode || textNode !== container) {
           return;
+        }
+
+        // Chrome skips offset 0 inside an anchor when a text node precedes it —
+        // the minimum reachable position becomes offset 1, so we must treat both as "at start".
+        // Also treat offset 1 as start when a ZWSP sentinel is already at position 0 (prior visit).
+        var prevSibIsText = !!(anchor.previousSibling && anchor.previousSibling.nodeType === 3);
+        var atStart = offset === 0 || (offset === 1 && (prevSibIsText || Zwsp.isZwsp(textNode.data[0])));
+
+        if (!atStart) {
+          return;
+        }
+
+        if (textNode.data[0] !== Zwsp.ZWSP) {
+          textNode.data = Zwsp.ZWSP + textNode.data;
         }
 
         if (textNode.data.length === 0 || textNode.data[0] !== Zwsp.ZWSP) {
