@@ -1661,7 +1661,6 @@ tinymce.util.Quirks = function (editor) {
       }
 
       var offset = rng.startOffset;
-
       var container = rng.startContainer;
       var anchor = dom.getParent(container, 'a');
 
@@ -1669,7 +1668,6 @@ tinymce.util.Quirks = function (editor) {
         var textNode = null;
         var walker = new TreeWalker(anchor, anchor), current;
 
-        // Walk FORWARD to find the first text node inside the anchor.
         while ((current = walker.next())) {
           if (current.nodeType == 3) {
             textNode = current;
@@ -1678,24 +1676,21 @@ tinymce.util.Quirks = function (editor) {
         }
 
         if (!textNode || textNode !== container) {
+          anchorOffset = null;
           return;
         }
 
-        // Chrome skips offset 0 inside an anchor when a text node precedes it —
-        // the minimum reachable position becomes offset 1, so we must treat both as "at start".
-        // Also treat offset 1 as start when a ZWSP sentinel is already at position 0 (prior visit).
-        var prevSibIsText = !!(anchor.previousSibling && anchor.previousSibling.nodeType === 3);
-        var atStart = offset === 0 || (offset === 1 && (prevSibIsText || Zwsp.isZwsp(textNode.data[0])));
+        // Track offset while inside the anchor so we know Chrome's minimum reachable
+        // position on the next call (when cursor may have jumped to adjacent text).
+        anchorOffset = offset;
 
-        if (!atStart) {
+        // offset 0 only occurs when the anchor is at the start of a line with no
+        // preceding text — Chrome can reach it directly.
+        if (offset !== 0) {
           return;
         }
 
-        if (textNode.data[0] !== Zwsp.ZWSP) {
-          textNode.data = Zwsp.ZWSP + textNode.data;
-        }
-
-        if (textNode.data.length === 0 || textNode.data[0] !== Zwsp.ZWSP) {
+        if (!Zwsp.isZwsp(textNode.data[0])) {
           textNode.data = Zwsp.ZWSP + textNode.data;
         }
 
@@ -1703,6 +1698,35 @@ tinymce.util.Quirks = function (editor) {
         newRng.setStart(textNode, 1);
         newRng.setEnd(textNode, 1);
         selection.setRng(newRng);
+        anchorOffset = 1;
+
+      } else {
+        // Cursor is outside any anchor. For arrow keys, anchorOffset === 1 means we
+        // were at Chrome's minimum reachable offset inside an anchor with adjacent text,
+        // and Chrome just jumped the cursor to that adjacent text — treat this as
+        // "cursor is now just before the anchor". For clicks, anchorOffset may be null
+        // but isCursorAtStart can still detect the adjacent anchor directly.
+        if (anchorOffset === 1 || anchorOffset === null) {
+          var adjacentAnchor = isCursorAtStart(rng, container, null);
+
+          if (adjacentAnchor) {
+            var firstText = null;
+            var walker2 = new TreeWalker(adjacentAnchor, adjacentAnchor), cur;
+
+            while ((cur = walker2.next())) {
+              if (cur.nodeType == 3) {
+                firstText = cur;
+                break;
+              }
+            }
+
+            if (firstText && !Zwsp.isZwsp(firstText.data[0])) {
+              firstText.data = Zwsp.ZWSP + firstText.data;
+            }
+          }
+        }
+
+        anchorOffset = null;
       }
     }
 
@@ -1739,9 +1763,7 @@ tinymce.util.Quirks = function (editor) {
     editor.onMouseUp.add(function (editor, e) {
       dom.remove(marker);
 
-      if (tinymce.isWebKit) {
-        ensureZwspAtAnchorStart();
-      }
+      ensureZwspAtAnchorStart();
 
       if (relocateCursorOutOfInline('span[data-mce-item="font"]')) {
         editor.nodeChanged();
@@ -1847,9 +1869,7 @@ tinymce.util.Quirks = function (editor) {
     // nodeChange being dispatched).
     editor.onKeyUp.add(function (_editor, e) {
       if (e.keyCode === VK.LEFT || e.keyCode === VK.RIGHT) {
-        if (tinymce.isWebKit) {
-          ensureZwspAtAnchorStart();
-        }
+        ensureZwspAtAnchorStart();
 
         var currentNode = selection.getStart(true);
 
