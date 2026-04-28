@@ -398,8 +398,7 @@
 
       // find and clear input element
       input.value = '';
-      input.focus();
-
+      
       if (removetags) {
         DOM.remove(DOM.select('.mceButtonTag', this.id));
       }
