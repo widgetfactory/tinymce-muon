@@ -16,6 +16,7 @@ import './src/util/Preview.js';
 
 import './src/util/Arr.js';
 import './src/util/Fun.js';
+import './src/util/Color.js';
 
 // tinymce.text.*
 import './src/text/ExtendingChar.js';
@@ -86,6 +87,7 @@ import './src/dom/StyleSheetLoader.js';
 import './src/dom/FocusManager.js';
 
 // tinymce.ui.*
+import './src/ui/DragHelper.js';
 import './src/ui/KeyboardNavigation.js';
 import './src/ui/Control.js';
 import './src/ui/Container.js';
@@ -101,6 +103,7 @@ import './src/ui/NativeListBox.js';
 import './src/ui/TextBox.js';
 import './src/ui/UrlBox.js';
 import './src/ui/CheckBox.js';
+import './src/ui/ColorPicker.js';
 import './src/ui/MenuButton.js';
 import './src/ui/SplitButton.js';
 import './src/ui/ColorSplitButton.js';
