@@ -93,8 +93,7 @@
         id: this.id,
         class: prefix + ' ' + s['class'],
         title: DOM.encode(s.title),
-        tabindex: 0,
-        autofocus: true
+        tabindex: 0
       };
 
       if (s.description) {
@@ -171,9 +170,16 @@
           DOM.setValue(this.id + '_color', DOM.get(self.id).value);
         });
 
-        Event.add(this.id + '_color', 'change', function (e) {
-          DOM.setValue(self.id, DOM.get(self.id + '_color').value);
-        });
+        if (s.colorpicker) {
+          Event.add(this.id + '_color', 'click', function (e) {
+            e.preventDefault();
+            s.colorpicker.apply(self);
+          });
+        } else {
+          Event.add(this.id + '_color', 'change', function (e) {
+            DOM.setValue(self.id, DOM.get(self.id + '_color').value);
+          });
+        }
       }
 
       this.onPostRender.dispatch(this, DOM.get(this.id));
