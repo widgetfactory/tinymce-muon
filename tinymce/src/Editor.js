@@ -865,7 +865,7 @@
 
       self.onPreInit.dispatch(self);
 
-      if (!settings.browser_spellcheck && !settings.gecko_spellcheck) {
+      if (!settings.browser_spellcheck) {
         doc.body.spellcheck = false;
       }
 
