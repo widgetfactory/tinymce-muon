@@ -48,11 +48,15 @@
           html += '<label for="' + ctrl.id + '" id="' + ctrl.id + '_label">' + dom.encode(s.label) + '</label>';
         }
 
+        if (s.label && ctrl.type === 'checkbox' && s.label_position === 'before') {
+          html += '<label for="' + ctrl.id + '" id="' + ctrl.id + '_label">' + dom.encode(s.label) + '</label>';
+        }
+
         html += '	<div class="mceFormControl">';
         html += ctrl.renderHTML();
         html += '	</div>';
 
-        if (s.label && ctrl.type === 'checkbox') {
+        if (s.label && ctrl.type === 'checkbox' && s.label_position !== 'before') {
           html += '<label for="' + ctrl.id + '" id="' + ctrl.id + '_label">' + dom.encode(s.label) + '</label>';
         }
 
