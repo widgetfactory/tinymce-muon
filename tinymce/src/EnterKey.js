@@ -657,12 +657,13 @@
       } else if (isCaretAtStartOrEndOfBlock()) {
         insertNewBlockAfter();
       } else if (isCaretAtStartOrEndOfBlock(true)) {
+        // Capture before DOM mutation: ce=false may be inside the block (caretAtCEFalse) or
+        // a preceding sibling block that RangeUtils resolved past when normalizing to a text node.
+        var adjacentCEFalse = caretAtCEFalse || (parentBlock.previousSibling && NodeType.isContentEditableFalse(parentBlock.previousSibling));
         // Insert new block before
         newBlock = parentBlock.parentNode.insertBefore(createNewBlock(), parentBlock);
         renderBlockOnIE(newBlock);
-        // When adjacent to a ce=false element the new block is the destination;
-        // for a true start-of-block press the cursor should stay on the content block.
-        moveToCaretPosition(caretAtCEFalse ? newBlock : parentBlock);
+        moveToCaretPosition(adjacentCEFalse ? newBlock : parentBlock);
       } else {
         // Extract after fragment and insert it after the current block
         tmpRng = rng.cloneRange();
