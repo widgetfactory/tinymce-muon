@@ -807,7 +807,7 @@
           }
       }*/
 
-      tinymce.each(this.windows, function (win) {
+      each(this.windows, function (win) {
         if (win.zIndex > ix) {
           fw = win;
           ix = win.zIndex;
