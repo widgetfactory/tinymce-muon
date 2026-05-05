@@ -143,7 +143,6 @@
         '<div class="mceModalBody" id="' + id + '" dir="' + ed.settings.skin_directionality + '">' +
         '   <div class="mceModalContainer">' +
         '       <div class="mceModalHeader" id="' + id + '_header">' + 
-        //'            <div class="mceModalLogo">' + (ed.settings.logo || '') + '</div>' +
         '           <h5 class="mceModalTitle" id="' + id + '_title">' + (f.title || "") + '</h5>' +
         '           <button class="mceModalClose" type="button" title="' + ed.getLang('close', 'Close') + '" aria-label="' + ed.getLang('close', 'Close') + '"></button>' +
         '       </div>' +
@@ -151,11 +150,11 @@
         '   </div>' +
         '</div>';
 
-      // find modal
-      var modal = DOM.select('.mceModal');
+      // find first modal
+      var modal = document.querySelector('.mceModal');
 
       // create modal
-      if (!modal.length) {
+      if (!modal) {
         modal = DOM.add(DOM.doc.body, 'div', { 'class': ed.settings.skin_class + ' mceModal', role: 'dialog', 'aria-labelledby': id + '_title' }, '');
 
         if (f.overlay !== false) {
@@ -409,13 +408,6 @@
         }
       }
 
-      if (!f.fixed) {
-        Event.add(DOM.win, 'resize orientationchange', function () {
-          if (DOM.get(id)) {
-            self.position(id);
-          }
-        });
-      }
 
       // Register events
       Event.add(id, 'mousedown', function (e) {
@@ -462,6 +454,7 @@
       }
 
       DOM.setAttrib(id, 'aria-hidden', 'false');
+      DOM.setAttrib(id, 'z-index', '-1');
 
       // position modal
       self.position(id);
@@ -700,15 +693,7 @@
     },
 
     position: function (id) {
-      var p = DOM.getRect(id),
-        vp = DOM.getViewPort();
-
-      var top = Math.round(Math.max(vp.y + 10, vp.y + (vp.h / 2.0) - (p.h / 2.0)));
-      var left = Math.round(Math.max(vp.x + 10, vp.x + (vp.w / 2.0) - (p.w / 2.0)));
-
-      left = Math.max(0, left - 10);
-
-      DOM.setStyles(id, { 'left': left, 'top': top });
+      // centering is handled by CSS flexbox on .mceModalFrame
     },
 
     focus: function (id) {
@@ -751,7 +736,7 @@
     // Internal functions
     _startDrag: function (id, se, ac) {
       var mu, mm, d = DOM.doc,
-        sx, sy;
+        sx, sy, startLeft, startTop;
 
       if (DOM.hasClass(id, 'dragging')) {
         end();
@@ -760,12 +745,16 @@
 
       updateWithTouchData(se);
 
-      var p = DOM.getRect(id);
-      var vp = DOM.getViewPort();
+      // Get position relative to the frame (which is fixed at 0,0 in the viewport)
+      var el = DOM.get(id);
+      var elRect = el.getBoundingClientRect();
+      var frameRect = el.parentNode.getBoundingClientRect();
 
-      // Reduce viewport size to avoid scrollbars while dragging
-      vp.w -= 2;
-      vp.h -= 2;
+      startLeft = elRect.left - frameRect.left;
+      startTop = elRect.top - frameRect.top;
+
+      // Switch to absolute positioning so left/top are meaningful
+      DOM.setStyles(id, { position: 'absolute', left: startLeft, top: startTop, margin: 0, width: elRect.width });
 
       DOM.addClass(id, 'dragging');
 
@@ -794,11 +783,11 @@
 
         updateWithTouchData(e);
 
-        x = e.screenX - sx; // - vp.x;
-        y = e.screenY - sy; // - vp.y;
+        x = e.screenX - sx;
+        y = e.screenY - sy;
 
-        var dx = Math.max(p.x + x, 10);
-        var dy = Math.max(p.y + y, 10);
+        var dx = Math.max(startLeft + x, 10);
+        var dy = Math.max(startTop + y, 10);
 
         DOM.setStyles(id, { 'left': dx, 'top': dy });
 
