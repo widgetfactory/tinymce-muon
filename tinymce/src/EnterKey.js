@@ -32,7 +32,8 @@
     function handleEnterKey(evt) {
       var rng = selection.getRng(true),
         tmpRng, editableRoot, container, offset, parentBlock, shiftKey,
-        newBlock, fragment, containerBlock, parentBlockName, containerBlockName, newBlockName, isAfterLastNodeInContainer;
+        newBlock, fragment, containerBlock, parentBlockName, containerBlockName, newBlockName, isAfterLastNodeInContainer,
+        caretAtCEFalse;
 
       // Returns true if the block can be split into two blocks or not
       function canSplitBlock(node) {
@@ -264,8 +265,10 @@
 
         // Caret can be before/after a contenteditable|false
         if (NodeType.isContentEditableFalse(container) || (container.previousSibling && NodeType.isContentEditableFalse(container.previousSibling))) {
+          caretAtCEFalse = true;
           return (isAfterLastNodeInContainer && !start) || (!isAfterLastNodeInContainer && start);
         }
+        caretAtCEFalse = false;
 
         // Walk the DOM and look for text nodes or non empty elements
         walker = new TreeWalker(container, parentBlock);
@@ -657,7 +660,9 @@
         // Insert new block before
         newBlock = parentBlock.parentNode.insertBefore(createNewBlock(), parentBlock);
         renderBlockOnIE(newBlock);
-        moveToCaretPosition(newBlock);
+        // When adjacent to a ce=false element the new block is the destination;
+        // for a true start-of-block press the cursor should stay on the content block.
+        moveToCaretPosition(caretAtCEFalse ? newBlock : parentBlock);
       } else {
         // Extract after fragment and insert it after the current block
         tmpRng = rng.cloneRange();
